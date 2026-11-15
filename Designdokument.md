@@ -211,6 +211,83 @@ A change is "good enough" when:
 - startup and interaction latency do not regress noticeably,
 - a new contributor can find the right place to modify behavior in under a few minutes.
 
+## Ideas from FreeDMS (not decided)
+FreeDMS (https://github.com/Palmstroemen/FreeDMS, 2016) was the first attempt at SEITON, built
+from shell scripts and `.desktop` buttons placed in the folders. Much of it lives on in SEITON:
+standard folders, embryos instead of empty folders, X-ray, folders as lenses for roles and
+programs, project-specific desktops (Desk). The ideas below are not in SEITON yet. They are
+collected here to think about, not to build (2026-11-15).
+
+### 1) A folder says what belongs in it
+In FreeDMS every standard folder had a `Read.me`: what goes here, what does not, and where it
+goes instead (for example, `_finance` said that private time sheets and expenses go into the
+person's own folder in `_team`). Hierarchies are never quite consistent: do insurances belong
+to finance or to legal? The answer stood where the question comes up.
+- In SEITON: a short `About.md` in the template folder's `.seiton` (beside its icons), not a
+  visible file in every folder. It would be inherited like the folder itself.
+- Where it is shown: as a tooltip on folders and embryos in Scope and SunTree. It matters most
+  at the moment of dropping something, before the folder exists.
+- "Not here, but in …" could become a link that leads straight to the right folder.
+
+### 2) Ending a project: Keep and archive
+FreeDMS had `_keep_this` folders throughout the project. Whatever was worth keeping (the best
+pictures, a finding, a piece of documentation) was gathered there, during the project or just
+before its "funeral". ARCHIVE THIS PROJECT copied everything kept into the parent project's
+`_check_this` folder to be looked through, packed the project into a zip and removed it.
+- SEITON has export (zip), trash and "a project becomes a folder again", but no end of a
+  project. A project's life has no last step yet.
+- In SEITON, "keep" could be a tag instead of extra folders. When a project is closed, what is
+  tagged keep goes to the parent project for review. The rest is packed, with its `.seiton` and
+  ACL history, into the parent's archive (where? `08_Dokumentation`?).
+- Open: whether an archive can still be searched and seen through lenses, whether it can be
+  unpacked to come back to life, and what happens to the rules on Nextcloud.
+
+### 3) The admin's place: tools and a watch list
+FreeDMS put the admin's tools into `_admin/_tools`: create a subproject, add or remove folders,
+manage the team, find files, archive. Most of them were workarounds for a file browser that did
+not know about projects; in SEITON they belong in Scope (P button, embryos) and in the CLI.
+Two ideas remain:
+- `_check_this`: the admin collected links to things to check regularly (time sheets, reports,
+  status). In SEITON this could be a tag or a saved filter shown in `00_Admin`, without links that
+  break.
+- `00_Admin` as the cockpit: the project's settings (rights, templates, cloud) where a person
+  looks for them, as files or a view, instead of only hidden in `.seiton`.
+
+### 4) Vertical communication between projects
+FreeDMS saw a company as a project with departments as subprojects. Reports go up, notices go
+down, one level at a time. In `_admin` there were two folders:
+- `_communication_to_subadmins`: seen by the admins of this project and of its direct
+  subprojects, not by their teams;
+- `_communication_to_subprojects`: seen by all members of the direct subprojects.
+
+In every subproject a link `_from_top_project` pointed there. Nothing passed further down by
+itself: each admin decided what to pass on to the next level.
+- In SEITON this is a question of rights plus a view, not of links (links do not survive
+  Nextcloud). A folder in the parent's `03_Kommunikation` is readable by the people of the direct
+  subprojects. The subproject shows it in its own `03_Kommunikation` as "from the parent
+  project", faint like an embryo.
+- For this, `ACLs.md` would need roles like "people of the direct subprojects" or "admins of the
+  direct subprojects", which it does not have today.
+
+### 5) Team: a folder per person and roles across levels
+- From the TEAM file, FreeDMS created a folder in `_team` for each person, with `_my_admin`
+  (time sheets, expenses, contracts, payments). Only that person and the admin could see it.
+  When someone left, their folder was packed. In SEITON this could follow `ACLs.md` `# Users`:
+  a folder in `02_Team` per person, with rules only for that person and the admin.
+- The rights sketch had a "master": the admin of the parent project, who keeps rights in every
+  subproject. Today a subproject with its own `ACLs.md` uses only that file, so the parent's
+  admin is out unless listed again. Also: someone removed from a team was removed from every
+  subproject (offboarding in one step), and a role for outside people.
+
+### 6) Smaller ideas
+- Browsing beyond folder borders: after the last picture of a folder, the viewer shows the next
+  folder's name as a picture and then its first picture (photos sorted by year and month).
+- Files that come with tags from the sender (a ticket, a bill, the terms) find their folder on
+  their own: an airline's bill goes to `04_Finanz`. Today SEITON would need a person or AI for that.
+- Programs as roles: a finance program gets exactly the finance folders of all projects (a lens
+  for programs, not only for people), plus a small interface: "all `04_Finanz` below here",
+  "save into `04_Finanz` of this project, create it if needed".
+
 ---
 
 This document should evolve with the architecture. Keep it concise, practical, and implementation-aligned.
