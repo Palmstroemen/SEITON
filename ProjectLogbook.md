@@ -82,7 +82,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
                 Sprache, versteckte Ordner (Scope/CwdTools.qml); M wird ein eigenes, oben angedocktes Werkzeug (kein H, kein E)
             [x] M bleibt eine Zeile (2026-10-26): MyOS-Ordner brechen nicht mehr in eine zweite Zeile um; Mausrad schiebt
             [ ] Setup auf der Rückseite von Scope (Scope/Designdocument Setup.md): ⚙ dreht Scope um; Tabs Allgemein, Scope,
-                Headline, SunTree; eine Einstellungsdatei für alle (core/settings.py, ~/.config/MyOS/MyOS.conf)
+                Headline, SunTree; eine Einstellungsdatei für alle (core/settings.py, ~/.config/seiton/seiton.conf)
                 [x] Schritt 1 (2026-10-26): Umdrehen, Hell/Dunkel und Sprache (bleiben jetzt gespeichert), SunTree-Werte
                 [x] Kleine Krone im SunTree-Tab (2026-10-26): leuchtende Grenzlinien, Tauchgang bei jeder Änderung
                 [ ] Schritt 2: Farbschemata wählen
@@ -92,7 +92,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
                         Brille, ACL-Dialoge im Schema; Mitte des FilesPanel je Schema einstellbar (filesPanelCenter):
                         war ein 20-%-Schleier über dem Rahmen und über den Dateien, beide Themen landeten bei Mittelgrau
                     [x] Auswahl im Tab Allgemein (2026-11-06): kleines Scope je Schema statt des Knopfs
-                    [ ] Drittes Schema; General/colorScheme löst General/darkTheme ab
+                    [-] Drittes Schema: entfällt (2026-11-15), die Farben folgen dem System (Setup-Designdokument, 5)
                     [x] Dialoge bleiben bewusst vertauscht (hell im dunklen Thema): so übersieht man sie nicht (2026-11-06)
                 [ ] Schritt 3: bearbeiten
                     [x] SunTree und kleine Krone am Schema (2026-11-06): 31 Farben im Schema, liest es beim Erscheinen; Dunkel wie
@@ -100,12 +100,16 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
                     [x] Hintergrund Dateibereich im Setup (2026-11-06): Farbkästchen öffnet die Farbauswahl, je Schema, wirkt sofort, liegt in
                         ~/.config/MyOS/schemes über den mitgelieferten Schemata
                     [ ] Beim Testlauf: Projektfarbe macht 52 % der Mitte aus, Weiß ist so nicht erreichbar; Anteil senken?
+                        Entschieden (2026-11-15): ein Regler, wie stark der Raum färbt
                     [x] Farbkästchen ziehen (2026-11-06): rechts heller, links dunkler, oben satter, unten blasser; kein "Standard" daneben
                     [x] Durchgreifen behoben (2026-11-06): Ziehen auf der Rückseite weckte die DragHandler der Vorderseite und
                         erwischte Ordner; die Vorderseite nimmt jetzt nichts an, solange die Rückseite zu sehen ist
                     [x] Elf Farben in vier Gruppen im Setup (2026-11-06), Deckkraft für Auswahl und Ablegen, "Alle Farben
                         zurücksetzen"; Rahmen des FilesPanel hat die Farbe des Reiters; Nebenschriften aus der Schrift berechnet
-                    [ ] Eigenes Schema speichern
+                    [ ] Eigenes Schema speichern: beliebig viele, eine Ebene unter "System", je eine feste Farbe,
+                        folgt dem System nicht; "Default" setzt eine Farbe auf die des Systems zurück
+                [ ] Schritt 2+3 neu (2026-11-15): Scope und SunTree folgen dem System (Hell/Dunkel/Automatisch,
+                    Kontrast, Akzent über das Portal); wenige Grundwerte, die Nuancen in OKLCH abgeleitet
                 [ ] Schritt 4: Tabs Scope und Headline
                 [~] Obere Leiste leeren (2026-10-26): Hell/Dunkel, Sprache weg (Allgemein); Zeilen an/aus im Tab Scope;
                     "Dateien 50%", "Projekt mit Thema versehen", "Ordnung aktivieren", "Schmal", Edge-Dock-Schalter entfernt;

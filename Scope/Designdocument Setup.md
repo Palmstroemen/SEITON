@@ -19,7 +19,7 @@ Decided on 2026-10-26.
 
 | Tab | Holds | When |
 |---|---|---|
-| General | light / dark, language, how pale embryos are - for the user "suggested MyOS folders" (live preview: a present folder beside a suggestion in each style, text, small and large icon, drawn as Scope's rows draw them; Scope follows at once, SunTree when it appears, 2026-10-26), and their badges, with a slider of their own (70 % by default); later the colour scheme (choose, edit) | step 1; scheme: steps 2, 3 |
+| General | light / dark, language, how pale embryos are - for the user "suggested MyOS folders" (live preview: a present folder beside a suggestion in each style, text, small and large icon, drawn as Scope's rows draw them; Scope follows at once, SunTree when it appears, 2026-10-26), and their badges, with a slider of their own (70 % by default); the colours: follow the system, or a scheme of one's own (section 5) | step 1; colours: steps 2, 3 |
 | Scope | everything the rows' display menus held (the menus are gone, 2026-10-26): left one picture of a row as it really looks (the path bar's segments pushed together like tabs, its folders with a suggestion and a hidden one, the preview below), right check items and choices it follows - the two rows on/off (the projects row off by default; M keeps its CWD button), for both rows alike the path bar, suggested MyOS folders, hidden folders, the preview and its background, the folder style of each row, the preview's behaviour (reopen at once, timing soft / balanced / quick) | built |
 | Headline | what concerns the docked tool: its tools, docking | with the Headline |
 | SunTree | the crown's values (SunTree/Designdocument Krone.md, 5): line T, inner radius, Enter, Leave, fish-eye, softness, edge | step 1 |
@@ -64,8 +64,8 @@ the small fan, then the three that are no line; a line under each says what it d
 
 ## 3. One Settings File for All
 
-- `~/.config/MyOS/MyOS.conf` (QSettings "MyOS"/"MyOS"), groups `General`, `Scope`, `Headline`,
-  `SunTree`. Scope writes it; SunTree reads it each time it appears, so a change on the back
+- `~/.config/seiton/seiton.conf` (until November 2026 `~/.config/MyOS/MyOS.conf`), groups
+  `General`, `Scope`, `Headline`, `SunTree`. Scope writes it; SunTree reads it each time it appears, so a change on the back
   of Scope shows the next time SunTree is called (it runs as a program of its own).
 - `core/settings.py` holds the settings with their defaults and ranges in one place; both
   programs read through it. Values out of range or of the wrong kind fall back to the
@@ -112,8 +112,10 @@ the small fan, then the three that are no line; a line under each says what it d
    follows while picking; sliders would be a mess at ten colours or more). A drag on the box
    fine-tunes: right lighter, left darker, up more saturated, down less (300 px the full way, the
    box stays where it is, a drag opens no picker, opacity stays). It counts at once
-   and for the scheme worn alone, kept in `~/.config/MyOS/schemes/<scheme>.json` over the shipped
+   and for the scheme worn alone, kept in `~/.config/seiton/schemes/<scheme>.json` over the shipped
    file (`core/color_schemes.py`). To come: a scheme of one's own.
+   **Steps 2 and 3 go on as section 5** (decided 2026-11-15): no third shipped scheme; the
+   colours follow the system, and the eleven boxes become the place for schemes of one's own.
    The frame of the FilesPanel has the colour of the current folder's tab (`folderCwpTint`, for a
    project its colour), no mix; the tab is that colour at its foot and a little lighter at its
    top. The side texts (`textMuted`, `textSoft`) are worked out from `text` and `bg`.
@@ -129,7 +131,49 @@ the small fan, then the three that are no line; a line under each says what it d
    into the window's title bar: the window manager draws it; a title bar of Scope's own would
    have to redo moving, resizing and snapping - perhaps with the Headline.)
 
-## 5. Open
+## 5. Colours: Follow the System (decided 2026-11-15)
 
-- Does SunTree take its colours from the scheme too (it has its own today)?
+How it is done today: light, dark or automatic (by time of day) and high contrast are set once in
+the system, and apps follow; personal taste is one accent colour, from which the rest is worked
+out (Apple, Windows, GNOME, KDE, Material You). Many themes side by side (dark, high contrast,
+green, blue …) that do not fit together are left to tinkerers. SEITON does the same.
+
+- **Scope and SunTree follow the system.** "System" is the default and stands first: light or
+  dark, high contrast and the accent colour come from the freedesktop portal
+  (`org.freedesktop.appearance`), the rest of the palette from Qt (`QPalette`; full under KDE,
+  approximate under GNOME). No switching by time of our own: the system does that, the program
+  follows. For now only Scope and SunTree take the desktop's colours, not the whole desktop.
+- **A few base values, the shades worked out.** Base values: background and text, the accent,
+  the project's colour. From them the many shades follow by rules, worked out in OKLCH so they
+  fit together under any system colour and stay readable:
+
+  | Shade | from |
+  |---|---|
+  | path bar, tabs | background, a little lighter or darker |
+  | suggested folders (embryos) | text, with the paleness set on General |
+  | selection, dropping on a folder, frame of the lens | accent |
+  | current folder, frame of the FilesPanel | project colour |
+  | side texts | text and background (so already) |
+  | SunTree's crown and the small crown | the same base values |
+
+  High contrast is no scheme of its own: the same rules with wider steps. The 34 fixed colours
+  of `dark.json` and `light.json` become base values and rules; what still has to be fixed by
+  hand stays as an exception.
+- **The project colour is the room.** It tints Scope as today; instead of the fixed 52 % in the
+  middle of the FilesPanel a slider says how strongly a room colours (the test run showed that at
+  52 % white cannot be reached). Light or dark never changes with the room.
+- **Schemes of one's own, one level lower.** Under "System" any number of schemes of one's own,
+  each a file in `~/.config/seiton/schemes/`. One begins from "System", from today's Light or
+  Dark or from another scheme of one's own.
+  - A scheme of one's own has **one set of colours, fixed**: no light and dark side, so it does
+    not follow the time of day.
+  - It follows **nothing of the system**, not the accent either: one may tinker freely, with base
+    values and, on top, each shade (today's eleven boxes).
+  - **Default** puts a colour back to what the system gives.
+- To check before building: whether our Qt reads the portal (`QStyleHints::colorScheme`, accent,
+  contrast), and what GNOME gives through `QPalette`.
+
+## 6. Open
+
 - Later on the Headline: signing in / switching user, switching off.
+- Answered (2026-11-06): SunTree takes its colours from the scheme too.
