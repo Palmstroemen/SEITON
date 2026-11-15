@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/)
-[![Status: Prototype](https://img.shields.io/badge/status-prototype-orange)](https://github.com/Palmstroemen/MyOS)
+[![Status: Prototype](https://img.shields.io/badge/status-prototype-orange)](https://github.com/Palmstroemen/SEITON)
 
 ## 🎯 Vision
 
@@ -23,7 +23,7 @@ Traditional file managers show you *what is*. MyOS shows you **what could be** -
 
 ## 🎯 What MyOS shall become?
 
-[GitHub-Link](https://github.com/Palmstroemen/MyOS#-what-is-myos)
+[GitHub-Link](https://github.com/Palmstroemen/SEITON#what-is-seiton)
 
 - **Project-Based Desktop:**
 	Instead of a classic multi-user setup → a multi-project environment for a single user.  
@@ -99,8 +99,8 @@ pip3 install --user fuse-py
 
 bash
 
-git clone https://github.com/Palmstroemen/MyOS.git
-cd MyOS/prototype
+git clone https://github.com/Palmstroemen/SEITON.git
+cd SEITON/prototype
 chmod +x myos_core.py myls.py
 
 ### 3. Experience MyOS Magic

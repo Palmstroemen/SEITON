@@ -42,7 +42,7 @@ def main():
     print("\n📋 Next steps:")
     print(f"   1. cd {test_dir}")
     print("   2. Run the commands in START_HERE.txt")
-    print("\n💡 Need help? Visit: https://github.com/Palmstroemen/MyOS")
+    print("\n💡 Need help? Visit: https://github.com/Palmstroemen/SEITON")
     
     # Offer to start MyOS immediately
     response = input("\n▶️  Start MyOS now? (y/N): ").lower()

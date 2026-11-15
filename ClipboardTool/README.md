@@ -13,18 +13,18 @@ Saves text clipboard contents as Markdown files in your MyOS Clipboard folder. F
 ### 1. Set environment variables
 
 - **`MYOS_CLIPBOARD_PATH`** – Target directory for clip files (e.g. your project’s `Clipboard` folder).
-  - Example: `~/Dokumente/MyOS/Seiton_Test/Clipboard`
+  - Example: `~/Dokumente/SEITON/Seiton_Test/Clipboard`
   - Fallback if unset: `~/Clipboard`
 
 - **`MYOS_CLIPBOARD_TOOL_SCRIPT`** (optional) – Full path to `save_clip_to_myos.py` if it is not at:
-  - `~/Dokumente/MyOS/ClipboardTool/save_clip_to_myos.py`
+  - `~/Dokumente/SEITON/ClipboardTool/save_clip_to_myos.py`
 
 To set for your session:
 
 ```bash
-export MYOS_CLIPBOARD_PATH="$HOME/Dokumente/MyOS/Seiton_Test/Clipboard"
+export MYOS_CLIPBOARD_PATH="$HOME/Dokumente/SEITON/Seiton_Test/Clipboard"
 # optional, if ClipboardTool is elsewhere:
-export MYOS_CLIPBOARD_TOOL_SCRIPT="$HOME/Dokumente/MyOS/ClipboardTool/save_clip_to_myos.py"
+export MYOS_CLIPBOARD_TOOL_SCRIPT="$HOME/Dokumente/SEITON/ClipboardTool/save_clip_to_myos.py"
 ```
 
 Make sure CopyQ is started with these variables (e.g. from the same shell, or via your desktop autostart).
@@ -79,7 +79,7 @@ The copied text here...
   - For auto-save: copying files (e.g. in a file manager) is ignored on purpose; only plain-text copies are saved.
 
 - **Wrong script path**  
-  - Set `MYOS_CLIPBOARD_TOOL_SCRIPT` to the full path of `save_clip_to_myos.py`, or place ClipboardTool at `~/Dokumente/MyOS/ClipboardTool/`.
+  - Set `MYOS_CLIPBOARD_TOOL_SCRIPT` to the full path of `save_clip_to_myos.py`, or place ClipboardTool at `~/Dokumente/SEITON/ClipboardTool/`.
 
 - **CopyQ doesn’t see env vars**  
   - Start CopyQ from a terminal where you `export` the variables, or set them in your desktop/autostart configuration so they apply when CopyQ starts.
