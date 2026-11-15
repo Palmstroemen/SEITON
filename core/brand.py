@@ -25,6 +25,7 @@ ENV_PREFIX = "SEITON_"
 XATTR_PREFIX = "user.seiton."
 HTTP_HEADER_PREFIX = "X-Seiton-"  # between the platform's bridge and the core service
 URL_SCHEME = "seiton"  # links in notes: seiton:open?scope=... (PostFix/exercise_links.py)
+TUTORIAL_DIR = f"Learning {NAME}"  # the tutorial in the repo (scripts/testrun.py copies it)
 
 # Former names, newest first (MyOS until 2026-11-14): environment variables under them are
 # still read; settings folders, the user's settings and extended attributes under them are

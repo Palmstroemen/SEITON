@@ -3,7 +3,7 @@
 Prototype, not yet PostFix: a note in the new editor (CodeMirror 6 with a live preview like
 Obsidian's, PostFix/codemirror) to compare it with Obsidian side by side.
 
-    python3 PostFix/cm_prototype.py ["Learning MyOS/DE/Lektion01/Beginne HIER.md"] [--in-place]
+    python3 PostFix/cm_prototype.py ["Learning Seiton/DE/Lektion01/Beginne HIER.md"] [--in-place]
 
 Without --in-place it works on a copy of the note's folder in a temporary folder, so trying
 it out changes nothing in the repository. It saves as you type, shows changes from outside at
@@ -27,6 +27,7 @@ from PySide6.QtWebEngineWidgets import QWebEngineView  # noqa: E402
 from PySide6.QtWidgets import QApplication, QMainWindow  # noqa: E402
 
 from PostFix.metadata import MetadataManager  # noqa: E402
+from core.brand import TUTORIAL_DIR  # noqa: E402
 
 BUNDLE = Path(__file__).resolve().parent / "codemirror" / "dist" / "editor.bundle.js"
 STARTED = time.time()
@@ -168,13 +169,13 @@ class Window(QMainWindow):
 
 def main() -> int:
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    note = Path(args[0] if args else REPO_ROOT / "Learning MyOS" / "DE" / "Lektion01" / "Beginne HIER.md").resolve()
+    note = Path(args[0] if args else REPO_ROOT / TUTORIAL_DIR / "DE" / "Lektion01" / "Beginne HIER.md").resolve()
     if "--in-place" not in sys.argv:
         # A copy of the whole tutorial (links between lessons keep working), not the repository.
         root = note.parent
-        while root.parent != root and root.name != "Learning MyOS":
+        while root.parent != root and root.name != TUTORIAL_DIR:
             root = root.parent
-        source = root if root.name == "Learning MyOS" else note.parent
+        source = root if root.name == TUTORIAL_DIR else note.parent
         copy = Path(tempfile.mkdtemp(prefix="postfix-prototype-")) / source.name
         shutil.copytree(source, copy)
         note = copy / note.relative_to(source)

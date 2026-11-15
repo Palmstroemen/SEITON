@@ -36,7 +36,7 @@ from typing import List, Optional
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-from core.brand import CONFIG_DIR, NAME, file_name, getenv, legacy_file_names, legacy_markers, marker
+from core.brand import CONFIG_DIR, NAME, TUTORIAL_DIR, file_name, getenv, legacy_file_names, legacy_markers, marker
 
 MARKER = marker("tutorial-copy")  # in the copy's root: it is ours, and when the tester started
 MARKERS = (MARKER, *legacy_markers("tutorial-copy"))  # copies made under a former name too
@@ -133,17 +133,17 @@ def copy_root(path: Path) -> Optional[Path]:
 def _committed_lessons(repo: Path, target: Path) -> bool:
     """The lessons as committed (git archive HEAD) into target; False without git."""
     try:
-        archive = subprocess.run(["git", "-C", str(repo), "archive", "--format=tar", "HEAD", "Learning MyOS"],
+        archive = subprocess.run(["git", "-C", str(repo), "archive", "--format=tar", "HEAD", TUTORIAL_DIR],
                                  capture_output=True, check=True, timeout=60).stdout
     except (OSError, subprocess.SubprocessError):
         return False
     with tempfile.TemporaryDirectory() as scratch:
         with tarfile.open(fileobj=io.BytesIO(archive)) as tar:
-            # Security: only regular files and folders below "Learning MyOS" are unpacked.
+            # Security: only regular files and folders below the tutorial folder are unpacked.
             members = [m for m in tar.getmembers()
-                       if (m.isfile() or m.isdir()) and m.name.split("/")[0] == "Learning MyOS" and ".." not in m.name.split("/")]
+                       if (m.isfile() or m.isdir()) and m.name.split("/")[0] == TUTORIAL_DIR and ".." not in m.name.split("/")]
             tar.extractall(scratch, members=members)
-        shutil.copytree(Path(scratch) / "Learning MyOS", target, ignore=shutil.ignore_patterns(*NOISE, "__pycache__"))
+        shutil.copytree(Path(scratch) / TUTORIAL_DIR, target, ignore=shutil.ignore_patterns(*NOISE, "__pycache__"))
     return True
 
 
@@ -153,7 +153,7 @@ def _build_pristine(places: Places, target: Path) -> None:
     from scripts.make_tutorial_data import generate  # Pillow, reportlab: only when building
 
     if not _committed_lessons(places.repo, target):  # no git (e.g. an unpacked release)
-        shutil.copytree(places.repo / "Learning MyOS", target,
+        shutil.copytree(places.repo / TUTORIAL_DIR, target,
                         ignore=shutil.ignore_patterns(*NOISE, "__pycache__"))
     generate(target)
     (target / COMMENTS).write_text(COMMENTS_TEXT, encoding="utf-8")

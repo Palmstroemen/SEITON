@@ -1,8 +1,12 @@
-# MyOS
+# Seiton
 
 A new OS paradigm for Linux: project-centric desktop and filesystem.
 
-**MyOS** is an experimental Linux desktop concept that puts the user and their projects at the center. The goal is an intuitive, context-sensitive environment where everything revolves around your current project and its structure.
+Seiton (整頓) is Japanese for order: a place for everything, and everything in its place. That is exactly the idea of Seiton: an order that is easy to understand, one that anyone can grasp and use right away.
+
+**Seiton** is an experimental Linux desktop concept that puts the user and their projects at the center. The goal is an intuitive, context-sensitive environment where everything revolves around your current project and its structure.
+
+Until November 2026 the project was called MyOS; in some places that name still appears.
 
 ## Project Status
 
@@ -12,7 +16,7 @@ For a concise status snapshot and priorities, see [docs/STATUS.md](docs/STATUS.m
 
 ---
 
-## What is MyOS?
+## What is Seiton?
 
 - **Project-based desktop:** Multi-project environment for a single user. Each project can have its own desktop, launcher, and app configuration; open windows stay tied to their respective projects.
 
@@ -26,7 +30,7 @@ For a concise status snapshot and priorities, see [docs/STATUS.md](docs/STATUS.m
 
 ## Vision
 
-The building blocks exist but are fragmented. MyOS aims to unify them into one clean, intuitive environment with sensible defaults and a gentle learning curve.
+The building blocks exist but are fragmented. Seiton aims to unify them into one clean, intuitive environment with sensible defaults and a gentle learning curve.
 
 ---
 
@@ -40,7 +44,7 @@ The building blocks exist but are fragmented. MyOS aims to unify them into one c
 | **cli/** | CLI tools (myls, myproject, mytag, myedit, myfilter, etc.) |
 | **docs/** | Documentation index, development guide, conventions, security |
 | **Vision/** | Concept and GUI notes (e.g. CWD/CWP/CTD) |
-| **Learning MyOS/** | Tutorial and learning content (DE/EN) |
+| **Learning Seiton/** | Tutorial and learning content (DE/EN) |
 | **Seiton_Test/** | Test/demo project structure |
 
 Design documents live under `core/Dokumentation/`. Entry points: [Designdokument.md](Designdokument.md), [docs/INDEX.md](docs/INDEX.md).

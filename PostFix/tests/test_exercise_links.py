@@ -13,7 +13,7 @@ from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import QApplication
 
 from PostFix import exercise_links as ex
-from core.brand import LEGACY_URL_SCHEMES, URL_SCHEME, env_name
+from core.brand import LEGACY_URL_SCHEMES, TUTORIAL_DIR, URL_SCHEME, env_name
 
 REPO = Path(__file__).resolve().parents[2]
 S = ex.SCHEME
@@ -183,7 +183,7 @@ def test_every_exercise_link_of_the_tutorial_opens_a_folder_of_its_lesson():
     import re
 
     links = []
-    for note in (REPO / "Learning MyOS").rglob("*.md"):
+    for note in (REPO / TUTORIAL_DIR).rglob("*.md"):
         for target in re.findall(rf"\]\(<({S}:[^>]+)>\)", note.read_text(encoding="utf-8")):
             links.append((note, target))
     assert len(links) >= 14  # lessons 4, 5, 7, 8 and the sheets of 10, 11, in both languages
@@ -195,7 +195,7 @@ def test_every_exercise_link_of_the_tutorial_opens_a_folder_of_its_lesson():
 
 
 def test_every_german_lesson_ends_with_a_comment_link_and_the_last_with_finish():
-    lessons = sorted(p for p in (REPO / "Learning MyOS" / "DE").iterdir() if p.name.startswith("Lektion"))
+    lessons = sorted(p for p in (REPO / TUTORIAL_DIR / "DE").iterdir() if p.name.startswith("Lektion"))
     assert len(lessons) == 16
     for folder in lessons:
         texts = [n.read_text(encoding="utf-8") for n in folder.glob("*.md")]
@@ -266,7 +266,7 @@ def test_the_tutorials_pictures_need_no_qt_add_ons():
     # lama of lesson 1 stayed empty there): pictures in notes are PNG, JPEG, GIF or SVG.
     import re
 
-    for note in (REPO / "Learning MyOS").rglob("*.md"):
+    for note in (REPO / TUTORIAL_DIR).rglob("*.md"):
         text = note.read_text(encoding="utf-8")
         for target in re.findall(r"!\[[^\]]*\]\(<?([^)>|]+)>?\)", text):
             assert target.lower().endswith((".png", ".jpg", ".jpeg", ".gif", ".svg")), (note, target)

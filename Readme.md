@@ -1,4 +1,4 @@
-# MyOS: A Human-Centric Operating Environment
+# Seiton: A Human-Centric Operating Environment
 
 > **Organically growing, project-centric file management for the human workflow**
 
@@ -10,7 +10,11 @@
 
 A new OS paradigm built on LINUX.
 
-**MyOS** is an experimental Linux desktop concept that puts the user and their projects at the center — not the underlying technology.  
+Seiton (整頓) is Japanese for order: a place for everything, and everything in its place. That is exactly the idea of Seiton: an order that is easy to understand, one that anyone can grasp and use right away.
+
+Until November 2026 the project was called MyOS; in some places that name still appears.
+
+**Seiton** is an experimental Linux desktop concept that puts the user and their projects at the center — not the underlying technology.  
 The goal is an intuitive, context-sensitive environment where everything revolves around your current project and its structure.
 
 Modern operating systems are built around technical concepts (folders, files, paths), not how humans naturally work with **projects**. MyOS reimagines the desktop as a project-centric environment that grows organically with your work.

@@ -27,7 +27,7 @@ Test suite: `python3 -m pytest core/tests/unit cli/tests PostFix/tests Scope/tes
 2. Perspectives (MVP running; persistence/sharing model open)
 3. Rooms concept (project-dependent desktops)
 4. RecentFiles
-5. Learning MyOS expansion
+5. Learning Seiton expansion
 6. Demo data as playground
 7. Scope/PostFix UI polish
 8. Distribution packaging

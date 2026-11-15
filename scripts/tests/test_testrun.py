@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 from core import brand
-from core.brand import CONFIG_DIR, META_DIR, NAME, env_name
+from core.brand import CONFIG_DIR, META_DIR, NAME, TUTORIAL_DIR, env_name
 
 pytest.importorskip("reportlab")
 pytest.importorskip("PIL")
@@ -115,7 +115,7 @@ def test_default_places_carry_the_name(monkeypatch):
 def test_the_copy_root_is_found_from_any_lesson(machine):
     testrun.prepare(machine)
     assert testrun.copy_root(machine.tutorial / "DE" / "Lektion07" / "Urlaub 2025") == machine.tutorial
-    assert testrun.copy_root(testrun.REPO_ROOT / "Learning MyOS" / "DE" / "Lektion07") is None
+    assert testrun.copy_root(testrun.REPO_ROOT / TUTORIAL_DIR / "DE" / "Lektion07") is None
 
 
 def test_a_comment_heading_per_lesson(machine):
@@ -173,7 +173,7 @@ def test_the_copy_comes_from_the_last_commit_not_from_edited_lessons(tmp_path):
     import subprocess
 
     repo = tmp_path / "repo"
-    lesson = repo / "Learning MyOS" / "DE" / "Lektion01" / "Beginne HIER.md"
+    lesson = repo / TUTORIAL_DIR / "DE" / "Lektion01" / "Beginne HIER.md"
     lesson.parent.mkdir(parents=True)
     lesson.write_text("# Hallo!\n", encoding="utf-8")
     git = ["git", "-C", str(repo), "-c", "user.name=t", "-c", "user.email=t@example.org"]

@@ -179,7 +179,7 @@ of lesson 7 back on closing:
   PostFix's own goes beside it as "<name> (Konflikt).md", and a short notice says so.
 - Every save reconciles first; a note deleted elsewhere is not written back.
 
-## Exercise Links (Learning MyOS)
+## Exercise Links (Learning Seiton)
 
 A lesson says `[▶ Übung öffnen](<myos:open?scope=Urlaub 2025&files=Urlaub 2025>)`: a click
 opens Scope in the exercise folder (`scope=`) and, if the exercise needs it, the desktop's

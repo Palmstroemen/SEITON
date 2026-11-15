@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate the exercise files of the tutorial (Learning MyOS), German and English.
+Generate the exercise files of the tutorial (Learning Seiton), German and English.
 
 Lesson 4 lays a vacation's documents loose in its folder to be sorted by hand; lesson 5 has
 the same files back in one unsorted folder, to be turned into a project; lesson 7 has another
@@ -11,7 +11,7 @@ documents are small PDFs, the video a few seconds of a boat - all tiny, and byte
 same on every run, so the committed files can be checked against this script
 (scripts/tests/test_make_tutorial_data.py).
 
-    python3 scripts/make_tutorial_data.py [target]   # default: Learning MyOS in the repo
+    python3 scripts/make_tutorial_data.py [target]   # default: Learning Seiton in the repo
 
 Needs Pillow, reportlab and ffmpeg.
 """
@@ -33,7 +33,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:  # started as a script: make core importable
     sys.path.insert(0, str(REPO_ROOT))
 
-from core.brand import META_DIR, URL_SCHEME  # noqa: E402
+from core.brand import META_DIR, NAME, TUTORIAL_DIR, URL_SCHEME  # noqa: E402
 
 
 # --- What the vacations hold, per language -----------------------------------------------
@@ -232,9 +232,9 @@ MOROCCO = {
     ],
 }
 
-# Lesson 10: two small projects, each with tags of its own (.MyOS/Tags.md); tags in notes are
+# Lesson 10: two small projects, each with tags of its own (.seiton/Tags.md); tags in notes are
 # words with # in front (several words with a hyphen). Lesson 11: a company whose rights are
-# in .MyOS/ACLs.md. Paths below are relative to the lesson's folder.
+# in .seiton/ACLs.md. Paths below are relative to the lesson's folder.
 
 def _project(name, colour):
     return (f"{name}/{META_DIR}/Project.md", "note", f"color: {colour}\n")
@@ -420,14 +420,14 @@ COMPANY = {
          "persönlicher Ordner unter /home), einen Doppelpunkt und *Admin*, zum Beispiel `maria: Admin`.\n"
          "Zurück in Scope änderst du jetzt mit einem **Rechtsklick** auf eine Gruppe ihre Rechte für den "
          "angezeigten Ordner. Gib zum Beispiel dem Team in *04_Finanz* Leserechte. Schau danach in die "
-         "ACLs.md: Genau eine Zeile ist dazugekommen. Die vorige Fassung bewahrt MyOS in "
+         f"ACLs.md: Genau eine Zeile ist dazugekommen. Die vorige Fassung bewahrt {NAME} in "
          f"*{META_DIR}/ACLs-history* auf.\n\n"
          "## 5. Eine neue Kollegin\n"
          "Links unten findest du jetzt **+ Person**. Füge Lea Wagner hinzu und gib ihr die Gruppe Team. "
          "Auch das steht danach als eine Zeile in der ACLs.md.\n\n"
          "---\n"
-         "Gut zu wissen: Ob MyOS die Rechte auch durchsetzt, ist derzeit noch ein Schalter für Entwickler. "
-         "In diesen Übungen siehst du, wer was darf – verstecken wird MyOS dabei noch nichts.\n\n"
+         f"Gut zu wissen: Ob {NAME} die Rechte auch durchsetzt, ist derzeit noch ein Schalter für Entwickler. "
+         f"In diesen Übungen siehst du, wer was darf – verstecken wird {NAME} dabei noch nichts.\n\n"
          "[Zurück zur Lektion](<Zugriffsrechte.md>)\n"),
         _project("Musterfirma", "#4c72d9"),
         (f"Musterfirma/{META_DIR}/ACLs.md", "note", ACLS["de"]),
@@ -483,13 +483,13 @@ COMPANY = {
          "under /home), a colon, and *Admin*, for example `maria: Admin`.\n"
          "Back in Scope, you can now **right-click** a group to change its rights for the folder shown. "
          "For example, give the team read access in *04_Finance*. Then look into ACLs.md: exactly one line "
-         f"has been added. MyOS keeps the previous version in *{META_DIR}/ACLs-history*.\n\n"
+         f"has been added. {NAME} keeps the previous version in *{META_DIR}/ACLs-history*.\n\n"
          "## 5. A new colleague\n"
          "At the bottom left you now find **+ Person**. Add Lea Wagner and give her the group Team. "
          "That, too, is one line in ACLs.md afterwards.\n\n"
          "---\n"
-         "Good to know: whether MyOS also enforces the rights is still a switch for developers. In these "
-         "exercises you see who may do what – MyOS won't hide anything yet.\n\n"
+         f"Good to know: whether {NAME} also enforces the rights is still a switch for developers. In these "
+         f"exercises you see who may do what – {NAME} won't hide anything yet.\n\n"
          "[Back to the lesson](<Access Rights.md>)\n"),
         _project("Sample Company", "#4c72d9"),
         (f"Sample Company/{META_DIR}/ACLs.md", "note", ACLS["en"]),
@@ -728,7 +728,7 @@ def write_documents(folder, documents, language):
 
 
 def generate(target):
-    """Write the exercise files under target (the Learning MyOS folder, or a test's)."""
+    """Write the exercise files under target (the Learning Seiton folder, or a test's)."""
     target = Path(target)
     for language, places in LESSONS.items():
         loose = target / places["loose"]
@@ -743,4 +743,4 @@ def generate(target):
 
 
 if __name__ == "__main__":
-    generate(Path(sys.argv[1]) if len(sys.argv) > 1 else REPO_ROOT / "Learning MyOS")
+    generate(Path(sys.argv[1]) if len(sys.argv) > 1 else REPO_ROOT / TUTORIAL_DIR)

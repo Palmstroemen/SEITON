@@ -5,7 +5,11 @@ window_x_permille: 78
 window_y_permille: 44
 note_style: cloud
 ---
-# MyOS Design Document
+# Seiton Design Document
+
+Seiton (整頓) is Japanese for order: a place for everything, and everything in its place. That is exactly the idea of Seiton: an order that is easy to understand, one that anyone can grasp and use right away.
+
+Until November 2026 the project was called MyOS; in some places that name still appears.
 
 ## Purpose
 This document is the practical entry point for contributors. It explains:

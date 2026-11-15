@@ -157,7 +157,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
     [x] Taskleisten-Programme pro Projekt (`## Taskbar`; Cinnamon, GNOME)
     [ ] Taskleiste unter KDE; Programmnamen statt .desktop-Kennungen in Scope
 [ ] RecentFiles
-[ ] Learning MyOS weiter ausbauen
+[ ] Learning Seiton weiter ausbauen
     [x] Tutorial harmonisiert (2026-10-26): Deutsch durchgehend "du", Englisch 1-16, Ordnernamen wie in der Vorlage,
         Übungsdaten (Lektion 4, 5, 7, 10, 11; scripts/make_tutorial_data.py), Übungslinks "▶ Übung öffnen" in PostFix
     [x] Testrechner (2026-10-26, docs/TEST-MACHINE.md): jeder Tester bekommt eine frische Kopie (~/MyOS-Tutorial),
