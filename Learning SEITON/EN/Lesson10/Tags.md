@@ -22,7 +22,7 @@ And for your finances maybe:
 * enforced
 * paid
 
-So projects should **contain** the flood of tags that would otherwise overwhelm your whole system. That's exactly what projects in Seiton can do.
+So projects should **contain** the flood of tags that would otherwise overwhelm your whole system. That's exactly what projects in SEITON can do.
 
 We give you tags on steroids.
 Tag what you want, whenever you want, however you want – in an easy, human-readable, yet consistent way.

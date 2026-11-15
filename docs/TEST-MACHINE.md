@@ -14,15 +14,15 @@ and lesson 1 opens for the next tester.
    sudo apt install python3-pip ffmpeg wmctrl
    pip install -r requirements-full.txt
    ```
-   Copying it from a development machine: never copy the lens drive `Seiton_Test/Perspektiven`
+   Copying it from a development machine: never copy the lens drive `SEITON_Test/Perspektiven`
    (a mounted drive), e.g. `rsync -a --exclude Perspektiven`. Testers need no "Projekte":
-   leave `Seiton_Test/Projekte` out or delete it - after step 3, its `.MyOS` holds the templates.
+   leave `SEITON_Test/Projekte` out or delete it - after step 3, its `.MyOS` holds the templates.
 3. The templates (Standard, Person, Development) go to `~/.MyOS/Templates`: MyOS takes the
    nearest `.MyOS/Templates` upwards from the tutorial copy, and the exercises (suggested
    folders in lesson 7, the P button) need them. They are not in git yet - take them from
-   `Seiton_Test/Projekte/.MyOS/Templates`:
+   `SEITON_Test/Projekte/.MyOS/Templates`:
    ```
-   mkdir -p ~/.MyOS && cp -r Seiton_Test/Projekte/.MyOS/Templates ~/.MyOS/
+   mkdir -p ~/.MyOS && cp -r SEITON_Test/Projekte/.MyOS/Templates ~/.MyOS/
    ```
    A plain `~/Templates` is never taken (on Linux it is the desktop's folder for new
    documents); MyOS templates left there from earlier go to `~/.MyOS/Templates`.
@@ -40,7 +40,7 @@ and lesson 1 opens for the next tester.
 
 ## What a tester sees
 
-The tutorial is its own root (`Learning Seiton/.seiton`: Standard template, no ACLs - everyone
+The tutorial is its own root (`Learning SEITON/.seiton`: Standard template, no ACLs - everyone
 may see it), so "In Projekt verwandeln" works in the lessons although no "Projekte" lies
 above it. Example rights only come where a lesson needs them (lesson 11).
 

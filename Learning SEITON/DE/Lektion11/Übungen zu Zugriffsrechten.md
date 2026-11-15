@@ -14,12 +14,12 @@ Klick links auf *Team*: Scope zeigt nur noch, worauf das Team zugreifen darf. Ei
 
 ## 4. Selbst Admin werden (für Fortgeschrittene)
 Rechte ändern darf nur, wer Admin ist – und in der Musterfirma ist das noch niemand. Schreib in der ACLs.md unter **# Users** eine neue Zeile: deinen Benutzernamen auf diesem Computer (so heißt dein persönlicher Ordner unter /home), einen Doppelpunkt und *Admin*, zum Beispiel `maria: Admin`.
-Zurück in Scope änderst du jetzt mit einem **Rechtsklick** auf eine Gruppe ihre Rechte für den angezeigten Ordner. Gib zum Beispiel dem Team in *04_Finanz* Leserechte. Schau danach in die ACLs.md: Genau eine Zeile ist dazugekommen. Die vorige Fassung bewahrt Seiton in *.seiton/ACLs-history* auf.
+Zurück in Scope änderst du jetzt mit einem **Rechtsklick** auf eine Gruppe ihre Rechte für den angezeigten Ordner. Gib zum Beispiel dem Team in *04_Finanz* Leserechte. Schau danach in die ACLs.md: Genau eine Zeile ist dazugekommen. Die vorige Fassung bewahrt SEITON in *.seiton/ACLs-history* auf.
 
 ## 5. Eine neue Kollegin
 Links unten findest du jetzt **+ Person**. Füge Lea Wagner hinzu und gib ihr die Gruppe Team. Auch das steht danach als eine Zeile in der ACLs.md.
 
 ---
-Gut zu wissen: Ob Seiton die Rechte auch durchsetzt, ist derzeit noch ein Schalter für Entwickler. In diesen Übungen siehst du, wer was darf – verstecken wird Seiton dabei noch nichts.
+Gut zu wissen: Ob SEITON die Rechte auch durchsetzt, ist derzeit noch ein Schalter für Entwickler. In diesen Übungen siehst du, wer was darf – verstecken wird SEITON dabei noch nichts.
 
 [Zurück zur Lektion](<Zugriffsrechte.md>)

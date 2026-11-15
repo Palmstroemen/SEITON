@@ -5,7 +5,7 @@ import "../js/Brand.js" as Brand
 
 // Asked only when a project that is to become an ordinary folder again has settings of its
 // own (changed rights, tags, a trash, ...): they are not deleted but go into the parent
-// project's trash as "Seiton settings" (see core/project_unmake.py).
+// project's trash as "SEITON settings" (see core/project_unmake.py).
 Dialog {
     id: root
     required property var window

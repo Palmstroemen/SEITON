@@ -3,7 +3,7 @@
 # Creating a project remembers what it wrote into .MyOS (CREATED, names and checksums).
 # Turning it back removes .MyOS when nothing of its own came since (changed rights, tags,
 # a trash with entries, ...); otherwise only with consent, and then .MyOS is not deleted
-# but goes into the parent project's trash as "Seiton settings". Not for the top project,
+# but goes into the parent project's trash as "SEITON settings". Not for the top project,
 # not outside the projects tree; subprojects stay projects.
 
 from __future__ import annotations

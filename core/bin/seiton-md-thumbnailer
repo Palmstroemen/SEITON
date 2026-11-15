@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CLI wrapper for the Seiton markdown thumbnailer."""
+"""CLI wrapper for the SEITON markdown thumbnailer."""
 
 import sys
 from pathlib import Path

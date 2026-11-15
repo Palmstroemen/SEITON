@@ -14,12 +14,12 @@ Open *.seiton/ACLs.md*. *.seiton* is a hidden folder – in Scope you show it wi
 
 ## 4. Become admin yourself (advanced)
 Only an admin may change rights – and in the Sample Company nobody is one yet. In ACLs.md, under **# Users**, write a new line: your user name on this computer (the name of your personal folder under /home), a colon, and *Admin*, for example `maria: Admin`.
-Back in Scope, you can now **right-click** a group to change its rights for the folder shown. For example, give the team read access in *04_Finance*. Then look into ACLs.md: exactly one line has been added. Seiton keeps the previous version in *.seiton/ACLs-history*.
+Back in Scope, you can now **right-click** a group to change its rights for the folder shown. For example, give the team read access in *04_Finance*. Then look into ACLs.md: exactly one line has been added. SEITON keeps the previous version in *.seiton/ACLs-history*.
 
 ## 5. A new colleague
 At the bottom left you now find **+ Person**. Add Lea Wagner and give her the group Team. That, too, is one line in ACLs.md afterwards.
 
 ---
-Good to know: whether Seiton also enforces the rights is still a switch for developers. In these exercises you see who may do what – Seiton won't hide anything yet.
+Good to know: whether SEITON also enforces the rights is still a switch for developers. In these exercises you see who may do what – SEITON won't hide anything yet.
 
 [Back to the lesson](<Access Rights.md>)

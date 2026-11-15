@@ -11,7 +11,7 @@ from core.brand import META_DIR, NAME
 
 
 def _setup_test_tree_structure(tmp_path: Path) -> dict:
-    """Create Seiton_Test/Projekte/MyOS/Dateien structure."""
+    """Create SEITON_Test/Projekte/MyOS/Dateien structure."""
     test_tree = tmp_path / f"{NAME}_Test"
     test_tree.mkdir()
     (test_tree / META_DIR).mkdir()
@@ -38,7 +38,7 @@ def _setup_test_tree_structure(tmp_path: Path) -> dict:
 
 
 def test_list_children_at_test_tree_root_includes_myos_and_dateien(tmp_path):
-    """list_children(Seiton_Test) must include MyOS and Dateien folders."""
+    """list_children(SEITON_Test) must include MyOS and Dateien folders."""
     paths = _setup_test_tree_structure(tmp_path)
     api = ScopeApi(str(paths["haus"]))  # start from Projekte/Haus
 
@@ -62,7 +62,7 @@ def test_list_children_at_projekte_includes_subfolders(tmp_path):
 
 
 def test_list_children_settings_folder_as_target(tmp_path):
-    """list_children(Seiton_Test/MyOS) must work - folder named MyOS."""
+    """list_children(SEITON_Test/MyOS) must work - folder named MyOS."""
     paths = _setup_test_tree_structure(tmp_path)
     api = ScopeApi(str(paths["haus"]))
 
@@ -72,7 +72,7 @@ def test_list_children_settings_folder_as_target(tmp_path):
 
 
 def test_list_children_dateien_folder_as_target(tmp_path):
-    """list_children(Seiton_Test/Dateien) must work."""
+    """list_children(SEITON_Test/Dateien) must work."""
     paths = _setup_test_tree_structure(tmp_path)
     api = ScopeApi(str(paths["haus"]))
 
@@ -81,16 +81,16 @@ def test_list_children_dateien_folder_as_target(tmp_path):
 
 
 def test_find_project_root_for_settings_folder(tmp_path):
-    """find_project_root(Seiton_Test/MyOS) must find Seiton_Test."""
+    """find_project_root(SEITON_Test/MyOS) must find SEITON_Test."""
     paths = _setup_test_tree_structure(tmp_path)
 
     root = find_project_root(paths["repo_folder"])
-    assert root is not None, "find_project_root must find Seiton_Test for MyOS folder"
+    assert root is not None, "find_project_root must find SEITON_Test for MyOS folder"
     assert root == paths["test_tree"]
 
 
 def test_find_project_root_for_dateien_folder(tmp_path):
-    """find_project_root(Seiton_Test/Dateien) must find Seiton_Test."""
+    """find_project_root(SEITON_Test/Dateien) must find SEITON_Test."""
     paths = _setup_test_tree_structure(tmp_path)
 
     root = find_project_root(paths["dateien"])
@@ -99,7 +99,7 @@ def test_find_project_root_for_dateien_folder(tmp_path):
 
 
 def test_update_context_to_settings_folder(tmp_path):
-    """update_context(Seiton_Test/MyOS) must not raise and must update project_root."""
+    """update_context(SEITON_Test/MyOS) must not raise and must update project_root."""
     paths = _setup_test_tree_structure(tmp_path)
     api = ScopeApi(str(paths["haus"]))
 
@@ -109,7 +109,7 @@ def test_update_context_to_settings_folder(tmp_path):
 
 
 def test_update_context_to_test_tree_root(tmp_path):
-    """update_context(Seiton_Test) must work when navigating above Projekte."""
+    """update_context(SEITON_Test) must work when navigating above Projekte."""
     paths = _setup_test_tree_structure(tmp_path)
     api = ScopeApi(str(paths["haus"]))
 
@@ -119,7 +119,7 @@ def test_update_context_to_test_tree_root(tmp_path):
 
 
 def test_list_children_above_project_root(tmp_path):
-    """When start_path is in Projekte, list_children(Seiton_Test) must work."""
+    """When start_path is in Projekte, list_children(SEITON_Test) must work."""
     paths = _setup_test_tree_structure(tmp_path)
     api = ScopeApi(str(paths["projekte"]))  # start from Projekte
 

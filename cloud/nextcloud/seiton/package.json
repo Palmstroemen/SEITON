@@ -1,7 +1,7 @@
 {
   "name": "seiton",
   "private": true,
-  "description": "Browser part of the Nextcloud app seiton: the row of Seiton folders in Files",
+  "description": "Browser part of the Nextcloud app seiton: the row of SEITON folders in Files",
   "license": "MIT",
   "scripts": {
     "build": "esbuild src/main.js --bundle --minify --format=iife --target=es2020 --outfile=js/seiton-main.js"

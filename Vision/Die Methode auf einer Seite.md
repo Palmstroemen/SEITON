@@ -2,9 +2,9 @@
 
 *Erster Entwurf, 5. November 2026.*
 
-Ordnung für alle deine Dateien, die du heute Abend anfangen kannst, im Dateimanager, den du schon hast. Du brauchst nur drei Regeln. Die Software dazu heißt Seiton, aber die Methode funktioniert auch ohne sie.
+Ordnung für alle deine Dateien, die du heute Abend anfangen kannst, im Dateimanager, den du schon hast. Du brauchst nur drei Regeln. Die Software dazu heißt SEITON, aber die Methode funktioniert auch ohne sie.
 
-Seiton (整頓) ist das japanische Wort für Ordnung: Alles hat seinen Platz, alles ist an seinem Platz. Genau das ist die Idee von Seiton: eine leicht verständliche Ordnung, die jeder sofort versteht und verwenden kann.
+Seiton (整頓) ist das japanische Wort für Ordnung: Alles hat seinen Platz, alles ist an seinem Platz. Genau das ist die Idee von SEITON: eine leicht verständliche Ordnung, die jeder sofort versteht und verwenden kann.
 
 ## 1. Alles gehört zu einem Projekt
 
@@ -50,11 +50,11 @@ Das ist die eigentliche Idee: **Du musst nicht wählen, ob du nach Projekten ode
 
 ## Was die Software dazugibt
 
-Die Methode gehört dir, auch ohne Programm. Das Programm Seiton nimmt dir die Handarbeit ab:
+Die Methode gehört dir, auch ohne Programm. Das Programm SEITON nimmt dir die Handarbeit ab:
 
 - **Blasse Ordner:** Die Standardordner stehen schon da, nur blass. Ziehst du eine Datei darauf, entsteht der Ordner.
 - **Vorlagen zum Weiterbauen:** Tiefe, vorgefertigte Ordnerstrukturen, die immer gleich bleiben und die du trotzdem an deine Bedürfnisse anpassen kannst. Wenn du es so weit treiben willst, baust du dir regelrechte Baukästen aus Standardordnern.
 - **Die Brille:** Weil jetzt wirklich alle Unterordner eines Projekts immer gleich heißen, bekommst du ganz einfach Übersichten über all deine Projekte und greifst direkt auf deine Dateien zu. Setz dir die Finanz-Brille auf, und du siehst sofort die Finanzen all deiner Projekte, aber nichts mehr sonst.
-- **Jedes Programm kann es:** Auch LibreOffice speichert auf diesem Weg ins richtige Projekt, ohne etwas von Seiton zu wissen.
+- **Jedes Programm kann es:** Auch LibreOffice speichert auf diesem Weg ins richtige Projekt, ohne etwas von SEITON zu wissen.
 
 Deine Dateien bleiben dabei gewöhnliche Dateien in gewöhnlichen Ordnern.

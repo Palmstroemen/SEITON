@@ -17,11 +17,11 @@ use OCP\IAppConfig;
 use Psr\Log\LoggerInterface;
 
 /**
- * Tells the Seiton core service (cloud/service/server.py, POST /changed) what changed in a Team
+ * Tells the SEITON core service (cloud/service/server.py, POST /changed) what changed in a Team
  * folder: created, renamed, copied, deleted, written - the path in the Team folder and whether
- * it is a folder. No Seiton logic here: the core decides what matters (its shadow tree holds
+ * it is a folder. No SEITON logic here: the core decides what matters (its shadow tree holds
  * folders and .seiton files) and brings the rules in step at once, instead of at its next look
- * at the Team folder's ETag ("Designdocument Seiton Core Service.md", 4).
+ * at the Team folder's ETag ("Designdocument MyOS Core Service.md", 4).
  *
  * @template-implements IEventListener<Event>
  */
@@ -70,7 +70,7 @@ class ForwardChanges implements IEventListener {
 			]);
 		} catch (\Throwable $e) {
 			// The core catches up at its next look at the Team folder's ETag.
-			$this->logger->warning('Seiton: could not tell the Seiton core about a change: ' . $e->getMessage());
+			$this->logger->warning('SEITON: could not tell the SEITON core about a change: ' . $e->getMessage());
 		}
 	}
 

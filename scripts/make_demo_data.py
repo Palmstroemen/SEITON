@@ -6,7 +6,7 @@ Build the data for the three-minute demo (Vision/Demo in drei Minuten.md), fresh
 
 Under target:
 - Projekte/.MyOS/Templates/Standard - copied from --templates (default: the templates of
-  Seiton_Test/Projekte, else ~/.MyOS/Templates), without access rights (ACLs.md).
+  SEITON_Test/Projekte, else ~/.MyOS/Templates), without access rights (ACLs.md).
 - Downloads - about 30 mixed files, the mess of scene 1, and "Rechnung Heizung 2025.odt" for
   scene 5 (LibreOffice saves it through the "Perspektiven" drive).
 - Projekte - the projects root: "Urlaub 2025" an ordinary folder (scene 2 makes it a project);

@@ -1,7 +1,7 @@
 /**
  * The view "Perspectives" in the Files app: the projects seen from a department, the turned
- * path of Seiton (/04_Finanz/Projekte/Job = Projekte/Job/04_Finanz). What a turned path stands
- * for comes from the Seiton core (cloud/service/lens.py, through seiton's CoreController):
+ * path of SEITON (/04_Finanz/Projekte/Job = Projekte/Job/04_Finanz). What a turned path stands
+ * for comes from the SEITON core (cloud/service/lens.py, through seiton's CoreController):
  * the virtual levels - departments, their folders, the shelf with the projects one may read -
  * or the real folder, which is listed here over WebDAV with the user's rights. Opening,
  * downloading, renaming and deleting act on the real files.
@@ -115,7 +115,7 @@ async function projectOnShelf(path, real) {
 		turned.set(node.source, path)
 		return node
 	} catch (error) {
-		console.error('Seiton', error)
+		console.error('SEITON', error)
 		return virtualFolder(path)
 	}
 }
@@ -168,7 +168,7 @@ function renderUnborn(folder) {
 	button.title = t(APP, 'Click to create it here, or drop files on it')
 	button.innerHTML = folderIcon
 	button.append(document.createTextNode(here.department))
-	const failed = error => console.error('Seiton', error)
+	const failed = error => console.error('SEITON', error)
 	button.addEventListener('click', () => bearHere(here.path, folder, []).catch(failed))
 	button.addEventListener('dragover', event => {
 		event.preventDefault()
@@ -227,5 +227,5 @@ export function registerPerspectives() {
 		if (status !== 200) {
 			getNavigation().remove(VIEW)
 		}
-	}).catch(error => console.error('Seiton', error))
+	}).catch(error => console.error('SEITON', error))
 }

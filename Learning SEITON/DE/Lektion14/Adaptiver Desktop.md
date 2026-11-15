@@ -6,7 +6,7 @@ In der Werkstatt hast du vielleicht gern ein dunkles Design und einen Bildschirm
 
 Heute könntest du dir das nur einrichten, indem du für jedes deiner Interessen einen eigenen Benutzer anlegst: einen Benutzer „Musikstudio", einen „Autowerkstatt", einen „Persönliches", einen „Job", einen „Haus und Garten", einen „Urlaub" ... Dazwischen jedes Mal ein mühsamer Benutzerwechsel mit Passwortabfrage. Aber so könntest du dir dein Musikstudio perfekt einrichten und deine Autowerkstatt ganz anders.
 
-In Seiton brauchst du dafür keine Benutzer und keine Passwörter, aber sonst funktioniert es ganz ähnlich – deine Projekte merken sich ihren Arbeitsplatz. Und es funktioniert auch in den Perspektiven: Du bist in deiner dunklen Autowerkstatt und gehst in die Finanzabteilung. Dort hast du ein helles Design eingestellt und findest sofort Textverarbeitung und Tabellenkalkulation in der Taskleiste. Zurück in der Autowerkstatt sind sie wieder weg. Charmant, oder?
+In SEITON brauchst du dafür keine Benutzer und keine Passwörter, aber sonst funktioniert es ganz ähnlich – deine Projekte merken sich ihren Arbeitsplatz. Und es funktioniert auch in den Perspektiven: Du bist in deiner dunklen Autowerkstatt und gehst in die Finanzabteilung. Dort hast du ein helles Design eingestellt und findest sofort Textverarbeitung und Tabellenkalkulation in der Taskleiste. Zurück in der Autowerkstatt sind sie wieder weg. Charmant, oder?
 
 [Und noch etwas ...](<../Lektion15/Ein schnelles Zugriffswidget.md>)
 

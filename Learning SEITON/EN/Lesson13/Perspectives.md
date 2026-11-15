@@ -27,6 +27,6 @@ That's exactly what the perspective /08_Documentation/Pictures/ does for you. Th
 Have you rebuilt your project structure in your mail program, too? In your accounting, your task manager, on your SharePoint, in your Nextcloud? Do you see what this means? ONE project structure, ALWAYS the same everywhere, without rebuilding and maintaining it again and again. All documents of a project always exactly where they belong: with the project. Copied onto a USB stick and handed over – and the other person has everything and finds their way around at once.
 And at the same time overviews of all invoices, all photos, all videos, all contracts ...
 
-And this already works in Seiton today. In any of your programs, you can take the way through a perspective when you save a document.
+And this already works in SEITON today. In any of your programs, you can take the way through a perspective when you save a document.
 
 [One more thing ...](<../Lesson14/Adaptive Desktop.md>)

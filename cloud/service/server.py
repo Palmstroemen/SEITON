@@ -29,7 +29,7 @@ from cloud.service.reconcile import Steward
 from cloud.service.shadow import ShadowKeeper, matters
 from core.acl_nextcloud import read_nextcloud_md
 from core.nextcloud_dav import NextcloudDAV
-from core.brand import HTTP_HEADER_PREFIX, META_DIR, env_name, getenv
+from core.brand import HTTP_HEADER_PREFIX, META_DIR, NAME, env_name, getenv
 
 logger = logging.getLogger(__name__)
 
@@ -166,7 +166,7 @@ def main() -> None:
                          host=getenv("CORE_HOST", "127.0.0.1"), port=int(getenv("CORE_PORT", "8080")),
                          place="/" + getenv("NC_FOLDER", "").strip("/") if getenv("NC_URL") else "",
                          on_change=wake.set)
-    logger.info("MyOS core service on %s:%s for %s", *server.server_address[:2], where)
+    logger.info("%s core service on %s:%s for %s", NAME, *server.server_address[:2], where)
     server.serve_forever()
 
 

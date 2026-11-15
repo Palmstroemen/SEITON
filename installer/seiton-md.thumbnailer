@@ -1,7 +1,7 @@
 [Thumbnailer Entry]
 Version=1.0
 Type=X-Thumbnailer
-Name=Seiton Markdown Thumbnailer
+Name=SEITON Markdown Thumbnailer
 Comment=Renders markdown notes as Post-it or notebook previews
 MimeType=text/markdown;text/x-markdown;
 TryExec=python3

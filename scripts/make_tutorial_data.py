@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate the exercise files of the tutorial (Learning Seiton), German and English.
+Generate the exercise files of the tutorial (Learning SEITON), German and English.
 
 Lesson 4 lays a vacation's documents loose in its folder to be sorted by hand; lesson 5 has
 the same files back in one unsorted folder, to be turned into a project; lesson 7 has another
@@ -11,7 +11,7 @@ documents are small PDFs, the video a few seconds of a boat - all tiny, and byte
 same on every run, so the committed files can be checked against this script
 (scripts/tests/test_make_tutorial_data.py).
 
-    python3 scripts/make_tutorial_data.py [target]   # default: Learning Seiton in the repo
+    python3 scripts/make_tutorial_data.py [target]   # default: Learning SEITON in the repo
 
 Needs Pillow, reportlab and ffmpeg.
 """
@@ -728,7 +728,7 @@ def write_documents(folder, documents, language):
 
 
 def generate(target):
-    """Write the exercise files under target (the Learning Seiton folder, or a test's)."""
+    """Write the exercise files under target (the Learning SEITON folder, or a test's)."""
     target = Path(target)
     for language, places in LESSONS.items():
         loose = target / places["loose"]

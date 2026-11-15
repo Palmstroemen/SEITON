@@ -27,7 +27,7 @@ Genau das macht dir die Perspektive /08_Dokumentation/Bilder/. Dort siehst du al
 Hast du deine Projektstruktur auch in deinem Mailprogramm nachgebaut? In deiner Buchhaltung, in deiner Aufgabenverwaltung, auf deinem SharePoint, in deiner Nextcloud? Verstehst du, was das bedeutet? EINE Projektstruktur, IMMER und überall gleich, ohne sie überall wieder und wieder nachbauen und pflegen zu müssen. Alle Dokumente eines Projekts immer genau dort, wo sie hingehören: beim Projekt. Auf einen USB-Stick kopiert und weitergegeben – und der andere hat alles und findet sich sofort zurecht.
 Und gleichzeitig Übersichten über alle Rechnungen, alle Fotos, alle Videos, alle Verträge ...
 
-Und das funktioniert in Seiton heute schon. Du kannst in jedem deiner Programme beim Speichern den Weg über eine Perspektive nehmen.
+Und das funktioniert in SEITON heute schon. Du kannst in jedem deiner Programme beim Speichern den Weg über eine Perspektive nehmen.
 
 [Noch etwas ...](<../Lektion14/Adaptiver Desktop.md>)
 

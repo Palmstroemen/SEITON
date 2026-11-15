@@ -30,12 +30,12 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(NodeCreatedEvent::class, LockNewEntries::class);
 		$context->registerEventListener(NodeRenamedEvent::class, LockNewEntries::class);
 		$context->registerEventListener(NodeCopiedEvent::class, LockNewEntries::class);
-		// Every change in a Team folder goes to the Seiton core, which brings the rules in step.
+		// Every change in a Team folder goes to the SEITON core, which brings the rules in step.
 		foreach ([NodeCreatedEvent::class, NodeRenamedEvent::class, NodeCopiedEvent::class,
 			NodeDeletedEvent::class, NodeWrittenEvent::class] as $event) {
 			$context->registerEventListener($event, ForwardChanges::class);
 		}
-		// The row of Seiton folders above the file list.
+		// The row of SEITON folders above the file list.
 		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadFilesScripts::class);
 	}
 

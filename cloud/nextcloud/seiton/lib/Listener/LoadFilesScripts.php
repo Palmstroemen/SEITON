@@ -11,7 +11,7 @@ use OCP\EventDispatcher\IEventListener;
 use OCP\Util;
 
 /**
- * The Files app gets the row of Seiton folders and the view "Perspectives" (src/main.js, built
+ * The Files app gets the row of SEITON folders and the view "Perspectives" (src/main.js, built
  * to js/seiton-main.js). As an init script, loaded before the Files app: a page opened in
  * the view (reloaded, a link) finds it registered.
  *

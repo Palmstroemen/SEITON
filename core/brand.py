@@ -18,7 +18,7 @@ import os
 from pathlib import Path
 from typing import Mapping, Optional, Union
 
-NAME = "Seiton"
+NAME = "SEITON"  # in capitals: a proper name, it stands out in running text
 META_DIR = ".seiton"  # a project's (or a template's) own settings, inside the folder
 CONFIG_DIR = "seiton"  # the user's settings, below XDG_CONFIG_HOME
 ENV_PREFIX = "SEITON_"

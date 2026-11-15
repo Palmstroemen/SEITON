@@ -22,7 +22,7 @@ Und bei deinen Finanzen vielleicht:
 * eingetrieben
 * bezahlt
 
-Projekte sollten also die Flut an Tags **eindämmen**, die sonst dein ganzes System überschwemmen würde. Genau das können Projekte in Seiton.
+Projekte sollten also die Flut an Tags **eindämmen**, die sonst dein ganzes System überschwemmen würde. Genau das können Projekte in SEITON.
 
 Wir bieten dir Tags auf Steroiden.
 Tagge, was du willst, wann du willst, wie du willst – auf einfache, menschenlesbare und trotzdem einheitliche Weise.

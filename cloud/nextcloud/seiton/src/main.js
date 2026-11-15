@@ -1,9 +1,9 @@
 /**
- * Seiton folders in the Files app: above the file list one row with the Seiton folders of the
+ * SEITON folders in the Files app: above the file list one row with the SEITON folders of the
  * current folder, always together - born ones in full colour, embryos (suggested, not yet
  * created) pale. The born ones leave the list below, so it holds what the user made.
  *
- * Which folders a level holds, and what a birth creates and copies, the Seiton core answers
+ * Which folders a level holds, and what a birth creates and copies, the SEITON core answers
  * (cloud/service/level.py, through seiton's CoreController): born ones the user may read,
  * embryos where the user may create, as Scope with ACLs enforced. The browser shows that and
  * gives birth with the user's own rights - Nextcloud checks them once more.
@@ -21,7 +21,7 @@ const APP = 'seiton'
 const EMBRYO_OPACITY = 0.4 // as Scope's default for suggested folders
 
 // The folder shown and the core's answers for it: folders [{name, born}] and tags [names],
-// null outside Seiton; tag: the one chosen to filter by.
+// null outside SEITON; tag: the one chosen to filter by.
 const state = { folder: null, folders: null, tags: null, tag: null, el: null }
 
 const style = `
@@ -51,7 +51,7 @@ function open(name) {
 	window.OCP.Files.Router.goToRoute(null, { view: 'files' }, { dir: childPath(name) })
 }
 
-/** Birth as the core says (as Seiton' BirthClinic does): the folders, then the copies. */
+/** Birth as the core says (as SEITON's BirthClinic does): the folders, then the copies. */
 async function birth(name) {
 	const { status, data } = await askCore('birth', childPath(name))
 	if (status !== 200 || !data) {
@@ -71,7 +71,7 @@ function render() {
 	if (folders.length > 0) {
 		const label = document.createElement('span')
 		label.className = 'seiton-row__label'
-		label.textContent = t(APP, 'Seiton folders')
+		label.textContent = t(APP, 'SEITON folders')
 		el.append(label)
 	}
 	for (const { name, born } of folders) {
@@ -81,7 +81,7 @@ function render() {
 		button.title = born ? name : t(APP, 'Suggested folder: click to create it')
 		button.innerHTML = folderIcon
 		button.append(document.createTextNode(name))
-		button.addEventListener('click', () => (born ? open(name) : birth(name)).catch(error => console.error('Seiton', error)))
+		button.addEventListener('click', () => (born ? open(name) : birth(name)).catch(error => console.error('SEITON', error)))
 		el.append(button)
 	}
 	const tags = state.tags ?? []
@@ -138,7 +138,7 @@ class SeitonFolders extends FileListFilter {
 		super('seiton-folders', 0)
 	}
 
-	/** Takes the born Seiton folders out of the list (they are in the row); with a tag chosen,
+	/** Takes the born SEITON folders out of the list (they are in the row); with a tag chosen,
 	 * keeps only what carries it. */
 	filter(nodes) {
 		const folder = state.folder

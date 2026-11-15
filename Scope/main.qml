@@ -104,8 +104,6 @@ ApplicationWindow {
     readonly property string settingsDirName: Brand.META_DIR
     readonly property string pathSegmentClipboard: "Clipboard"
     readonly property string pathSegmentProjekte: "Projekte"
-    readonly property string pathSegmentTestTree: Brand.NAME + "_Test"
-    readonly property string pathSegmentRepo: Brand.NAME
     property color dialogPanelBg: schemeColors.dialogPanelBg
     property color dialogPanelBorder: schemeColors.dialogPanelBorder
     property color dialogTextStrong: schemeColors.dialogTextStrong
@@ -756,10 +754,6 @@ ApplicationWindow {
         commitCTD(shown)
     }
 
-    function _isRepoFolderTrace(pathOrName) {
-        var s = String(pathOrName || "")
-        return s.indexOf("/" + pathSegmentTestTree) >= 0 || s.indexOf("/" + pathSegmentRepo + "/") >= 0 || s.endsWith("/" + pathSegmentRepo) || s === pathSegmentRepo
-    }
     function listChildren(path, options) {
         var showHidden = (options && options.showHidden !== undefined) ? options.showHidden : projectsShowHiddenFolders
         if (hasBackend()) {
@@ -2983,8 +2977,6 @@ ApplicationWindow {
             hostBackend: backend
             hostProjectIconForPath: projectIconForPath
             hostHasBackend: hasBackend
-            pathSegmentTestTree: pathSegmentTestTree
-            pathSegmentRepo: pathSegmentRepo
             searchActive: level2SearchActive
             searchText: level2SearchText
             onToggleMode: level2VerticalView = !level2VerticalView
@@ -3142,8 +3134,6 @@ ApplicationWindow {
             maxParents: 10
             path: cwp
             pathDisplayPrefix: cwp
-            pathSegmentTestTree: pathSegmentTestTree
-            pathSegmentRepo: pathSegmentRepo
             folders: subProjects
             childrenProvider: function(targetPath, options) { return listRightFolders(targetPath, options) }
             showEmbryos: false  // MyOS folders, suggestions too, are only on the left (A3.9)

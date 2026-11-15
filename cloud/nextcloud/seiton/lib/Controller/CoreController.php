@@ -17,11 +17,11 @@ use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
 
 /**
- * The bridge to the Seiton core service (cloud/service/server.py): what a turned path stands
- * for (lens), the Seiton folders of a level (level), what a birth does (birth), what saving
+ * The bridge to the SEITON core service (cloud/service/server.py): what a turned path stands
+ * for (lens), the SEITON folders of a level (level), what a birth does (birth), what saving
  * through a lens needs first (bear) and the tags a folder's project suggests (tags), as the core
- * answers them for the logged-in account. No Seiton logic here - the core decides, this only
- * passes the account on ("Designdocument Seiton Core Service.md", 4 and 6).
+ * answers them for the logged-in account. No SEITON logic here - the core decides, this only
+ * passes the account on ("Designdocument MyOS Core Service.md", 4 and 6).
  * Set by the admin: occ config:app:set seiton core_url --value=http://seiton-core:8080
  * and occ config:app:set seiton core_secret --sensitive --value=...
  */
@@ -75,7 +75,7 @@ class CoreController extends OCSController {
 		$url = rtrim($this->config->getValueString(Application::APP_ID, 'core_url'), '/');
 		$secret = $this->config->getValueString(Application::APP_ID, 'core_secret');
 		if ($url === '' || $secret === '') {
-			return new DataResponse(['error' => 'the Seiton core is not set up'], Http::STATUS_SERVICE_UNAVAILABLE);
+			return new DataResponse(['error' => 'the SEITON core is not set up'], Http::STATUS_SERVICE_UNAVAILABLE);
 		}
 		try {
 			$response = $this->clients->newClient()->get($url . '/' . $question . '?' . http_build_query(['path' => $path]), [
@@ -86,14 +86,14 @@ class CoreController extends OCSController {
 				'nextcloud' => ['allow_local_address' => true],
 			]);
 		} catch (\Throwable $e) {
-			$this->logger->error('Seiton: the Seiton core is not reachable: ' . $e->getMessage(), ['exception' => $e]);
-			return new DataResponse(['error' => 'the Seiton core is not reachable'], Http::STATUS_BAD_GATEWAY);
+			$this->logger->error('SEITON: the SEITON core is not reachable: ' . $e->getMessage(), ['exception' => $e]);
+			return new DataResponse(['error' => 'the SEITON core is not reachable'], Http::STATUS_BAD_GATEWAY);
 		}
 		$status = $response->getStatusCode();
 		if ($status === Http::STATUS_UNAUTHORIZED) {
 			// The core refused the bridge (wrong secret), not the user.
-			$this->logger->error('Seiton: the Seiton core refused the shared secret');
-			return new DataResponse(['error' => 'the Seiton core refused the bridge'], Http::STATUS_BAD_GATEWAY);
+			$this->logger->error('SEITON: the SEITON core refused the shared secret');
+			return new DataResponse(['error' => 'the SEITON core refused the bridge'], Http::STATUS_BAD_GATEWAY);
 		}
 		$body = json_decode((string)$response->getBody(), true);
 		return new DataResponse(is_array($body) ? $body : [], $status);

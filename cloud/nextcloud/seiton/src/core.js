@@ -1,5 +1,5 @@
 /**
- * What the row of Seiton folders and the view Perspectives share: asking the Seiton core
+ * What the row of SEITON folders and the view Perspectives share: asking the SEITON core
  * (cloud/service/server.py) through seiton's CoreController - the core decides, the browser
  * shows its answer - and acting over WebDAV with the user's own rights.
  */

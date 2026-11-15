@@ -6,6 +6,6 @@ In the workshop you might like a dark theme and a desktop background with a pret
 
 Today you could only set this up by creating a separate user for each of your interests: a user "Music Studio", one "Car Workshop", one "Personal", one "Job", one "House and Garden", one "Vacation" ... With a tedious user switch and password prompt every time in between. But that way you could set up your music studio perfectly, and your car workshop quite differently.
 
-In Seiton you need no users and no passwords for this, but otherwise it works quite similarly – your projects remember their workplace. And it works in perspectives, too: you are in your dark car workshop and walk over to the finance department. There you have set a light theme and immediately find word processor and spreadsheet in the taskbar. Back in the car workshop, they're gone again. Charming, isn't it?
+In SEITON you need no users and no passwords for this, but otherwise it works quite similarly – your projects remember their workplace. And it works in perspectives, too: you are in your dark car workshop and walk over to the finance department. There you have set a light theme and immediately find word processor and spreadsheet in the taskbar. Back in the car workshop, they're gone again. Charming, isn't it?
 
 [And one more thing ...](<../Lesson15/A quick access widget.md>)

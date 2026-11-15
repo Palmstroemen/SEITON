@@ -1,10 +1,10 @@
-# Seiton
+# SEITON
 
 A new OS paradigm for Linux: project-centric desktop and filesystem.
 
-Seiton (整頓) is Japanese for order: a place for everything, and everything in its place. That is exactly the idea of Seiton: an order that is easy to understand, one that anyone can grasp and use right away.
+Seiton (整頓) is Japanese for order: a place for everything, and everything in its place. That is exactly the idea of SEITON: an order that is easy to understand, one that anyone can grasp and use right away.
 
-**Seiton** is an experimental Linux desktop concept that puts the user and their projects at the center. The goal is an intuitive, context-sensitive environment where everything revolves around your current project and its structure.
+**SEITON** is an experimental Linux desktop concept that puts the user and their projects at the center. The goal is an intuitive, context-sensitive environment where everything revolves around your current project and its structure.
 
 Until November 2026 the project was called MyOS; in some places that name still appears.
 
@@ -16,7 +16,7 @@ For a concise status snapshot and priorities, see [docs/STATUS.md](docs/STATUS.m
 
 ---
 
-## What is Seiton?
+## What is SEITON?
 
 - **Project-based desktop:** Multi-project environment for a single user. Each project can have its own desktop, launcher, and app configuration; open windows stay tied to their respective projects.
 
@@ -30,7 +30,7 @@ For a concise status snapshot and priorities, see [docs/STATUS.md](docs/STATUS.m
 
 ## Vision
 
-The building blocks exist but are fragmented. Seiton aims to unify them into one clean, intuitive environment with sensible defaults and a gentle learning curve.
+The building blocks exist but are fragmented. SEITON aims to unify them into one clean, intuitive environment with sensible defaults and a gentle learning curve.
 
 ---
 
@@ -44,8 +44,8 @@ The building blocks exist but are fragmented. Seiton aims to unify them into one
 | **cli/** | CLI tools (myls, myproject, mytag, myedit, myfilter, etc.) |
 | **docs/** | Documentation index, development guide, conventions, security |
 | **Vision/** | Concept and GUI notes (e.g. CWD/CWP/CTD) |
-| **Learning Seiton/** | Tutorial and learning content (DE/EN) |
-| **Seiton_Test/** | Test/demo project structure |
+| **Learning SEITON/** | Tutorial and learning content (DE/EN) |
+| **SEITON_Test/** | Test/demo project structure |
 
 Design documents live under `core/Dokumentation/`. Entry points: [Designdokument.md](Designdokument.md), [docs/INDEX.md](docs/INDEX.md).
 
@@ -65,7 +65,7 @@ python3 -m pytest core/tests/unit cli/tests PostFix/tests -v
 
 **CLI examples:**
 ```bash
-python3 cli/myls.py Seiton_Test/Projekte/ --extended
+python3 cli/myls.py SEITON_Test/Projekte/ --extended
 python3 PostFix/cli.py path/to/file.md
 ```
 

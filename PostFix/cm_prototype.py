@@ -3,7 +3,7 @@
 Prototype, not yet PostFix: a note in the new editor (CodeMirror 6 with a live preview like
 Obsidian's, PostFix/codemirror) to compare it with Obsidian side by side.
 
-    python3 PostFix/cm_prototype.py ["Learning Seiton/DE/Lektion01/Beginne HIER.md"] [--in-place]
+    python3 PostFix/cm_prototype.py ["Learning SEITON/DE/Lektion01/Beginne HIER.md"] [--in-place]
 
 Without --in-place it works on a copy of the note's folder in a temporary folder, so trying
 it out changes nothing in the repository. It saves as you type, shows changes from outside at

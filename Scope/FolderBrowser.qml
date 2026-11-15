@@ -19,8 +19,6 @@ Item { // ROOT
     implicitHeight: visible ? contentHeight : 0
     property string path: "/"
     property string pathDisplayPrefix: ""
-    property string pathSegmentTestTree: Brand.NAME + "_Test"
-    property string pathSegmentRepo: Brand.NAME
     property var resolvePath: function(p) { return String(p || "") }
     property var folders: []
     property var childrenProvider: null
