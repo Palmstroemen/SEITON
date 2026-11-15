@@ -141,6 +141,12 @@ This keeps perceived startup responsive.
 - `.MyOS/Tags.md` is used as project scope tag filter/list.
 - New document tags can be synced into scope tags.
 - Scope tag changes can trigger propagation hooks through `core.project` signaling.
+- `.seiton/ACLs.md` holds the project's rights. Why the plural, although it is one file (asked
+  2026-11-15): technically every object has its own ACL (every file and folder in Linux and
+  Windows, every path with rules in Nextcloud), and this file describes the ACLs of many
+  folders at once; SEITON also turns it into rules per path. So the name stays. If it is ever
+  renamed, then to a name a layperson understands (`Rights.md`, `Access.md`), not for one
+  letter. Old projects would need a time in which both names are read, as with MyOS.
 
 ### Vault-Level (Obsidian Compatibility)
 - Tag color registry is persisted in Obsidian-compatible app config data.
