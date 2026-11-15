@@ -14,7 +14,7 @@ ApplicationWindow {
     width: 1400
     height: 900
     visible: true
-    title: "Scope - MyOS GUI Stub"
+    title: "Scope - " + Brand.NAME
 
     property int baseFont: Qt.application.font.pixelSize
     property bool darkTheme: true

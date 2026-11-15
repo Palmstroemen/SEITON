@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from core.brand import META_DIR
+from core.brand import META_DIR, NAME
 from core.project import resolve_cwp
 
 
@@ -27,7 +27,7 @@ SECTION_MAP = {
 
 def parse_args(args=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Open the relevant MyOS config file in your editor.",
+        description=f"Open the relevant {NAME} config file in your editor.",
     )
     parser.add_argument("section", help="Config section (tags, templates, acl, config)")
     parser.add_argument(

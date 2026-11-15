@@ -10,11 +10,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.tags import read_tags, write_tags
+from core.brand import NAME  # noqa: E402
 
 
 def parse_args(args=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="MyOS tags utility",
+        description=f"{NAME} tags utility",
     )
     sub = parser.add_subparsers(dest="command", required=True)
 

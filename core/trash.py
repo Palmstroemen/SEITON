@@ -18,7 +18,7 @@ from typing import List, Optional
 from urllib.parse import quote, unquote
 
 from core.project import ProjectFinder
-from core.brand import META_DIR
+from core.brand import META_DIR, NAME
 
 TRASH_DIR = Path(META_DIR) / "Trash"
 DEFAULT_RETENTION_DAYS = 30
@@ -55,7 +55,7 @@ def move_to_trash(path, deleted_by: str) -> TrashEntry:
     target = Path(path).expanduser().absolute()
     root = project_trash_root(target)
     if root is None:
-        raise TrashError(f"{target} is not in a MyOS project")
+        raise TrashError(f"{target} is not in a {NAME} project")
     rel = target.relative_to(root)
     # The project's own configuration (and the trash in it) is not deleted this way.
     if not rel.parts or rel.parts[0] == META_DIR:

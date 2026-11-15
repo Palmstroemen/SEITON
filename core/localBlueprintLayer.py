@@ -6,7 +6,7 @@ import time
 import errno
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
-from core.brand import META_DIR, getenv
+from core.brand import META_DIR, NAME, getenv
 
 try:
     from fuse import FUSE, FuseOSError, Operations
@@ -290,7 +290,7 @@ class Blueprint(Operations):
         self.config = ProjectConfig(self.project_root)
         
         if not self.config.is_valid():
-            raise ValueError(f"Not a valid MyOS project: {self.project_root}")
+            raise ValueError(f"Not a valid {NAME} project: {self.project_root}")
         
         self.templates_dir = self._resolve_templates_dir()
         

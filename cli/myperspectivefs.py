@@ -14,10 +14,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core.perspective_fuse import mount_perspective_drive
+from core.brand import NAME  # noqa: E402
 
 
 def parse_args(args=None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Mount the MyOS perspective drive (turned tree)")
+    parser = argparse.ArgumentParser(description=f"Mount the {NAME} perspective drive (turned tree)")
     parser.add_argument("--projects-root", "--project-root", dest="projects_root", required=True,
                         help="The projects root (the folder holding the projects, e.g. .../Projekte)")
     parser.add_argument("--mount-point", required=True,

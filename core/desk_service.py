@@ -11,7 +11,7 @@ from core.desk import DeskConfig
 from core.desk_runtime import DeskRuntime
 from core.desktop_backends.base import DesktopState
 from core.project import find_config_in_parents, find_next_parent_config
-from core.brand import META_DIR, config_dir
+from core.brand import META_DIR, NAME, config_dir
 
 _SAFE_CONFIG_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*\.md$")
 _MAX_CONFIG_NAME_LEN = 120
@@ -351,7 +351,7 @@ class DeskService:
             candidates.append(
                 {
                     "id": "global_root",
-                    "label": "MyOS-Root",
+                    "label": f"{NAME}-Root",
                     "targetPath": str(root),
                     "configPath": str(config_path),
                     "exists": "1" if config_path.exists() else "0",

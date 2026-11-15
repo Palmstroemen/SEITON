@@ -10,11 +10,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.importer import import_package
+from core.brand import NAME  # noqa: E402
 
 
 def parse_args(args=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="MyOS import utility",
+        description=f"{NAME} import utility",
     )
     parser.add_argument("package", help="Path to export package (folder or zip)")
     parser.add_argument(

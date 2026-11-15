@@ -14,10 +14,11 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from daemon.perspective_daemon import run_daemon
+from core.brand import NAME  # noqa: E402
 
 
 def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="MyOS perspective daemon (FUSE + Unix socket API)")
+    parser = argparse.ArgumentParser(description=f"{NAME} perspective daemon (FUSE + Unix socket API)")
     parser.add_argument("--projects-root", "--project-root", dest="projects_root", required=True,
                         help="The projects root (e.g. .../Projekte)")
     parser.add_argument("--mount-point", required=True, help="Where the drive appears (e.g. .../Perspektiven)")

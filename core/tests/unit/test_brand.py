@@ -59,6 +59,13 @@ def test_installed_file_names_follow_the_name(monkeypatch):
     assert brand.legacy_file_names("suntree.desktop") == ("oldname-suntree.desktop",)
 
 
+def test_project_heading_follows_the_name(monkeypatch):
+    monkeypatch.setattr(brand, "NAME", "Neu")
+    monkeypatch.setattr(brand, "LEGACY_NAMES", ("Alt",))
+    assert brand.project_heading() == "# Neu Project"
+    assert brand.legacy_project_headings() == ("# Alt Project",)
+
+
 def test_url_scheme_is_lowercase_and_differs_from_former_ones():
     assert brand.URL_SCHEME == brand.URL_SCHEME.lower() and brand.URL_SCHEME not in brand.LEGACY_URL_SCHEMES
 
@@ -67,7 +74,7 @@ def test_qml_has_the_same_name():
     """Scope/js/Brand.js mirrors core/brand.py for QML."""
     js = (REPO / "Scope" / "js" / "Brand.js").read_text(encoding="utf-8")
     values = dict(re.findall(r'^var (\w+) = "([^"]*)"$', js, re.M))
-    assert values == {"NAME": brand.NAME, "META_DIR": brand.META_DIR}
+    assert values == {"NAME": brand.NAME, "META_DIR": brand.META_DIR, "CONFIG_DIR": brand.CONFIG_DIR}
 
 
 def test_qml_takes_the_name_from_brand_js():

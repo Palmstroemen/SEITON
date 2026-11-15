@@ -11,13 +11,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.perspective import find_filters_layers, resolve_effective_filter
+from core.brand import NAME  # noqa: E402
 
 _STATE_FILE = Path("~/.cache/myos/myfilter_state.json").expanduser()
 
 
 def parse_args(args=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="MyOS filters utility",
+        description=f"{NAME} filters utility",
     )
     sub = parser.add_subparsers(dest="command", required=True)
 

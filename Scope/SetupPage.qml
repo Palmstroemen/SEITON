@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Dialogs
 import QtQuick.Layouts 1.15
+import "js/Brand.js" as Brand
 
 // The back of Scope (Scope/Designdocument Setup.md): the settings of Scope, the Headline and
 // SunTree in tabs. Values go to the one settings file through `settings` (Scope's backend:
@@ -646,7 +647,7 @@ Rectangle {
                                 }
                                 ColorGroup {
                                     title: qsTr("Folder rows")
-                                    ColorSetting { colorName: "panelAlt"; label: qsTr("Background MyOS folders") }
+                                    ColorSetting { colorName: "panelAlt"; label: qsTr("Background %1 folders").arg(Brand.NAME) }
                                     ColorSetting { colorName: "panel"; label: qsTr("Background projects row") }
                                     ColorSetting { colorName: "folderPathTint"; label: qsTr("Path bar") }
                                     ColorSetting { colorName: "folderULineTint"; label: qsTr("Folders") }
@@ -727,11 +728,11 @@ Rectangle {
                             SettingSlider {
                                 id: embryoSlider
                                 key: "General/embryoOpacity"
-                                label: qsTr("Suggested MyOS folders")
+                                label: qsTr("Suggested %1 folders").arg(Brand.NAME)
                                 labelWidth: 130
                                 unit: "%"
                                 Layout.fillWidth: true
-                                help: qsTr("How pale MyOS folders appear that are only suggested here, not made yet.")
+                                help: qsTr("How pale %1 folders appear that are only suggested here, not made yet.").arg(Brand.NAME)
                             }
                             SettingSlider {
                                 id: badgeSlider
@@ -740,7 +741,7 @@ Rectangle {
                                 labelWidth: 130
                                 unit: "%"
                                 Layout.fillWidth: true
-                                help: qsTr("How pale the badges (€, § ...) on suggested MyOS folders are.")
+                                help: qsTr("How pale the badges (€, § ...) on suggested %1 folders are.").arg(Brand.NAME)
                             }
                         }
                     }
@@ -775,7 +776,7 @@ Rectangle {
                             spacing: 8
                             CheckItem {
                                 objectName: "checkTemplatesRow"
-                                label: qsTr("MyOS folders")
+                                label: qsTr("%1 folders").arg(Brand.NAME)
                                 checked: root.templatesRowShown
                                 onToggled: root.toggleTemplatesRow()
                                 Layout.preferredWidth: 118
@@ -812,7 +813,7 @@ Rectangle {
                         }
                         CheckItem {
                             objectName: "checkSuggestions"
-                            label: qsTr("Suggested MyOS folders")
+                            label: qsTr("Suggested %1 folders").arg(Brand.NAME)
                             checked: root.showSuggestionsOn
                             onToggled: { root.showSuggestionsOn = !root.showSuggestionsOn; root.keep("Scope/showSuggestions", root.showSuggestionsOn) }
                         }

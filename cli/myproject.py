@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from core.brand import META_DIR
+from core.brand import META_DIR, NAME
 from core.project import ProjectConfig
 
 
@@ -99,7 +99,7 @@ def _trash(args) -> int:
 
 def parse_args(args=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="MyOS project management",
+        description=f"{NAME} project management",
     )
     sub = parser.add_subparsers(dest="command", required=True)
 

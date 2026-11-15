@@ -11,7 +11,7 @@ import pytest
 
 from core.acl import ACLPolicy
 from core.project import ProjectConfig
-from core.brand import META_DIR, env_name
+from core.brand import META_DIR, env_name, project_heading
 
 
 @pytest.fixture(autouse=True)
@@ -59,7 +59,7 @@ def test_a_new_project_gets_the_templates_settings_files(tree):
     settings_dir = project / META_DIR
     assert (settings_dir / "Desk.md").read_text() == "# Desk\nPanelTheme: Mint-Y-Blue\n"
     assert (settings_dir / "ACLs.md").read_text().startswith(TEMPLATE_ACLS)
-    assert (settings_dir / "Project.md").read_text() == "# MyOS Project\n"
+    assert (settings_dir / "Project.md").read_text() == project_heading() + "\n"
     assert not (settings_dir / "ACLs-history").exists()  # the template's own history stays there
     assert not (settings_dir / ".ACLs.md.draft").exists()
 

@@ -35,6 +35,7 @@ LEGACY_META_DIRS: tuple = (".MyOS",)
 LEGACY_CONFIG_DIRS: tuple = ("MyOS",)
 LEGACY_XATTR_PREFIXES: tuple = ("user.myos.",)
 LEGACY_URL_SCHEMES: tuple = ("myos",)  # still followed: notes keep their links
+LEGACY_NAMES: tuple = ("MyOS",)  # a Project.md heading under them still marks an unchanged project
 
 
 def meta_dir(folder: Union[str, Path]) -> Path:
@@ -73,6 +74,16 @@ def file_name(kind: str) -> str:
 def legacy_file_names(kind: str) -> tuple:
     """The same file under the former names ("myos-suntree.desktop"): replaced when installing."""
     return tuple(f"{name.lower()}-{kind}" for name in LEGACY_CONFIG_DIRS)
+
+
+def project_heading() -> str:
+    """The heading of a project's Project.md as creating the project writes it."""
+    return f"# {NAME} Project"
+
+
+def legacy_project_headings() -> tuple:
+    """The same heading under former names (projects made before the rename)."""
+    return tuple(f"# {name} Project" for name in LEGACY_NAMES)
 
 
 def marker(kind: str) -> str:

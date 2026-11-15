@@ -10,11 +10,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.exporter import export_subtree
+from core.brand import NAME  # noqa: E402
 
 
 def parse_args(args=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="MyOS export utility",
+        description=f"{NAME} export utility",
     )
     parser.add_argument("path", help="Path inside a project to export")
     parser.add_argument(

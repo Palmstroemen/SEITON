@@ -10,7 +10,7 @@ import sys
 import logging
 
 from core.config.parser import MarkdownConfigParser
-from core.brand import META_DIR, NAME, getenv
+from core.brand import META_DIR, NAME, getenv, project_heading
 
 logger = logging.getLogger(__name__)
 
@@ -237,7 +237,7 @@ class ProjectConfig:
             
             # Ensure Project.md exists as a minimal marker file
             if not self.project_md.exists():
-                self.project_md.write_text("# MyOS Project\n")
+                self.project_md.write_text(project_heading() + "\n")
             
             # Write Templates.md in the current format
             templates_md = self.settings_dir / "Templates.md"
@@ -577,7 +577,7 @@ class ProjectConfig:
         target_settings.mkdir(parents=True, exist_ok=True)
         project_marker = target_settings / "Project.md"
         if not project_marker.exists():
-            project_marker.write_text("# MyOS Project\n")
+            project_marker.write_text(project_heading() + "\n")
             # A new project gets what its templates' root .MyOS holds (ACLs.md, Desk.md, ...).
             from core.template_seed import seed_from_templates  # late: template_seed imports this module
             from core.project_unmake import record_created
@@ -716,7 +716,7 @@ class ProjectConfig:
         
         config = ProjectConfig(Path(args.path))
         if not config.is_valid():
-            print(f"Error: {args.path} is not a valid MyOS project")
+            print(f"Error: {args.path} is not a valid {NAME} project")
             return 1
         
         print(f"Propagating '{args.section}' from {config.path}")
@@ -899,7 +899,7 @@ if __name__ == "__main__":
         test_dir.mkdir()
         parent_settings = test_dir.parent / META_DIR
         parent_settings.mkdir(exist_ok=True)
-        (parent_settings / "Project.md").write_text("# MyOS Project\n")
+        (parent_settings / "Project.md").write_text(project_heading() + "\n")
         result = ProjectConfig.make_project(test_dir, template="standard")
         assert result, "make_project should succeed"
         config = ProjectConfig(test_dir)

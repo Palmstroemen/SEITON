@@ -2,6 +2,7 @@ import QtQuick 6.9  // per-corner radii (6.7), Flickable.acceptedButtons (6.9)
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import "Theme/tag_chips.js" as TagChips
+import "js/Brand.js" as Brand
 import "Theme/tag_chip_style.js" as TagChipStyle
 import "Theme/panel_colors.js" as PanelColors
 import "js/DropUtils.js" as DropUtils
@@ -780,7 +781,7 @@ Rectangle { // Files panel
                         wrapMode: Text.WordWrap
                         ToolTip.visible: aclNotListedMouse.containsMouse
                         ToolTip.delay: 600
-                        ToolTip.text: qsTr("People who may change the rights add their name to ~/.config/MyOS/Identity.md themselves.")
+                        ToolTip.text: qsTr("People who may change the rights add their name to ~/.config/%1/Identity.md themselves.").arg(Brand.CONFIG_DIR)
                         MouseArea {
                             id: aclNotListedMouse
                             anchors.fill: parent

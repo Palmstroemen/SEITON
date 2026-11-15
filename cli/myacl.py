@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from core.brand import META_DIR, env_name, getenv
+from core.brand import META_DIR, NAME, env_name, getenv
 from core.acl import ACLPolicy
 from core.acl_enforcement import configured_mode
 from core.acl_nextcloud import BITS, FULL_MASK, NEXTCLOUD_PERMISSIONS, local_tree, plan, read_nextcloud_md, rights_files
@@ -26,7 +26,7 @@ class _Refused(Exception):
 
 
 def parse_args(args=None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="MyOS ACLs utility")
+    parser = argparse.ArgumentParser(description=f"{NAME} ACLs utility")
     sub = parser.add_subparsers(dest="command", required=True)
 
     show_cmd = sub.add_parser("show", help="Who may do what at a path, and where it comes from")

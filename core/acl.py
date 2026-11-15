@@ -10,7 +10,7 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple
 from core.config.parser import MarkdownConfigParser
 from core.project import ProjectConfig, find_config_in_parents
 from core.template_place import find_templates_dir
-from core.brand import META_DIR
+from core.brand import META_DIR, NAME
 
 try:
     import casbin as _casbin
@@ -66,7 +66,7 @@ class ACLPolicy:
             # A template's rights: its own folders are the template folder roles.
             template_roles = _template_folder_names(project_root)
         else:
-            raise ValueError(f"Not a valid MyOS project: {project_root}")
+            raise ValueError(f"Not a valid {NAME} project: {project_root}")
         acl_roles, role_permissions, folder_defaults, users = _roles_from_acls(project_root, acl_file)
         normalized_defaults = _normalize_permissions({"folder": folder_defaults}).get("folder", {})
         normalized_sections = _normalize_permissions(role_permissions)

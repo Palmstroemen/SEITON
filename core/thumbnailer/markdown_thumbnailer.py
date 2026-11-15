@@ -8,7 +8,7 @@ import os
 import re
 from pathlib import Path
 from textwrap import wrap
-from core.brand import META_DIR, getenv
+from core.brand import META_DIR, NAME, getenv
 
 try:
     from PIL import Image, ImageDraw, ImageFont
@@ -449,7 +449,7 @@ def generate_thumbnail(input_file: Path, output_file: Path, size: int) -> int:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Generate MyOS markdown thumbnail")
+    parser = argparse.ArgumentParser(description=f"Generate {NAME} markdown thumbnail")
     parser.add_argument("input_file", type=Path, help="Input markdown file path")
     parser.add_argument("output_file", type=Path, help="Output PNG path")
     parser.add_argument("size", nargs="?", default="256", help="Thumbnail size (px)")

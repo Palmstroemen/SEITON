@@ -15,14 +15,16 @@ from typing import List, Dict, Optional, Any
 import tempfile
 
 try:
-    # Try to import the MyOS API
+    # Try to import the core
     sys.path.insert(0, str(Path(__file__).parent.parent))
     from core.localBlueprintLayer import Blueprint
     from core.tags import read_tags
     from core.xray import xray_listing
+    from core.brand import NAME
     HAS_CORE = True
 except ImportError:
     HAS_CORE = False
+    NAME = ""
 
 class Lister:
     def __init__(self, path: str) -> None:
@@ -195,7 +197,7 @@ def parse_arguments(args=None) -> argparse.Namespace:
         args = sys.argv[1:]  # Default: current command line
     
     parser = argparse.ArgumentParser(
-        description='MyOS Intelligent File Lister',
+        description=f'{NAME} Intelligent File Lister'.strip(),
         epilog='Examples:\n'
                '  myls . --extended          # Show embryo status\n'
                '  myls ~/projects --recent=5 # 5 newest files\n'
@@ -263,7 +265,7 @@ def parse_arguments(args=None) -> argparse.Namespace:
     parser.add_argument(
         '--version',
         action='version',
-        version='myls 0.2.0 (MyOS Prototype)'
+        version=f'myls 0.2.0 ({NAME} Prototype)'
     )
     
     return parser.parse_args()

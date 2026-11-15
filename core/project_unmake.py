@@ -16,11 +16,10 @@ from typing import Dict, List
 
 from core import trash
 from core.template_place import find_templates_dir
-from core.brand import META_DIR, NAME
+from core.brand import META_DIR, NAME, legacy_project_headings, project_heading
 
 CREATED = ".created.json"  # in .MyOS: what creating the project wrote
 SETTINGS_NAME = f"{NAME} settings"  # .seiton with settings of its own, in the parent's trash
-_MARKER_BODY = "# MyOS Project"
 
 
 class ProjectHasOwnSettings(Exception):
@@ -64,7 +63,7 @@ def own_settings(project_root: Path) -> List[str]:
             if any(p.is_file() or p.is_symlink() for p in item.rglob("*")):
                 own.append(item.name)
         elif item.name == "Project.md":
-            if created.get(item.name) != _checksum(item) and _marker_body(item) != _MARKER_BODY:
+            if created.get(item.name) != _checksum(item) and _marker_body(item) not in (project_heading(), *legacy_project_headings()):
                 own.append(item.name)
         elif created.get(item.name) != _checksum(item):
             own.append(item.name)

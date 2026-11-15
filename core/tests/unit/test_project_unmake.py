@@ -12,7 +12,7 @@ import pytest
 from core import trash
 from core.project import ProjectConfig
 from core.project_unmake import ProjectHasOwnSettings, can_unmake, own_settings, unmake_project
-from core.brand import META_DIR, NAME, env_name
+from core.brand import META_DIR, NAME, env_name, project_heading
 
 
 @pytest.fixture(autouse=True)
@@ -99,6 +99,13 @@ def test_projects_made_before_count_everything_but_the_marker_as_their_own(tree)
     assert own_settings(old) == []
     (old / META_DIR / "Desk.md").write_text("# Desk\n")
     assert own_settings(old) == ["Desk.md"]
+
+
+def test_the_marker_under_the_current_name_is_not_their_own(tree):
+    new = tree["projects"] / "Neu"
+    (new / META_DIR).mkdir(parents=True)
+    (new / META_DIR / "Project.md").write_text(f"---\nwindow_x: 10\n---\n{project_heading()}\n")
+    assert own_settings(new) == []
 
 
 def test_what_cannot_be_turned_back(tree):

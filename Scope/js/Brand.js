@@ -4,3 +4,4 @@
 /// compares them). QML cannot read the Python module, and main.qml is also loaded without Scope.py.
 var NAME = "SEITON"
 var META_DIR = ".seiton"
+var CONFIG_DIR = "seiton"

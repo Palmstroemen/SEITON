@@ -17,7 +17,7 @@ import socket
 
 from core.project import ProjectConfig, ProjectFinder
 from core.template_place import TEMPLATES_REL, find_templates_dir
-from core.brand import META_DIR
+from core.brand import META_DIR, project_heading
 
 logger = logging.getLogger(__name__)
 
@@ -165,7 +165,7 @@ def _write_export_metadata(project_md: Path, reference_path: Path, subtree_path:
         project_md.write_text(project_md.read_text() + export_block)
     else:
         project_md.parent.mkdir(parents=True, exist_ok=True)
-        project_md.write_text("# MyOS Project\n" + export_block)
+        project_md.write_text(project_heading() + "\n" + export_block)
 
 
 def _zip_folder(folder: Path) -> Path:
