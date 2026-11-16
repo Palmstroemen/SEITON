@@ -118,16 +118,25 @@ one in the new project. No project active: the clock stands.
 
 Where the idle time comes from depends on the session (an adapter each, `IdleSource`):
 
-| Session | Source |
+| Desktop | Source (`core/clock_sources.py`), the first that answers is kept |
 |---|---|
-| X11 | the XScreenSaver extension (as `xprintidle` does) |
-| Wayland | `ext-idle-notify` or the desktop's idle monitor (GNOME: Mutter IdleMonitor, KDE: KIdleTime) |
-| Tests | a fake source and a fake clock |
+| Cinnamon | Muffin's idle monitor (`org.cinnamon.Muffin.IdleMonitor`, X11 and Wayland) |
+| GNOME | Mutter's idle monitor (`org.gnome.Mutter.IdleMonitor`) |
+| KDE | the freedesktop screensaver (`GetSessionIdleTime`) |
+| any X11 | the XScreenSaver extension (as `xprintidle` does), last |
+| Tests | a fake bus and a fake clock |
+
+Tried on the test machine (Cinnamon, X11, 16 November 2026): Muffin and XScreenSaver give the
+same idle time; the freedesktop screensaver does not answer there.
 
 ### 4.3 Video and the dead man's button
 
-A video player tells the system not to start the screensaver (an *idle inhibitor*,
-`org.freedesktop.ScreenSaver.Inhibit`). The clock sees that:
+A video player tells the system not to start the screensaver (an *idle inhibitor*). The clock
+asks the session manager whether the session's going idle is inhibited
+(`org.gnome.SessionManager.IsInhibited` with the flag 8, "idle"; Cinnamon and GNOME), or KDE's
+power management (`HasInhibit`). Seen on the test machine: a browser playing a video holds
+"Video Wake Lock" with the flag 8; playing only audio it holds the flag 4 (suspend), so music
+alone does not keep the clock counting. The clock sees that:
 
 - idle time above the pause limit **and** an inhibitor active: the clock does not stop, it
   asks: a small notice at the clock button, "Still working on *Küche*?" with "Yes" and "No".
