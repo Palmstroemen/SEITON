@@ -51,3 +51,8 @@ MyOS_Test/
 
 # Personal editor workspace
 *.code-workspace
+
+# Strategy papers: kept local, not on GitHub
+Vision/Entwicklung und Rollout.md
+Vision/Claims.md
+Vision/Die Datenkatastrophe.md
