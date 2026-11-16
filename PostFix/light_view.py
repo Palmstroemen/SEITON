@@ -200,6 +200,8 @@ def fill(document: QTextDocument, body: str, width: int, base_dir: Optional[Path
             fmt.setProperty(WANTED_TOP_PROPERTY, top)
         if block.quote:
             fmt.setLeftMargin(QUOTE_BAR + QUOTE_PAD)
+        if block.centered:
+            fmt.setAlignment(Qt.AlignHCenter)
         char = QTextCharFormat()
         char.setFont(font)
         char.setForeground(QColor(lr.COLORS["fg"]))

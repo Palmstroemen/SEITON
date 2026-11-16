@@ -50,3 +50,30 @@ def test_laid_out_again_when_the_width_changes(view):
     browser.resize(900, 300)
     app.processEvents()
     assert browser.document().size().height() < narrow  # fewer lines when wider
+
+
+def _block_with_picture(browser):
+    block = browser.document().begin()
+    while block.isValid():
+        if "￼" in block.text():
+            return block
+        block = block.next()
+    return None
+
+
+def test_a_picture_alone_on_its_line_sits_in_the_middle(view):
+    from PySide6.QtCore import Qt
+
+    app, browser = view
+    browser.show_note("Text\n\n![Bild|20](bild.png)\n\nEnde")
+    block = _block_with_picture(browser)
+    assert block is not None and block.blockFormat().alignment() & Qt.AlignHCenter
+
+
+def test_a_picture_in_the_text_stays_where_the_text_is(view):
+    from PySide6.QtCore import Qt
+
+    app, browser = view
+    browser.show_note("Ein Bild ![Bild|20](bild.png) im Text")
+    block = _block_with_picture(browser)
+    assert block is not None and not block.blockFormat().alignment() & Qt.AlignHCenter

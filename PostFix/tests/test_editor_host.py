@@ -2,6 +2,7 @@
 the note being edited; every note keeps its own text, cursor and undo history in it. Runs a real
 browser page without a screen."""
 
+import json
 import os
 import time
 from pathlib import Path
@@ -130,3 +131,12 @@ def test_a_note_deleted_with_the_editor_in_it_does_not_take_the_editor_along(app
     QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)  # processEvents() leaves deletions
     assert host.owner() is None and host.view.parent() is None
     assert _js(app, host, "window.host.getDoc('a.md')") == "A"  # the editor and its states live on
+
+
+def test_pictures_have_square_corners_and_one_alone_on_its_line_sits_in_the_middle(app, host, tmp_path):
+    # As in the light view: the picture as it is, a line of its own centres it.
+    host.attach(QWidget(), "a.md", "Text\n\n![Box|20](box.png)\n\nEin Bild ![x|20](x.png) im Text\n\nEnde", tmp_path)
+    _wait(app, lambda: False, 0.3)
+    styles = _js(app, host, "JSON.stringify([...window.host.view.contentDOM.querySelectorAll('.cm-md-image')].map(i => "
+                            "[getComputedStyle(i).borderTopLeftRadius, getComputedStyle(i.closest('.cm-line')).textAlign]))")
+    assert json.loads(styles) == [["0px", "center"], ["0px", "start"]]  # nested lists come back as JSON

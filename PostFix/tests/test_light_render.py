@@ -83,3 +83,15 @@ def test_an_image_with_its_obsidian_width():
 def test_markup_in_the_text_is_shown_not_run():
     (block,) = _blocks("<b>nicht fett</b> & mehr")
     assert "<b>nicht" not in block.html and _text(block.html) == "<b>nicht fett</b> & mehr"
+
+
+def test_a_picture_alone_on_its_line_sits_in_the_middle():
+    (alone,) = _blocks("![SEITON|200](SEITON-Box.svg)")
+    assert alone.centered
+    (in_text,) = _blocks("Ein Bild ![x|20](x.png) im Text")
+    assert not in_text.centered
+
+
+def test_a_line_of_text_is_not_centred():
+    (block,) = _blocks("Nur Text")
+    assert not block.centered

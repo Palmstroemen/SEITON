@@ -39,6 +39,7 @@ _ORDERED = re.compile(r"^([ \t]*)(\d{1,9}[.)])([ \t]+|$)")
 _TASK = re.compile(r"^\[([ xX])\]")
 _TABLE_DIVIDER = re.compile(r"^[ \t]*\|?[ \t]*:?-+:?[ \t]*(\|[ \t]*:?-+:?[ \t]*)*\|?[ \t]*$")
 _IMAGE_ALT_WIDTH = re.compile(r"^(.*)\|(\d+)$")
+_PICTURE_ALONE = re.compile(r"^[ \t]*!\[[^\]]*\]\([^)]*\)[ \t]*$")  # a line that is one picture
 
 
 @dataclass
@@ -51,6 +52,7 @@ class Block:
     quote: bool = False
     code: bool = False
     task: Optional[bool] = None     # a check box: ticked or not
+    centered: bool = False          # a picture alone on its line sits in the middle
     images: list = field(default_factory=list)  # [(src, width or None)]
     rows: list = field(default_factory=list)    # a table's cells
     lines: int = 1                  # source lines it stands for
@@ -251,7 +253,8 @@ def render_lines(body: str) -> list[Block]:
         for offset, inner in enumerate(rendered):
             lead = html.escape(_leading(source[i + offset]), quote=False) if offset else ""
             mine = [image for image in images if f'src="{html.escape(image[0], quote=True)}"' in inner]
-            blocks.append(Block(html=lead + inner, images=mine))
+            alone = bool(mine) and bool(_PICTURE_ALONE.match(source[i + offset]))
+            blocks.append(Block(html=lead + inner, images=mine, centered=alone))
         i = end
     return blocks
 

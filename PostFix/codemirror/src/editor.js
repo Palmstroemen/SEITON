@@ -144,6 +144,8 @@ function buildDecorations(state) {
           if (match) {
             const [alt, width] = match[1].split("|");  // Obsidian: ![alt|300](picture.png)
             add(from, to, Decoration.replace({ widget: new ImageWidget(match[2], alt, /^\d+$/.test(width || "") ? width : "") }));
+            const line = state.doc.lineAt(from);
+            if (line.text.trim() === text) add(line.from, line.from, Decoration.line({ class: "cm-md-image-line" }));  // alone: in the middle
           }
           return false;
         }
@@ -241,7 +243,8 @@ const theme = EditorView.theme({
   ".cm-md-h3": { fontSize: "1.2em", fontWeight: "700", paddingTop: "0.3em" },
   ".cm-md-h4, .cm-md-h5, .cm-md-h6": { fontWeight: "700" },
   ".cm-md-link": { color: "var(--accent)", textDecoration: "underline", cursor: "pointer" },
-  ".cm-md-image": { display: "inline-block", maxWidth: "100%", borderRadius: "4px", verticalAlign: "bottom" },
+  ".cm-md-image": { display: "inline-block", maxWidth: "100%", verticalAlign: "bottom" },  // as it is: square corners
+  ".cm-md-image-line": { textAlign: "center" },
   ".cm-md-task": { margin: "0 0.45em 0 0", verticalAlign: "middle", cursor: "pointer" },
   ".cm-md-done": { color: "var(--muted)", textDecoration: "line-through" },
   ".cm-md-bullet": { color: "var(--muted)", padding: "0 0.25em" },
