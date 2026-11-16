@@ -1,0 +1,84 @@
+<!doctype html>
+<!-- Draft (2026-11-16): the square bento box turned into a long shelf, S E I T ON, each compartment
+     its own colour (OKLCH, equal lightness). Not the final logo: the letters here are a system font,
+     the real pictures come from scripts/make_brand_svgs.py with outlines of Open Sans Semibold. -->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SEITON Regal-Logo</title>
+<style>
+  body { margin: 0; padding: 24px 16px; background: #faf8f4; color: #2a2433; font-family: "Open Sans", sans-serif; }
+  main { max-width: 720px; margin: 0 auto; }
+  .row { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
+  .row label { min-width: 90px; font-size: 14px; color: #5a5366; }
+  .row input { flex: 1; }
+  .row span { min-width: 110px; font-size: 13px; color: #5a5366; }
+  .buttons { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 8px; }
+  button { font: inherit; font-size: 14px; padding: 6px 12px; border: 1px solid #b9b2c4; border-radius: 8px; background: #fff; cursor: pointer; }
+  button:hover { background: #f0edf5; }
+  svg { width: 100%; height: auto; display: block; max-height: 320px; }
+</style>
+</head>
+<body>
+<main>
+<svg id="logo" viewBox="0 0 330 170" role="img" aria-label="SEITON-Logo">
+  <rect id="box" fill="#4a3478"/>
+  <g id="cells"></g>
+</svg>
+<div class="buttons">
+  <button id="morph">Überführen</button>
+  <button id="pal1">Regenbogen</button>
+  <button id="pal2">Warm und kalt im Wechsel</button>
+  <button id="pal3">Papier (wie heute)</button>
+</div>
+<div class="row"><label for="c">Buntheit</label><input type="range" id="c" min="0" max="0.22" step="0.01" value="0.09"><span id="cOut"></span></div>
+<div class="row"><label for="l">Helligkeit</label><input type="range" id="l" min="0.6" max="0.95" step="0.01" value="0.84"><span id="lOut"></span></div>
+</main>
+<script>
+const W = 10, H = 65, C = 40, ONW = 2 * C + W, BOX = "#4a3478";
+const letters = ["S", "E", "I", "T", "ON"];
+const sq = { w: 160, h: 160, cells: [[W, W, C, H], [W + C + W, W, C, H], [W + 2 * (C + W), W, C, H], [W, 2 * W + H, C, H], [W + C + W, 2 * W + H, ONW, H]] };
+const lg = { w: W + 4 * (C + W) + ONW + W, h: H + 2 * W, cells: letters.map((t, i) => [W + i * (C + W), W, i < 4 ? C : ONW, H]) };
+let hues = [25, 85, 150, 235, 305], t = 0, anim = null, paper = false;
+const g = document.getElementById("cells"), box = document.getElementById("box");
+const ns = "http://www.w3.org/2000/svg", rects = [], texts = [];
+letters.forEach(s => {
+  const r = document.createElementNS(ns, "rect"); g.appendChild(r); rects.push(r);
+  const tx = document.createElementNS(ns, "text"); tx.textContent = s;
+  tx.setAttribute("text-anchor", "middle"); tx.setAttribute("dominant-baseline", "central");
+  tx.setAttribute("font-family", "Open Sans, Noto Sans, DejaVu Sans, sans-serif");
+  tx.setAttribute("font-weight", "600"); tx.setAttribute("font-size", "38"); tx.setAttribute("fill", BOX);
+  g.appendChild(tx); texts.push(tx);
+});
+const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const lerp = (a, b, k) => a + (b - a) * k;
+function draw() {
+  const k = ease(t), bw = lerp(sq.w, lg.w, k), bh = lerp(sq.h, lg.h, k), ox = (330 - bw) / 2, oy = (170 - bh) / 2;
+  box.setAttribute("x", ox); box.setAttribute("y", oy); box.setAttribute("width", bw); box.setAttribute("height", bh);
+  const cv = +document.getElementById("c").value, lv = +document.getElementById("l").value;
+  rects.forEach((r, i) => {
+    const a = sq.cells[i], b = lg.cells[i];
+    const x = lerp(a[0], b[0], k), y = lerp(a[1], b[1], k), w = lerp(a[2], b[2], k), h = lerp(a[3], b[3], k);
+    r.setAttribute("x", ox + x); r.setAttribute("y", oy + y); r.setAttribute("width", w); r.setAttribute("height", h);
+    r.style.fill = paper ? "#f3ecdf" : `oklch(${lv} ${cv} ${hues[i]})`;
+    texts[i].setAttribute("x", ox + x + w / 2); texts[i].setAttribute("y", oy + y + h / 2 + 1);
+  });
+  document.getElementById("cOut").textContent = cv < 0.05 ? "pastell" : cv < 0.08 ? "zart" : cv < 0.13 ? "satt" : cv < 0.17 ? "kräftig" : "knallbunt";
+  document.getElementById("lOut").textContent = Math.round(lv * 100) + " %";
+}
+document.getElementById("morph").onclick = () => {
+  if (anim) cancelAnimationFrame(anim);
+  const from = t, to = t < .5 ? 1 : 0, start = performance.now();
+  const step = now => { const p = Math.min(1, (now - start) / 900); t = from + (to - from) * p; draw(); if (p < 1) anim = requestAnimationFrame(step); };
+  anim = requestAnimationFrame(step);
+};
+document.getElementById("pal1").onclick = () => { paper = false; hues = [25, 85, 150, 235, 305]; draw(); };
+document.getElementById("pal2").onclick = () => { paper = false; hues = [30, 220, 85, 265, 150]; draw(); };
+document.getElementById("pal3").onclick = () => { paper = true; draw(); };
+document.getElementById("c").oninput = () => { paper = false; draw(); };
+document.getElementById("l").oninput = () => { paper = false; draw(); };
+draw();
+</script>
+</body>
+</html>
