@@ -394,6 +394,61 @@ the invoice from FirmaX from two weeks ago? In which project was it?"
   one, `SEITON_Test`); autostart of the small Scope; how Nemo, Déjà Dup and the search
   indexes treat the `Perspektiven` symlink on the real desktop.
 
+## A11. Several Roots, Several Perspectives (Concept, 2026-11-16)
+
+Not built, not decided. Came up when SEITON was rolled out on the Dell: `~/Dokumente` became a
+projects root, and a second root `~/Projekte` was planned beside it (left out for now).
+
+**What breaks today.** The code knows one projects root. The daemon mounts its drive *next to*
+the root (`projects_root.parent / "Perspektiven"`, `daemon/lens_link.py`), so two roots in the
+same folder (`~/Dokumente`, `~/Projekte`) would both mount `~/Perspektiven`. Started in `~`,
+above both, Scope and SunTree find no projects root at all: no lens, and SunTree does not know
+where to go (`ScopeApi._find_projects_root`).
+
+**Where the drives go** (weighed 2026-11-16):
+
+| Where | Clash between roots | Read twice by other programs |
+|---|---|---|
+| inside the root, `<root>/Perspektiven` | none | yes, and worst: Obsidian (`~/Dokumente` is a vault) would find every note twice, the Nextcloud client would upload the turned tree, the daemon would have to leave itself out |
+| inside the root, hidden, `<root>/.seiton/Perspektiven` | none | by backups and sync, which do not skip hidden folders; seen in Nemo only with hidden files |
+| one place, a folder per root, `~/Perspektiven/<root>` | none while two roots do not share a name | by whatever walks the home folder (backups, `du ~`, `find ~`) |
+
+Proposal: **one place, a folder per root, as symlinks** - the last row together with A9. Each
+root's drive is mounted outside the home folder (`/run/user/<uid>/seiton/<root key>`, the key as
+for the daemon's socket, `socket_path_for`); `~/Perspektiven` is a plain folder with a symlink
+per root (`~/Perspektiven/Dokumente`, `~/Perspektiven/Projekte`). One visible place for all
+roots; tools walking the home folder do not follow the symlinks; without SEITON running the
+links point nowhere. One daemon per root, as today.
+
+**Several perspectives of one root.** Today the drive shows the whole turned tree of a root:
+`/<department>/Projekte/<project>/...`, all departments side by side. Beyond that, a root may
+name the perspectives it wants at hand, deeper ones too:
+
+```
+# Perspectives
+4_Finanz
+5_Recht
+9_Dokumentation/92_Bilder
+```
+
+(in the root's `.seiton`, say `Perspectives.md`). Each appears as an entry of its own in the
+root's drive, turned at that place: `~/Perspektiven/Dokumente/92_Bilder/<project>/...` holds the
+pictures of all projects. That is the FreeDMS idea of programs as roles (Designdokument.md,
+"Ideas from FreeDMS", 6): a photo program is given `92_Bilder`, a bookkeeping program `4_Finanz`,
+and sees exactly that across all projects and nothing else.
+
+**Open:**
+- Two roots with the same name (two `Projekte` in different places): a suffix in the link's
+  name, as "Projekte (Arbeit)".
+- Where the list of roots comes from: there is none today. Simplest: a section in
+  `~/.config/seiton/seiton.conf`; then Scope and SunTree, started in `~`, know the roots too, and
+  the service of A9 knows which drives to mount.
+- Whether the lens in Scope looks into one root or into all ("all `4_Finanz`").
+- Whether the named perspectives replace the whole turned tree in the drive or stand beside it.
+- The name of a named perspective's entry: its last part (`92_Bilder`), or the whole path.
+- Rights: through a named perspective a program sees only what its user may see (as everywhere,
+  the ACLs apply to the real paths, A4).
+
 # Part B - Resolver Contract (removed)
 
 The resolver contract of the first build (CPD forms, `perspective_open` / `set_cpd` /
