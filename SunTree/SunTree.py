@@ -10,7 +10,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from PySide6.QtCore import QEasingCurve, QObject, QPointF, QTranslator, QVariantAnimation, Signal, Slot, QUrl, QTimer
-from PySide6.QtGui import QGuiApplication, QIcon, QCursor, QImage
+from PySide6.QtGui import QGuiApplication, QCursor, QImage
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuick import QQuickImageProvider
 
@@ -18,6 +18,7 @@ from core.brand import env_name, getenv
 from core.scope_api import ScopeApi
 from core.color_schemes import load_scheme
 from core.settings import Settings
+from Scope.window_icon import seiton_icon
 from daemon.lens_link import LensLink
 
 # pynput's syntax: named keys in angle brackets ("<space>", not "space").
@@ -486,9 +487,7 @@ def main() -> int:
     app = QGuiApplication(sys.argv)
     app.setApplicationName("SunTree")
     install_translator(app, "de")  # German, as Scope starts
-    icon_path = REPO_ROOT / "Scope" / "Theme" / "icons" / "folder.svg"
-    if icon_path.exists():
-        app.setWindowIcon(QIcon(str(icon_path)))
+    app.setWindowIcon(seiton_icon())  # SEITON's box, as Scope
 
     api = ScopeApi(start_path)
     adapter = BackendAdapter(api)

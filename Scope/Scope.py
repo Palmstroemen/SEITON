@@ -55,9 +55,9 @@ from core.settings import Settings
 from daemon.lens_link import LensLink
 
 try:  # imported as Scope.Scope (tests) or run as a script (python3 Scope/Scope.py)
-    from .window_icon import with_project_badge
+    from .window_icon import seiton_icon
 except ImportError:
-    from window_icon import with_project_badge
+    from window_icon import seiton_icon
 
 
 class DropDebugFilter(QObject):
@@ -1204,15 +1204,9 @@ class ThemeIconProvider(QQuickImageProvider):
         return image
 
 
-def main() -> int:
-    os.environ.setdefault(env_name("MD_USE_POSTFIX"), "1")
-    start_path = sys.argv[1] if len(sys.argv) > 1 else str(Path.cwd())
-    api = ScopeApi(start_path)
-    app = QGuiApplication(sys.argv)
-    # The window's icon is the theme's folder (Scope's own only where the theme has none) with
-    # the projects' P on it: in the taskbar Scope is not the file browser.
-    icon_path = Path(__file__).with_name("Theme").joinpath("icons", "folder.svg")
-    app.setWindowIcon(with_project_badge(QIcon.fromTheme("folder", QIcon(str(icon_path)))))
+def load_scope(api: ScopeApi, app: QGuiApplication) -> QQmlApplicationEngine:
+    """Scope's window on `api`'s place: the engine with its backend, main.qml loaded (no root
+    object when it fails). Shared by main() and the smoke test, so both load it alike."""
     engine = QQmlApplicationEngine()
     engine.addImageProvider("theme", ThemeIconProvider())
 
@@ -1228,6 +1222,16 @@ def main() -> int:
 
     qml_path = Path(__file__).with_name("main.qml").resolve()
     engine.load(QUrl.fromLocalFile(str(qml_path)))
+    return engine
+
+
+def main() -> int:
+    os.environ.setdefault(env_name("MD_USE_POSTFIX"), "1")
+    start_path = sys.argv[1] if len(sys.argv) > 1 else str(Path.cwd())
+    api = ScopeApi(start_path)
+    app = QGuiApplication(sys.argv)
+    app.setWindowIcon(seiton_icon())  # SEITON's box, as SunTree
+    engine = load_scope(api, app)
     if not engine.rootObjects():
         return 1
     root = engine.rootObjects()[0]
