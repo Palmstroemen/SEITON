@@ -32,6 +32,9 @@ Daraus folgt eine ganze Reihe von Problemen:
 
 - **Die Daten gehören dem Programm.** Wer die Notiz-App wechselt, nimmt seine Notizen nicht einfach
   mit. Wer ein Programm deinstalliert, verliert oft, was darin lag.
+- **Die Ordnung baut man in jedem Silo neu.** Alben in der Foto-App, Ordner im Mailprogramm,
+  Notizbücher in der Notiz-App: Dieselben Vorhaben werden in jedem Programm aufs Neue angelegt,
+  jedes Mal ein bisschen anders, und nichts davon passt zusammen.
 - **Der Überblick geht verloren.** „Wo ist eigentlich die Datei?“ ist eine Frage, die viele gar
   nicht mehr stellen. Eine ganze Generation lernt Computer kennen, ohne je einen Ordner angelegt
   zu haben. Wer nicht weiß, wo seine Daten liegen, kann sie auch nicht sichern, ordnen oder
@@ -83,7 +86,9 @@ es schon, anderes ist der nächste Schritt):
    Programm gelten: Das Steuerprogramm darf `4_Finanz` lesen, in allen Projekten, und sonst
    nichts. Der Bildbearbeiter darf in `9_Dokumentation` schreiben. Statt zwanzig unverständlicher
    Einzelfragen steht da eine Regel, die man einmal festlegt und lesen kann. Und weil die Ordner
-   in jedem Projekt gleich heißen, passt die Regel überall.
+   in jedem Projekt gleich heißen, passt die Regel überall. Genauso kann ein Programm Rechte auf
+   eine Perspektive bekommen: Der Bildbetrachter sieht die Perspektive „Fotos“, also alle Bilder
+   aus allen Projekten, und nichts sonst.
 
 3. **Der Öffnen-Dialog kennt die Ordnung.** Heute ist der Dialog zum Öffnen und Speichern die
    schmale Durchreiche zwischen den Sandkästen. In SEITON wird er zum Wegweiser: Er bietet das
@@ -103,6 +108,19 @@ es schon, anderes ist der nächste Schritt):
 6. **Der Überblick geht quer, ohne die Grenzen aufzuheben.** Mit den Perspektiven von SEITON
    sieht man zum Beispiel alle Rechnungen aller Projekte auf einen Blick, ohne dass dafür etwas
    kopiert oder ein Zaun eingerissen wird. Man sieht nur, was man auch sehen darf.
+
+   Hier liegt der eigentliche Unterschied zum Datensilo. Die Foto-App sieht heute „alle Fotos“,
+   und genau das ist eine Perspektive. Nur liegen die Fotos dafür bei ihr, sie ist ein Ort. In
+   SEITON ist dieselbe Sicht nur eine Ansicht: **Was heute ein Datensilo ist, wird eine
+   Perspektive mit Zugriffsrechten.** Das Programm bekommt dieselbe Sicht, aber die Daten
+   bleiben, wo sie hingehören.
+
+   Und die Ordnung wandert gratis mit. Heute baut man in jedem Silo die eigenen Vorhaben aufs
+   Neue nach: Alben in der Foto-App, Ordner im Mailprogramm, Notizbücher in der Notiz-App,
+   Projekte in der Aufgabenverwaltung. Jedes Mal dieselbe Küche, derselbe Kunde Huber, und
+   jedes Mal ein bisschen anders. In SEITON gibt es die Projekte nur einmal. Jede Perspektive
+   zeigt sie von selbst mit, denn jede Datei weiß, in welchem Projekt sie liegt. Wer ein neues
+   Projekt anlegt, hat es in allen Perspektiven zugleich.
 
 Für die Durchsetzung muss SEITON nichts neu erfinden. Linux bringt die Werkzeuge mit, aus denen
 heute die Sandkästen gebaut werden: Namensräume, Landlock, die Portale von Flatpak. SEITON
