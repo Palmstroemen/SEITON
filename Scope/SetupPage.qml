@@ -24,6 +24,10 @@ Rectangle {
     property color pill
     property color pillBorder
     property alias currentTab: tabs.currentIndex
+    // SunTree is a workshop piece beside SEITON: without it, no SunTree tab (Scope.py tells).
+    property bool sunTreePresent: true
+    // Notes open in PostFix, unless switched off (core/bin/open_md.py reads the setting).
+    property bool postFixOn: settings ? settings.setting("General/postFix") === true : true
     // How pale embryos are, as one slides (Scope follows at once; without settings the default).
     readonly property real embryoOpacity: settings ? embryoSlider.value : 0.4
     readonly property real embryoBadgeOpacity: settings ? badgeSlider.value : 0.7
@@ -596,7 +600,8 @@ Rectangle {
             TabButton { objectName: "tabGeneral"; text: qsTr("General") }
             TabButton { objectName: "tabScope"; text: qsTr("Scope") }
             TabButton { objectName: "tabHeadline"; text: qsTr("Headline") }
-            TabButton { objectName: "tabSunTree"; text: qsTr("SunTree") }
+            TabButton { id: sunTreeTab; objectName: "tabSunTree"; text: qsTr("SunTree") }
+            Component.onCompleted: if (!root.sunTreePresent) tabs.removeItem(sunTreeTab)
         }
 
         StackLayout {
@@ -681,6 +686,28 @@ Rectangle {
                             objectName: "setupLanguage"
                             label: root.language.toUpperCase()
                             onActivated: root.switchLanguage()
+                        }
+                    }
+                    RowLayout {
+                        spacing: 12
+                        Text { text: qsTr("Notes"); color: root.textColor; font.pixelSize: root.baseFont; Layout.preferredWidth: 180; Layout.alignment: Qt.AlignTop }
+                        ColumnLayout {
+                            spacing: 4
+                            Layout.fillWidth: true
+                            CheckItem {
+                                objectName: "checkPostFix"
+                                label: qsTr("Open in PostFix")
+                                checked: root.postFixOn
+                                onToggled: { root.postFixOn = !root.postFixOn; root.keep("General/postFix", root.postFixOn) }
+                            }
+                            Text {
+                                text: qsTr("Off: notes open in Obsidian or in the system's editor.")
+                                color: root.mutedColor
+                                font.pixelSize: root.baseFont - 1
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                                Layout.maximumWidth: 560
+                            }
                         }
                     }
                     // For the user embryos are "suggested MyOS folders" (the code keeps embryo): the
@@ -874,22 +901,26 @@ Rectangle {
 
             RowLayout {  // SunTree: the crown (SunTree/Designdocument Krone.md, 5)
                 spacing: 24
-                CrownPreview {
-                    // What the values do, at once: SunTree's arithmetic on sample folders.
-                    id: crownPreview
-                    objectName: "crownPreview"
+                Loader {
+                    // What the values do, at once: SunTree's arithmetic on sample folders. Asked
+                    // for only with SunTree there: CrownPreview.qml imports SunTree's Crown.js.
+                    id: crownLoader
+                    Component.onCompleted: if (root.sunTreePresent) setSource("CrownPreview.qml", { "schemeColors": root.schemeOf(root.schemeWorn) })
                     Layout.preferredWidth: 220
                     Layout.preferredHeight: 420
                     Layout.alignment: Qt.AlignTop
-                    schemeColors: root.schemeOf(root.schemeWorn)
-                    lineT: lineTSlider.value
-                    inner: innerSlider.value
-                    enter: enterSlider.value
-                    leave: leaveSlider.value
-                    lens: lensSlider.value
-                    softness: softnessSlider.value
-                    edge: edgeSlider.value
-                    demo: root.demo
+                    onLoaded: {
+                        item.objectName = "crownPreview"
+                        item.schemeColors = Qt.binding(function() { return root.schemeOf(root.schemeWorn) })
+                        item.lineT = Qt.binding(function() { return lineTSlider.value })
+                        item.inner = Qt.binding(function() { return innerSlider.value })
+                        item.enter = Qt.binding(function() { return enterSlider.value })
+                        item.leave = Qt.binding(function() { return leaveSlider.value })
+                        item.lens = Qt.binding(function() { return lensSlider.value })
+                        item.softness = Qt.binding(function() { return softnessSlider.value })
+                        item.edge = Qt.binding(function() { return edgeSlider.value })
+                        item.demo = Qt.binding(function() { return root.demo })
+                    }
                 }
                 ColumnLayout {
                     spacing: 8
@@ -906,19 +937,19 @@ Rectangle {
                         Layout.fillWidth: true
                         Layout.bottomMargin: 8
                     }
-                    SettingSlider { id: innerSlider; key: "SunTree/inner"; label: qsTr("Size of the middle"); unit: "R"; mark: crownPreview.innerColor; Layout.fillWidth: true
+                    SettingSlider { id: innerSlider; key: "SunTree/inner"; label: qsTr("Size of the middle"); unit: "R"; mark: crownLoader.item ? crownLoader.item.innerColor : "transparent"; Layout.fillWidth: true
                         help: qsTr("The empty middle at the stem: every level starts there, and back there the fan lets go.") }
-                    SettingSlider { id: leaveSlider; key: "SunTree/leave"; label: qsTr("Landing"); unit: "%"; mark: crownPreview.leaveColor; Layout.fillWidth: true
+                    SettingSlider { id: leaveSlider; key: "SunTree/leave"; label: qsTr("Landing"); unit: "%"; mark: crownLoader.item ? crownLoader.item.leaveColor : "transparent"; Layout.fillWidth: true
                         help: qsTr("How far among the subfolders you already are after the change.") }
-                    SettingSlider { id: lineTSlider; key: "SunTree/lineT"; label: qsTr("Way per level"); unit: "R"; mark: crownPreview.lineColor; Layout.fillWidth: true
+                    SettingSlider { id: lineTSlider; key: "SunTree/lineT"; label: qsTr("Way per level"); unit: "R"; mark: crownLoader.item ? crownLoader.item.lineColor : "transparent"; Layout.fillWidth: true
                         help: qsTr("How far you move the mouse outward until the folder fills the whole fan and you go one level deeper.") }
-                    SettingSlider { id: enterSlider; key: "SunTree/enter"; label: qsTr("Change begins"); unit: "%"; mark: crownPreview.enterColor; Layout.fillWidth: true
+                    SettingSlider { id: enterSlider; key: "SunTree/enter"; label: qsTr("Change begins"); unit: "%"; mark: crownLoader.item ? crownLoader.item.enterColor : "transparent"; Layout.fillWidth: true
                         help: qsTr("How deep in the folder the pointer is when the change into its subfolders begins.") }
                     SettingSlider { id: lensSlider; key: "SunTree/lens"; label: qsTr("Magnifier"); Layout.fillWidth: true
                         help: qsTr("How much the folder under the pointer is enlarged already at the start of a level.") }
                     SettingSlider { id: softnessSlider; key: "SunTree/softness"; label: qsTr("Softness"); Layout.fillWidth: true
                         help: qsTr("How fast everything follows the hand: smaller is softer, larger is more direct.") }
-                    SettingSlider { id: edgeSlider; key: "SunTree/edge"; label: qsTr("Exit at the edge"); unit: "R"; mark: crownPreview.exitColor; Layout.fillWidth: true
+                    SettingSlider { id: edgeSlider; key: "SunTree/edge"; label: qsTr("Exit at the edge"); unit: "R"; mark: crownLoader.item ? crownLoader.item.exitColor : "transparent"; Layout.fillWidth: true
                         help: qsTr("How far you push past the first or last folder until the fan lets go (the rim running on, green).") }
                 }
             }

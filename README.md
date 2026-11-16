@@ -40,7 +40,8 @@ The building blocks exist but are fragmented. SEITON aims to unify them into one
 |------|--------------|
 | **core/** | API, FUSE/blueprint layer, project config, ACLs, tagging, design docs |
 | **Scope/** | QML file browser (Templates + Projects rows, tags, CWD/CTD) |
-| **PostFix/** | Markdown editor with tag sidebar, Obsidian-compatible |
+| **PostFix/** | From the workshop: Markdown editor with tag sidebar, Obsidian-compatible |
+| **SunTree/** | From the workshop: the folder fan for quick dropping |
 | **cli/** | CLI tools (myls, myproject, mytag, myedit, myfilter, etc.) |
 | **docs/** | Documentation index, development guide, conventions, security |
 | **Vision/** | Concept and GUI notes (e.g. CWD/CWP/CTD) |
@@ -48,6 +49,20 @@ The building blocks exist but are fragmented. SEITON aims to unify them into one
 | **SEITON_Test/** | Test/demo project structure |
 
 Design documents live under `core/Dokumentation/`. Entry points: [Designdokument.md](Designdokument.md), [docs/INDEX.md](docs/INDEX.md).
+
+---
+
+## From the Workshop
+
+SEITON is Scope with its core, the CLI and the lens. Beside it lie a few pieces that sketch where
+the idea could go. They are not needed for SEITON, and SEITON runs without them:
+
+- **PostFix**: a Markdown editor with tags and rights in the sidebar. Scope opens notes in it by
+  default; on Scope's back (General, Notes) you can switch that off, then notes open in Obsidian
+  or the system's editor.
+- **SunTree**: the folder fan (Ctrl + Alt + Space). Without it, Scope's back shows no SunTree tab.
+- **Markdown previews for file browsers**: the thumbnailer behind Scope's previews, offered to
+  Nautilus, Nemo and Dolphin too; `install.sh` asks before installing it.
 
 ---
 

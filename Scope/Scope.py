@@ -41,7 +41,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuick import QQuickImageProvider
 from PySide6.QtCore import QMimeDatabase
 
-from core.brand import CONFIG_DIR, env_name, file_name, getenv
+from core.brand import CONFIG_DIR, file_name, getenv
 from core.color_schemes import (
     has_own_colors,
     load_scheme,
@@ -1204,6 +1204,11 @@ class ThemeIconProvider(QQuickImageProvider):
         return image
 
 
+def sun_tree_present() -> bool:
+    """Whether SunTree, a workshop piece beside SEITON, is there: else its tab stays off the back."""
+    return (REPO_ROOT / "SunTree" / "SunTree.py").is_file()
+
+
 def load_scope(api: ScopeApi, app: QGuiApplication) -> QQmlApplicationEngine:
     """Scope's window on `api`'s place: the engine with its backend, main.qml loaded (no root
     object when it fails). Shared by main() and the smoke test, so both load it alike."""
@@ -1215,6 +1220,7 @@ def load_scope(api: ScopeApi, app: QGuiApplication) -> QQmlApplicationEngine:
     ctx.setContextProperty("backend", backend)
     ctx.setContextProperty("scopeStartPath", api.get_start_path())
     ctx.setContextProperty("scopeProjectRoot", api.get_project_root() or "")
+    ctx.setContextProperty("scopeSunTreePresent", sun_tree_present())
     engine._backend = backend
 
     ui_lang = getenv("UI_LANG", "de")
@@ -1226,7 +1232,6 @@ def load_scope(api: ScopeApi, app: QGuiApplication) -> QQmlApplicationEngine:
 
 
 def main() -> int:
-    os.environ.setdefault(env_name("MD_USE_POSTFIX"), "1")
     start_path = sys.argv[1] if len(sys.argv) > 1 else str(Path.cwd())
     api = ScopeApi(start_path)
     app = QGuiApplication(sys.argv)

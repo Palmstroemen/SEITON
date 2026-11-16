@@ -102,6 +102,19 @@ def open_with_xdg(target: str) -> int:
     return subprocess.run(["xdg-open", target], check=False).returncode
 
 
+def postfix_wanted() -> bool:
+    """Whether notes open in PostFix: MD_USE_POSTFIX in the environment if set, else the switch
+    on Scope's back (on by default); never when PostFix is not in the repository."""
+    if not POSTFIX_PATH.exists():
+        return False
+    raw = getenv("MD_USE_POSTFIX", "").strip().lower()
+    if raw:
+        return raw in {"1", "true", "yes"}
+    from core.settings import Settings
+
+    return Settings().get("General/postFix") is True
+
+
 def open_with_postfix(file_path: Path) -> int:
     if POSTFIX_PATH.exists():
         try:
@@ -176,7 +189,7 @@ def main() -> int:
 
     override_cmd = getenv("MD_EDITOR_CMD")
     force_override = getenv("MD_FORCE_EDITOR", "").strip().lower() in {"1", "true", "yes"}
-    use_postfix = getenv("MD_USE_POSTFIX", "").strip().lower() in {"1", "true", "yes"}
+    use_postfix = postfix_wanted()
 
     if use_postfix:
         return open_with_postfix(file_path)
@@ -210,7 +223,7 @@ def main() -> int:
     if override_cmd and force_override:
         return open_with_command(override_cmd, file_path)
 
-    return open_with_postfix(file_path)
+    return open_with_xdg(str(file_path))
 
 
 if __name__ == "__main__":

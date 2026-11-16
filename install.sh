@@ -41,8 +41,10 @@ echo "🔗 Setting up CLI tools..."
 chmod +x cli/myls.py
 ln -sf "$(pwd)/cli/myls.py" ~/.local/bin/myls 2>/dev/null || true
 
-# Optional: Markdown thumbnailer for Linux file browsers
-if [ -f "$(pwd)/core/bin/seiton-md-thumbnailer" ]; then
+# Optional, from the workshop: previews of Markdown notes in the file browsers (Nautilus, Nemo,
+# Dolphin ...). Scope draws its own previews without it.
+read -p "🖼️  Also show Markdown previews in the system's file browsers? [y/N]: " WANT_THUMBNAILER
+if [[ "$WANT_THUMBNAILER" =~ ^[YyJj] ]] && [ -f "$(pwd)/core/bin/seiton-md-thumbnailer" ]; then
     chmod +x "$(pwd)/core/bin/seiton-md-thumbnailer"
     sudo ln -sf "$(pwd)/core/bin/seiton-md-thumbnailer" /usr/local/bin/seiton-md-thumbnailer || true
     mkdir -p "$HOME/.local/share/thumbnailers"

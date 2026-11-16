@@ -3097,6 +3097,7 @@ ApplicationWindow {
             z: 100000
             visible: window.setupShown
             settings: window.hasBackend() ? backend : null
+            sunTreePresent: typeof scopeSunTreePresent !== "undefined" ? scopeSunTreePresent : true
             darkTheme: window.darkTheme
             textColor: theme.setupText
             mutedColor: theme.setupMuted

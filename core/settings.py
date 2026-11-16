@@ -19,6 +19,8 @@ SETTINGS: Dict[str, Tuple[type, Any, Any]] = {
     "General/embryoOpacity": (float, 0.4, (0.1, 0.9)),
     # The badges (€, §, ...) on suggested MyOS folders: their own paleness, half way by default.
     "General/embryoBadgeOpacity": (float, 0.7, (0.1, 1.0)),
+    # Notes (.md) open in PostFix, the editor of the workshop; off: Obsidian or the system's editor.
+    "General/postFix": (bool, True, None),
     # Scope's two rows (the projects, the MyOS folders); views of their own are to come.
     "Scope/projectsRow": (bool, False, None),  # off by default: suggestions show only on the left
     "Scope/templatesRow": (bool, True, None),

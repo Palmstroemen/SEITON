@@ -14,7 +14,7 @@ from PySide6.QtGui import QGuiApplication, QCursor, QImage
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuick import QQuickImageProvider
 
-from core.brand import env_name, getenv
+from core.brand import getenv
 from core.scope_api import ScopeApi
 from core.color_schemes import load_scheme
 from core.settings import Settings
@@ -481,7 +481,6 @@ class BackendAdapter:
 
 
 def main() -> int:
-    os.environ.setdefault(env_name("MD_USE_POSTFIX"), "1")
     start_path = sys.argv[1] if len(sys.argv) > 1 else str(Path.cwd())
 
     app = QGuiApplication(sys.argv)

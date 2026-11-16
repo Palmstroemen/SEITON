@@ -78,8 +78,7 @@ def _named(view, name):
     return next((i for i in _walk(view.rootObject()) if i.objectName() == name), None)
 
 
-@pytest.fixture
-def page(tmp_path, monkeypatch):
+def _open_page(tmp_path, monkeypatch, extra=""):
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     QGuiApplication.instance() or QGuiApplication([])
@@ -87,7 +86,7 @@ def page(tmp_path, monkeypatch):
     qml = tmp_path / "host.qml"
     qml.write_text(
         f'import QtQuick 2.15\nimport "{SCOPE_DIR.as_uri()}"\n'
-        'SetupPage { width: 800; height: 600; settings: host\n'
+        'SetupPage { width: 800; height: 600; settings: host\n' + extra +
         '  property var heard: []\n'
         '  onSwitchTheme: heard = heard.concat(["theme"])\n'
         '  onSchemeColorEdited: heard = heard.concat(["edited"])\n'
@@ -102,6 +101,19 @@ def page(tmp_path, monkeypatch):
     assert view.status() == QQuickView.Ready, [e.toString() for e in view.errors()]
     view.show()
     QTest.qWait(50)
+    return view, host
+
+
+@pytest.fixture
+def page(tmp_path, monkeypatch):
+    view, host = _open_page(tmp_path, monkeypatch)
+    yield view, host
+    view.close()
+
+
+@pytest.fixture
+def page_without_suntree(tmp_path, monkeypatch):
+    view, host = _open_page(tmp_path, monkeypatch, "  sunTreePresent: false\n")
     yield view, host
     view.close()
 
@@ -596,3 +608,30 @@ def test_without_the_path_bar_the_example_shows_up(page):
     _click(view, _named(view, "checkPathBar"))
     up = _named(view, "exampleUp")
     assert up.isVisible() and up.mapToScene(QPointF(up.width(), 0)).x() <= _scene(view, "exampleSegment_0").x()
+
+
+def test_notes_open_in_postfix_unless_switched_off(page):
+    from core.settings import Settings
+
+    view, _ = page
+    check = _named(view, "checkPostFix")
+    assert check is not None and check.property("checked") is True
+    QMetaObject.invokeMethod(check, "toggled")  # below the fold of the small test window
+    assert Settings().get("General/postFix") is False and check.property("checked") is False
+    QMetaObject.invokeMethod(check, "toggled")
+    assert Settings().get("General/postFix") is True
+
+
+def test_without_suntree_there_is_no_suntree_tab(page_without_suntree):
+    view, _ = page_without_suntree
+    assert _named(view, "tabSunTree") is None
+    assert _named(view, "crownPreview") is None
+    assert _named(view, "tabGeneral") is not None and _named(view, "tabHeadline") is not None
+
+
+def test_the_small_crown_comes_from_suntree_only_when_it_is_there():
+    # CrownPreview.qml imports SunTree/js/Crown.js: named directly, the back would not load
+    # without SunTree. A Loader asks for it only when SunTree is present.
+    source = (SCOPE_DIR / "SetupPage.qml").read_text(encoding="utf-8")
+    assert "CrownPreview {" not in source
+    assert 'if (root.sunTreePresent) setSource("CrownPreview.qml"' in source

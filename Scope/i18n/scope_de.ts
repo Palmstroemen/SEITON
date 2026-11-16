@@ -830,342 +830,357 @@ Fehlgeschlagen: %3</translation>
 <context>
     <name>SetupPage</name>
     <message>
-        <location filename="../SetupPage.qml" line="548"/>
+        <location filename="../SetupPage.qml" line="552"/>
         <source>Default</source>
         <translation>Standard</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="585"/>
+        <location filename="../SetupPage.qml" line="589"/>
         <source>Setup</source>
         <translation>Setup</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="580"/>
+        <location filename="../SetupPage.qml" line="584"/>
         <source>Done</source>
         <translation>Fertig</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="596"/>
+        <location filename="../SetupPage.qml" line="600"/>
         <source>General</source>
         <translation>Allgemein</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="597"/>
+        <location filename="../SetupPage.qml" line="601"/>
         <source>Scope</source>
         <translation>Scope</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="598"/>
+        <location filename="../SetupPage.qml" line="602"/>
         <source>Headline</source>
         <translation>Headline</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="599"/>
+        <location filename="../SetupPage.qml" line="603"/>
         <source>SunTree</source>
         <translation>SunTree</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="618"/>
+        <location filename="../SetupPage.qml" line="623"/>
         <source>Appearance</source>
         <translation>Darstellung</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="625"/>
+        <location filename="../SetupPage.qml" line="630"/>
         <source>Light</source>
         <translation>Hell</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="624"/>
+        <location filename="../SetupPage.qml" line="629"/>
         <source>Dark</source>
         <translation>Dunkel</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="679"/>
+        <location filename="../SetupPage.qml" line="684"/>
         <source>Language</source>
         <translation>Sprache</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="708"/>
+        <location filename="../SetupPage.qml" line="735"/>
         <source>Suggestion</source>
         <translation>Vorschlag</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="708"/>
+        <location filename="../SetupPage.qml" line="735"/>
         <source>Present</source>
         <translation>Vorhanden</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="807"/>
+        <location filename="../SetupPage.qml" line="834"/>
         <source>Both rows show</source>
         <translation>Beide Zeilen zeigen</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="822"/>
+        <location filename="../SetupPage.qml" line="849"/>
         <source>Hidden folders</source>
         <translation>Versteckte Ordner</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="786"/>
-        <location filename="../SetupPage.qml" line="802"/>
+        <location filename="../SetupPage.qml" line="813"/>
+        <location filename="../SetupPage.qml" line="829"/>
         <source>Text</source>
         <translation>Text</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="650"/>
+        <location filename="../SetupPage.qml" line="655"/>
         <source>Background %1 folders</source>
         <translation>Hintergrund %1-Ordner</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="786"/>
-        <location filename="../SetupPage.qml" line="802"/>
+        <location filename="../SetupPage.qml" line="813"/>
+        <location filename="../SetupPage.qml" line="829"/>
         <source>Small</source>
         <translation>Klein</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="786"/>
-        <location filename="../SetupPage.qml" line="802"/>
+        <location filename="../SetupPage.qml" line="813"/>
+        <location filename="../SetupPage.qml" line="829"/>
         <source>Large</source>
         <translation>Groß</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="838"/>
+        <location filename="../SetupPage.qml" line="865"/>
         <source>Preview behaviour</source>
         <translation>Verhalten der Vorschau</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="841"/>
+        <location filename="../SetupPage.qml" line="868"/>
         <source>Reopen at once</source>
         <translation>Sofort wieder öffnen</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="847"/>
+        <location filename="../SetupPage.qml" line="874"/>
         <source>Timing</source>
         <translation>Zeitverhalten</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="850"/>
+        <location filename="../SetupPage.qml" line="877"/>
         <source>Soft</source>
         <translation>Sanft</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="850"/>
+        <location filename="../SetupPage.qml" line="877"/>
         <source>Balanced</source>
         <translation>Ausgewogen</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="850"/>
+        <location filename="../SetupPage.qml" line="877"/>
         <source>Quick</source>
         <translation>Flott</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="856"/>
+        <location filename="../SetupPage.qml" line="883"/>
         <source>Soft waits longer before the preview opens and closes it slowly; quick answers at once.</source>
         <translation>Sanft wartet länger, bevor die Vorschau aufgeht, und schließt sie langsam; flott antwortet sofort.</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="868"/>
+        <location filename="../SetupPage.qml" line="895"/>
         <source>The Headline&apos;s settings come here with the Headline.</source>
         <translation>Die Einstellungen der Headline kommen mit der Headline hierher.</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="920"/>
+        <location filename="../SetupPage.qml" line="951"/>
         <source>How fast everything follows the hand: smaller is softer, larger is more direct.</source>
         <translation>Wie schnell alles der Hand folgt: kleiner ist weicher, größer ist direkter.</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="922"/>
+        <location filename="../SetupPage.qml" line="953"/>
         <source>How far you push past the first or last folder until the fan lets go (the rim running on, green).</source>
         <translation>Wie weit du über den ersten oder letzten Ordner hinausschiebst, bis der Fächer loslässt (der weiterlaufende Rand, grün).</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="909"/>
+        <location filename="../SetupPage.qml" line="940"/>
         <source>Size of the middle</source>
         <translation>Größe der Mitte</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="740"/>
+        <location filename="../SetupPage.qml" line="767"/>
         <source>Their badges</source>
         <translation>Ihre Badges</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="795"/>
+        <location filename="../SetupPage.qml" line="822"/>
         <source>Projects</source>
         <translation>Projekte</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="773"/>
+        <location filename="../SetupPage.qml" line="800"/>
         <source>Display</source>
         <translation>Anzeige</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="652"/>
-        <location filename="../SetupPage.qml" line="810"/>
+        <location filename="../SetupPage.qml" line="657"/>
+        <location filename="../SetupPage.qml" line="837"/>
         <source>Path bar</source>
         <translation>Pfadleiste</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="633"/>
+        <location filename="../SetupPage.qml" line="638"/>
         <source>Window</source>
         <translation>Fenster</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="634"/>
+        <location filename="../SetupPage.qml" line="639"/>
         <source>Window background</source>
         <translation>Fensterhintergrund</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="635"/>
+        <location filename="../SetupPage.qml" line="640"/>
         <source>Font colour</source>
         <translation>Schrift</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="638"/>
+        <location filename="../SetupPage.qml" line="643"/>
         <source>Files area</source>
         <translation>Dateibereich</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="639"/>
+        <location filename="../SetupPage.qml" line="644"/>
         <source>Background</source>
         <translation>Hintergrund</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="642"/>
+        <location filename="../SetupPage.qml" line="647"/>
         <source>Markings</source>
         <translation>Markierungen</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="643"/>
+        <location filename="../SetupPage.qml" line="648"/>
         <source>Selected files</source>
         <translation>Ausgewählte Dateien</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="644"/>
+        <location filename="../SetupPage.qml" line="649"/>
         <source>Dropping on a folder</source>
         <translation>Ablegen auf Ordner</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="645"/>
+        <location filename="../SetupPage.qml" line="650"/>
         <source>Frame of the lens</source>
         <translation>Rahmen der Brille</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="649"/>
+        <location filename="../SetupPage.qml" line="654"/>
         <source>Folder rows</source>
         <translation>Ordnerzeilen</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="651"/>
+        <location filename="../SetupPage.qml" line="656"/>
         <source>Background projects row</source>
         <translation>Hintergrund Projektzeile</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="653"/>
+        <location filename="../SetupPage.qml" line="658"/>
         <source>Folders</source>
         <translation>Ordner</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="654"/>
+        <location filename="../SetupPage.qml" line="659"/>
         <source>Current folder and frame</source>
         <translation>Aktueller Ordner und Rahmen</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="658"/>
+        <location filename="../SetupPage.qml" line="663"/>
         <source>Click a box to choose a colour, drag it to fine-tune: right lighter, left darker, up stronger, down paler. These colours count for the scheme worn alone; projects keep their own colour, which also shows through the background of the files area.</source>
         <translation>Klick aufs Kästchen wählt eine Farbe, Ziehen stimmt sie fein ab: rechts heller, links dunkler, oben kräftiger, unten blasser. Die Farben gelten nur für das gewählte Schema; Projekte behalten ihre eigene Farbe, die auch durch den Hintergrund des Dateibereichs scheint.</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="668"/>
+        <location filename="../SetupPage.qml" line="673"/>
         <source>Reset all colours</source>
         <translation>Alle Farben zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="731"/>
-        <location filename="../SetupPage.qml" line="816"/>
+        <location filename="../SetupPage.qml" line="693"/>
+        <source>Notes</source>
+        <translation>Notizen</translation>
+    </message>
+    <message>
+        <location filename="../SetupPage.qml" line="699"/>
+        <source>Open in PostFix</source>
+        <translation>In PostFix öffnen</translation>
+    </message>
+    <message>
+        <location filename="../SetupPage.qml" line="704"/>
+        <source>Off: notes open in Obsidian or in the system&apos;s editor.</source>
+        <translation>Aus: Notizen öffnen sich in Obsidian oder im Editor des Systems.</translation>
+    </message>
+    <message>
+        <location filename="../SetupPage.qml" line="758"/>
+        <location filename="../SetupPage.qml" line="843"/>
         <source>Suggested %1 folders</source>
         <translation>Vorgeschlagene %1-Ordner</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="735"/>
+        <location filename="../SetupPage.qml" line="762"/>
         <source>How pale %1 folders appear that are only suggested here, not made yet.</source>
         <translation>Wie blass %1-Ordner erscheinen, die hier nur vorgeschlagen und noch nicht angelegt sind.</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="744"/>
+        <location filename="../SetupPage.qml" line="771"/>
         <source>How pale the badges (€, § ...) on suggested %1 folders are.</source>
         <translation>Wie blass die Badges (€, § …) auf vorgeschlagenen %1-Ordnern sind.</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="779"/>
+        <location filename="../SetupPage.qml" line="806"/>
         <source>%1 folders</source>
         <translation>%1-Ordner</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="828"/>
+        <location filename="../SetupPage.qml" line="855"/>
         <source>Preview</source>
         <translation>Vorschau</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="834"/>
+        <location filename="../SetupPage.qml" line="861"/>
         <source>Preview background</source>
         <translation>Vorschau-Hintergrund</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="902"/>
+        <location filename="../SetupPage.qml" line="933"/>
         <source>The folder fan for quick dropping. It reads these when it appears next. Move the mouse through the small fan on the left: it answers as the real one does. Over a slider it shows what the slider changes.</source>
         <translation>Der Ordner-Fächer zum schnellen Ablegen. Er liest diese Werte, wenn er das nächste Mal erscheint. Fahre links mit der Maus durch den kleinen Fächer: Er antwortet wie der echte. Über einem Regler zeigt er, was der Regler verändert.</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="910"/>
+        <location filename="../SetupPage.qml" line="941"/>
         <source>The empty middle at the stem: every level starts there, and back there the fan lets go.</source>
         <translation>Die leere Mitte am Stamm: Dort beginnt jede Ebene, und dorthin zurück lässt der Fächer los.</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="911"/>
+        <location filename="../SetupPage.qml" line="942"/>
         <source>Landing</source>
         <translation>Landung</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="912"/>
+        <location filename="../SetupPage.qml" line="943"/>
         <source>How far among the subfolders you already are after the change.</source>
         <translation>Wie weit du nach dem Wechsel schon zwischen den Unterordnern stehst.</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="913"/>
+        <location filename="../SetupPage.qml" line="944"/>
         <source>Way per level</source>
         <translation>Weg pro Ebene</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="914"/>
+        <location filename="../SetupPage.qml" line="945"/>
         <source>How far you move the mouse outward until the folder fills the whole fan and you go one level deeper.</source>
         <translation>Wie weit du die Maus nach außen bewegst, bis der Ordner den ganzen Fächer füllt und du eine Ebene tiefer gehst.</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="915"/>
+        <location filename="../SetupPage.qml" line="946"/>
         <source>Change begins</source>
         <translation>Wechsel beginnt</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="916"/>
+        <location filename="../SetupPage.qml" line="947"/>
         <source>How deep in the folder the pointer is when the change into its subfolders begins.</source>
         <translation>Wie tief im Ordner der Zeiger steht, wenn der Wechsel in seine Unterordner beginnt.</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="917"/>
+        <location filename="../SetupPage.qml" line="948"/>
         <source>Magnifier</source>
         <translation>Lupe</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="918"/>
+        <location filename="../SetupPage.qml" line="949"/>
         <source>How much the folder under the pointer is enlarged already at the start of a level.</source>
         <translation>Wie stark der Ordner unter dem Zeiger schon am Anfang einer Ebene vergrößert wird.</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="921"/>
+        <location filename="../SetupPage.qml" line="952"/>
         <source>Exit at the edge</source>
         <translation>Ausgang am Rand</translation>
     </message>
     <message>
-        <location filename="../SetupPage.qml" line="919"/>
+        <location filename="../SetupPage.qml" line="950"/>
         <source>Softness</source>
         <translation>Weichheit</translation>
     </message>
