@@ -1,6 +1,7 @@
 <!doctype html>
 <!-- Draft (2026-11-16): the square bento box turned into a long shelf, S E I T ON, each compartment
-     its own colour (OKLCH, equal lightness). Not the final logo: the letters here are a system font,
+     its own colour (OKLCH, equal lightness); S may be loud red and the frame black, as on lacquered
+     bento boxes. Not the final logo: the letters here are a system font,
      the real pictures come from scripts/make_brand_svgs.py with outlines of Open Sans Semibold. -->
 <html lang="de">
 <head>
@@ -34,9 +35,17 @@
 </div>
 <div class="row"><label for="c">Buntheit</label><input type="range" id="c" min="0" max="0.22" step="0.01" value="0.09"><span id="cOut"></span></div>
 <div class="row"><label for="l">Helligkeit</label><input type="range" id="l" min="0.6" max="0.95" step="0.01" value="0.84"><span id="lOut"></span></div>
+<div class="row"><label for="frame">Rahmen</label><select id="frame"><option value="violet">Violett (wie heute)</option><option value="black" selected>Lackschwarz</option><option value="anthracite">Anthrazit</option></select></div>
+<div class="row"><label for="red">S knallrot</label><input type="checkbox" id="red" style="flex:none">
+  <select id="redTone"><option value="lack">Lackrot (Urushi)</option><option value="zinnober">Zinnober</option><option value="signal">Signalrot</option><option value="karmin">Karmin</option></select>
+  <select id="redLetter"><option value="paper">S hell</option><option value="box">S dunkel</option></select></div>
+<div class="row"><label for="same">Alle gleich bunt</label><input type="checkbox" id="same" style="flex:none"><span id="sameOut" style="min-width:0;flex:1"></span></div>
 </main>
 <script>
-const W = 10, H = 65, C = 40, ONW = 2 * C + W, BOX = "#4a3478";
+const W = 10, H = 65, C = 40, ONW = 2 * C + W;
+// The box and the dark letters: today's violet, or black as on lacquered bento boxes.
+const FRAMES = { violet: "#4a3478", black: "#16130f", anthracite: "#2e2c2b" };
+const frame = () => FRAMES[document.getElementById("frame").value];
 const letters = ["S", "E", "I", "T", "ON"];
 const sq = { w: 160, h: 160, cells: [[W, W, C, H], [W + C + W, W, C, H], [W + 2 * (C + W), W, C, H], [W, 2 * W + H, C, H], [W + C + W, 2 * W + H, ONW, H]] };
 const lg = { w: W + 4 * (C + W) + ONW + W, h: H + 2 * W, cells: letters.map((t, i) => [W + i * (C + W), W, i < 4 ? C : ONW, H]) };
@@ -48,23 +57,53 @@ letters.forEach(s => {
   const tx = document.createElementNS(ns, "text"); tx.textContent = s;
   tx.setAttribute("text-anchor", "middle"); tx.setAttribute("dominant-baseline", "central");
   tx.setAttribute("font-family", "Open Sans, Noto Sans, DejaVu Sans, sans-serif");
-  tx.setAttribute("font-weight", "600"); tx.setAttribute("font-size", "38"); tx.setAttribute("fill", BOX);
+  tx.setAttribute("font-weight", "600"); tx.setAttribute("font-size", "38"); tx.setAttribute("fill", frame());
   g.appendChild(tx); texts.push(tx);
 });
+// Whether an OKLCH colour fits on the screen (sRGB), and how colourful a hue can be at a lightness.
+function fits(L, C, h) {
+  const a = C * Math.cos(h * Math.PI / 180), b = C * Math.sin(h * Math.PI / 180);
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3, m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3,
+        s = (L - 0.0894841775 * a - 1.2914855480 * b) ** 3;
+  const rgb = [4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+               -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+               -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s];
+  return rgb.every(v => v >= -1e-6 && v <= 1 + 1e-6);
+}
+function maxChroma(L, h) {
+  let lo = 0, hi = 0.4;
+  for (let i = 0; i < 30; i++) { const mid = (lo + hi) / 2; if (fits(L, mid, h)) lo = mid; else hi = mid; }
+  return lo;
+}
+// The one loud compartment, as in the red and black lacquered bento boxes.
+const REDS = { lack: "#b5212b", zinnober: "#e2402b", signal: "#d7141a", karmin: "#a3123a" };
+const word = c => c < 0.05 ? "pastell" : c < 0.08 ? "zart" : c < 0.13 ? "satt" : c < 0.17 ? "kräftig" : "knallbunt";
 const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 const lerp = (a, b, k) => a + (b - a) * k;
 function draw() {
   const k = ease(t), bw = lerp(sq.w, lg.w, k), bh = lerp(sq.h, lg.h, k), ox = (330 - bw) / 2, oy = (170 - bh) / 2;
+  box.setAttribute("fill", frame());
   box.setAttribute("x", ox); box.setAttribute("y", oy); box.setAttribute("width", bw); box.setAttribute("height", bh);
-  const cv = +document.getElementById("c").value, lv = +document.getElementById("l").value;
+  const wanted = +document.getElementById("c").value, lv = +document.getElementById("l").value;
+  const same = document.getElementById("same").checked;
+  const redOn = document.getElementById("red").checked;  // then S does not limit the others
+  const limits = hues.map(h => maxChroma(lv, h)), common = Math.min(...limits.filter((v, i) => !(redOn && i === 0)));
+  const cv = same ? Math.min(wanted, common) : wanted;
+  const clipped = letters.filter((s, i) => !(redOn && i === 0) && cv > limits[i] + 1e-4);
+  document.getElementById("sameOut").textContent = paper ? "" : same
+    ? (wanted > common ? `begrenzt auf ${common.toFixed(3)} (${word(common)}), mehr geht bei ${Math.round(lv * 100)} % nicht für alle` : "alle fünf so bunt wie eingestellt")
+    : (clipped.length ? `abgeschnitten: ${clipped.join(", ")} (Bildschirm kann es nicht)` : "alle fünf passen auf den Bildschirm");
   rects.forEach((r, i) => {
     const a = sq.cells[i], b = lg.cells[i];
     const x = lerp(a[0], b[0], k), y = lerp(a[1], b[1], k), w = lerp(a[2], b[2], k), h = lerp(a[3], b[3], k);
     r.setAttribute("x", ox + x); r.setAttribute("y", oy + y); r.setAttribute("width", w); r.setAttribute("height", h);
-    r.style.fill = paper ? "#f3ecdf" : `oklch(${lv} ${cv} ${hues[i]})`;
+    const loud = i === 0 && document.getElementById("red").checked;
+    r.style.fill = loud ? REDS[document.getElementById("redTone").value]
+      : paper ? "#f3ecdf" : `oklch(${lv} ${cv} ${hues[i]})`;
+    texts[i].setAttribute("fill", loud && document.getElementById("redLetter").value === "paper" ? "#f3ecdf" : frame());
     texts[i].setAttribute("x", ox + x + w / 2); texts[i].setAttribute("y", oy + y + h / 2 + 1);
   });
-  document.getElementById("cOut").textContent = cv < 0.05 ? "pastell" : cv < 0.08 ? "zart" : cv < 0.13 ? "satt" : cv < 0.17 ? "kräftig" : "knallbunt";
+  document.getElementById("cOut").textContent = `${word(wanted)} (${wanted.toFixed(2)})`;
   document.getElementById("lOut").textContent = Math.round(lv * 100) + " %";
 }
 document.getElementById("morph").onclick = () => {
@@ -78,6 +117,8 @@ document.getElementById("pal2").onclick = () => { paper = false; hues = [30, 220
 document.getElementById("pal3").onclick = () => { paper = true; draw(); };
 document.getElementById("c").oninput = () => { paper = false; draw(); };
 document.getElementById("l").oninput = () => { paper = false; draw(); };
+document.getElementById("same").onchange = () => { paper = false; draw(); };
+["frame", "red", "redTone", "redLetter"].forEach(id => document.getElementById(id).onchange = draw);
 draw();
 </script>
 </body>
