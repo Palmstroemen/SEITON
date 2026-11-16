@@ -22,6 +22,7 @@
 |----------|---------|
 | [DEVELOPMENT.md](DEVELOPMENT.md) | Setup, tests, contribution guidelines |
 | [CONVENTIONS.md](CONVENTIONS.md) | Documentation language and naming conventions |
+| [Portierung auf andere LINUX Systeme.md](Portierung%20auf%20andere%20LINUX%20Systeme.md) | Porting to other Linux distributions, desktops and Wayland (plan) |
 | [../MyOS Tests Dokumentation.md](../MyOS%20Tests%20Dokumentation.md) | Test suite details |
 
 ## Design Documents (core)
