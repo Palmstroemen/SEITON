@@ -113,6 +113,8 @@ one in the new project. No project active: the clock stands.
   in Setup; then the clock waits for a click).
 - Short gaps are not stretches: if a new stretch begins less than 1 minute after the last one
   ended in the same project, the two become one row.
+- A stretch shorter than a minute is a glance, not time (passing through a project on the way
+  to another): it is not written.
 
 Where the idle time comes from depends on the session (an adapter each, `IdleSource`):
 

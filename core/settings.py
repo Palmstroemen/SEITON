@@ -21,6 +21,15 @@ SETTINGS: Dict[str, Tuple[type, Any, Any]] = {
     "General/embryoBadgeOpacity": (float, 0.7, (0.1, 1.0)),
     # Notes (.md) open in PostFix, the editor of the workshop; off: Obsidian or the system's editor.
     "General/postFix": (bool, True, None),
+    # The time tracking (core/Dokumentation/Designdocument Time.md): the pause limit in minutes,
+    # resuming at the next input, the dead man's button while a video runs, and how the sums
+    # are rounded (never the file).
+    "Time/pauseMinutes": (float, 5.0, (1.0, 60.0)),
+    "Time/autoResume": (bool, True, None),
+    "Time/deadMan": (bool, True, None),
+    "Time/roundStep": (str, "0", {"0", "5", "10", "15", "30"}),
+    "Time/roundMode": (str, "up", {"up", "nearest"}),
+    "Time/roundPer": (str, "stretch", {"stretch", "day"}),
     # Scope's two rows (the projects, the MyOS folders); views of their own are to come.
     "Scope/projectsRow": (bool, False, None),  # off by default: suggestions show only on the left
     "Scope/templatesRow": (bool, True, None),
