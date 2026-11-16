@@ -437,17 +437,36 @@ pictures of all projects. That is the FreeDMS idea of programs as roles (Designd
 "Ideas from FreeDMS", 6): a photo program is given `92_Bilder`, a bookkeeping program `4_Finanz`,
 and sees exactly that across all projects and nothing else.
 
-**Open:**
-- Two roots with the same name (two `Projekte` in different places): a suffix in the link's
-  name, as "Projekte (Arbeit)".
-- Where the list of roots comes from: there is none today. Simplest: a section in
-  `~/.config/seiton/seiton.conf`; then Scope and SunTree, started in `~`, know the roots too, and
-  the service of A9 knows which drives to mount.
-- Whether the lens in Scope looks into one root or into all ("all `4_Finanz`").
-- Whether the named perspectives replace the whole turned tree in the drive or stand beside it.
-- The name of a named perspective's entry: its last part (`92_Bilder`), or the whole path.
-- Rights: through a named perspective a program sees only what its user may see (as everywhere,
-  the ACLs apply to the real paths, A4).
+**Decided (2026-11-16):**
+- **No list of roots.** A root is known by its `.seiton/Project.md`. Inside a root one finds it
+  upwards, as today (`find_top_project_root`). Above the roots (started in `~`) Scope and SunTree
+  look downwards for roots; if they find none, one is not in a SEITON metaproject. Whoever opens a
+  root names it (the SunTree autostart gives `~/Dokumente`); its daemon mounts the drive and puts
+  its link into `~/Perspektiven`. So `~/Perspektiven` itself shows the roots that run.
+- **Two roots with the same name:** only when the names clash does the link get a part of the path
+  added, as "Projekte (Arbeit)" and "Projekte (Privat)".
+- **The lens looks into one root.** In one's private projects one does not want the firm's bills;
+  if both are wanted, that is two searches.
+- **Without a list the drive shows everything, with a list only the list.** If a root has no
+  `Perspectives.md`, its drive shows the whole turned tree, as today. If it has one, the drive shows
+  only the named perspectives, so a program given the drive sees exactly what was chosen.
+- **An entry is named as its folder:** `9_Dokumentation/92_Bilder` appears as `92_Bilder`. Two named
+  perspectives with the same name get a part of the path added, as with roots.
+
+**Idea: the named perspectives as favourites (2026-11-16, not decided).** Today Scope and SunTree
+show either the normal view or the perspectives. The named perspectives of the current root could
+stay in sight at all times, like the favourites of a web browser:
+- One click puts the lens on at that place; clicking the active entry again (or "normal") takes it
+  off. Not a switch between two views any more, but a jump to an entry point.
+- Without `Perspectives.md` there is one entry only, the whole turned tree, so it stays as simple as
+  today (power only when used).
+- A favourite is made with a right click on a folder, "Keep as perspective", which writes
+  `Perspectives.md`; nobody needs to edit the file by hand.
+- Open: where they stand. Chosen by the user, so by "left the system, right the user" rather on the
+  right; in SunTree perhaps a small row at the crown.
+
+**Note:** through a named perspective a program sees only what its user may see (as everywhere,
+the ACLs apply to the real paths, A4).
 
 # Part B - Resolver Contract (removed)
 
