@@ -180,6 +180,12 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
     mit einer Nachlaufzeit von etwa 5 min zählen
 [ ] Demodaten als Playground
 [ ] Scope UI verfeinern  
+    [ ] Layout-Schleife in der oberen Zeile (gefunden 2026-11-16 mit dem neuen Smoke-Test): Pfadleiste und Ordner
+        rechnen ihre Breite aus der Breite der eigenen Zeile (`horizontalPathHostMaxWidth()` liest `topRow.width` /
+        `mainColumn.width`, `FolderBrowser.qml`), Qt bricht nach zwei Runden ab ("Detected recursive rearrange").
+        Harmlos, aber echt, auch beim normalen Start. Die Zeile soll die Breite selbst verteilen (fillWidth, Minimum/
+        Maximum), dazu die Umbruchlogik (`flowOnSecondLine`) anfassen. Test: `Scope/tests/test_scope_smoke.py`
+        (`test_the_top_row_has_no_layout_loop`, xfail strict - meldet sich, sobald die Schleife weg ist)
     [x] Röntgenblick (X-Ray): kleine Ordner durchsichtig, solange die Liste ohne Scrollbalken passt; Standard an; auch `myls --roentgen`
     [x] Röntgenblick: eigenes Icon (2026-10-26, Theme/icons/xray.svg: Film mit Brustkorb statt Ordner)
     [x] Dateibereich (2026-10-26): Embryos unter den Ordnern blass (0,4) wie in den Ordnerzeilen - fehlte bisher;
