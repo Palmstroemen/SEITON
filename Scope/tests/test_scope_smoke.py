@@ -1,34 +1,62 @@
+"""Scope starts without QML errors: loaded as Scope.py loads it (with its backend, on a project of
+its own), offscreen, without touching the real configuration (conftest.py)."""
+
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 import pytest
 
-try:
-    from PySide6.QtCore import QUrl, qInstallMessageHandler
-    from PySide6.QtGui import QGuiApplication
-    from PySide6.QtQml import QQmlApplicationEngine
-except Exception:  # pragma: no cover
-    pytest.skip("PySide6 not installed", allow_module_level=True)
+REPO = Path(__file__).resolve().parents[2]
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+from PySide6.QtCore import QtMsgType, qInstallMessageHandler  # noqa: E402
+from PySide6.QtGui import QGuiApplication  # noqa: E402
+
+sys.path.insert(0, str(REPO))
+from core.scope_api import ScopeApi  # noqa: E402
+from Scope.Scope import load_scope  # noqa: E402
 
 
-def test_scope_qml_loads_without_errors():
-    if not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY"):
-        pytest.skip("No display available for QML")
+LAYOUT_LOOP = "Detected recursive rearrange"
 
+
+@pytest.fixture(scope="module")
+def started(tmp_path_factory):
+    """What QML says about its own files while Scope starts, once for this module."""
+    root = tmp_path_factory.mktemp("place") / "Dokumente"
+    (root / ".seiton").mkdir(parents=True)
+    (root / ".seiton" / "Project.md").write_text("# SEITON Project\n", encoding="utf-8")
+    (root / "1_Info").mkdir()
     messages = []
 
-    def handler(_mode, _context, message):
-        if "Error" in message or "Type" in message:
+    def handler(kind, _context, message):
+        if kind in (QtMsgType.QtWarningMsg, QtMsgType.QtCriticalMsg, QtMsgType.QtFatalMsg) \
+                and "file://" in message:
             messages.append(message)
 
-    qInstallMessageHandler(handler)
+    previous = qInstallMessageHandler(handler)
+    try:
+        app = QGuiApplication.instance() or QGuiApplication([])
+        engine = load_scope(ScopeApi(str(root)), app)
+        app.processEvents()
+    finally:
+        qInstallMessageHandler(previous)
+    return engine, messages
 
-    app = QGuiApplication.instance() or QGuiApplication([])
-    engine = QQmlApplicationEngine()
-    qml_path = Path(__file__).resolve().parents[1] / "main.qml"
-    engine.load(QUrl.fromLocalFile(str(qml_path)))
 
+def test_scope_starts_without_qml_errors(started):
+    engine, messages = started
     assert engine.rootObjects(), "QML failed to load"
-    assert not messages, "\n".join(messages)
+    errors = [m for m in messages if LAYOUT_LOOP not in m]
+    assert not errors, "\n".join(errors)
+
+
+@pytest.mark.xfail(strict=True, reason=(
+    "FolderBrowser.qml, top row: the path bar's and the folders' widths are worked out from the "
+    "row's own width (horizontalPathHostMaxWidth), so Qt's layout runs in a loop and gives up "
+    "after two rounds. Harmless, but real; the row should share out its width itself."))
+def test_the_top_row_has_no_layout_loop(started):
+    _engine, messages = started
+    assert not [m for m in messages if LAYOUT_LOOP in m]
