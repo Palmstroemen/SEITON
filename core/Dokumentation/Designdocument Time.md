@@ -255,11 +255,12 @@ standard template only the folder's own role may). The rule needed is **"everyon
 own time file"**: a right on a file named after oneself. This is new in the ACLs:
 
 ```markdown
-## Folder
+## Everyone
 - /0_Admin/Zeitaufwand/{Self}.md: read, write
 ```
 
-`{Self}` is the person, as `{Folder}` is the folder's role today (decided 2026-11-16). Reading
+`## Everyone` holds rules for every person in `# Users`, and `{Self}` is the asking person, as
+`{Folder}` is the folder's role (decided 2026-11-16; "Designdocument ACLs.md", 2.5). Reading
 the others' files is then a normal right (for example the project's admin reads all of
 `0_Admin/Zeitaufwand/`).
 
@@ -300,7 +301,7 @@ Each step with its tests first (fake clock, fake idle source, tmp projects).
 1. **Time zones**: readability. Local time, an offset only away from home (section 2.1).
 2. **Columns**: `Datum | Von | Dauer | Art | Notiz`, no "Bis": it is redundant, and it confuses
    when summer time begins or ends. In the user's language, SEITON reads German and English.
-3. **`{Self}`** in the ACLs: tried (section 7.4).
+3. **`{Self}`** in the ACLs, in a new section `## Everyone` (section 7.4).
 4. **Several computers** at once: one file per person all the same; the rare conflict is
    accepted. When the cloud leaves a conflict copy (`Oliver (conflicted copy ...).md`), the time
    screen shows it and offers to merge it.

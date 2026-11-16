@@ -51,6 +51,10 @@ class ACLPolicy:
     folder_defaults: Dict[str, Set[str]] = field(default_factory=dict)
     own_sections: Set[str] = field(default_factory=set)
     explicit_bases: Dict[str, Set[str]] = field(default_factory=dict)
+    # "## Everyone": rules for every person in "# Users", {Self} still in them (it is the
+    # asking person, expanded when asked: everyone_rights). Kept apart from the roles, so the
+    # tools that copy roles elsewhere (Nextcloud, myacl rules) do not see a literal {Self}.
+    everyone: List[PermissionRule] = field(default_factory=list)
 
     def display_name(self, key: str) -> str:
         return self.display_names.get(key, key)
@@ -67,7 +71,7 @@ class ACLPolicy:
             template_roles = _template_folder_names(project_root)
         else:
             raise ValueError(f"Not a valid {NAME} project: {project_root}")
-        acl_roles, role_permissions, folder_defaults, users = _roles_from_acls(project_root, acl_file)
+        acl_roles, role_permissions, folder_defaults, users, everyone = _roles_from_acls(project_root, acl_file)
         normalized_defaults = _normalize_permissions({"folder": folder_defaults}).get("folder", {})
         normalized_sections = _normalize_permissions(role_permissions)
 
@@ -100,6 +104,7 @@ class ACLPolicy:
             folder_defaults=normalized_defaults,
             own_sections=set(normalized_sections),
             explicit_bases=explicit_bases,
+            everyone=[PermissionRule(path, set(rights)) for path, rights in everyone.items()],
         )
 
     def for_context(self, project_root: Path, context: Optional[Path]) -> "ACLPolicy":
@@ -110,7 +115,7 @@ class ACLPolicy:
         (/{Folder}/ -> /Familie/04_Finanz/ for the role 04_Finanz), also for roles with a
         section of their own, unless that section has an explicit entry for that folder.
         """
-        if context is None or not self.folder_defaults:
+        if context is None or not (self.folder_defaults or self.everyone):
             return self
         root = Path(project_root).resolve()
         try:
@@ -120,10 +125,15 @@ class ACLPolicy:
         permissions = {role: list(rules) for role, rules in self.permissions.items()}
         roles = set(self.roles)
         display_names = dict(self.display_names)
+        everyone = list(self.everyone)
         for depth in range(1, len(rel_parts) + 1):
             sub = root.joinpath(*rel_parts[:depth])
             if not (sub / META_DIR / "Project.md").exists():
                 continue
+            prefix = "/" + "/".join(rel_parts[:depth])
+            # "## Everyone" applies again in each subproject, like "## Folder".
+            everyone += [PermissionRule(_normalize_path(prefix + ("" if rule.path == "/" else rule.path)),
+                                        set(rule.rights)) for rule in self.everyone]
             try:
                 folders = _roles_from_templates(sub, ProjectConfig(sub).get_effective_templates())
             except Exception:
@@ -139,7 +149,8 @@ class ACLPolicy:
                     permissions.setdefault(role_key, []).append(PermissionRule(sub_path, set(rights)))
                 roles.add(role_key)
                 display_names.setdefault(role_key, folder)
-        return replace(self, roles=roles, permissions=permissions, display_names=display_names)
+        return replace(self, roles=roles, permissions=permissions, display_names=display_names,
+                       everyone=everyone)
 
     @classmethod
     def for_tree(cls, project_root: Path) -> "ACLPolicy":
@@ -189,6 +200,30 @@ class ACLPolicy:
         rights = self.rights_for(role, path)
         return "*" in rights or right.strip().lower() in rights
 
+    def everyone_rights(self, username: str, path: str) -> Set[str]:
+        """Rights the "## Everyone" rules give a person of the project at path ({Self}: that
+        person, as written in "# Users"). Nobody outside "# Users" is everyone."""
+        user_key = str(username or "").strip().lower()
+        if not self.everyone or user_key not in self.users:
+            return set()
+        name = self.display_names.get(user_key, user_key)
+        # Security: {Self} becomes part of a path rule. A name that is no plain file name
+        # (a slash, "..", a wildcard) would widen the rule to other people's files, so for it
+        # the rules with {Self} give nothing.
+        plain = bool(name) and not name.startswith(".") and not any(c in name for c in "/\\*?[]")
+        rules = []
+        for rule in self.everyone:
+            if "{self}" in rule.path.lower():
+                if not plain:
+                    continue
+                rule = PermissionRule(re.sub(r"\{self\}", lambda _m: name, rule.path, flags=re.IGNORECASE),
+                                      rule.rights)
+            rules.append(rule)
+        rights: Set[str] = set()
+        for rule in _nearest_rules(rules, _normalize_path(path)):
+            rights |= set(rule.rights)
+        return rights
+
 
 class ACLAuthorizer:
     """Optional authorizer wrapper with pluggable backend."""
@@ -226,6 +261,10 @@ class ACLAuthorizer:
         user_key = str(username or "").strip().lower()
         path_key = _normalize_path(path)
         right_key = str(right or "read").strip().lower()
+        # "## Everyone" only gives rights, the same for both backends.
+        everyone = self.policy.everyone_rights(user_key, path_key)
+        if "*" in everyone or right_key in everyone:
+            return True
         if self.backend == "casbin" and self._enforcer is not None:
             return bool(self._enforcer.enforce(user_key, path_key, right_key))
         for role in self.policy.roles_for_user(user_key):
@@ -397,7 +436,7 @@ def _roles_from_acls(
 ) -> Tuple[Set[str], Dict[str, Dict[str, Set[str]]], Dict[str, Set[str]], Dict[str, Set[str]]]:
     acl_file = Path(acl_file) if acl_file is not None else project_root / META_DIR / "ACLs.md"
     if not acl_file.exists():
-        return set(), {}, {}, {}
+        return set(), {}, {}, {}, {}
 
     try:
         text = acl_file.read_text(encoding="utf-8")
@@ -408,6 +447,7 @@ def _roles_from_acls(
     roles: Set[str] = set()
     role_permissions: Dict[str, Dict[str, Set[str]]] = {}
     folder_defaults: Dict[str, Set[str]] = {}
+    everyone: Dict[str, Set[str]] = {}
     users: Dict[str, Set[str]] = {}
 
     for section_name, section_data in data.items():
@@ -428,11 +468,14 @@ def _roles_from_acls(
         if section_key.lower() == "folder":
             folder_defaults = _normalize_rule_dict(section_data)
             continue
+        if section_key.lower() == "everyone":
+            everyone = _normalize_rule_dict(section_data)
+            continue
 
         roles.add(section_key)
         role_permissions[section_key] = _normalize_rule_dict(section_data)
 
-    return roles, role_permissions, folder_defaults, users
+    return roles, role_permissions, folder_defaults, users, everyone
 
 
 def _acl_rule_text(text: str) -> str:

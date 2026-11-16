@@ -108,6 +108,23 @@ rights in subprojects. Windows users know this model (inherited and explicit ent
 the difference is that an explicit entry *replaces* the inherited one for its folder,
 where Windows would need a deny entry or switching inheritance off.
 
+### **2.5 Everyone, and {Self}**
+`## Everyone` holds rules for **every person of the project** (everyone in `# Users`). In
+its rules `{Self}` is the **asking person**, written as in `# Users`:
+```markdown
+## Everyone
+- /0_Admin/Zeitaufwand/{Self}.md: read, write   # each one their own time file
+```
+- The rules only **give** rights; a person keeps what their roles give (Leitung reads all
+  time files).
+- Like `## Folder`, they apply again in every subproject the ACLs.md governs.
+- Someone not in `# Users` is not everyone. A name that is no plain file name (a slash,
+  `..`, a wildcard) gets nothing from a `{Self}` rule, so it cannot widen it.
+- Everyone is no role: the GUI's role list, `myacl rules` and the Nextcloud adapter do not
+  show it yet (to come).
+
+Decided 2026-11-16 for the time tracking ("Designdocument Time.md", 7.4).
+
 ---
 
 ## **2. Core Philosophy**
