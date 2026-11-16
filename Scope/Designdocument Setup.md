@@ -156,6 +156,7 @@ green, blue …) that do not fit together are left to tinkerers. SEITON does the
   | side texts | text and background (so already) |
   | SunTree's crown and the small crown | the same base values |
 
+  Which of today's colours is a base value, derived or fixed: `Scope/Colour inventory.md`.
   High contrast is no scheme of its own: the same rules with wider steps. The 34 fixed colours
   of `dark.json` and `light.json` become base values and rules; what still has to be fixed by
   hand stays as an exception.
@@ -170,8 +171,24 @@ green, blue …) that do not fit together are left to tinkerers. SEITON does the
   - It follows **nothing of the system**, not the accent either: one may tinker freely, with base
     values and, on top, each shade (today's eleven boxes).
   - **Default** puts a colour back to what the system gives.
-- To check before building: whether our Qt reads the portal (`QStyleHints::colorScheme`, accent,
-  contrast), and what GNOME gives through `QPalette`.
+- **Checked (2026-11-15)** on Linux Mint 21.3, Cinnamon, X11, PySide6 6.10.2 from pip:
+  - The palette is read right from the GTK theme (Mint-L-Darker-Aqua): window `#f9f9f9`, text
+    `#303030`, highlight `#6cabcd`.
+  - `colorScheme` says **Dark** for a light theme: the portal says "no preference", and Qt then
+    guesses from the theme's name ("Darker" means only the dark header bar).
+  - `QPalette.Accent` is not set (black): Mint 21.3's portal gives no accent and no contrast. The
+    theme's accent is in `Highlight`.
+  - Contrast: `contrastPreference` is `NoPreference`.
+  - `QT_QPA_PLATFORMTHEME=qt5ct` is set, but there is no such plugin for Qt 6; Qt falls back to its
+    GTK3 plugin without a word (so does `xdgdesktopportal`). Pip's PySide6 can load only the
+    plugins it brings (GTK3, portal): under KDE the full Plasma palette would come only through the
+    portal.
+  - Qt listens to the portal's changes; whether Scope follows a theme switched while it runs is
+    not tried yet (it would mean switching the desktop's theme).
+- **So:** light or dark from the palette itself (window background lighter than text = light);
+  `colorScheme` only when the portal says light or dark outright. Accent: `Accent` when set,
+  else `Highlight`. Base values from `QPalette`: `Window`, `WindowText`, `Base`, `Text`,
+  `Highlight`.
 
 ## 6. Open
 
