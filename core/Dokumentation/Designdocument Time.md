@@ -48,19 +48,28 @@ A Markdown table, readable and editable without SEITON:
 ```markdown
 # Zeitaufwand Oliver
 
-| Date       | From  | To    | Time | Kind  | Note     |
-|------------|-------|-------|------|-------|----------|
-| 2026-11-16 | 09:12 | 11:40 | 2:28 | auto  |          |
-| 2026-11-16 | 13:05 | 14:35 | 1:30 | added | Baumarkt |
+| Datum      | Von   | Dauer | Art          | Notiz    |
+|------------|-------|-------|--------------|----------|
+| 2026-11-16 | 09:12 | 2:28  | auto         |          |
+| 2026-11-16 | 13:05 | 1:30  | nachgetragen | Baumarkt |
+| 2026-11-17 |       | 0:45  | nachgetragen | Telefonat mit Huber |
 ```
 
-- One row per stretch of time. **Kind**: `auto` (counted by the clock), `manual` (started and
-  stopped by hand), `added` (entered afterwards), `corrected` (an `auto` row changed by hand).
-- **Time** is From to To, written for the reader; the reader of the file (SEITON) computes it
-  again and trusts From and To. A row may have only a duration and no From/To ("added, 1:30").
-- **Local time**, with the offset only when it is not the one of the file's first row, as
-  `09:12+02:00` (holidays in another time zone). Open: section 10.
-- A stretch does not run over midnight: the clock closes it at 24:00 and opens the next day's.
+- One row per stretch of time: **when it began and how long it lasted** (decided 2026-11-16).
+  There is no "To": it would say the same twice, and on the night the clocks change it would
+  confuse (02:30 comes twice in autumn, not at all in spring). The duration is what counts; the
+  end is From plus Dauer, computed where it is shown.
+- **Von** may be empty for an added row ("0:45, Telefonat").
+- **Art**: `auto` (counted by the clock), `manuell` (started and stopped by hand),
+  `nachgetragen` (entered afterwards), `korrigiert` (an `auto` row changed by hand).
+- **The columns and kinds are written in the user's language** (German as above; English:
+  `Date | From | Time | Kind | Note`, kinds `auto`, `manual`, `added`, `corrected`). SEITON reads
+  both, whatever language the file was begun in; it keeps the language of a file it adds to.
+- **Local time, readable** (decided 2026-11-16): `09:12`, without an offset. Only when the
+  computer's time zone is not the person's usual one (holidays abroad) does Von carry it:
+  `09:12+09:00`. Sums never depend on it, because they add durations.
+- A stretch does not run over midnight: the clock closes it at 24:00 and opens the next day's,
+  so the sums per day are simple.
 - Sorted by date and From. Rows the person wrote by hand stay where they are; SEITON adds new
   rows at the end and sorts only when it rewrites the file from the time screen.
 
@@ -128,10 +137,10 @@ A video player tells the system not to start the screensaver (an *idle inhibitor
 
 - **Stop** on the time screen: the clock stands until **Start**, even with input. The button
   shows that it was stopped by hand (an outline instead of grey).
-- **Start** in a stand: counts as `manual`, and the pause limit still applies.
-- **Add**: date, project (the active one preselected, any project one may write), From–To or a
-  duration, a note. Example: shopping for the project in town.
-- **Correct, delete**: only one's own rows. A changed `auto` row becomes `corrected`.
+- **Start** in a stand: counts as `manuell`, and the pause limit still applies.
+- **Add**: date, project (the active one preselected, any project one may write), From (may stay
+  empty) and a duration, a note. Example: shopping for the project in town.
+- **Correct, delete**: only one's own rows. A changed `auto` row becomes `korrigiert`.
 
 ### 4.5 A crash or a switched-off computer
 
@@ -151,9 +160,12 @@ Opened by the clock button; a page like Setup, so it fits in the top bar form of
 - **Overview**: a project with its children (section 3), filtered by person, period (week,
   month, own range) and kind; sums per project and per person. Later: export as CSV for an
   invoice.
+- **Rounding** (for invoices) is only done in the overview and the export, never in the file. It
+  is set in Setup (decided 2026-11-16): none, or to 5, 10, 15 or 30 minutes, upwards or to the
+  nearest, per stretch or per day.
 
 Setup gets a "Time" part (General tab): pause limit, automatic resume, the dead man's button
-on/off.
+on/off, rounding.
 
 ## 6. Parts
 
@@ -236,9 +248,9 @@ own time file"**: a right on a file named after oneself. This is new in the ACLs
 - /0_Admin/Zeitaufwand/{Self}.md: read, write
 ```
 
-`{Self}` is the person, as `{Folder}` is the folder's role today. Reading the others' files is
-then a normal right (for example the project's admin reads all of `0_Admin/Zeitaufwand/`).
-Open: section 10.
+`{Self}` is the person, as `{Folder}` is the folder's role today (decided 2026-11-16). Reading
+the others' files is then a normal right (for example the project's admin reads all of
+`0_Admin/Zeitaufwand/`).
 
 ## 8. Later: the Phone
 
@@ -253,7 +265,7 @@ Not part of the first steps, written down so the design leaves room for it:
   stays in the inbox.
 - **Receipts**: photographed in the app as a receipt, they land in
   `4_Finanz/44_Rechnungen/Eingang` of the active project, and the time screen can add the trip
-  as an `added` stretch.
+  as a `nachgetragen` stretch.
 - A small app of its own comes after that: switch project, start/stop, photograph a receipt.
 
 ## 9. Steps
@@ -272,16 +284,13 @@ Each step with its tests first (fake clock, fake idle source, tmp projects).
    the Setup part.
 6. Later: the phone (section 8).
 
-## 10. Open Questions
+## 10. Decisions (16 November 2026)
 
-1. **Time zones**: local time with an offset only where it changes (as above), or always the
-   offset? Readability against travel.
-2. **Column names**: in the user's language (German files have `Datum | Von | Bis | Dauer | Art |
-   Notiz`) and SEITON reads both, or one fixed language?
-3. **`{Self}` in the ACLs**: is a right on "one's own file" the right new concept, or should the
-   standard template simply let every member write `0_Admin/Zeitaufwand/`?
-4. **Several computers**: the same person works on two computers at once (rare). Both clocks
-   write the same person's file. Each computer its own file (`Oliver (Laptop).md`), or accept
-   the rare conflict?
-5. **Granularity for invoices**: rounding (to 15 minutes?) only in the overview and export, never
-   in the file?
+1. **Time zones**: readability. Local time, an offset only away from home (section 2.1).
+2. **Columns**: `Datum | Von | Dauer | Art | Notiz`, no "Bis": it is redundant, and it confuses
+   when summer time begins or ends. In the user's language, SEITON reads German and English.
+3. **`{Self}`** in the ACLs: tried (section 7.4).
+4. **Several computers** at once: one file per person all the same; the rare conflict is
+   accepted. When the cloud leaves a conflict copy (`Oliver (conflicted copy ...).md`), the time
+   screen shows it and offers to merge it.
+5. **Rounding**: configurable, only in the overview and the export (section 5).
