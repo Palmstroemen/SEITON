@@ -102,6 +102,9 @@ def test_a_template_one_may_not_write_cannot_be_edited(template):
 
 def test_the_acl_panel_in_a_template(template, monkeypatch):
     monkeypatch.delenv(env_name("ACL_USER"))
+    # Without that override the login name counts; pin it, so the test does not depend on
+    # who runs it (Oliver is Admin of the project that holds the template).
+    monkeypatch.setattr("core.identity.login_name", lambda: "oliver")
     (template / META_DIR / "ACLs.md").write_text(ACLS + "\n# Users\nChefin: Buchhaltung\n")
 
     summary = ScopeApi(str(template)).acl_summary(str(template), [str(template / "04_Finanz")])
