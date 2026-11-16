@@ -1,5 +1,7 @@
 We have reached the end of the tutorial. What have you learned about SEITON?
 
+![SEITON|400](SEITON.svg)
+
 The name gives it away: Seiton (整頓) is Japanese for order. A place for everything, and everything in its place. That is exactly the idea of SEITON: an order that is easy to understand, one that anyone can grasp and use right away.
 
 1. Everything, even the biggest international corporation, starts with an idea, a small note on a piece of paper. Many ideas stay small, some grow. Ideas don't stand alone: they refer to each other, they are linked. With Markdown you have the most modern and convenient way to capture your thoughts, ideas, and projects as a network.
@@ -13,6 +15,8 @@ The name gives it away: Seiton (整頓) is Japanese for order. A place for every
 9. You no longer need a computer science degree to manage access rights.
 10. Your desktop, your taskbar, your theme adapt to your projects, if you want. So you see at a glance whether you are in the car workshop, the music studio, or the finance department.
 11. And with the folder fan, every folder is only a flick of the hand away.
+
+![SEITON|200](SEITON-Box.svg)
 
 Think for a moment about what this could mean.
 * You get back an overview of your data. Finally you know where to file things – just as the folders Pictures, Videos, Music, Downloads, Documents once did for us, only much smarter.

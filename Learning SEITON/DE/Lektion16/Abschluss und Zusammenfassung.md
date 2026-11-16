@@ -1,5 +1,7 @@
 Wir sind am Ende des Tutorials angekommen. Was hast du über SEITON erfahren?
 
+![SEITON|400](SEITON.svg)
+
 Der Name verrät es schon: Seiton (整頓) ist das japanische Wort für Ordnung. Alles hat seinen Platz, alles ist an seinem Platz. Genau das ist die Idee von SEITON: eine leicht verständliche Ordnung, die jeder sofort versteht und verwenden kann.
 
 1. Alles, selbst der größte internationale Konzern, beginnt mit einer Idee, einer kleinen Notiz auf einem Zettel. Viele Ideen bleiben klein, manche wachsen. Ideen stehen nicht für sich allein: Sie beziehen sich aufeinander, sie sind verlinkt. Mit Markdown hast du die modernste und bequemste Art, deine Gedanken, Ideen und Projekte vernetzt festzuhalten.
@@ -13,6 +15,8 @@ Der Name verrät es schon: Seiton (整頓) ist das japanische Wort für Ordnung.
 9. Für Zugriffsrechte brauchst du keine Informatik-Ausbildung mehr.
 10. Dein Desktop, deine Taskleiste, dein Design passen sich, wenn du willst, deinen Projekten an. So siehst du auf den ersten Blick, ob du gerade in der Autowerkstatt, im Musikstudio oder in der Finanzabteilung bist.
 11. Und mit dem Ordnerfächer ist jeder Ordner nur eine Handbewegung entfernt.
+
+![SEITON|200](SEITON-Box.svg)
 
 Denk einmal kurz darüber nach, was das bedeuten könnte.
 * Du bekommst wieder den Überblick über deine Daten. Endlich weißt du, wo du Dinge ablegen sollst – so wie es einst die Ordner Bilder, Videos, Musik, Downloads, Dokumente für uns taten, nur viel geschickter.
