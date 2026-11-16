@@ -1,90 +1,15 @@
-#!/bin/bash
-# MyOS Quick Installer - v0.1
-
-set -e  # Exit on error
-
-echo "🎯 MyOS Quick Installer"
-echo "========================"
-
-# 1. Prüfe Voraussetzungen
-echo "📦 Checking prerequisites..."
-if ! command -v python3 &> /dev/null; then
-    echo "❌ Python3 not found. Please install Python 3.8 or higher."
+#!/usr/bin/env bash
+# SEITON for this user, from this folder (installer/seiton_install.py does the work).
+#
+#   ./install.sh                 install, or update after git pull
+#   ./install.sh --suntree       also SunTree at login
+#   ./install.sh --thumbnailer   also Markdown previews in the file browsers
+#   ./install.sh --yes           ask nothing
+#   ./install.sh --uninstall     take it away again (settings and templates stay)
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")"
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "python3 is missing: install it with your package manager first." >&2
     exit 1
 fi
-
-if ! command -v fuse3 &> /dev/null; then
-    echo "⚠️  FUSE3 not found. Installing..."
-    sudo apt-get update
-    sudo apt-get install -y fuse3 libfuse3-dev python3-pip
-fi
-
-# 2. Install Python dependencies
-echo "📦 Installing Python dependencies..."
-pip3 install --user fusepy tabulate pytest
-
-# 3. Frage nach Test-Verzeichnis
-echo ""
-echo "📁 Where would you like to test MyOS?"
-echo "   This will create a 'myos_test' directory there."
-read -p "   Enter path [default: ~/Desktop]: " TEST_PATH
-TEST_PATH=${TEST_PATH:-"$HOME/Desktop"}
-
-# 4. Test-Verzeichnis erstellen
-FULL_PATH="$TEST_PATH/myos_test"
-mkdir -p "$FULL_PATH"
-mkdir -p "$FULL_PATH/mirror"
-mkdir -p "$FULL_PATH/mount"
-
-# 5. Symlinks für CLI-Tools
-echo "🔗 Setting up CLI tools..."
-chmod +x cli/myls.py
-ln -sf "$(pwd)/cli/myls.py" ~/.local/bin/myls 2>/dev/null || true
-
-# Optional, from the workshop: previews of Markdown notes in the file browsers (Nautilus, Nemo,
-# Dolphin ...). Scope draws its own previews without it.
-read -p "🖼️  Also show Markdown previews in the system's file browsers? [y/N]: " WANT_THUMBNAILER
-if [[ "$WANT_THUMBNAILER" =~ ^[YyJj] ]] && [ -f "$(pwd)/core/bin/seiton-md-thumbnailer" ]; then
-    chmod +x "$(pwd)/core/bin/seiton-md-thumbnailer"
-    sudo ln -sf "$(pwd)/core/bin/seiton-md-thumbnailer" /usr/local/bin/seiton-md-thumbnailer || true
-    mkdir -p "$HOME/.local/share/thumbnailers"
-    if [ -f "$(pwd)/installer/thumbnailers/seiton-markdown.thumbnailer" ]; then
-        cp "$(pwd)/installer/thumbnailers/seiton-markdown.thumbnailer" "$HOME/.local/share/thumbnailers/seiton-markdown.thumbnailer"
-        echo "🖼️  Markdown thumbnailer installed (user scope)."
-    fi
-fi
-
-# 6. Test-Dateien erstellen
-echo "📄 Creating test files..."
-cat > "$FULL_PATH/test_commands.txt" << 'EOF'
-# MyOS Test Commands
-# ==================
-
-# Terminal 1: Start MyOS
-cd $(dirname "$0")
-python3 myos_core.py ./mirror ./mount
-
-# Terminal 2: Test MyOS
-cd $(dirname "$0")
-ls mount/                          # Shows blueprint folders
-touch mount/project%/test.txt      # Materializes project/
-./myls.py mount/ --roentgen        # Intelligent view
-EOF
-
-# 7. Erfolgsmeldung
-echo ""
-echo "✅ Installation complete!"
-echo "========================"
-echo ""
-echo "📁 Test directory created at:"
-echo "   $FULL_PATH"
-echo ""
-echo "🚀 To start testing:"
-echo "   1. Open Terminal 1: cd $FULL_PATH"
-echo "   2. Run: python3 myos_core.py ./mirror ./mount"
-echo "   3. Open Terminal 2: cd $FULL_PATH"
-echo "   4. Run commands from test_commands.txt"
-echo ""
-echo "💡 Quick test:"
-echo "   ./myls.py . --help"
-echo ""
+exec python3 installer/seiton_install.py "$@"

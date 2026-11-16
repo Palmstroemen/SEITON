@@ -1,0 +1,12 @@
+# What SEITON needs at runtime, in its own venv (installer/seiton_install.py).
+# Qt stays on one minor version: a newer one has crashed PostFix before (ACER, 2026-11-16);
+# raise it on purpose, after testing.
+PySide6>=6.10,<6.11
+fusepy>=1.0.1  # the lens (libfuse 2 from the system)
+tabulate>=0.9.0
+markdown-it-py
+mdit-py-plugins
+casbin>=1.43.0
+pydantic>=2.12.5
+Pillow  # EXIF dates, Markdown previews
+pynput  # SunTree's shortcut (Ctrl+Alt+Space)

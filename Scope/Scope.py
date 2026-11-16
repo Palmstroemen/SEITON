@@ -1235,6 +1235,7 @@ def main() -> int:
     start_path = sys.argv[1] if len(sys.argv) > 1 else str(Path.cwd())
     api = ScopeApi(start_path)
     app = QGuiApplication(sys.argv)
+    app.setDesktopFileName(CONFIG_DIR)  # the menu entry the installer writes (seiton.desktop)
     app.setWindowIcon(seiton_icon())  # SEITON's box, as SunTree
     engine = load_scope(api, app)
     if not engine.rootObjects():

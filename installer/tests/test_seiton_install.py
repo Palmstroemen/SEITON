@@ -1,0 +1,240 @@
+"""SEITON's installer (installer/seiton_install.py, started by install.sh): for one user, from the
+git folder. System packages through the distribution's package manager, Python packages in a
+venv of SEITON's own, launchers, the icon, the menu entry, the templates; on request SunTree at
+login and Markdown previews in the file browsers. Everything it writes is listed, so uninstalling
+takes exactly that and leaves settings and templates.
+
+The tests never touch the real home: every place lies in tmp_path, commands are recorded, not run.
+"""
+
+import os
+import stat
+import sys
+from pathlib import Path
+
+import pytest
+
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO))
+from installer import seiton_install as inst  # noqa: E402
+
+
+class Runner:
+    """Records commands; creating the venv makes its python, a query answers from `installed`."""
+
+    def __init__(self, installed=()):
+        self.commands = []
+        self.installed = set(installed)
+
+    def __call__(self, command, quiet=False):
+        self.commands.append([str(c) for c in command])
+        if command[1:3] == ["-m", "venv"]:
+            python = Path(command[3]) / "bin" / "python"
+            python.parent.mkdir(parents=True, exist_ok=True)
+            python.write_text("")
+        query = inst.QUERY.get(self.manager)
+        if query and list(command[:len(query)]) == query:
+            return 0 if command[-1] in self.installed else 1
+        return 0
+
+    manager = "apt"
+
+
+@pytest.fixture
+def places(tmp_path):
+    env = {"HOME": str(tmp_path / "home"), "XDG_DATA_HOME": str(tmp_path / "data"),
+           "XDG_CONFIG_HOME": str(tmp_path / "config")}
+    return inst.Places.from_env(REPO, env)
+
+
+def _install(places, runner=None, **options):
+    runner = runner or Runner(installed=inst.PACKAGES["apt"])
+    inst.install(places, inst.Options(**options), run=runner, ask=lambda question: False,
+                 which=lambda name: "/usr/bin/apt-get" if name == "apt-get" else None)
+    return runner
+
+
+# --- the places ---------------------------------------------------------------------------
+
+def test_the_places_follow_the_xdg_variables(places, tmp_path):
+    assert places.venv == tmp_path / "data" / "seiton" / "venv"
+    assert places.bin == tmp_path / "home" / ".local" / "bin"
+    assert places.templates == tmp_path / "home" / ".seiton" / "Templates"
+    assert places.applications == tmp_path / "data" / "applications"
+
+
+# --- system packages ----------------------------------------------------------------------
+
+@pytest.mark.parametrize("found, manager", [("apt-get", "apt"), ("dnf", "dnf"), ("zypper", "zypper"),
+                                            ("pacman", "pacman"), (None, None)])
+def test_the_package_manager_is_found(found, manager):
+    assert inst.package_manager(lambda name: f"/usr/bin/{name}" if name == found else None) == manager
+
+
+def test_every_manager_brings_fuse_2_qt_and_pdf_previews():
+    for manager, packages in inst.PACKAGES.items():
+        text = " ".join(packages)
+        assert "fuse" in text, manager  # libfuse 2 for fusepy
+        assert "cursor" in text, manager  # Qt's X11 plugin needs xcb-cursor
+        assert "poppler" in text, manager  # pdftoppm: Scope's previews of PDFs
+
+
+def test_only_missing_packages_are_installed_after_asking(places):
+    runner = Runner(installed=[p for p in inst.PACKAGES["apt"] if p != "libfuse2"])
+    asked = []
+    inst.install(places, inst.Options(), run=runner, ask=lambda q: asked.append(q) or True,
+                 which=lambda name: "/usr/bin/apt-get" if name == "apt-get" else None)
+    install_line = [c for c in runner.commands if c[:3] == ["sudo", "apt-get", "install"]]
+    assert install_line == [["sudo", "apt-get", "install", "-y", "libfuse2"]]
+    assert any("libfuse2" in q for q in asked)
+
+
+def test_without_consent_no_sudo(places):
+    runner = Runner(installed=[])
+    _install(places, runner)
+    assert not any(c[0] == "sudo" for c in runner.commands)
+
+
+# --- python in a venv of its own ------------------------------------------------------------
+
+def test_python_packages_go_into_seitons_own_venv(places):
+    runner = _install(places)
+    python = str(places.venv / "bin" / "python")
+    assert [sys.executable, "-m", "venv", str(places.venv)] in runner.commands
+    assert [python, "-m", "pip", "install", "-r", str(REPO / "installer" / "requirements.txt")] in runner.commands
+
+
+def test_qt_is_pinned_to_one_minor_version():
+    lines = (REPO / "installer" / "requirements.txt").read_text(encoding="utf-8").splitlines()
+    qt = [line for line in lines if line.startswith("PySide6")]
+    assert qt and ">=" in qt[0] and ",<" in qt[0]
+
+
+# --- launchers, icon, menu ------------------------------------------------------------------
+
+def test_the_launcher_starts_scope_with_the_venv(places):
+    _install(places)
+    launcher = places.bin / "seiton"
+    text = launcher.read_text(encoding="utf-8")
+    assert str(places.venv / "bin" / "python") in text and str(REPO / "Scope" / "Scope.py") in text
+    assert launcher.stat().st_mode & stat.S_IXUSR
+
+
+def test_the_cli_tools_and_postfix_get_launchers(places):
+    _install(places)
+    for name in ("myls", "myproject", "mytag", "myacl"):
+        assert str(REPO / "cli" / f"{name}.py") in (places.bin / name).read_text(encoding="utf-8")
+    # "postfix" is a mail server's command: ours carries the name
+    assert str(REPO / "PostFix" / "cli.py") in (places.bin / "seiton-postfix").read_text(encoding="utf-8")
+    assert not (places.bin / "postfix").exists()
+
+
+def test_the_icon_is_the_box(places):
+    _install(places)
+    icon = places.data / "icons" / "hicolor" / "scalable" / "apps" / "seiton.svg"
+    assert icon.read_bytes() == (REPO / "assets" / "brand" / "seiton-icon.svg").read_bytes()
+
+
+def test_the_menu_entry(places):
+    _install(places)
+    entry = (places.applications / "seiton.desktop").read_text(encoding="utf-8")
+    assert "Name=SEITON\n" in entry and "Icon=seiton\n" in entry
+    assert f'Exec="{places.bin / "seiton"}" %f\n' in entry
+    assert "Type=Application\n" in entry
+
+
+def test_scope_names_its_menu_entry():
+    # So the taskbar finds the entry and its icon (Wayland asks the app for it).
+    assert "app.setDesktopFileName(CONFIG_DIR)" in (REPO / "Scope" / "Scope.py").read_text(encoding="utf-8")
+    assert inst.APP_ID == "seiton"
+
+
+def test_the_emblems_are_installed(places):
+    _install(places)
+    emblems = places.data / "icons" / "hicolor" / "scalable" / "emblems"
+    assert list(emblems.glob("emblem-seiton-*.svg"))
+
+
+# --- templates ------------------------------------------------------------------------------
+
+def test_the_templates_come_along_without_gitkeep(places):
+    _install(places)
+    standard = places.templates / "Standard"
+    assert (standard / "4_Finanz" / "44_Rechnungen" / "Eingang").is_dir()
+    assert (standard / ".seiton" / "ACLs.md").is_file()
+    assert not list(places.templates.rglob(".gitkeep"))
+    assert {p.name for p in places.templates.iterdir()} == {"Standard", "Person", "Firma", "Development"}
+
+
+def test_a_template_one_has_is_kept(places):
+    own = places.templates / "Standard"
+    own.mkdir(parents=True)
+    (own / "Mine.md").write_text("mine")
+    _install(places)
+    assert [p.name for p in own.iterdir()] == ["Mine.md"]
+
+
+def test_the_shipped_templates_are_clean():
+    templates = REPO / "templates"
+    assert not list(templates.rglob("ACLs-history")) and not list(templates.rglob(".TagsHere.json"))
+    for note in templates.rglob("*.md"):
+        text = note.read_text(encoding="utf-8")
+        assert not text.startswith("---"), note  # no window place of PostFix
+        assert "# Users" not in text, note  # no test people
+    for folder in [p for p in templates.rglob("*") if p.is_dir()]:
+        names = [p.name for p in folder.iterdir()]
+        assert names, folder  # git keeps no empty folder
+        assert ".gitkeep" not in names or names == [".gitkeep"], folder
+
+
+# --- extras ---------------------------------------------------------------------------------
+
+def test_no_extras_unless_asked(places):
+    runner = _install(places)
+    assert not any("install_autostart.py" in " ".join(c) for c in runner.commands)
+    assert not (places.data / "thumbnailers").exists()
+
+
+def test_suntree_at_login(places):
+    runner = _install(places, suntree=True)
+    python = str(places.venv / "bin" / "python")
+    assert [python, str(REPO / "SunTree" / "install_autostart.py"), str(places.home)] in runner.commands
+
+
+def test_markdown_previews_in_the_file_browsers(places):
+    _install(places, thumbnailer=True)
+    entry = (places.data / "thumbnailers" / "seiton-md.thumbnailer").read_text(encoding="utf-8")
+    python = str(places.venv / "bin" / "python")
+    assert f"Exec={python} {REPO / 'scripts' / 'seiton_md_thumbnailer.py'} %i %o %s" in entry
+    assert f"TryExec={python}" in entry and "__REPO_ROOT__" not in entry
+
+
+# --- uninstalling ---------------------------------------------------------------------------
+
+def test_uninstall_takes_what_it_wrote_and_keeps_settings_and_templates(places):
+    _install(places, thumbnailer=True)
+    places.config.mkdir(parents=True)
+    (places.config / "seiton.conf").write_text("[General]\n")
+    runner = Runner()
+    inst.uninstall(places, run=runner)
+    assert not (places.bin / "seiton").exists() and not (places.applications / "seiton.desktop").exists()
+    assert not (places.data / "thumbnailers" / "seiton-md.thumbnailer").exists()
+    assert not places.venv.exists() and not places.manifest.exists()
+    assert (places.templates / "Standard").is_dir() and (places.config / "seiton.conf").exists()
+    assert any("--remove" in c for c in runner.commands)  # SunTree's login entry, if any
+
+
+def test_uninstall_takes_nothing_it_did_not_write(places):
+    _install(places)
+    stranger = places.bin / "something-else"
+    stranger.write_text("not ours")
+    inst.uninstall(places, run=Runner())
+    assert stranger.exists()
+
+
+# --- the entry --------------------------------------------------------------------------------
+
+def test_install_sh_hands_over_to_the_installer():
+    text = (REPO / "install.sh").read_text(encoding="utf-8")
+    assert "installer/seiton_install.py" in text and "myos_core" not in text
+    assert os.access(REPO / "install.sh", os.X_OK)

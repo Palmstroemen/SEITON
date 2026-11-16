@@ -42,6 +42,8 @@ The building blocks exist but are fragmented. SEITON aims to unify them into one
 | **Scope/** | QML file browser (Templates + Projects rows, tags, CWD/CTD) |
 | **PostFix/** | From the workshop: Markdown editor with tag sidebar, Obsidian-compatible |
 | **SunTree/** | From the workshop: the folder fan for quick dropping |
+| **templates/** | The templates SEITON ships (Standard, Person, Firma, Development) |
+| **installer/** | The installer (`install.sh` starts it) and its requirements |
 | **cli/** | CLI tools (myls, myproject, mytag, myedit, myfilter, etc.) |
 | **docs/** | Documentation index, development guide, conventions, security |
 | **Vision/** | Concept and GUI notes (e.g. CWD/CWP/CTD) |
@@ -62,13 +64,31 @@ the idea could go. They are not needed for SEITON, and SEITON runs without them:
   or the system's editor.
 - **SunTree**: the folder fan (Ctrl + Alt + Space). Without it, Scope's back shows no SunTree tab.
 - **Markdown previews for file browsers**: the thumbnailer behind Scope's previews, offered to
-  Nautilus, Nemo and Dolphin too; `install.sh` asks before installing it.
+  Nautilus, Nemo and Dolphin too; the installer asks before installing it.
 
 ---
 
+## Install
+
+For one user, from the git folder (Debian/Ubuntu/Mint, Fedora, openSUSE, Arch/Manjaro; X11 session):
+
+```bash
+git clone git@github.com:Palmstroemen/SEITON.git
+cd SEITON
+./install.sh
+```
+
+It installs the missing system packages (after asking, with sudo), puts SEITON's Python packages
+into a venv of its own (`~/.local/share/seiton/venv`), adds SEITON to the menu, the launchers
+`seiton`, `seiton-postfix` and the CLI tools to `~/.local/bin`, and the templates to
+`~/.seiton/Templates`. It asks whether SunTree should start at login and whether the file
+browsers should show Markdown previews (`--suntree`, `--thumbnailer`; `--yes` asks nothing).
+Update: `git pull` and `./install.sh` again. Remove: `./install.sh --uninstall` (settings and
+templates stay).
+
 ## Quick Start
 
-**Run the Scope file browser (requires Qt/QML and Python backend):**
+**Run Scope from the repository without installing (needs the packages of `installer/requirements.txt`):**
 ```bash
 python3 Scope/Scope.py
 ```

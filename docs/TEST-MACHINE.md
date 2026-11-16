@@ -9,31 +9,24 @@ and lesson 1 opens for the next tester.
 ## Setting it up (once)
 
 1. Linux with an X11 session (Cinnamon, GNOME on Xorg, ...), one user account for all testers.
-2. The repository, e.g. `~/MyOS`, and its dependencies:
-   ```
-   sudo apt install python3-pip ffmpeg wmctrl
-   pip install -r requirements-full.txt
-   ```
+2. The repository, e.g. `~/SEITON`, installed with `./install.sh` (system packages, its venv,
+   launchers, and the templates Standard, Person, Firma, Development to `~/.seiton/Templates`,
+   which the exercises need: the suggested folders in lesson 7, the P button). For the
+   tutorial's example data also `sudo apt install ffmpeg wmctrl` and
+   `~/.local/share/seiton/venv/bin/pip install reportlab`. The steps below run with SEITON's
+   Python, `PY=~/.local/share/seiton/venv/bin/python`.
    Copying it from a development machine: never copy the lens drive `SEITON_Test/Perspektiven`
-   (a mounted drive), e.g. `rsync -a --exclude Perspektiven`. Testers need no "Projekte":
-   leave `SEITON_Test/Projekte` out or delete it - after step 3, its `.MyOS` holds the templates.
-3. The templates (Standard, Person, Development) go to `~/.MyOS/Templates`: MyOS takes the
-   nearest `.MyOS/Templates` upwards from the tutorial copy, and the exercises (suggested
-   folders in lesson 7, the P button) need them. They are not in git yet - take them from
-   `SEITON_Test/Projekte/.MyOS/Templates`:
-   ```
-   mkdir -p ~/.MyOS && cp -r SEITON_Test/Projekte/.MyOS/Templates ~/.MyOS/
-   ```
-   A plain `~/Templates` is never taken (on Linux it is the desktop's folder for new
-   documents); MyOS templates left there from earlier go to `~/.MyOS/Templates`.
+   (a mounted drive), e.g. `rsync -a --exclude Perspektiven`.
+3. A plain `~/Templates` is never taken (on Linux it is the desktop's folder for new
+   documents).
 4. Open the tutorial at every login, PostFix as the program for Markdown notes (a double click on
    a lesson opens PostFix with its links, not a text editor), and SunTree (lesson 15) ready for
    Ctrl+Alt+Space:
    ```
-   python3 scripts/testrun.py install
-   python3 SunTree/install_autostart.py ~/MyOS-Tutorial/DE
+   $PY scripts/testrun.py install
+   $PY SunTree/install_autostart.py ~/MyOS-Tutorial/DE
    ```
-5. Make the first copy and open lesson 1: `python3 scripts/testrun.py start`.
+5. Make the first copy and open lesson 1: `$PY scripts/testrun.py start`.
 6. Check: lesson 1 shows in PostFix; in lesson 7, "▶ Übung öffnen" opens Scope and the file
    browser side by side, with the pale suggested folders (then the templates are found);
    "💬 Kommentar zu dieser Lektion" opens "Meine Kommentare".
