@@ -50,6 +50,12 @@ ApplicationWindow {
         ScriptAction { script: window.setupShown = setupFlipAnimation.toBack }
         NumberAnimation { target: setupFlip; property: "angle"; from: 90; to: 0; duration: 450; easing.type: Easing.OutQuad }
     }
+    // Started with a task (Scope.py --setup | --search | --clipboard; the Headline's buttons).
+    function startAction(action) {
+        if (action === "setup") flipSetup(true)
+        else if (action === "search") templatesBrowser.searchActive = true
+        else if (action === "clipboard") openClipboard()
+    }
     function flipSetup(toBack) {
         if (setupFlipAnimation.running || setupShown === toBack) return
         setupFlipAnimation.toBack = toBack
@@ -2227,6 +2233,8 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
+        if (typeof scopeStartAction !== "undefined" && scopeStartAction)
+            Qt.callLater(window.startAction, scopeStartAction)
         Qt.application.windowIcon = Qt.resolvedUrl(iconFolder)
         window.contentItem.transform = [setupFlip]
         if (hasBackend() && typeof backend.setting === "function") {
@@ -2894,6 +2902,7 @@ ApplicationWindow {
 
         FolderBrowser {  // TemplatesBrowser
             id: templatesBrowser
+            objectName: "templatesBrowserRoot"
             debugName: "TemplatesBrowser"
             parent: floatingPool
             visible: templatesBrowserVisible && !edgeDockEnabled

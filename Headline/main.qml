@@ -62,6 +62,10 @@ Window {
     Connections {
         target: headline
         function onChanged() { line.refresh() }
+        function onThemeChanged() {
+            line.theme = headline.colorScheme()
+            panelWindow.theme = line.theme
+        }
         function onWidgetsChanged() {
             line.widgets = headline.widgets()
             Qt.callLater(line.fit)
@@ -241,6 +245,7 @@ Window {
     DropList {  // the way up: from the projects root down to where one is
         id: climbList
         objectName: "climbList"
+        showTools: true
         theme: line.theme
         baseFont: line.baseFont
         onChosen: function(path) { line.go(path) }

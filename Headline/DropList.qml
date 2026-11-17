@@ -11,6 +11,7 @@ Window {
     property int rowHeight: 28
     property int baseFont: 13
     property string currentPath: ""   // marked in the list
+    property bool showTools: false    // the Headline's tools on top (the way up, as M's tools)
     signal chosen(string path)
     signal hovered(Item item, var entry)
 
@@ -51,12 +52,21 @@ Window {
         Column {
             id: column
             spacing: 2
+            Tools {
+                visible: list.showTools
+                theme: list.theme
+                onUsed: list.close()
+            }
             Repeater {
                 id: rows
                 model: list.entries
                 delegate: FolderItem {
                     objectName: "dropRow"
                     hitAreaFullButton: true  // a menu row: the whole row takes the click
+                    // Badges as in Scope's rows: a folder's own, the P of a project.
+                    batchSource: modelData.batch || ""
+                    batchText: modelData.batchText || ""
+                    projectBadge: !!modelData.project
                     width: Math.max(implicitWidth, column.width)
                     label: modelData.name
                     style: "smallIcon"

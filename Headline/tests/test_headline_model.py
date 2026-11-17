@@ -202,3 +202,22 @@ def test_outside_a_project_no_project(world):
     model, told = _reporting(world, world["studio"])
     model.go(str(world["root"]))  # the projects root holds projects, it is none
     assert told[-1][0] is None
+
+
+# --- badges in the dropdowns: the P of projects, a folder's own badge (2026-11-17) -------------
+
+def test_the_way_up_knows_its_projects(world):
+    model = _model(world["studio"])
+    model.go(str(world["studio"] / "01_Info"))
+    steps = {s["name"]: s for s in model.climb()}
+    assert steps["Musikstudio"]["project"] and not steps["01_Info"]["project"]
+    assert "batch" in steps["01_Info"] and "batchText" in steps["01_Info"]
+
+
+def test_the_cascade_carries_the_badges(world):
+    (world["studio"] / "04_Finanz").mkdir()
+    (world["studio"] / "04_Finanz" / ".seiton").mkdir()
+    (world["studio"] / "04_Finanz" / ".seiton" / "batch.md").write_text("€\n")
+    model = _model(world["studio"])
+    entry = {c["name"]: c for c in model.children(str(world["studio"]))}["04_Finanz"]
+    assert entry["batchText"] == "€" and entry["batch"] == ""

@@ -310,3 +310,69 @@ def test_they_close_once_the_pointer_left_them_and_the_line(started):
     _find(started, "headlineLine").setProperty("pointerInside", False)
     _wait(app, 900)
     assert not climb.isVisible()
+
+
+# --- the tools: a row of small buttons on top of the way up and in the panel (2026-11-17) -----
+
+TOOLS = ["toolScope", "toolSetup", "toolSearch", "toolClipboard", "toolTime", "toolTheme"]
+
+
+def test_the_way_up_has_the_tools_on_top(started):
+    _activate(_find(started, "cwdButton"))
+    _settle(started["app"])
+    climb = _find(started, "climbList")
+    names = [i.objectName() for i in _items(climb.contentItem()) if i.objectName().startswith("tool")]
+    assert names == TOOLS
+    tools = _all(started, "toolSetup", climb)[0]
+    assert tools.mapToScene(tools.boundingRect().topLeft()).y() < _all(started, "dropRow", climb)[0].mapToScene(
+        _all(started, "dropRow", climb)[0].boundingRect().topLeft()).y()
+
+
+def test_the_panel_has_them_too(started):
+    panel = _open_panel(started, None)
+    assert [i.objectName() for i in _items(panel.contentItem()) if i.objectName().startswith("tool")] == TOOLS
+
+
+@pytest.mark.parametrize("tool, command_ends", [
+    ("toolSetup", "--setup"), ("toolSearch", "--search"), ("toolClipboard", "--clipboard")])
+def test_setup_search_and_clipboard_open_scope_here(started, world, tool, command_ends):
+    backend = started["engine"]._backend
+    ran = []
+    backend._start = ran.append
+    panel = _open_panel(started, None)
+    _activate(_all(started, tool, panel)[0])
+    _settle(started["app"])
+    assert ran and ran[-1][-2:] == [str(world["studio"]), command_ends]
+    assert ran[-1][-3].endswith("Scope.py")
+
+
+def test_scope_alone_opens_scope_here(started, world):
+    backend = started["engine"]._backend
+    ran = []
+    backend._start = ran.append
+    panel = _open_panel(started, None)
+    _activate(_all(started, "toolScope", panel)[0])
+    _settle(started["app"])
+    assert ran[-1][-1] == str(world["studio"]) and ran[-1][-2].endswith("Scope.py")  # no task
+
+
+def test_time_opens_the_time_screen(started):
+    backend = started["engine"]._backend
+    ran = []
+    backend._start = ran.append
+    panel = _open_panel(started, None)
+    _activate(_all(started, "toolTime", panel)[0])
+    _settle(started["app"])
+    assert ran and "seiton-time" in ran[-1][0]
+
+
+def test_light_and_dark_switch_at_once(started):
+    from core.settings import Settings
+    before = Settings().get("General/darkTheme")
+    line = _find(started, "headlineLine")
+    colour = line.property("theme")["bg"]
+    panel = _open_panel(started, None)
+    _activate(_all(started, "toolTheme", panel)[0])
+    _settle(started["app"])
+    assert Settings().get("General/darkTheme") is (not before)
+    assert line.property("theme")["bg"] != colour

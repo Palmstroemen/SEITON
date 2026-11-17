@@ -9,6 +9,7 @@ cascade to climb; docking at the top edge comes in step 2.
 
 from __future__ import annotations
 
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -47,6 +48,7 @@ class HeadlineBackend(QObject):
     changed = Signal()
     dockChanged = Signal()
     widgetsChanged = Signal()
+    themeChanged = Signal()
     # "Open the panel": at an anchor {x, y, width, height} (the applet's button), or None: at
     # the pointer (the launcher, the shortcut). From a later start (Headline/instance.py).
     panelRequested = Signal("QVariant")
@@ -54,6 +56,9 @@ class HeadlineBackend(QObject):
     def __init__(self, model: HeadlineModel) -> None:
         super().__init__()
         self._model = model
+        # How the tools start Scope and the time screen (tests put a recorder here).
+        self._start = lambda command: subprocess.Popen(command, cwd=str(REPO_ROOT),
+                                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         self._dock = (self._read_dock(), self.placeMode())
         self._widgets = widgets.shown()
         self._follow = QTimer(self)
@@ -157,15 +162,35 @@ class HeadlineBackend(QObject):
         pos = QCursor.pos()
         return {"x": pos.x(), "y": pos.y(), "width": 1, "height": 1}
 
-    @Slot(result=bool)
-    def openScope(self) -> bool:
-        """Scope where one is (a program of its own; the Headline does not wait for it)."""
+    @Slot(str, result=bool)
+    def openScope(self, action: str) -> bool:
+        """Scope where one is, perhaps with a task (setup, search, clipboard; Scope.py --<task>).
+        A program of its own; the Headline does not wait for it."""
+        command = [sys.executable, str(REPO_ROOT / "Scope" / "Scope.py"), self._model.cwd]
+        if action in ("setup", "search", "clipboard"):
+            command.append(f"--{action}")
         try:
-            subprocess.Popen([sys.executable, str(REPO_ROOT / "Scope" / "Scope.py"), self._model.cwd],
-                             cwd=str(REPO_ROOT), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            self._start(command)
             return True
         except OSError:
             return False
+
+    @Slot(result=bool)
+    def openTime(self) -> bool:
+        """The time screen of the time tracking (its launcher, written by the installer)."""
+        launcher = shutil.which("seiton-time") or str(Path.home() / ".local" / "bin" / "seiton-time")
+        try:
+            self._start([launcher])
+            return True
+        except OSError:
+            return False
+
+    @Slot()
+    def switchTheme(self) -> None:
+        """Light / dark, for Scope, SunTree and the Headline (General/darkTheme)."""
+        settings = Settings()
+        settings.set("General/darkTheme", not settings.get("General/darkTheme"))
+        self.themeChanged.emit()
 
     @Slot(result="QVariantMap")
     def colorScheme(self) -> dict:

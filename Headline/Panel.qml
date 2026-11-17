@@ -78,6 +78,9 @@ Window {
                     model: panel.steps
                     delegate: FolderItem {
                         objectName: "panelPath"
+                        batchSource: modelData.batch || ""
+                        batchText: modelData.batchText || ""
+                        projectBadge: !!modelData.project
                         label: modelData.name
                         style: "text"
                         compactHeight: panel.rowHeight - 4
@@ -219,20 +222,10 @@ Window {
                 }
             }
 
-            Row {  // the buttons
+            Tools {  // the buttons: setup, search, clipboard, time, light / dark
                 topPadding: 8
-                spacing: 4
-                FolderItem {
-                    objectName: "panelOpenScope"
-                    label: qsTr("Open in Scope")
-                    style: "text"
-                    compactHeight: panel.rowHeight
-                    fillColor: panel.theme.smallButtonBg || "#2c3040"
-                    strokeColor: panel.theme.smallButtonBorder || "#3a3f52"
-                    textColor: panel.theme.smallButtonText || panel.theme.text || "#e6e6e6"
-                    textSize: panel.baseFont
-                    onActivate: { headline.openScope(); panel.close() }
-                }
+                theme: panel.theme
+                onUsed: panel.close()
             }
         }
     }

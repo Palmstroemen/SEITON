@@ -1209,7 +1209,18 @@ def sun_tree_present() -> bool:
     return (REPO_ROOT / "SunTree" / "SunTree.py").is_file()
 
 
-def load_scope(api: ScopeApi, app: QGuiApplication) -> QQmlApplicationEngine:
+START_ACTIONS = ("setup", "search", "clipboard")
+
+
+def start_action(args) -> str:
+    """The task Scope is started with (--setup, --search, --clipboard; the Headline's buttons)."""
+    for arg in args:
+        if arg.startswith("--") and arg[2:] in START_ACTIONS:
+            return arg[2:]
+    return ""
+
+
+def load_scope(api: ScopeApi, app: QGuiApplication, action: str = "") -> QQmlApplicationEngine:
     """Scope's window on `api`'s place: the engine with its backend, main.qml loaded (no root
     object when it fails). Shared by main() and the smoke test, so both load it alike."""
     engine = QQmlApplicationEngine()
@@ -1221,6 +1232,7 @@ def load_scope(api: ScopeApi, app: QGuiApplication) -> QQmlApplicationEngine:
     ctx.setContextProperty("scopeStartPath", api.get_start_path())
     ctx.setContextProperty("scopeProjectRoot", api.get_project_root() or "")
     ctx.setContextProperty("scopeSunTreePresent", sun_tree_present())
+    ctx.setContextProperty("scopeStartAction", action if action in START_ACTIONS else "")
     engine._backend = backend
 
     ui_lang = getenv("UI_LANG", "de")
@@ -1232,12 +1244,13 @@ def load_scope(api: ScopeApi, app: QGuiApplication) -> QQmlApplicationEngine:
 
 
 def main() -> int:
-    start_path = sys.argv[1] if len(sys.argv) > 1 else str(Path.cwd())
+    places = [arg for arg in sys.argv[1:] if not arg.startswith("--")]
+    start_path = places[0] if places else str(Path.cwd())
     api = ScopeApi(start_path)
     app = QGuiApplication(sys.argv)
     app.setDesktopFileName(CONFIG_DIR)  # the menu entry the installer writes (seiton.desktop)
     app.setWindowIcon(seiton_icon())  # SEITON's box, as SunTree
-    engine = load_scope(api, app)
+    engine = load_scope(api, app, action=start_action(sys.argv[1:]))
     if not engine.rootObjects():
         return 1
     root = engine.rootObjects()[0]

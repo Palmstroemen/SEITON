@@ -129,3 +129,16 @@ def test_the_launcher_learns_the_programs_pid(place):
     command = sb.command(["true"], place=place, binds=[], info_fd=7)
     assert command[command.index("--info-fd") + 1] == "7"
     assert command.index("--info-fd") < command.index("--")
+
+
+def test_the_code_inside_the_projects_root_comes_back(tmp_path):
+    # The Dell (2026-11-17): the repository lies in ~/Dokumente/SEITON, inside the projects root
+    # ~/Dokumente the clock must not see - hidden after the code, it hid the clock's own program.
+    projects = tmp_path / "Dokumente"
+    code = projects / "SEITON"
+    code.mkdir(parents=True)
+    place = sb.Place(home=tmp_path, runtime=Path("/run/user/1000"), dbus="", keep=[code], hide=[projects])
+    args = sb.command(["python3", "x.py"], place=place, binds=[])
+    hidden = args.index(str(projects))
+    kept = max(i for i, a in enumerate(args) if a == str(code) and args[i - 1] == "--ro-bind")
+    assert args[hidden - 1] == "--tmpfs" and hidden < kept  # the root hidden first, the code back over it

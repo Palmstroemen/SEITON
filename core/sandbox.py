@@ -73,12 +73,15 @@ def command(program: Sequence[str], *, place: Place, binds: Sequence[Bind],
     args = ["bwrap", "--die-with-parent", "--new-session", "--unshare-all", "--as-pid-1", "--clearenv",
             "--ro-bind", "/", "/", "--dev", "/dev", "--proc", "/proc",
             "--tmpfs", "/tmp", "--tmpfs", str(place.home), "--tmpfs", str(place.runtime)]
-    for kept in place.keep:
-        args += ["--ro-bind", str(kept), str(kept)]
-    # After the kept folders: a projects root inside the code (SEITON_Test) stays hidden too.
-    for hidden in place.hide:
-        if Path(hidden).is_dir():  # bwrap cannot put a tmpfs where there is nothing
-            args += ["--tmpfs", str(hidden)]
+    # Kept and hidden folders from the outside in: the inner one wins. A projects root inside the
+    # code (SEITON_Test) stays hidden; the code inside a projects root (~/Dokumente/SEITON on the
+    # Dell) comes back over the hidden root - else the program would not see itself.
+    layers = [(Path(kept), "keep") for kept in place.keep] + [(Path(hidden), "hide") for hidden in place.hide]
+    for folder, what in sorted(layers, key=lambda layer: len(layer[0].parts)):
+        if what == "keep":
+            args += ["--ro-bind", str(folder), str(folder)]
+        elif folder.is_dir():  # bwrap cannot put a tmpfs where there is nothing
+            args += ["--tmpfs", str(folder)]
     socket = _bus_socket(place.dbus)
     environment = {"HOME": str(place.home), "PATH": "/usr/local/bin:/usr/bin:/bin",
                    "LANG": os.environ.get("LANG", "C.UTF-8"), "XDG_RUNTIME_DIR": str(place.runtime)}

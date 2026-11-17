@@ -111,7 +111,13 @@ class HeadlineModel:
             if top is None or not (parent == top or top in parent.parents):
                 break
             steps.append(parent)
-        return [{"name": step.name, "path": str(step)} for step in reversed(steps)]
+        return [{"name": step.name, "path": str(step), "project": (step / META_DIR / "Project.md").is_file(),
+                 **self._badge(step)} for step in reversed(steps)]
+
+    def _badge(self, folder: Path) -> Dict[str, str]:
+        """A folder's own badge (its .seiton/batch.*), as Scope's rows show it."""
+        found = getattr(self._api, "_get_folder_batch", lambda _f: {})(Path(folder)) or {}
+        return {"batch": found.get("batch") or "", "batchText": found.get("batchText") or ""}
 
     # --- the perspectives of the root (Designdocument Perspective Resolver MVP.md, A11) -----
 
@@ -164,6 +170,8 @@ class HeadlineModel:
             "path": str(Path(path) / entry["name"]),
             "project": bool(entry.get("isProject")),
             "color": entry.get("color") or "",
+            "batch": entry.get("batch") or "",
+            "batchText": entry.get("batchText") or "",
         } for entry in self._api.list_children(path, False)]
         return sorted(result, key=lambda f: f["name"].lower())
 
