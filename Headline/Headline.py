@@ -12,7 +12,7 @@ from __future__ import annotations
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -201,16 +201,46 @@ def install_translator(app: QGuiApplication, code: str) -> Optional[QTranslator]
     return translator
 
 
+def parse_start(args: list) -> Tuple[Optional[str], Optional[dict]]:
+    """Headline.py [--panel [--anchor x,y,w,h]] [place] -> (place or None, request or None).
+    A broken anchor opens the panel at the pointer."""
+    place, request, rest = None, None, list(args)
+    anchor = None
+    if "--anchor" in rest:
+        at = rest.index("--anchor")
+        value = rest[at + 1] if at + 1 < len(rest) else ""
+        del rest[at:at + 2]
+        try:
+            numbers = [int(part) for part in value.split(",")]
+        except ValueError:
+            numbers = []
+        if len(numbers) == 4 and numbers[2] > 0 and numbers[3] > 0:
+            anchor = dict(zip(instance.ANCHOR_KEYS, numbers))
+    if "--panel" in rest:
+        rest.remove("--panel")
+        request = {"panel": anchor}
+    places = [a for a in rest if not a.startswith("--")]
+    if places:
+        place = places[0]
+    return place, request
+
+
+def to_logical(anchor: Optional[dict], ratio: float) -> Optional[dict]:
+    """An anchor in device pixels (Cinnamon) in Qt's logical pixels."""
+    if anchor is None or not ratio or ratio == 1.0:
+        return anchor
+    return {key: int(round(anchor[key] / ratio)) for key in instance.ANCHOR_KEYS}
+
+
 def main(argv: Optional[list] = None) -> int:
-    """Headline.py [--panel] [place]: one Headline per user; a later start hands "open the
-    panel" to the one running (the launcher in the taskbar, the shortcut) and ends."""
-    args = list(sys.argv[1:] if argv is None else argv)
-    wants_panel = "--panel" in args
-    places = [a for a in args if not a.startswith("--")]
+    """Headline.py [--panel [--anchor x,y,w,h]] [place]: one Headline per user; a later start
+    hands "open the panel" to the one running (the applet, the launcher, the shortcut) and
+    ends; a later plain start opens the panel at the pointer."""
+    place, request = parse_start(list(sys.argv[1:] if argv is None else argv))
     name = instance.server_name()
-    if instance.hand_over(name, {"panel": None}):
+    if instance.hand_over(name, request or {"panel": None}):
         return 0
-    start = places[0] if places else str(Path.home())
+    start = place or str(Path.home())
     app = QGuiApplication([sys.argv[0]])
     app.setApplicationName("Headline")
     app.setWindowIcon(seiton_icon())
@@ -226,10 +256,11 @@ def main(argv: Optional[list] = None) -> int:
     backend = engine._backend
     dock(window, backend)
     backend.dockChanged.connect(lambda: dock(window, backend))
-    server.panelRequested.connect(backend.panelRequested.emit)
+    ratio = app.primaryScreen().devicePixelRatio()
+    server.panelRequested.connect(lambda anchor: backend.panelRequested.emit(to_logical(anchor, ratio)))
     backend.start_following()
-    if wants_panel:
-        QTimer.singleShot(0, lambda: backend.panelRequested.emit(None))
+    if request is not None:
+        QTimer.singleShot(0, lambda: backend.panelRequested.emit(to_logical(request["panel"], ratio)))
     code = app.exec()
     server.close()
     link.close()

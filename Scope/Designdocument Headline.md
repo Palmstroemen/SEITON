@@ -155,6 +155,12 @@ widget shows grey "Clock not running", and its click starts it.
    Still to come in the panel: the widgets and the person (2a), the clipboard, search, new
    project and Setup buttons.
 4. **The Cinnamon applet:** the button in the taskbar that opens the panel above itself.
+   Built 2026-11-17: `Headline/cinnamon/seiton-headline@seiton/` - a button with SEITON's box;
+   a click runs `seiton-headline --panel --anchor x,y,w,h` with where the button is (device
+   pixels, the Headline turns them into Qt's logical ones). The installer writes the launcher
+   `seiton-headline`, a menu entry "SEITON Panel" (`--panel`, to pin to any taskbar), on Cinnamon
+   the applet (the user adds it: right click on the panel, Applets), and with `--headline` the
+   Headline at login; uninstalling takes all of it.
 5. Later: KDE's plasmoid; Wayland.
 
 ## 5. Open

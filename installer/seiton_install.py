@@ -4,6 +4,7 @@
     ./install.sh                 install or update (after git pull: the same again)
     ./install.sh --suntree       also SunTree at login (Ctrl+Alt+Space)
     ./install.sh --thumbnailer   also Markdown previews in the file browsers
+    ./install.sh --headline      also the Headline at login (the line at the top edge)
     ./install.sh --yes           ask nothing: system packages yes, extras only as given
     ./install.sh --uninstall     take away what it wrote; settings and templates stay
 
@@ -16,7 +17,9 @@ What it does:
 3. Launchers in ~/.local/bin (seiton, the CLI tools, seiton-postfix), the icon, the menu entry,
    the emblems.
 4. The templates to ~/.seiton/Templates; a template one has already is kept.
-5. On request SunTree at login and Markdown previews in the file browsers.
+5. The Headline: its launcher, a menu entry that opens its panel (to pin to a taskbar), on
+   Cinnamon its applet; on request the Headline at login.
+6. On request SunTree at login and Markdown previews in the file browsers.
 
 Everything written outside the venv is listed in ~/.local/share/seiton/installed.txt; uninstalling
 takes exactly that, the venv, and SunTree's login entry.
@@ -59,6 +62,9 @@ INSTALL = {
     "zypper": ["sudo", "zypper", "--non-interactive", "install"],
     "pacman": ["sudo", "pacman", "-S", "--needed", "--noconfirm"],
 }
+# The Headline (Scope/Designdocument Headline.md): its launcher, and its applet in Cinnamon.
+HEADLINE = file_name("headline")
+HEADLINE_APPLET = "seiton-headline@seiton"
 # The CLI tools that get a launcher of the same name (cli/<name>.py).
 CLI_TOOLS = ("myls", "myproject", "mytag", "myedit", "myfilter", "myacl", "myexport", "myimport")
 
@@ -118,6 +124,7 @@ class Places:
 class Options:
     suntree: bool = False
     thumbnailer: bool = False
+    headline: bool = False  # the Headline at login
     system_packages: bool = True
 
 
@@ -214,6 +221,8 @@ def launchers(places: Places, written: Written) -> None:
         script = places.repo / "cli" / f"{tool}.py"
         if script.is_file():
             written.text(places.bin / tool, _launcher(places, script), executable=True)
+    written.text(places.bin / HEADLINE, _launcher(places, places.repo / "Headline" / "Headline.py"),
+                 executable=True)
     postfix = places.repo / "PostFix" / "cli.py"
     if postfix.is_file():  # "postfix" alone is a mail server's command
         written.text(places.bin / file_name("postfix"), _launcher(places, postfix), executable=True)
@@ -243,6 +252,43 @@ def menu_entry(places: Places, written: Written, run: Run) -> None:
         "MimeType=inode/directory;\n"))
     if shutil.which("update-desktop-database"):
         run(["update-desktop-database", "-q", str(places.applications)], quiet=True)
+
+
+def headline_entry(places: Places, written: Written) -> None:
+    """A menu entry that opens the Headline's panel: to pin to any taskbar (as the start menu)."""
+    written.text(places.applications / f"{HEADLINE}.desktop", (
+        "[Desktop Entry]\n"
+        "Type=Application\n"
+        f"Name={NAME} Panel\n"
+        "Comment=Where you are, the project's folders, the perspectives\n"
+        f"Exec={_quoted(places.bin / HEADLINE)} --panel\n"
+        f"Icon={APP_ID}\n"
+        "Terminal=false\n"
+        "Categories=Utility;\n"))
+
+
+def cinnamon_applet(places: Places, written: Written, which: Which) -> None:
+    """On Cinnamon the applet: a button in the panel that opens the Headline's panel above it.
+    The user adds it to the panel (right click on the panel, Applets)."""
+    if not which("cinnamon"):
+        return
+    source = places.repo / "Headline" / "cinnamon" / HEADLINE_APPLET
+    target = places.data / "cinnamon" / "applets" / HEADLINE_APPLET
+    script = (source / "applet.js").read_text(encoding="utf-8")
+    written.text(target / "applet.js", script.replace("__LAUNCHER__", str(places.bin / HEADLINE)))
+    written.copy(source / "metadata.json", target / "metadata.json")
+    written.copy(places.repo / "assets" / "brand" / file_name("icon-small.svg"), target / "icon.svg")
+
+
+def headline_at_login(places: Places, written: Written) -> None:
+    written.text(places.config.parent / "autostart" / f"{HEADLINE}.desktop", (
+        "[Desktop Entry]\n"
+        "Type=Application\n"
+        f"Name={NAME} Headline\n"
+        f"Exec={_quoted(places.bin / HEADLINE)}\n"
+        f"Icon={APP_ID}\n"
+        "Terminal=false\n"
+        "X-GNOME-Autostart-enabled=true\n"))
 
 
 def templates(places: Places) -> None:
@@ -292,13 +338,19 @@ def install(places: Places, options: Options, run: Run = run_command, ask: Ask =
     launchers(places, written)
     icons(places, written, run)
     menu_entry(places, written, run)
+    headline_entry(places, written)
+    cinnamon_applet(places, written, which)
     templates(places)
     if options.suntree:
         suntree(places, run)
     if options.thumbnailer:
         thumbnailer(places, written)
+    if options.headline:
+        headline_at_login(places, written)
     _write_manifest(places, written)
     print(f"\n{NAME} is installed. Start it from the menu or with: {places.bin / APP_ID}")
+    if which("cinnamon"):
+        print("The SEITON button for Cinnamon's panel: right click on the panel, Applets, SEITON.")
     if str(places.bin) not in os.environ.get("PATH", "").split(os.pathsep):
         print(f"(Add {places.bin} to PATH to start it and the CLI tools by name.)")
 
@@ -319,6 +371,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=f"Install {NAME} for this user.")
     parser.add_argument("--suntree", action="store_true", help="SunTree at login (Ctrl+Alt+Space)")
     parser.add_argument("--thumbnailer", action="store_true", help="Markdown previews in the file browsers")
+    parser.add_argument("--headline", action="store_true", help="the Headline at login (the line at the top edge)")
     parser.add_argument("--no-system-packages", action="store_true", help="leave the system packages alone")
     parser.add_argument("--yes", action="store_true", help="ask nothing")
     parser.add_argument("--uninstall", action="store_true", help="take away what was installed")
@@ -330,7 +383,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     ask = (lambda question: True) if args.yes else ask_user
     suntree_wanted = args.suntree or (not args.yes and ask_user("Also SunTree, the folder fan, at login (Ctrl+Alt+Space)?"))
     previews_wanted = args.thumbnailer or (not args.yes and ask_user("Also Markdown previews in the system's file browsers?"))
-    install(places, Options(suntree=suntree_wanted, thumbnailer=previews_wanted,
+    headline_wanted = args.headline or (not args.yes and ask_user("Also the Headline at login (the line at the top edge)?"))
+    install(places, Options(suntree=suntree_wanted, thumbnailer=previews_wanted, headline=headline_wanted,
                             system_packages=not args.no_system_packages), ask=ask)
     return 0
 

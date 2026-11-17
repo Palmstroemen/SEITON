@@ -235,6 +235,68 @@ def test_markdown_previews_in_the_file_browsers(places):
     assert f"TryExec={python}" in entry and "__REPO_ROOT__" not in entry
 
 
+# --- the Headline (Scope/Designdocument Headline.md) ---------------------------------------
+
+def _install_on_cinnamon(places, **options):
+    runner = Runner(installed=inst.PACKAGES["apt"])
+    found = {"apt-get": "/usr/bin/apt-get", "cinnamon": "/usr/bin/cinnamon"}
+    inst.install(places, inst.Options(**options), run=runner, ask=lambda question: False,
+                 which=found.get)
+    return runner
+
+
+def test_the_headline_gets_a_launcher(places):
+    _install(places)
+    launcher = places.bin / "seiton-headline"
+    assert launcher.is_file() and os.access(launcher, os.X_OK)
+    assert str(REPO / "Headline" / "Headline.py") in launcher.read_text(encoding="utf-8")
+
+
+def test_a_menu_entry_opens_the_panel_to_pin_to_any_taskbar(places):
+    _install(places)
+    entry = (places.applications / "seiton-headline.desktop").read_text(encoding="utf-8")
+    assert f"Exec={inst._quoted(places.bin / 'seiton-headline')} --panel" in entry and "Icon=seiton" in entry
+
+
+def test_on_cinnamon_the_applet_comes_along(places):
+    _install_on_cinnamon(places)
+    applet = places.data / "cinnamon" / "applets" / "seiton-headline@seiton"
+    script = (applet / "applet.js").read_text(encoding="utf-8")
+    assert f'const LAUNCHER = "{places.bin / "seiton-headline"}";' in script and "__LAUNCHER__" not in script
+    assert (applet / "metadata.json").is_file() and (applet / "icon.svg").is_file()
+
+
+def test_without_cinnamon_no_applet(places):
+    _install(places)
+    assert not (places.data / "cinnamon").exists()
+
+
+def test_the_headline_at_login_only_when_asked(places):
+    _install(places)
+    login = places.config.parent / "autostart" / "seiton-headline.desktop"
+    assert not login.exists()
+    _install(places, headline=True)
+    assert f"Exec={inst._quoted(places.bin / 'seiton-headline')}\n" in login.read_text(encoding="utf-8")
+
+
+def test_uninstall_takes_the_headline_away(places):
+    _install_on_cinnamon(places, headline=True)
+    inst.uninstall(places, run=Runner())
+    assert not (places.bin / "seiton-headline").exists()
+    assert not (places.data / "cinnamon" / "applets" / "seiton-headline@seiton" / "applet.js").exists()
+    assert not (places.config.parent / "autostart" / "seiton-headline.desktop").exists()
+
+
+def test_the_applet_is_valid_javascript():
+    import shutil
+    import subprocess
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("no node to check the syntax")
+    script = REPO / "Headline" / "cinnamon" / "seiton-headline@seiton" / "applet.js"
+    assert subprocess.run([node, "--check", str(script)], capture_output=True).returncode == 0
+
+
 # --- uninstalling ---------------------------------------------------------------------------
 
 def test_uninstall_takes_what_it_wrote_and_keeps_settings_and_templates(places):
