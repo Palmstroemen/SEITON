@@ -83,6 +83,16 @@ def find_project_root(start_path: Path) -> Optional[Path]:
     return None
 
 
+def roots_below(path: Path) -> List[Path]:
+    """Above the roots one looks downwards (A11): the projects one level below path, sorted.
+    Hidden folders are not looked into."""
+    try:
+        children = sorted(p for p in Path(path).iterdir() if p.is_dir() and not p.name.startswith("."))
+    except OSError:
+        return []
+    return [child for child in children if (child / META_DIR / "Project.md").is_file()]
+
+
 def find_top_project_root(start_path: Path) -> Optional[Path]:
     start_path = start_path.resolve()
     found: Optional[Path] = None

@@ -50,7 +50,8 @@ def no_new_privs(status: Path = Path("/proc/self/status")) -> bool:
 
 
 def clock_arguments(settings: Settings) -> List[str]:
-    args = ["--language", settings.get("General/language"), "--pause", str(settings.get("Time/pauseMinutes"))]
+    args = ["--language", settings.get("General/language"), "--pause", str(settings.get("Time/pauseMinutes")),
+            "--recent", settings.get("Time/recentShows")]
     if not settings.get("Time/autoResume"):
         args.append("--no-resume")
     if not settings.get("Time/deadMan"):

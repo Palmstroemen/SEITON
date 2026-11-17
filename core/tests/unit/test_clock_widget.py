@@ -136,3 +136,62 @@ def test_a_command_moves_the_clock(tmp_path, ledger):
     clock.state = "asks"
     cw.obey(clock, "yes", NOW)
     assert clock.state == "runs"
+
+
+# --- the time shown beside the projects worked on last (decided 2026-11-17: in all, settable) --
+
+def _file(tmp_path, project, rows):
+    from core import time_log as tl
+    for day, minutes in rows:
+        tl.add(project, "Oliver", tl.Stretch(day=day, start=None, duration=timedelta(minutes=minutes),
+                                            kind="manual"), language="de")
+
+
+@pytest.fixture
+def projects(tmp_path):
+    folders = {}
+    for name in ("Küche", "Dachboden"):
+        folder = tmp_path / "Projekte" / name
+        folder.mkdir(parents=True)
+        folders[name] = folder
+    monday = NOW.date() - timedelta(days=NOW.weekday())
+    _file(tmp_path, folders["Küche"], [(NOW.date() - timedelta(days=40), 600), (monday, 60), (NOW.date(), 30)])
+    _file(tmp_path, folders["Dachboden"], [(NOW.date() - timedelta(days=3), 760)])
+    return folders
+
+
+def test_in_all_from_the_projects_time_file(projects, ledger):
+    spent = cw.spent_from(lambda project, person: cw.tl.time_file(project, person))
+    assert spent(projects["Küche"], "Oliver", "total", NOW.date()) == timedelta(minutes=690)
+    assert spent(projects["Küche"], "Oliver", "today", NOW.date()) == timedelta(minutes=30)
+    assert NOW.weekday() == 1  # a Tuesday: Monday's hour and today's half belong to the week
+    assert spent(projects["Küche"], "Oliver", "week", NOW.date()) == timedelta(minutes=90)
+
+
+def test_no_file_no_time(tmp_path, ledger):
+    spent = cw.spent_from(lambda project, person: cw.tl.time_file(project, person))
+    assert spent(tmp_path / "Nichts", "Oliver", "total", NOW.date()) == timedelta(0)
+
+
+def test_the_list_shows_the_time_in_all(tmp_path, projects, ledger):
+    clock = _clock(tmp_path, ledger)
+    ledger.seen(projects["Küche"], NOW - timedelta(hours=2), "Oliver")
+    ledger.seen(projects["Dachboden"], NOW - timedelta(hours=1), "Oliver")
+    spent = cw.spent_from(lambda project, person: cw.tl.time_file(project, person))
+    items = cw.render(clock, ledger, NOW, language="de", spent=spent, shows="total")["items"]
+    assert [i["text"] for i in items] == ["Dachboden · 12:40", "Küche · 11:30"]
+
+
+def test_the_running_stretch_counts_too(tmp_path, projects, ledger):
+    clock = _clock(tmp_path, ledger)
+    ledger.seen(projects["Küche"], NOW, "Oliver")
+    clock.set_project(projects["Küche"], "Oliver", NOW - timedelta(minutes=10))
+    spent = cw.spent_from(lambda project, person: cw.tl.time_file(project, person))
+    items = cw.render(clock, ledger, NOW, language="de", spent=spent, shows="total")["items"]
+    assert items[0]["text"] == "Küche · 11:40"
+
+
+def test_what_the_list_shows_is_a_setting():
+    from core.settings import SETTINGS
+    kind, default, allowed = SETTINGS["Time/recentShows"]
+    assert default == "total" and allowed == {"total", "week", "today"}

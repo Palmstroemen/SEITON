@@ -30,6 +30,8 @@ SETTINGS: Dict[str, Tuple[type, Any, Any]] = {
     "Time/roundStep": (str, "0", {"0", "5", "10", "15", "30"}),
     "Time/roundMode": (str, "up", {"up", "nearest"}),
     "Time/roundPer": (str, "stretch", {"stretch", "day"}),
+    # Beside the projects worked on last (the Headline's panel): the time in all, this week, today.
+    "Time/recentShows": (str, "total", {"total", "week", "today"}),
     # Scope's two rows (the projects, the MyOS folders); views of their own are to come.
     "Scope/projectsRow": (bool, False, None),  # off by default: suggestions show only on the left
     "Scope/templatesRow": (bool, True, None),

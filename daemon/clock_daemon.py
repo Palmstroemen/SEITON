@@ -30,10 +30,13 @@ LISTEN = 1.0  # how often it looks for the Headline's commands
 class Widget:
     """The clock as the Headline's widget (core/clock_widget.py): where its view goes, its ledger."""
 
-    def __init__(self, folder: Path, ledger: "cw.Ledger", language: str = "de") -> None:
+    def __init__(self, folder: Path, ledger: "cw.Ledger", language: str = "de",
+                 spent=None, shows: str = "total") -> None:
         self.folder = Path(folder)
         self.ledger = ledger
         self.language = language
+        self.spent = spent  # the time in a project from its time file (cw.spent_from)
+        self.shows = shows  # beside the projects worked on last: total, week, today
 
 
 class ClockService:
@@ -55,7 +58,8 @@ class ClockService:
     def show(self) -> None:
         if self.widget is not None:
             cw.write_view(self.widget.folder, cw.render(self.clock, self.widget.ledger, self.now(),
-                                                        language=self.widget.language))
+                                                        language=self.widget.language,
+                                                        spent=self.widget.spent, shows=self.widget.shows))
 
     def listen(self) -> bool:
         """The Headline's commands (start, stop, yes, no); True when there were any."""
@@ -75,7 +79,7 @@ class ClockService:
             self._seen = (project, person)
             self.clock.set_project(project, person, now)
             if project is not None and self.widget is not None:
-                self.widget.ledger.seen(project, now)
+                self.widget.ledger.seen(project, now, person)
         idle = self.idle()
         if idle is None:
             # No source answers: the clock cannot see a pause, only a switch of project.
@@ -94,6 +98,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--store", type=Path, default=None)
     parser.add_argument("--active", type=Path, default=None)
     parser.add_argument("--widget", type=Path, default=None, help="the folder of its widget in the Headline")
+    parser.add_argument("--recent", default="total", choices=list(cw.SHOWS),
+                        help="the time beside the projects worked on last")
     parser.add_argument("--language", default="de", choices=["de", "en"])
     parser.add_argument("--pause", type=float, default=5.0, help="the pause limit in minutes")
     parser.add_argument("--no-resume", action="store_true")
@@ -104,17 +110,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.drive is not None:
         if args.projects_root is None:
             parser.error("--drive needs --projects-root")
-        from core.role_drive import drive_writer
+        from core.role_drive import drive_path, drive_writer
         writer = drive_writer(args.drive, args.projects_root, language=args.language)
+        spent = cw.spent_from(lambda project, person: drive_path(args.drive, args.projects_root, project, person))
     else:
         writer = file_writer(language=args.language)
+        spent = cw.spent_from(cw.tl.time_file)
     settings = ClockSettings(pause=timedelta(minutes=args.pause), auto_resume=not args.no_resume,
                              dead_man=not args.no_dead_man)
     store = args.store or default_store()
     ledger = cw.Ledger(store.with_name("ledger.json"))
     clock = Clock(writer=cw.counting(writer, ledger), store=store, settings=settings)
     clock.recover(datetime.now())
-    widget = Widget(folder=args.widget or cw.folder(), ledger=ledger, language=args.language)
+    widget = Widget(folder=args.widget or cw.folder(), ledger=ledger, language=args.language,
+                    spent=spent, shows=args.recent)
     service = ClockService(clock, active=args.active or active_file(), idle=IdleTime(), inhibited=Inhibited(),
                            widget=widget)
 

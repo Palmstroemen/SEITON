@@ -15,8 +15,11 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+# Started as a script (python3 Headline/Headline.py) its own folder comes first on sys.path, and
+# "Headline" would mean this file, not the folder: "from Headline.model import ..." would fail.
+_HERE = Path(__file__).resolve().parent
+sys.path[:] = [p for p in sys.path if Path(p or ".").resolve() != _HERE]
+sys.path.insert(0, str(REPO_ROOT))
 
 from PySide6.QtCore import QObject, QPoint, QRect, QTimer, QTranslator, QUrl, Signal, Slot  # noqa: E402
 from PySide6.QtGui import QCursor, QGuiApplication  # noqa: E402
@@ -25,7 +28,7 @@ from PySide6.QtQml import QQmlApplicationEngine  # noqa: E402
 from core.brand import getenv  # noqa: E402
 from core.clock_sources import active_file, write_active  # noqa: E402
 from core.color_schemes import load_scheme  # noqa: E402
-from core.scope_api import ScopeApi  # noqa: E402
+from core.scope_api import ScopeApi, find_top_project_root, roots_below  # noqa: E402
 from core.settings import Settings  # noqa: E402
 from daemon.lens_link import LensLink  # noqa: E402
 from Headline.model import HeadlineModel  # noqa: E402
@@ -253,6 +256,17 @@ def parse_start(args: list) -> Tuple[Optional[str], Optional[dict]]:
     return place, request
 
 
+def start_place(place: Optional[str]) -> str:
+    """Where the Headline starts: the place given, else the home folder; outside any root it
+    looks downwards (A11) and starts in the first root below (the autostart gives no place)."""
+    start = Path(place or Path.home()).expanduser()
+    if find_top_project_root(start) is None:
+        below = roots_below(start)
+        if below:
+            return str(below[0])
+    return str(start)
+
+
 def to_logical(anchor: Optional[dict], ratio: float) -> Optional[dict]:
     """An anchor in device pixels (Cinnamon) in Qt's logical pixels."""
     if anchor is None or not ratio or ratio == 1.0:
@@ -268,7 +282,7 @@ def main(argv: Optional[list] = None) -> int:
     name = instance.server_name()
     if instance.hand_over(name, request or {"panel": None}):
         return 0
-    start = place or str(Path.home())
+    start = start_place(place)
     app = QGuiApplication([sys.argv[0]])
     app.setApplicationName("Headline")
     app.setWindowIcon(seiton_icon())

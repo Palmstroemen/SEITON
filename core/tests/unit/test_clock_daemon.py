@@ -186,3 +186,13 @@ def test_the_sandbox_may_write_the_widgets_folder_and_nothing_more(tmp_path, mon
     assert ("--bind", str(tmp_path / "run" / "seiton-clock"), str(sb.INSIDE / "widget")) in pairs
     program = command[command.index("--") + 1:]
     assert program[program.index("--widget") + 1] == str(sb.INSIDE / "widget")
+
+
+def test_what_the_recent_list_shows_reaches_the_clock(tmp_path, monkeypatch):
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    from core.settings import Settings
+    args = launcher.clock_arguments(Settings())
+    assert args[args.index("--recent") + 1] == "total"
+    Settings().set("Time/recentShows", "week")
+    args = launcher.clock_arguments(Settings())
+    assert args[args.index("--recent") + 1] == "week"

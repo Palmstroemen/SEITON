@@ -18,11 +18,13 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
+from core import time_log as tl
 from core.brand import config_dir, file_name
 
 KEEP_PROJECTS = 10  # the projects worked on last that the ledger remembers
 KEEP_DAYS = 31
 SHOWN_ITEMS = 10
+SHOWS = ("total", "week", "today")  # the time beside the projects worked on last (Time/recentShows)
 COMMANDS = ("start", "stop", "yes", "no")
 
 _WORDS = {
@@ -97,14 +99,19 @@ class Ledger:
         self._forget(day)
         self._save()
 
-    def seen(self, project: Path, when: datetime) -> None:
+    def seen(self, project: Path, when: datetime, person: str = "") -> None:
         self._entry(project)["last"] = when.isoformat()
+        if person:
+            self._entry(project)["person"] = person
         self._forget(when.date())
         self._save()
 
     def on(self, project: Path, day: date) -> timedelta:
         entry = self._data["projects"].get(str(project)) or {}
         return timedelta(minutes=float((entry.get("days") or {}).get(day.isoformat(), 0)))
+
+    def person(self, project: Path) -> str:
+        return str((self._data["projects"].get(str(project)) or {}).get("person") or "")
 
     def recent(self) -> List[Path]:
         projects = self._data["projects"]
@@ -121,8 +128,28 @@ def counting(writer: Callable, ledger: Ledger) -> Callable:
     return write
 
 
-def render(clock, ledger: Ledger, now: datetime, *, language: str) -> Dict[str, Any]:
-    """The widget's view (Headline/widgets.py) for the clock as it is now."""
+def spent_from(path_of: Callable[[Path, str], Path]) -> Callable[[Path, str, str, date], timedelta]:
+    """The time a person spent on a project, from the time file at path_of(project, person) -
+    the project's own file, or in the sandbox the one on the role's drive. shows: "total",
+    "week" (since Monday) or "today"."""
+    def spent(project: Path, person: str, shows: str, today: date) -> timedelta:
+        if not person:
+            return timedelta(0)
+        try:
+            stretches = tl.read(path_of(Path(project), person)).stretches
+        except (OSError, ValueError):
+            return timedelta(0)
+        since = {"today": today, "week": today - timedelta(days=today.weekday())}.get(shows)
+        return sum((s.duration for s in stretches if since is None or s.day >= since), timedelta(0))
+    return spent
+
+
+def render(clock, ledger: Ledger, now: datetime, *, language: str,
+           spent: Optional[Callable[[Path, str, str, date], timedelta]] = None,
+           shows: str = "total") -> Dict[str, Any]:
+    """The widget's view (Headline/widgets.py) for the clock as it is now. Beside the projects
+    worked on last the time `shows` from their time files (spent); without, what the ledger
+    counted today."""
     words = _words(language)
     view: Dict[str, Any] = {}
     project = clock.project
@@ -139,10 +166,14 @@ def render(clock, ledger: Ledger, now: datetime, *, language: str) -> Dict[str, 
                                             {"id": "no", "label": words["no"]}]}
     items = []
     for recent in ledger.recent()[:SHOWN_ITEMS]:
-        spent = ledger.on(recent, now.date())
+        if spent is None:
+            time_there = ledger.on(recent, now.date())
+        else:
+            person = ledger.person(recent) or (clock.person if project is not None and recent == Path(project) else "")
+            time_there = spent(recent, person, shows, now.date())
         if project is not None and recent == Path(project) and clock.state in ("runs", "asks"):
-            spent += clock.view(now)["running"]
-        items.append({"text": f"{recent.name} · {_hours(spent)}", "path": str(recent)})
+            time_there += clock.view(now)["running"]  # not written yet
+        items.append({"text": f"{recent.name} · {_hours(time_there)}", "path": str(recent)})
     view["items"] = items
     return view
 

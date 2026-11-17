@@ -35,3 +35,15 @@ def test_device_pixels_to_logical_ones():
     assert to_logical(anchor, 2.0) == {"x": 12, "y": 1040, "width": 36, "height": 40}
     assert to_logical(anchor, 1.0) == anchor
     assert to_logical(None, 2.0) is None
+
+
+def test_started_above_the_roots_it_goes_into_the_first_below(tmp_path):
+    from core.brand import META_DIR
+    from Headline.Headline import start_place
+
+    (tmp_path / "Dokumente" / META_DIR).mkdir(parents=True)
+    (tmp_path / "Dokumente" / META_DIR / "Project.md").write_text("x")
+    assert start_place(str(tmp_path)) == str(tmp_path / "Dokumente")
+    assert start_place(str(tmp_path / "Dokumente")) == str(tmp_path / "Dokumente")
+    (tmp_path / "Leer").mkdir()
+    assert start_place(str(tmp_path / "Leer")) == str(tmp_path / "Leer")  # no root: stays

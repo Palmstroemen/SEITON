@@ -34,21 +34,25 @@ def role_may(role: Role, projects_root: Union[str, Path], acls: Acls) -> Callabl
     return may
 
 
+def drive_path(folder: Path, projects_root: Union[str, Path], project: Path, person: str) -> Path:
+    """A project's time file through the drive at folder (the role's /0_Admin/Zeitaufwand):
+    /Projekte/<the project's way>/<person>.md - where the clock writes and reads it."""
+    root = Path(projects_root)
+    try:
+        rel = Path(project).relative_to(root)
+    except ValueError:
+        raise ValueError(f"{project}: not below {root}")
+    name = tl.time_file(Path("/"), person).name  # Security: checks the person's name
+    if not rel.parts or any(part in ("..", ".") or part.startswith(".") for part in rel.parts):
+        raise ValueError(f"{project}: no project way")
+    return Path(folder) / PROJECTS / rel / name
+
+
 def drive_writer(folder: Path, projects_root: Union[str, Path], *, language: str,
                  add: Callable = tl.add_to_file):
-    """The clock's writer inside its sandbox: a project's time file through the drive at folder
-    (the role's /0_Admin/Zeitaufwand), /Projekte/<the project's way>/<person>.md."""
-    root = Path(projects_root)
-
+    """The clock's writer inside its sandbox: a project's time file through the drive (drive_path)."""
     def write(project: Path, person: str, stretch):
-        try:
-            rel = Path(project).relative_to(root)
-        except ValueError:
-            raise ValueError(f"{project}: not below {root}")
-        name = tl.time_file(Path("/"), person).name  # Security: checks the person's name
-        if not rel.parts or any(part in ("..", ".") or part.startswith(".") for part in rel.parts):
-            raise ValueError(f"{project}: no project way")
-        return add(Path(folder) / PROJECTS / rel / name, person, stretch, language=language)
+        return add(drive_path(folder, projects_root, project, person), person, stretch, language=language)
     return write
 
 

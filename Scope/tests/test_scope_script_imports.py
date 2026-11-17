@@ -23,7 +23,7 @@ print("ok")
 """
 
 
-@pytest.mark.parametrize("program", ["Scope/Scope.py", "SunTree/SunTree.py"])
+@pytest.mark.parametrize("program", ["Scope/Scope.py", "SunTree/SunTree.py", "Headline/Headline.py"])
 def test_the_script_reaches_the_lens(program):
     # SunTree shares the lens with Scope (Designdocument Perspective Resolver MVP.md, A6).
     script = REPO_ROOT / program
