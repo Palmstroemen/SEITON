@@ -11,7 +11,13 @@
 # Without the department folder in a project, the project itself is shown (v1.1 fallback,
 # with its folders). Saving there lands in the department folder, born on the way (with
 # its template content). The first "Projekte" separates the department path from the way
-# to the project. Within a project, subprojects are reached through the project.
+# to the project. Within a project, subprojects are reached through the project: a way goes
+# on through it (/0_Admin/Zeitaufwand/Projekte/Firma/7_Arbeit/Kunde Huber), after what the
+# department folder holds (2026-11-16).
+#
+# Without fallback (the drive of a program with a role, "Designdocument Time.md" 7.2) a
+# missing department folder is shown empty and born when something is saved into it: the
+# project or a folder above would show more than the role allows.
 
 from __future__ import annotations
 
@@ -34,14 +40,18 @@ class DriveNode:
     project: Optional[Parts] = None
     rest: Parts = ()             # below the department path, inside the project
     fallback: Optional[Path] = None  # the department folder is missing: shown from here
+    missing: bool = False  # without fallback: the department folder is missing, shown empty
 
 
 class PerspectiveDrive:
     def __init__(self, projects_root: Union[str, Path],
-                 may: Optional[Callable[[Path, str], bool]] = None) -> None:
+                 may: Optional[Callable[[Path, str], bool]] = None, fallback: bool = True) -> None:
         self.projects_root = Path(projects_root).expanduser().resolve()
         # may(real_path, action) with action "read" or "write": the caller's ACL check.
         self._may = may or (lambda path, action: True)
+        # Without fallback (the drive of a program with a role) a missing department folder is
+        # shown empty, never the project or the nearest folder above it in its place.
+        self.fallback = fallback
 
     # --- reading ---------------------------------------------------------------------
 
@@ -64,7 +74,7 @@ class PerspectiveDrive:
             place = place + (name,)
             folder = self.projects_root.joinpath(*place)
             if is_project(folder):
-                return self._inside(lens, place, way[index + 1:])
+                return self._in_project(lens, place, way[index + 1:])
             if not holds_project(folder):
                 return None
         return DriveNode(is_dir=True, real=None, lens=lens)  # the shelf (or the way along it)
@@ -73,8 +83,13 @@ class PerspectiveDrive:
         node = self.node(path)
         if node is None or not node.is_dir:
             raise FileNotFoundError(path)
-        if node.real is not None:
-            return [p.name for p in children(node.real)]
+        if node.real is not None or node.missing:
+            names = [p.name for p in children(node.real)] if node.real is not None else []
+            if node.project is not None and not node.rest:
+                # the ways on to the subprojects, after what the department folder holds
+                ways = _ways(self.projects_root.joinpath(*node.project))
+                names += [name for name in ways if name not in names]
+            return names
         parts = _parts(path) or ()
         if not parts:
             return sorted(departments(self.projects_root), key=str.lower)
@@ -100,15 +115,16 @@ class PerspectiveDrive:
             raise FileNotFoundError(path)
         if parent.project is None:
             raise PermissionError(f"{path}: not inside a project")
-        if parent.fallback is not None and not parent.rest:
-            # The project itself is shown: saving goes into the department folder.
+        born = parent.missing or (parent.fallback is not None and not parent.rest)
+        if born:
+            # The department folder is missing: saving goes into it, born on the way.
             folder = self._department_folder(parent)
         else:
             folder = parent.real
         target = folder / parts[-1]
         if not self._may(target, "write"):
             raise PermissionError(path)
-        if parent.fallback is not None and not parent.rest:
+        if born:
             folder = bear_folder(self.projects_root.joinpath(*parent.project), parent.lens)
         return folder / parts[-1]
 
@@ -118,11 +134,47 @@ class PerspectiveDrive:
 
     # --- helpers ---------------------------------------------------------------------
 
+    def _in_project(self, lens: Parts, place: Parts, rest: Parts) -> Optional[DriveNode]:
+        """In the project at place: what its department folder holds, or else the way on to a
+        subproject (a way may go through a project, decided 2026-11-16)."""
+        if rest and not rest[0].startswith("."):
+            project_dir = self.projects_root.joinpath(*place)
+            shown = self._shown(project_dir, lens)
+            if shown is None or not (shown / rest[0]).exists():
+                for depth in range(1, len(rest) + 1):
+                    candidate = project_dir.joinpath(*rest[:depth])
+                    if rest[depth - 1].startswith("."):
+                        break
+                    if is_project(candidate):
+                        return self._in_project(lens, place + rest[:depth], rest[depth:])
+                    if not (candidate.is_dir() and holds_project(candidate)):
+                        break
+                else:
+                    return DriveNode(is_dir=True, real=None, lens=lens)  # a way, all along
+        return self._inside(lens, place, rest)
+
+    def _shown(self, project_dir: Path, lens: Parts) -> Optional[Path]:
+        """The folder a project shows for lens: its department folder, or (with fallback) the
+        nearest folder above it; None without fallback when the department folder is missing."""
+        department = project_dir.joinpath(*lens)
+        if department.is_dir():
+            return department
+        if not self.fallback:
+            return None
+        return next(p for p in [*department.parents] if p == project_dir or p.is_dir()
+                    and project_dir in p.parents)
+
     def _inside(self, lens: Parts, place: Parts, rest: Parts) -> Optional[DriveNode]:
         project_dir = self.projects_root.joinpath(*place)
         department = project_dir.joinpath(*lens)
         if department.is_dir():
             real, fallback = department.joinpath(*rest), None
+        elif not self.fallback:
+            if rest:
+                return None
+            if not self._may(department, "read"):
+                raise PermissionError(str(department))
+            return DriveNode(is_dir=True, real=None, lens=lens, project=place, missing=True)
         else:
             fallback = next(p for p in [*department.parents] if p == project_dir or p.is_dir()
                             and project_dir in p.parents)
@@ -135,6 +187,12 @@ class PerspectiveDrive:
 
     def _department_folder(self, node: DriveNode) -> Path:
         return self.projects_root.joinpath(*node.project, *node.lens)
+
+
+def _ways(project_dir: Path) -> List[str]:
+    """The folders of a project that are, or lead to, subprojects (hidden ones not)."""
+    return [p.name for p in children(project_dir)
+            if p.is_dir() and (is_project(p) or holds_project(p))]
 
 
 def _parts(path: str) -> Optional[Parts]:

@@ -103,8 +103,8 @@ class PerspectiveDriveFuse(Operations):
 
     def getattr(self, path: str, fh=None):
         node = self._node(path)
-        if node.real is None:  # a virtual level: a read-only folder
-            return {"st_mode": stat.S_IFDIR | 0o555, "st_nlink": 2, "st_size": 0,
+        if node.real is None:  # a virtual level: a read-only folder (a missing one: writable)
+            return {"st_mode": stat.S_IFDIR | (0o755 if node.missing else 0o555), "st_nlink": 2, "st_size": 0,
                     "st_ctime": self._mounted_at, "st_mtime": self._mounted_at, "st_atime": self._mounted_at,
                     "st_uid": os.getuid(), "st_gid": os.getgid()}
         info = self._call(lambda: os.lstat(node.real))
@@ -211,10 +211,11 @@ def mount_perspective_drive(
     mount_point: str,
     may: Optional[Callable[[Path, str], bool]] = None,
     foreground: bool = True,
+    fallback: bool = True,
 ):
     """Mount the turned tree of projects_root at mount_point (blocks while foreground)."""
     if FUSE is None:
         raise RuntimeError("fusepy is not installed")
     logger.info("perspective_fuse.mount projects_root=%s mount_point=%s", projects_root, mount_point)
-    fs = PerspectiveDriveFuse(PerspectiveDrive(projects_root, may=may))
+    fs = PerspectiveDriveFuse(PerspectiveDrive(projects_root, may=may, fallback=fallback))
     return FUSE(fs, str(mount_point), foreground=foreground, allow_other=False, nothreads=False)

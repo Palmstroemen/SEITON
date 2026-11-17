@@ -218,34 +218,58 @@ rule fits all projects, including those that do not exist yet.
 
 ### 7.2 How it is enforced
 
-The clock does not write the projects directly. It gets **the perspective** `0_Admin/Zeitaufwand`
-from the FUSE drive (`core/perspective_fuse.py`), where `/0_Admin/Zeitaufwand/Projekte/Küche`
-is `Projekte/Küche/0_Admin/Zeitaufwand`. SEITON starts it with bubblewrap:
+Built 16 November 2026 (step 4). The clock does not write the projects directly:
 
-- the drive's perspective `0_Admin/Zeitaufwand` bound in, read and write;
-- its state folder (`~/.local/state/seiton`), read and write;
-- the system read-only, an empty home, no projects folder.
+1. **Its own drive.** `cli/seiton_clock.py` mounts a perspective drive of the clock's own
+   (`core/role_drive.py`) at `$XDG_RUNTIME_DIR/seiton-drives/seiton-clock`. Every access on it
+   must be allowed by the role (`Programs.md`, `core/programs.py`) and by the person's ACLs, the
+   role asked first. Which program asks is told by the mount point, not by a process number: the
+   clock only ever sees this drive.
+2. **No fallback.** The general drive shows the project itself (or the nearest folder above)
+   where a department folder is missing, for "Save as" in LibreOffice. For a role that would show
+   more than the role allows (all of `0_Admin` in a project without `Zeitaufwand`). The drive of
+   a role shows a missing folder empty and bears it when something is saved into it.
+3. **Ways through projects.** A way in the drive goes on through a project to its subprojects
+   (`/0_Admin/Zeitaufwand/Projekte/Firma/7_Arbeit/Kunde Huber`), after what the department
+   folder holds; this holds for every drive (decided 2026-11-16).
+4. **The sandbox** (`core/sandbox.py`, bubblewrap): the system read-only; home, `/tmp` (and
+   with it the X11 socket), the runtime folder and the projects root hidden; the code read-only
+   again; a cleared environment without `DISPLAY`. Inside, at `/tmp/seiton`:
+   - `0_Admin/Zeitaufwand`: the role's folder from its drive, read and write;
+   - `state`: the clock's state (`~/.local/state/seiton`), read and write;
+   - `run`: the folder of `active-project.json`, read only;
+   - and the session bus.
 
-The drive's department paths are made of template folders (`core/perspective_drive.py`), so
-`Zeitaufwand` has to be one (section 2). For a project without the folder, the drive already
-bears a missing department folder on the way when saving; step 4 checks that this holds one
-level deeper too.
+   The projects root is hidden even where it lies inside the code (`SEITON_Test` in the
+   repository): a kept folder would show it again.
+
+   bwrap does not pass signals on. The clock is the sandbox's first process (`--as-pid-1`),
+   bwrap tells the launcher its pid (`--info-fd`), and the launcher sends it SIGTERM when it is
+   ended itself (logout): the clock then closes its running stretch at its last activity.
 
 A new project appears in the perspective by itself; no rule and no mount has to change. This is
 "what is a data silo today becomes a perspective with rights" made real: the clock sees the
 time files of all projects, as its own silo, and they still lie in the projects.
 
-The drive checks each write with the person's ACLs (`may(path, action)`), as for every program.
-So the clock cannot write where the person may not.
+Tried on the test machine (16 November 2026), with a plain folder standing in for the drive:
+inside, the home holds only the way to the code, `.ssh` is not there, no X11 socket and no
+`DISPLAY`, the code and `run` are read-only, the hidden `SEITON_Test/Projekte` is empty (8 entries
+outside), the idle time comes over the session bus, and the clock writes its rows through the
+bound folder. The drive itself could not be mounted from the development tool (its processes run
+with `no_new_privs`, so the setuid `fusermount` is refused); that is to be tried from a normal
+session.
 
 ### 7.3 What the prototype does not close
 
-- **X11**: to ask the idle time the clock needs the X socket, and on X11 any client with it can
-  read the keyboard. This is the same hole Flatpak has on X11. On Wayland the idle time comes
-  over a protocol that tells nothing else.
-- **D-Bus**: inhibitors are asked over the session bus. Without a filter (Flatpak's
-  `xdg-dbus-proxy`) the clock could also talk to other services. The prototype names it; a filter
-  is a later step.
+- **X11** is not needed where the desktop's idle monitor answers over D-Bus (Cinnamon, GNOME,
+  KDE): the sandbox has no X socket. Only the last resort, the XScreenSaver extension, would need
+  it, and on X11 any client with the socket can read the keyboard (the hole Flatpak has on X11).
+  The sandbox does not give it.
+- **D-Bus**: idle time and inhibitors are asked over the session bus. Without a filter
+  (Flatpak's `xdg-dbus-proxy`) the clock could also talk to other services. A filter is a later
+  step.
+- **Outside the home**, the system is visible read-only, except what is hidden (`/tmp`, the
+  runtime folder, the projects root). Other disks under `/media` or `/mnt` are to be hidden too.
 - A program started past SEITON is not in the fence.
 
 ### 7.4 What the ACLs need

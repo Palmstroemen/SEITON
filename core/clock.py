@@ -157,6 +157,12 @@ class Clock:
                 self._begin(last_input, "auto")
         self._save(force=self.state != state_before)
 
+    def pause_now(self) -> None:
+        """The clock ends (logout, shutdown): the running stretch closes at its last activity."""
+        if self._running is not None:
+            self._pause(self._running.activity)
+        self._save(force=True)
+
     # --- what the top bar shows --------------------------------------------------------------
 
     def view(self, now: datetime) -> Dict[str, Any]:
@@ -221,6 +227,9 @@ class Clock:
             except OSError as error:
                 logger.info("clock.write later project=%s error=%s", item.get("project"), error)
                 left.append(item)
+            except (ValueError, KeyError, TypeError) as error:
+                # never writable (outside the projects, a broken entry): waiting would not help
+                logger.warning("clock.write dropped project=%s error=%s", item.get("project"), error)
         if len(left) != len(self.pending):
             self.pending = left
             self._save(force=True)

@@ -146,7 +146,10 @@ def test_the_file_counts_whole_minutes():
     odd = tl.Stretch(day=date(2026, 11, 16), start=time(9, 0, 40),
                      duration=timedelta(minutes=40, seconds=40), kind="auto", note="")
     text = tl.render("Oliver", [odd], "de")
-    assert "| 09:00 | 0:41 |" in text  # a begun minute counts; the seconds stay out of the file
+    assert "| 09:00 | 0:41 |" in text  # to the nearest minute; the seconds stay out of the file
+    short = tl.Stretch(day=date(2026, 11, 16), start=time(9, 0), duration=timedelta(minutes=1, seconds=10),
+                       kind="auto", note="")
+    assert "| 09:00 | 0:01 |" in tl.render("Oliver", [short], "de")  # not 0:02
 
 
 # --- parents and children ------------------------------------------------------------------

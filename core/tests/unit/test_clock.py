@@ -278,3 +278,20 @@ def test_the_writer_writes_the_persons_file(tmp_path):
     stretch = tl.Stretch(day=date(2026, 11, 16), start=time(9, 0), duration=minutes(30), kind="auto")
     write(tmp_path, "Oliver", stretch)
     assert tl.read(tl.time_file(tmp_path, "Oliver")).stretches == [stretch]
+
+
+def test_a_stretch_no_project_can_ever_take_is_dropped(clock):
+    def refuse(project, person, stretch):
+        raise ValueError("outside the projects")
+    clock.writer = refuse
+    clock.set_project(KITCHEN, "Oliver", at(0))
+    clock.set_project(None, "Oliver", at(10))
+    assert clock.pending == []
+
+
+def test_when_the_clock_ends_the_stretch_closes_at_the_last_activity(clock, writer):
+    clock.set_project(KITCHEN, "Oliver", at(0))
+    clock.tick(at(20), idle(2))
+    clock.pause_now()
+    assert writer.stretches() == [(KITCHEN, time(9, 0), minutes(18), "auto")]
+    assert clock.state == "paused"

@@ -223,8 +223,9 @@ def read(path: Union[str, Path]) -> TimeLog:
 # --- writing -------------------------------------------------------------------------------
 
 def _minutes(duration: timedelta) -> int:
-    """Whole minutes for the file: a begun minute counts."""
-    return max(0, math.ceil(duration.total_seconds() / 60))
+    """Whole minutes for the file, to the nearest (half a minute up): neither gives nor takes,
+    rounding for invoices is done in the sums."""
+    return max(0, math.floor(duration.total_seconds() / 60 + 0.5))
 
 
 def _format_duration(duration: timedelta) -> str:
@@ -273,9 +274,14 @@ def render(person: str, stretches: Iterable[Stretch], language: str) -> str:
 def add(project: Union[str, Path], person: str, stretch: Stretch, *, language: str) -> Path:
     """Add a stretch at the end of the person's table; a new file is begun in `language`, an
     existing one keeps its language, its column order and everything written around the table."""
+    return add_to_file(time_file(project, person), person, stretch, language=language)
+
+
+def add_to_file(path: Path, person: str, stretch: Stretch, *, language: str) -> Path:
+    """add() into a given file (the clock in its sandbox reaches the projects through its drive)."""
     if stretch.kind not in KINDS:
         raise ValueError(f"kind {stretch.kind!r}")
-    path = time_file(project, person)
+    path = Path(path)
     try:
         text = path.read_text(encoding="utf-8")
     except FileNotFoundError:
