@@ -22,6 +22,7 @@ APPS = {
     "scope": (["Scope/*.qml", "Scope/Dialogs/*.qml", "Scope/js/*.js"], ["de"]),
     "postfix": (["PostFix/*.py"], ["de"]),
     "suntree": (["SunTree/*.qml", "SunTree/js/*.js"], ["de"]),
+    "headline": (["Headline/*.qml"], ["de"]),
 }
 
 
@@ -43,7 +44,7 @@ def update(app: str) -> None:
 
 
 def app_dir(app: str) -> str:
-    return {"scope": "Scope", "postfix": "PostFix", "suntree": "SunTree"}[app]
+    return {"scope": "Scope", "postfix": "PostFix", "suntree": "SunTree", "headline": "Headline"}[app]
 
 
 def main(argv) -> int:

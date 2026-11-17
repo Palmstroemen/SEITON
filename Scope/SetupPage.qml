@@ -40,6 +40,7 @@ Rectangle {
     property bool showHiddenOn: settings ? settings.setting("Scope/showHidden") === true : false
     property string templatesStyle: settings ? String(settings.setting("Scope/templatesStyle")) : "smallIcon"
     property string headlineDock: settings ? String(settings.setting("Headline/dock")) : "keep"
+    property string headlinePlace: settings ? String(settings.setting("Headline/place")) : "top"
     property string projectsStyle: settings ? String(settings.setting("Scope/projectsStyle")) : "text"
     property bool instantReopenOn: settings ? settings.setting("Scope/instantReopen") === true : true
     property string previewTuning: settings ? String(settings.setting("Scope/previewTuning")) : "balanced"
@@ -893,8 +894,17 @@ Rectangle {
 
             ColumnLayout {  // Headline (Scope/Designdocument Headline.md)
                 spacing: 8
-                Heading { text: qsTr("At the top edge") }
+                Heading { text: qsTr("Where") }
                 Choices {
+                    // A line at the top edge, or a panel from the taskbar (as the start menu).
+                    prefix: "headlinePlace"
+                    options: [{ value: "top", label: qsTr("Top edge") }, { value: "taskbar", label: qsTr("From the taskbar") }]
+                    current: root.headlinePlace
+                    onChosen: function(value) { root.headlinePlace = value; root.keep("Headline/place", value) }
+                }
+                Heading { text: qsTr("At the top edge"); visible: root.headlinePlace === "top" }
+                Choices {
+                    visible: root.headlinePlace === "top"
                     // As a taskbar can: always there, keeping its room, or hiding itself until
                     // the pointer touches the edge.
                     prefix: "headlineDock"
@@ -903,6 +913,7 @@ Rectangle {
                     onChosen: function(value) { root.headlineDock = value; root.keep("Headline/dock", value) }
                 }
                 Text {
+                    visible: root.headlinePlace === "top"
                     text: root.headlineDock === "keep"
                         ? qsTr("Windows stop below the line.")
                         : qsTr("The line comes when the pointer touches the top edge.")

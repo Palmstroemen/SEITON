@@ -128,3 +128,42 @@ def test_a_step_of_the_cascade_shows_its_folders(world):
     assert names == ["Musikstudio", "Reisen"]  # sorted, the projects of the level
     assert all(f["project"] for f in model.children(str(world["root"])))
     assert [f["name"] for f in model.children(str(world["studio"]))] == ["01_Info"]  # no hidden .seiton
+
+
+# --- the perspectives of the root (Designdocument Perspective Resolver MVP.md, A11) ----------
+
+def _perspectives(world, text):
+    (world["root"] / META_DIR / "Perspectives.md").write_text(text)
+
+
+def test_no_list_no_perspectives(world):
+    assert _model(world["studio"]).perspectives() == []
+
+
+def test_the_roots_perspectives_named_as_their_folder(world):
+    _perspectives(world, "# Perspectives\n04_Finanz\n9_Dokumentation/92_Bilder\n\n")
+    shown = _model(world["studio"]).perspectives()
+    assert [(p["name"], p["lens"]) for p in shown] == [
+        ("04_Finanz", ["04_Finanz"]), ("92_Bilder", ["9_Dokumentation", "92_Bilder"])]
+    assert not any(p["active"] for p in shown)
+
+
+def test_two_of_the_same_name_get_a_part_of_their_path(world):
+    _perspectives(world, "# Perspectives\n04_Finanz/Bilder\n9_Dokumentation/Bilder\n")
+    assert [p["name"] for p in _model(world["studio"]).perspectives()] == [
+        "Bilder (04_Finanz)", "Bilder (9_Dokumentation)"]
+
+
+def test_no_way_out_of_the_root(world):
+    _perspectives(world, "# Perspectives\n../Fremd\n/etc\n04_Finanz\n")
+    assert [p["name"] for p in _model(world["studio"]).perspectives()] == ["04_Finanz"]
+
+
+def test_a_perspective_puts_the_lens_on_and_off(world):
+    _perspectives(world, "# Perspectives\n04_Finanz\n")
+    model = _model(world["studio"])
+    assert model.wear(["04_Finanz"])
+    assert model.perspectives()[0]["active"]
+    assert model.view()["lens"]["active"]
+    assert model.wear(["04_Finanz"])  # the active one again: off
+    assert not model.perspectives()[0]["active"] and not model.view()["lens"]["active"]

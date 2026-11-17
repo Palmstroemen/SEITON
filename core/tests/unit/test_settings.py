@@ -91,3 +91,10 @@ def test_the_headline_keeps_its_room_or_hides_itself(config):
     assert Settings().get("Headline/dock") == "keep"
     assert Settings().set("Headline/dock", "hide") and Settings().get("Headline/dock") == "hide"
     assert not Settings().set("Headline/dock", "sideways")
+
+
+def test_the_headline_at_the_top_edge_or_from_the_taskbar(config):
+    # Scope/Designdocument Headline.md, 1: chosen in Setup, as a taskbar can be.
+    assert Settings().get("Headline/place") == "top"
+    assert Settings().set("Headline/place", "taskbar") and Settings().get("Headline/place") == "taskbar"
+    assert not Settings().set("Headline/place", "left")

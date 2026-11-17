@@ -182,3 +182,58 @@ def test_while_a_dropdown_is_open_it_stays(hiding, started):
     _call(line, "pointerLeft")
     _wait(app, 800)
     assert line.height() == line.property("lineHeight")
+
+
+# --- the panel (step 3): the same model as a list, opened at the pointer or at a button ------
+
+def _panel(started):
+    return _find(started, "panel")
+
+
+def _open_panel(started, anchor):
+    engine_backend = started["engine"]._backend
+    engine_backend.panelRequested.emit(anchor)
+    _settle(started["app"])
+    return _panel(started)
+
+
+def test_from_the_taskbar_the_panel_opens_upwards_above_the_button(started):
+    screen = QGuiApplication.primaryScreen().availableGeometry()
+    button = {"x": 10, "y": screen.y() + screen.height() - 2, "width": 40, "height": 40}
+    panel = _open_panel(started, button)
+    assert isinstance(panel, QWindow) and panel.isVisible()
+    assert panel.y() + panel.height() <= button["y"]  # above the button: upwards
+    assert panel.x() == 10
+
+
+def test_the_panel_lists_the_path_the_standard_folders_and_the_perspectives(world, started):
+    (world["root"] / META_DIR / "Perspectives.md").write_text("# Perspectives\n04_Finanz\n")
+    panel = _open_panel(started, None)  # at the pointer
+    assert panel.isVisible()
+    assert [o.property("label") for o in _all(started, "panelPath", panel)] == ["Projekte", "Musikstudio"]
+    folders = [o.property("label") for o in _all(started, "panelFolder", panel)]
+    assert folders[:2] == ["01_Info", "02_Planung"] and len(folders) == 6
+    assert [o.property("label") for o in _all(started, "panelPerspective", panel)] == ["04_Finanz"]
+
+
+def test_a_perspective_in_the_panel_puts_the_lens_on(world, started):
+    (world["root"] / META_DIR / "Perspectives.md").write_text("# Perspectives\n04_Finanz\n")
+    panel = _open_panel(started, None)
+    _activate(_all(started, "panelPerspective", panel)[0])
+    _settle(started["app"])
+    assert started["engine"]._backend.view()["lens"]["active"]
+    assert _all(started, "panelPerspective", panel)[0].property("textBold")  # worn: lit
+
+
+@pytest.fixture
+def from_the_taskbar(world):
+    from core.settings import Settings
+
+    assert Settings().set("Headline/place", "taskbar")
+    return world
+
+
+def test_from_the_taskbar_there_is_no_line(from_the_taskbar, started):
+    _settle(started["app"])
+    assert not _find(started, "headlineLine").isVisible()
+    assert _open_panel(started, None).isVisible()  # the panel still comes

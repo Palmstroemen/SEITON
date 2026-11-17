@@ -48,6 +48,8 @@ SETTINGS: Dict[str, Tuple[type, Any, Any]] = {
     "Scope/previewTuning": (str, "balanced", {"soft", "balanced", "aggressive"}),
     # The Headline at the top edge (Scope/Designdocument Headline.md, 1): always there, keeping
     # its room, or hiding itself until the pointer touches the edge.
+    # Where it lives: a line at the top edge, or a panel from the taskbar (as the start menu).
+    "Headline/place": (str, "top", {"top", "taskbar"}),
     "Headline/dock": (str, "keep", {"keep", "hide"}),
     # SunTree's crown (SunTree/Designdocument Krone.md, 5); line and radius as shares of R.
     "SunTree/lineT": (float, 0.7, (0.5, 0.85)),

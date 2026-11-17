@@ -28,7 +28,9 @@ Window {
     y: Screen.virtualY
     width: Screen.width
     height: expanded ? lineHeight : edgeHeight
-    visible: true
+    // From the taskbar (Setup) there is no line, only the panel.
+    property string placeMode: headline.placeMode()
+    visible: placeMode === "top"
     color: theme.bg || "#0f1014"
     title: "Headline"
 
@@ -56,7 +58,15 @@ Window {
     Connections {
         target: headline
         function onChanged() { line.refresh() }
-        function onDockChanged() { line.dockMode = headline.dockMode() }
+        function onDockChanged() {
+            line.dockMode = headline.dockMode()
+            line.placeMode = headline.placeMode()
+        }
+        function onPanelRequested(anchor) {
+            panelWindow.theme = line.theme
+            panelWindow.embryoOpacity = line.embryoOpacity
+            panelWindow.openAt(anchor)
+        }
     }
 
     // The pointer at the edge opens the line at once; it goes about 0.5 s after the pointer
@@ -151,6 +161,13 @@ Window {
                 moreList.dropBelow(moreButton, line)
             }
         }
+    }
+
+    Panel {
+        id: panelWindow
+        theme: line.theme
+        embryoOpacity: line.embryoOpacity
+        baseFont: line.baseFont
     }
 
     DropList {  // the way up: from the projects root down to where one is

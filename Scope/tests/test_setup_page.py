@@ -648,3 +648,16 @@ def test_the_headline_keeps_its_room_or_hides_itself(page):
     assert Settings().get("Headline/dock") == "hide" and _named(view, "headlineDock_hide").property("on")
     _click(view, _named(view, "headlineDock_keep"))
     assert Settings().get("Headline/dock") == "keep"
+
+
+def test_the_headline_at_the_top_edge_or_from_the_taskbar(page):
+    from core.settings import Settings
+
+    view, _ = page
+    _click(view, _named(view, "tabHeadline"))
+    assert _named(view, "headlinePlace_top").property("on")
+    _click(view, _named(view, "headlinePlace_taskbar"))
+    assert Settings().get("Headline/place") == "taskbar"
+    assert not _named(view, "headlineDock_keep").property("visible")  # only for the top edge
+    _click(view, _named(view, "headlinePlace_top"))
+    assert Settings().get("Headline/place") == "top" and _named(view, "headlineDock_keep").property("visible")

@@ -10,6 +10,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from core.brand import META_DIR
+
 
 class HeadlineModel:
     def __init__(self, api, link, start_path: str) -> None:
@@ -79,6 +81,50 @@ class HeadlineModel:
                 break
             steps.append(parent)
         return [{"name": step.name, "path": str(step)} for step in reversed(steps)]
+
+    # --- the perspectives of the root (Designdocument Perspective Resolver MVP.md, A11) -----
+
+    def perspectives(self) -> List[Dict[str, Any]]:
+        """The root's named perspectives (its .seiton/Perspectives.md), each named as its
+        folder; two of the same name get a part of their path. active: the lens wears it."""
+        lenses = self._listed_lenses()
+        worn = list(self.lens("state").get("lens") or []) if self.lens("state").get("active") else []
+        last = [parts[-1] for parts in lenses]
+        result = []
+        for parts in lenses:
+            name = parts[-1]
+            if last.count(name) > 1 and len(parts) > 1:
+                name = f"{name} ({'/'.join(parts[:-1])})"
+            result.append({"name": name, "lens": list(parts), "active": list(parts) == worn})
+        return result
+
+    def wear(self, lens: List[str]) -> bool:
+        """A click on a perspective: put that lens on; on the one worn already, take it off."""
+        state = self.lens("state")
+        if state.get("active") and list(state.get("lens") or []) == list(lens):
+            return bool(self._link.call("take_off", {}).get("ok"))
+        return bool(self._link.call("put_on", {"lens": list(lens)}).get("ok"))
+
+    def _listed_lenses(self) -> List[tuple]:
+        root = self._api.projects_root()
+        if root is None:
+            return []
+        listing = Path(root) / META_DIR / "Perspectives.md"
+        try:
+            lines = listing.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            return []
+        lenses = []
+        for line in lines:
+            text = line.strip()
+            if not text or text.startswith("#"):
+                continue
+            parts = tuple(part for part in text.split("/") if part)
+            # Security: a perspective is a folder path inside the root, nothing above it.
+            if text.startswith("/") or not parts or any(p in (".", "..") for p in parts):
+                continue
+            lenses.append(parts)
+        return lenses
 
     def children(self, path: str) -> List[Dict[str, Any]]:
         """The folders in one step of the cascade (real ones, sorted; no suggestions)."""

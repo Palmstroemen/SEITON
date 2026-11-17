@@ -146,6 +146,14 @@ widget shows grey "Clock not running", and its click starts it.
    first widget, with its time screen as its own window, and its start at login.
 3. **The panel:** the same model as a vertical list, with the perspectives and the buttons;
    opened at the pointer (launcher, shortcut).
+   Built 2026-11-17: `Headline/Panel.qml` - the path, the standard folders, the root's
+   perspectives (`.seiton/Perspectives.md`; a click puts that lens on, on the worn one takes it
+   off), "Open in Scope"; it opens towards the room (above a taskbar upwards) and a click
+   outside closes it. One Headline per user (`Headline/instance.py`, as PostFix): a later start,
+   `Headline.py --panel`, hands "open the panel" to the one running, at the pointer or at an
+   anchor (for the applet). Setup: "Where" - the top edge, or from the taskbar (no line then).
+   Still to come in the panel: the widgets and the person (2a), the clipboard, search, new
+   project and Setup buttons.
 4. **The Cinnamon applet:** the button in the taskbar that opens the panel above itself.
 5. Later: KDE's plasmoid; Wayland.
 

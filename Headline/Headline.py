@@ -9,15 +9,17 @@ cascade to climb; docking at the top edge comes in step 2.
 
 from __future__ import annotations
 
+import subprocess
 import sys
 from pathlib import Path
+from typing import Optional
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from PySide6.QtCore import QObject, QPoint, QRect, QTimer, QUrl, Signal, Slot  # noqa: E402
-from PySide6.QtGui import QGuiApplication  # noqa: E402
+from PySide6.QtCore import QObject, QPoint, QRect, QTimer, QTranslator, QUrl, Signal, Slot  # noqa: E402
+from PySide6.QtGui import QCursor, QGuiApplication  # noqa: E402
 from PySide6.QtQml import QQmlApplicationEngine  # noqa: E402
 
 from core.brand import getenv  # noqa: E402
@@ -26,7 +28,7 @@ from core.scope_api import ScopeApi  # noqa: E402
 from core.settings import Settings  # noqa: E402
 from daemon.lens_link import LensLink  # noqa: E402
 from Headline.model import HeadlineModel  # noqa: E402
-from Headline import popup_place, x11_dock  # noqa: E402
+from Headline import instance, popup_place, x11_dock  # noqa: E402
 from Scope.Scope import ThemeIconProvider  # noqa: E402
 from Scope.window_icon import seiton_icon  # noqa: E402
 
@@ -40,11 +42,14 @@ def _rect(value) -> tuple:
 class HeadlineBackend(QObject):
     changed = Signal()
     dockChanged = Signal()
+    # "Open the panel": at an anchor {x, y, width, height} (the applet's button), or None: at
+    # the pointer (the launcher, the shortcut). From a later start (Headline/instance.py).
+    panelRequested = Signal("QVariant")
 
     def __init__(self, model: HeadlineModel) -> None:
         super().__init__()
         self._model = model
-        self._dock = self._read_dock()
+        self._dock = (self._read_dock(), self.placeMode())
         self._follow = QTimer(self)
         self._follow.setInterval(FOLLOW_MS)
         self._follow.timeout.connect(self._tick)
@@ -80,13 +85,18 @@ class HeadlineBackend(QObject):
         return str(Settings().get("Headline/dock"))
 
     @Slot(result=str)
+    def placeMode(self) -> str:
+        """Where the Headline lives: "top" (the line) or "taskbar" (only the panel)."""
+        return str(Settings().get("Headline/place"))
+
+    @Slot(result=str)
     def dockMode(self) -> str:
-        return self._dock
+        return self._dock[0]
 
     @Slot(result=bool)
     def checkDock(self) -> bool:
-        """Read the setting anew (Setup may have changed it); True when it changed."""
-        now = self._read_dock()
+        """Read the settings anew (Setup may have changed them); True when one changed."""
+        now = (self._read_dock(), self.placeMode())
         if now == self._dock:
             return False
         self._dock = now
@@ -99,6 +109,32 @@ class HeadlineBackend(QObject):
         if ok:
             self.changed.emit()
         return ok
+
+    @Slot(result="QVariantList")
+    def perspectives(self) -> list:
+        return self._model.perspectives()
+
+    @Slot("QVariantList", result=bool)
+    def wear(self, lens) -> bool:
+        ok = self._model.wear([str(part) for part in lens])
+        if ok:
+            self.changed.emit()
+        return ok
+
+    @Slot(result="QVariantMap")
+    def pointerRect(self) -> dict:
+        pos = QCursor.pos()
+        return {"x": pos.x(), "y": pos.y(), "width": 1, "height": 1}
+
+    @Slot(result=bool)
+    def openScope(self) -> bool:
+        """Scope where one is (a program of its own; the Headline does not wait for it)."""
+        try:
+            subprocess.Popen([sys.executable, str(REPO_ROOT / "Scope" / "Scope.py"), self._model.cwd],
+                             cwd=str(REPO_ROOT), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return True
+        except OSError:
+            return False
 
     @Slot(result="QVariantMap")
     def colorScheme(self) -> dict:
@@ -153,11 +189,34 @@ def load_headline(model: HeadlineModel, app: QGuiApplication) -> QQmlApplication
     return engine
 
 
-def main() -> int:
-    start = sys.argv[1] if len(sys.argv) > 1 else str(Path.home())
-    app = QGuiApplication(sys.argv)
+def install_translator(app: QGuiApplication, code: str) -> Optional[QTranslator]:
+    """The Headline in the language code (as Scope and SunTree): the strings in the code are
+    English, others load i18n/headline_<code>.qm. None for English or without a translation."""
+    if code == "en":
+        return None
+    translator = QTranslator(app)
+    if not translator.load(str(Path(__file__).with_name("i18n") / f"headline_{code}.qm")):
+        return None
+    app.installTranslator(translator)
+    return translator
+
+
+def main(argv: Optional[list] = None) -> int:
+    """Headline.py [--panel] [place]: one Headline per user; a later start hands "open the
+    panel" to the one running (the launcher in the taskbar, the shortcut) and ends."""
+    args = list(sys.argv[1:] if argv is None else argv)
+    wants_panel = "--panel" in args
+    places = [a for a in args if not a.startswith("--")]
+    name = instance.server_name()
+    if instance.hand_over(name, {"panel": None}):
+        return 0
+    start = places[0] if places else str(Path.home())
+    app = QGuiApplication([sys.argv[0]])
     app.setApplicationName("Headline")
     app.setWindowIcon(seiton_icon())
+    install_translator(app, str(Settings().get("General/language")))
+    server = instance.InstanceServer(name)
+    server.listen()
     api = ScopeApi(start)
     link = LensLink(api, start_daemon=getenv("SCOPE_START_DAEMON", "1") != "0")
     engine = load_headline(HeadlineModel(api, link, start), app)
@@ -167,8 +226,12 @@ def main() -> int:
     backend = engine._backend
     dock(window, backend)
     backend.dockChanged.connect(lambda: dock(window, backend))
+    server.panelRequested.connect(backend.panelRequested.emit)
     backend.start_following()
+    if wants_panel:
+        QTimer.singleShot(0, lambda: backend.panelRequested.emit(None))
     code = app.exec()
+    server.close()
     link.close()
     return code
 
