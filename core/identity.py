@@ -77,6 +77,22 @@ def acl_user_for(path: Union[str, Path]) -> str:
     return person_in(_listed_people(root) if root is not None else ())
 
 
+def person_for(path: Union[str, Path]) -> str:
+    """The person at path as written in the project's "# Users" (Designdocument Time.md, 2:
+    the time file is named so), else as written among one's own names, else the key itself."""
+    key = acl_user_for(path)
+    policy = _policy(path)
+    if policy is not None and key in getattr(policy, "users", {}):
+        return policy.display_name(key)
+    override = str(getenv("ACL_USER") or "").strip()
+    if override and override.lower() == key:
+        return override
+    for name in own_names():
+        if name.strip().lower() == key:
+            return name.strip()
+    return key
+
+
 def is_listed(path: Union[str, Path]) -> bool:
     """Whether the user is one of the people of the project governing path."""
     root = find_acl_project_root(Path(path).expanduser())

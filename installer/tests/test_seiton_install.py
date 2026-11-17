@@ -297,11 +297,38 @@ def test_the_applet_is_valid_javascript():
     assert subprocess.run([node, "--check", str(script)], capture_output=True).returncode == 0
 
 
+# --- the time tracking (Designdocument Time.md; Headline.md, 3a) ----------------------------
+
+def test_the_time_screen_and_the_clock_get_launchers(places):
+    _install(places)
+    for name, script in (("seiton-time", "Time/TimeScreen.py"), ("seiton-clock", "cli/seiton_clock.py")):
+        launcher = places.bin / name
+        assert launcher.is_file() and os.access(launcher, os.X_OK)
+        assert str(REPO / script) in launcher.read_text(encoding="utf-8")
+
+
+def test_the_clock_registers_as_the_headlines_widget(places, monkeypatch):
+    import json
+    monkeypatch.setenv("XDG_RUNTIME_DIR", "/run/user/4711")
+    _install(places)
+    registration = json.loads((places.config / "headline" / "widgets" / "clock.json").read_text(encoding="utf-8"))
+    assert registration["folder"] == "/run/user/4711/seiton-clock"
+    assert registration["open"] == [str(places.bin / "seiton-time")]
+    assert set(registration["commands"]) == {"start", "stop"}
+
+
+def test_uninstall_takes_the_registration_away(places):
+    _install(places)
+    inst.uninstall(places, run=Runner())
+    assert not (places.config / "headline" / "widgets" / "clock.json").exists()
+    assert not (places.bin / "seiton-time").exists() and not (places.bin / "seiton-clock").exists()
+
+
 # --- uninstalling ---------------------------------------------------------------------------
 
 def test_uninstall_takes_what_it_wrote_and_keeps_settings_and_templates(places):
     _install(places, thumbnailer=True)
-    places.config.mkdir(parents=True)
+    places.config.mkdir(parents=True, exist_ok=True)
     (places.config / "seiton.conf").write_text("[General]\n")
     runner = Runner()
     inst.uninstall(places, run=runner)

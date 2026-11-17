@@ -223,6 +223,11 @@ def launchers(places: Places, written: Written) -> None:
             written.text(places.bin / tool, _launcher(places, script), executable=True)
     written.text(places.bin / HEADLINE, _launcher(places, places.repo / "Headline" / "Headline.py"),
                  executable=True)
+    # The time tracking: its screen, and the clock (started in its sandbox, cli/seiton_clock.py).
+    written.text(places.bin / file_name("time"), _launcher(places, places.repo / "Time" / "TimeScreen.py"),
+                 executable=True)
+    written.text(places.bin / file_name("clock"), _launcher(places, places.repo / "cli" / "seiton_clock.py"),
+                 executable=True)
     postfix = places.repo / "PostFix" / "cli.py"
     if postfix.is_file():  # "postfix" alone is a mail server's command
         written.text(places.bin / file_name("postfix"), _launcher(places, postfix), executable=True)
@@ -278,6 +283,17 @@ def cinnamon_applet(places: Places, written: Written, which: Which) -> None:
     written.text(target / "applet.js", script.replace("__LAUNCHER__", str(places.bin / HEADLINE)))
     written.copy(source / "metadata.json", target / "metadata.json")
     written.copy(places.repo / "assets" / "brand" / file_name("icon-small.svg"), target / "icon.svg")
+
+
+def clock_widget(places: Places, written: Written) -> None:
+    """The clock as the Headline's widget (core/clock_widget.py): its registration; a click on
+    it opens the time screen."""
+    import json
+    from core import clock_widget as cw
+
+    registration = cw.registration(cw.folder(), [str(places.bin / file_name("time"))])
+    written.text(places.config / "headline" / "widgets" / "clock.json",
+                 json.dumps(registration, ensure_ascii=False, indent=2) + "\n")
 
 
 def headline_at_login(places: Places, written: Written) -> None:
@@ -340,6 +356,7 @@ def install(places: Places, options: Options, run: Run = run_command, ask: Ask =
     menu_entry(places, written, run)
     headline_entry(places, written)
     cinnamon_applet(places, written, which)
+    clock_widget(places, written)
     templates(places)
     if options.suntree:
         suntree(places, run)

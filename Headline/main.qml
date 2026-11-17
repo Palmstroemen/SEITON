@@ -79,6 +79,20 @@ Window {
 
     // The pointer at the edge opens the line at once; it goes about 0.5 s after the pointer
     // left, not while a dropdown of it is open.
+    // The dropdowns close once the pointer has left them and the line for about 0.6 s.
+    readonly property bool pointerNearPopups: pointerInside || climbList.pointerInside
+                                              || cascade.pointerInside || moreList.pointerInside
+    Timer {
+        id: popupCloser
+        interval: 600
+        running: line.popupOpen && !line.pointerNearPopups
+        onTriggered: {
+            climbList.close()
+            cascade.close()
+            moreList.close()
+        }
+    }
+
     function pointerEntered() {
         collapseTimer.stop()
         pointerInside = true

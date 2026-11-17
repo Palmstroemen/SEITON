@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 from core.brand import META_DIR
-from core.identity import acl_user_for
+from core.identity import person_for
 from core.scope_api import find_project_root
 
 
@@ -65,7 +65,7 @@ class HeadlineModel:
         if self._report is None:
             return
         project = self.active_project()
-        person = acl_user_for(project) if project else ""
+        person = person_for(project) if project else ""
         if (project, person) != self._reported:
             self._reported = (project, person)
             self._report(project, person)

@@ -64,6 +64,11 @@ Both show the same: one model, two ways of drawing it.
 - **Popups are windows of their own.** In M today the dropdowns and the cascade are items in
   Scope's window (`floatingPool`): in a line 30 px high they would be cut off at its edge. Each
   dropdown, cascade and menu becomes a small window of its own.
+- **They take no clicks from each other** (2026-11-17, seen on the desktop): the dropdowns and
+  the cascade are tool tip windows, not popups - on X11 a second popup took every click, and
+  one could never click back in the way up. They close once the pointer has left them and the
+  line for about 0.6 s, or after a choice; a whole row takes the click, as in a menu. Only the
+  panel is a popup (a click outside closes it); it has no cascade.
 - **They open towards the room.** Where the Headline sits tells the direction: from the top edge
   down, from a taskbar at the bottom up, at the left or right towards the middle. Qt gives the
   screen and the room left by the panels (`QScreen.geometry`, `availableGeometry`); from them,

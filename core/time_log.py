@@ -302,6 +302,51 @@ def add_to_file(path: Path, person: str, stretch: Stretch, *, language: str) -> 
     return path
 
 
+def _rewrite(path: Path, old: Stretch, new: Optional[Stretch]) -> bool:
+    """Replace (new) or take away (None) the first row equal to old; everything else in the file
+    stays. Written anew and swapped in. False when there is no such row."""
+    path = Path(path)
+    try:
+        text = path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return False
+    lines = text.splitlines()
+    table = _table(lines)
+    if table is None:
+        return False
+    index, columns, language, end = table
+    for at in range(index + 1, end):
+        if _is_rule(lines[at]):
+            continue
+        try:
+            stretch = _row(columns, lines[at])
+        except (ValueError, KeyError):
+            continue
+        if stretch != old:
+            continue
+        if new is None:
+            del lines[at]
+        else:
+            if new.kind not in KINDS:
+                raise ValueError(f"kind {new.kind!r}")
+            lines[at] = _format_row(columns, language, new)
+        temporary = path.with_name(f".{path.name}.writing")
+        temporary.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        os.replace(temporary, path)
+        return True
+    return False
+
+
+def change(path: Union[str, Path], old: Stretch, new: Stretch) -> bool:
+    """Correct a row (the time screen, with the person's own rights)."""
+    return _rewrite(Path(path), old, new)
+
+
+def remove(path: Union[str, Path], stretch: Stretch) -> bool:
+    """Take a row away (the time screen, with the person's own rights)."""
+    return _rewrite(Path(path), stretch, None)
+
+
 # --- the day and the gaps ------------------------------------------------------------------
 
 def split_days(start: datetime, duration: timedelta, *, kind: str, note: str = "",

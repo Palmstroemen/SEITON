@@ -283,3 +283,30 @@ def test_in_the_panel_the_last_three_and_more(a_clock, started):
 def test_without_widgets_nothing_stands_there(started):
     _settle(started["app"])
     assert _all(started, "widget") == []
+
+
+# --- dropdowns do not take the clicks (2026-11-17: a second popup took them on X11, so one
+# --- could never click back in the way up; seen on the real desktop, not offscreen) ----------
+
+def test_the_dropdowns_take_no_clicks_from_each_other(started):
+    from PySide6.QtCore import Qt
+    for name in ("climbList", "cascade", "moreList"):
+        flags = _find(started, name).flags()
+        assert (flags & Qt.WindowType.WindowType_Mask) == Qt.WindowType.ToolTip, name
+
+
+def test_they_close_once_the_pointer_left_them_and_the_line(started):
+    app = started["app"]
+    _activate(_find(started, "cwdButton"))
+    _settle(app)
+    climb = _find(started, "climbList")
+    climb.setProperty("pointerInside", True)
+    _wait(app, 900)
+    assert climb.isVisible()  # the pointer is in it
+    _find(started, "headlineLine").setProperty("pointerInside", True)
+    climb.setProperty("pointerInside", False)
+    _wait(app, 900)
+    assert climb.isVisible()  # on the line it stays too
+    _find(started, "headlineLine").setProperty("pointerInside", False)
+    _wait(app, 900)
+    assert not climb.isVisible()

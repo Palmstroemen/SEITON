@@ -14,7 +14,12 @@ Window {
     signal chosen(string path)
     signal hovered(Item item, var entry)
 
-    flags: Qt.Popup | Qt.FramelessWindowHint
+    // Not a popup: on X11 a second popup (the cascade) takes every click, and one could never
+    // click back in the way up. A tool tip window takes no clicks from the others; the line
+    // closes it when the pointer has left (main.qml, popupCloser).
+    flags: Qt.ToolTip | Qt.FramelessWindowHint
+    property bool pointerInside: false
+    HoverHandler { onHoveredChanged: list.pointerInside = hovered }
     color: theme.panel || "#202124"
     width: Math.max(160, column.implicitWidth + 8)
     height: column.implicitHeight + 8
@@ -51,6 +56,7 @@ Window {
                 model: list.entries
                 delegate: FolderItem {
                     objectName: "dropRow"
+                    hitAreaFullButton: true  // a menu row: the whole row takes the click
                     width: Math.max(implicitWidth, column.width)
                     label: modelData.name
                     style: "smallIcon"

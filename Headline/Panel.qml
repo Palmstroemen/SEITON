@@ -97,6 +97,7 @@ Window {
                 model: panel.view.folders || []
                 delegate: FolderItem {
                     objectName: "panelFolder"
+                    hitAreaFullButton: true
                     width: content.width
                     label: modelData.name
                     style: "smallIcon"
@@ -123,6 +124,7 @@ Window {
                 model: panel.perspectives
                 delegate: FolderItem {
                     objectName: "panelPerspective"
+                    hitAreaFullButton: true
                     width: content.width
                     label: modelData.name
                     style: "smallIcon"
@@ -147,6 +149,7 @@ Window {
                     Heading { text: widgetColumn.entry.name }
                     FolderItem {
                         objectName: "panelWidget"
+                        hitAreaFullButton: true
                         width: content.width
                         label: widgetColumn.entry.text
                         style: "text"
@@ -188,6 +191,7 @@ Window {
                         model: widgetColumn.entry.items.slice(0, 3)
                         delegate: FolderItem {
                             objectName: "panelWidgetItem"
+                            hitAreaFullButton: true
                             width: content.width
                             label: modelData.text
                             style: "text"
@@ -201,6 +205,7 @@ Window {
                     }
                     FolderItem {  // all of them, to see and correct: the widget's own screen
                         objectName: "panelWidgetMore"
+                        hitAreaFullButton: true
                         visible: widgetColumn.entry.items.length > 3
                         label: qsTr("More")
                         style: "text"
