@@ -187,7 +187,7 @@ on/off, rounding.
 | The clock | `core/clock.py` | the states (stands, runs, paused, asks, stopped by hand), driven by events and a clock; no Qt, no system calls |
 | Sources | `core/clock_sources.py` | `IdleSource` (X11, Wayland, fake), inhibitors, the active project |
 | The program | `daemon/clock_daemon.py` (`seiton-clock`) | runs the clock, tells the top bar over a socket what it shows |
-| The button and the screen | `Scope/` (top bar form) | the clock button, the time screen, the Setup part |
+| The widget and the screen | the time tracking itself; shown by the Headline (Scope/Designdocument Headline.md, 3a) | its view and command files, the time screen as its own window with its settings |
 
 The clock is a program of its own rather than a part of Scope: it has to run when no Scope
 window is open, and it gets a role of its own (section 7).
@@ -316,8 +316,11 @@ Each step with its tests first (fake clock, fake idle source, tmp projects).
    after that.
 4. **The program** `seiton-clock` and its role: the perspective `0_Admin/Zeitaufwand` from the
    FUSE drive, the start in bubblewrap, `Programs.md`; `{Self}` in the ACLs.
-5. **The button and the time screen** in the top bar form of Scope, once that form is ready;
-   the Setup part.
+5. **The widget and the time screen** (decided 2026-11-17): the time tracking is a program of its
+   own that puts itself into the Headline as a widget, and may be missing or replaced; the
+   Headline writes the active project; the time screen is the time tracking's own window, with
+   the person's rights, and holds its settings (Scope/Designdocument Headline.md, 3a). The last
+   three projects worked on with their time, and "More", in the Headline's panel.
 6. Later: the phone (section 8).
 
 ## 10. Decisions (16 November 2026)
