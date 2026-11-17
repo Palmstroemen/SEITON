@@ -203,6 +203,9 @@ def python_packages(places: Places, run: Run) -> None:
     run([str(places.python), "-m", "pip", "install", "--upgrade", "pip"])
     if run([str(places.python), "-m", "pip", "install", "-r", str(places.repo / "installer" / "requirements.txt")]) != 0:
         raise SystemExit("Installing the Python packages failed.")
+    if run([str(places.python), "-m", "pip", "install", "--no-deps", "-r",
+            str(places.repo / "installer" / "requirements-nodeps.txt")]) != 0:
+        raise SystemExit("Installing the Python packages failed.")
 
 
 def launchers(places: Places, written: Written) -> None:

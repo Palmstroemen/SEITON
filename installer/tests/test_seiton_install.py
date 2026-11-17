@@ -104,6 +104,32 @@ def test_python_packages_go_into_seitons_own_venv(places):
     assert [python, "-m", "pip", "install", "-r", str(REPO / "installer" / "requirements.txt")] in runner.commands
 
 
+def _requirements(name):
+    lines = (REPO / "installer" / name).read_text(encoding="utf-8").splitlines()
+    return [line.split("#")[0].strip() for line in lines if line.split("#")[0].strip()]
+
+
+def test_nothing_needs_a_compiler():
+    # pynput asks for evdev on Linux, which is only source and needs gcc and kernel headers
+    # (Ubuntu 24.04 container, 2026-11-16). SunTree uses pynput's X11 way, which needs
+    # python-xlib only: so pynput comes without its own dependencies, these given by hand.
+    assert not any(line.startswith("pynput") for line in _requirements("requirements.txt"))
+    plain = _requirements("requirements-nodeps.txt")
+    assert any(line.startswith("pynput") for line in plain)
+    assert not any(line.startswith("evdev") for line in plain + _requirements("requirements.txt"))
+    given = _requirements("requirements.txt")
+    assert any(line.startswith("python-xlib") for line in given) and any(line.startswith("six") for line in given)
+
+
+def test_the_packages_without_dependencies_come_after_the_others(places):
+    runner = _install(places)
+    python = str(places.venv / "bin" / "python")
+    with_deps = [python, "-m", "pip", "install", "-r", str(REPO / "installer" / "requirements.txt")]
+    plain = [python, "-m", "pip", "install", "--no-deps", "-r", str(REPO / "installer" / "requirements-nodeps.txt")]
+    assert with_deps in runner.commands and plain in runner.commands
+    assert runner.commands.index(with_deps) < runner.commands.index(plain)
+
+
 def test_qt_is_pinned_to_one_minor_version():
     lines = (REPO / "installer" / "requirements.txt").read_text(encoding="utf-8").splitlines()
     qt = [line for line in lines if line.startswith("PySide6")]

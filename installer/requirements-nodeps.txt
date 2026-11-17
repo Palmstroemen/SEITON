@@ -1,0 +1,4 @@
+# Installed with --no-deps after requirements.txt (installer/seiton_install.py).
+# pynput asks for evdev on Linux, which is only source and needs gcc and kernel headers
+# (Ubuntu 24.04, 2026-11-16); SunTree uses pynput's X11 way, which needs python-xlib only.
+pynput>=1.7

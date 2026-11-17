@@ -9,4 +9,7 @@ mdit-py-plugins
 casbin>=1.43.0
 pydantic>=2.12.5
 Pillow  # EXIF dates, Markdown previews
-pynput  # SunTree's shortcut (Ctrl+Alt+Space)
+# SunTree's shortcut (Ctrl+Alt+Space): what pynput's X11 way needs; pynput itself comes without
+# its dependencies (requirements-nodeps.txt), they would ask for evdev, which needs a compiler.
+python-xlib>=0.17
+six
