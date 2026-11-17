@@ -4,17 +4,22 @@
 <context>
     <name>Panel</name>
     <message>
-        <location filename="../Panel.qml" line="92"/>
+        <location filename="../Panel.qml" line="95"/>
         <source>Folders</source>
         <translation>Ordner</translation>
     </message>
     <message>
-        <location filename="../Panel.qml" line="116"/>
+        <location filename="../Panel.qml" line="119"/>
         <source>Perspectives</source>
         <translation>Perspektiven</translation>
     </message>
     <message>
-        <location filename="../Panel.qml" line="142"/>
+        <location filename="../Panel.qml" line="205"/>
+        <source>More</source>
+        <translation>Weitere</translation>
+    </message>
+    <message>
+        <location filename="../Panel.qml" line="222"/>
         <source>Open in Scope</source>
         <translation>In Scope öffnen</translation>
     </message>

@@ -237,3 +237,49 @@ def test_from_the_taskbar_there_is_no_line(from_the_taskbar, started):
     _settle(started["app"])
     assert not _find(started, "headlineLine").isVisible()
     assert _open_panel(started, None).isVisible()  # the panel still comes
+
+
+# --- widgets (step 2a): the time tracking and others put themselves in ------------------------
+
+@pytest.fixture
+def a_clock(world, tmp_path):
+    import json
+    from Headline import widgets
+
+    folder = tmp_path / "run" / "seiton-clock"
+    folder.mkdir(parents=True)
+    widgets.widgets_dir().mkdir(parents=True)
+    (widgets.widgets_dir() / "clock.json").write_text(json.dumps(
+        {"name": "Time", "folder": str(folder), "open": ["true"], "commands": ["start", "stop"]}))
+    items = [{"text": f"P{i} · 0:{i}0", "path": str(world["root"] / f"P{i}")} for i in range(5)]
+    (folder / "view.json").write_text(json.dumps({
+        "text": "Musikstudio · 2:15", "state": "asking", "items": items,
+        "question": {"text": "Still working on Musikstudio?",
+                     "answers": [{"id": "yes", "label": "Yes"}, {"id": "no", "label": "No"}]}}))
+    return folder
+
+
+def test_a_widget_stands_in_the_line(a_clock, started):
+    _settle(started["app"])
+    [widget] = _all(started, "widget")
+    assert widget.property("label") == "Musikstudio · 2:15"
+    assert [o.property("label") for o in _all(started, "widgetAnswer")] == ["Yes", "No"]
+
+
+def test_an_answer_tells_the_widget(a_clock, started):
+    _settle(started["app"])
+    _activate(_all(started, "widgetAnswer")[0])
+    _settle(started["app"])
+    assert [p.name.split("-", 1)[1] for p in (a_clock / "commands").iterdir()] == ["yes"]
+
+
+def test_in_the_panel_the_last_three_and_more(a_clock, started):
+    panel = _open_panel(started, None)
+    assert [o.property("label") for o in _all(started, "panelWidgetItem", panel)] == [
+        "P0 · 0:00", "P1 · 0:10", "P2 · 0:20"]
+    assert len(_all(started, "panelWidgetMore", panel)) == 1
+
+
+def test_without_widgets_nothing_stands_there(started):
+    _settle(started["app"])
+    assert _all(started, "widget") == []

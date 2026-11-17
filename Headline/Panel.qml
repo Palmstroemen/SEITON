@@ -12,6 +12,7 @@ Window {
     property var view: ({})
     property var steps: []
     property var perspectives: []
+    property var widgets: []
     property var theme: ({})
     property real embryoOpacity: 0.4
     property int baseFont: 13
@@ -28,6 +29,7 @@ Window {
         view = headline.view()
         steps = headline.climb()
         perspectives = headline.perspectives()
+        widgets = headline.widgets()
     }
     // anchor: {x, y, width, height} on the screen (the applet's button), or null: the pointer.
     function openAt(anchor) {
@@ -47,6 +49,7 @@ Window {
     Connections {
         target: headline
         function onChanged() { if (panel.visible) panel.refresh() }
+        function onWidgetsChanged() { if (panel.visible) panel.widgets = headline.widgets() }
     }
 
     component Heading: Text {
@@ -131,6 +134,83 @@ Window {
                     textSize: panel.baseFont
                     textBold: modelData.active
                     onActivate: headline.wear(modelData.lens)
+                }
+            }
+
+            Repeater {  // the widgets: what each shows, its answers, its last three, "More"
+                model: panel.widgets
+                delegate: Column {
+                    id: widgetColumn
+                    readonly property var entry: modelData
+                    width: content.width
+                    spacing: 2
+                    Heading { text: widgetColumn.entry.name }
+                    FolderItem {
+                        objectName: "panelWidget"
+                        width: content.width
+                        label: widgetColumn.entry.text
+                        style: "text"
+                        compactHeight: panel.rowHeight
+                        fillColor: widgetColumn.entry.state === "active" ? (panel.theme.smallButtonActiveBg || "#2c3a55")
+                                                                        : (panel.theme.pill || "#2c3040")
+                        strokeColor: widgetColumn.entry.state === "asking" ? (panel.theme.lensFrame || "#d97706")
+                                                                          : (panel.theme.pillBorder || "#3a3f52")
+                        textColor: panel.theme.text || "#e6e6e6"
+                        textSize: panel.baseFont
+                        onActivate: { headline.widgetOpen(widgetColumn.entry.id); panel.close() }
+                    }
+                    Text {
+                        visible: !!widgetColumn.entry.question
+                        text: widgetColumn.entry.question ? widgetColumn.entry.question.text : ""
+                        color: panel.theme.text || "#e6e6e6"
+                        font.pixelSize: panel.baseFont
+                        wrapMode: Text.WordWrap
+                        width: content.width
+                    }
+                    Row {
+                        spacing: 4
+                        Repeater {
+                            model: widgetColumn.entry.question ? widgetColumn.entry.question.answers : []
+                            delegate: FolderItem {
+                                objectName: "panelWidgetAnswer"
+                                label: modelData.label
+                                style: "text"
+                                compactHeight: panel.rowHeight
+                                fillColor: panel.theme.smallButtonBg || "#2c3040"
+                                strokeColor: panel.theme.lensFrame || "#d97706"
+                                textColor: panel.theme.text || "#e6e6e6"
+                                textSize: panel.baseFont
+                                onActivate: headline.widgetTell(widgetColumn.entry.id, modelData.id)
+                            }
+                        }
+                    }
+                    Repeater {  // the last three; a click goes there
+                        model: widgetColumn.entry.items.slice(0, 3)
+                        delegate: FolderItem {
+                            objectName: "panelWidgetItem"
+                            width: content.width
+                            label: modelData.text
+                            style: "text"
+                            compactHeight: panel.rowHeight - 2
+                            fillColor: panel.theme.pill || "#2c3040"
+                            strokeColor: panel.theme.pillBorder || "#3a3f52"
+                            textColor: panel.theme.text || "#e6e6e6"
+                            textSize: panel.baseFont
+                            onActivate: headline.go(modelData.path)
+                        }
+                    }
+                    FolderItem {  // all of them, to see and correct: the widget's own screen
+                        objectName: "panelWidgetMore"
+                        visible: widgetColumn.entry.items.length > 3
+                        label: qsTr("More")
+                        style: "text"
+                        compactHeight: panel.rowHeight - 2
+                        fillColor: panel.theme.smallButtonBg || "#2c3040"
+                        strokeColor: panel.theme.smallButtonBorder || "#3a3f52"
+                        textColor: panel.theme.smallButtonText || panel.theme.text || "#e6e6e6"
+                        textSize: panel.baseFont
+                        onActivate: { headline.widgetOpen(widgetColumn.entry.id); panel.close() }
+                    }
                 }
             }
 

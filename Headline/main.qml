@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Window 2.15
+import QtQuick.Controls 2.15
 import "../Scope"
 
 // The Headline's line (Scope/Designdocument Headline.md, 2): the CWD with its cascade to climb,
@@ -9,6 +10,8 @@ Window {
     id: line
     objectName: "headlineLine"
     property var view: headline.view()
+    // What other programs put in (Headline/widgets.py): the time tracking first.
+    property var widgets: headline.widgets()
     property var theme: headline.colorScheme()
     property real embryoOpacity: headline.embryoOpacity()
     readonly property int lineHeight: 30
@@ -40,6 +43,7 @@ Window {
     }
     function fit() {
         var room = line.width - cwdButton.width - moreButton.implicitWidth - 3 * row.spacing - 8
+                   - (widgetRow.implicitWidth > 0 ? widgetRow.implicitWidth + 12 : 0)
         var used = 0
         var count = 0
         for (var i = 0; i < folderRepeater.count; i++) {
@@ -58,6 +62,10 @@ Window {
     Connections {
         target: headline
         function onChanged() { line.refresh() }
+        function onWidgetsChanged() {
+            line.widgets = headline.widgets()
+            Qt.callLater(line.fit)
+        }
         function onDockChanged() {
             line.dockMode = headline.dockMode()
             line.placeMode = headline.placeMode()
@@ -159,6 +167,52 @@ Window {
                 if (moreList.visible) { moreList.close(); return }
                 moreList.entries = line.folders.slice(line.shownCount).filter(function(f) { return !f.embryo })
                 moreList.dropBelow(moreButton, line)
+            }
+        }
+    }
+
+    Row {  // far right: the widgets, each with its question's answers when it asks
+        id: widgetRow
+        visible: line.expanded
+        anchors.right: parent.right
+        anchors.rightMargin: 4
+        y: (line.lineHeight - height) / 2
+        spacing: 4
+        Repeater {
+            model: line.widgets
+            delegate: Row {
+                spacing: 2
+                FolderItem {
+                    objectName: "widget"
+                    label: modelData.text
+                    style: "text"
+                    compactHeight: line.lineHeight - 4
+                    fillColor: modelData.state === "active" ? (line.theme.smallButtonActiveBg || "#2c3a55")
+                                                            : (line.theme.pill || "#2c3040")
+                    strokeColor: modelData.state === "asking" ? (line.theme.lensFrame || "#d97706")
+                                                              : (line.theme.pillBorder || "#3a3f52")
+                    textColor: modelData.state === "calm" ? (line.theme.setupMuted || "#9aa0ad")
+                                                          : (line.theme.text || "#e6e6e6")
+                    textSize: line.baseFont
+                    ToolTip.visible: hoverActive && modelData.tooltip.length > 0
+                    ToolTip.text: modelData.tooltip
+                    onActivate: headline.widgetOpen(modelData.id)
+                }
+                Repeater {
+                    model: modelData.question ? modelData.question.answers : []
+                    delegate: FolderItem {
+                        objectName: "widgetAnswer"
+                        label: modelData.label
+                        style: "text"
+                        compactHeight: line.lineHeight - 4
+                        fillColor: line.theme.smallButtonBg || "#2c3040"
+                        strokeColor: line.theme.lensFrame || "#d97706"
+                        textColor: line.theme.text || "#e6e6e6"
+                        textSize: line.baseFont
+                        onActivate: headline.widgetTell(widgetEntry.id, modelData.id)
+                    }
+                }
+                property var widgetEntry: modelData
             }
         }
     }

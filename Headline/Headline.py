@@ -23,12 +23,13 @@ from PySide6.QtGui import QCursor, QGuiApplication  # noqa: E402
 from PySide6.QtQml import QQmlApplicationEngine  # noqa: E402
 
 from core.brand import getenv  # noqa: E402
+from core.clock_sources import active_file, write_active  # noqa: E402
 from core.color_schemes import load_scheme  # noqa: E402
 from core.scope_api import ScopeApi  # noqa: E402
 from core.settings import Settings  # noqa: E402
 from daemon.lens_link import LensLink  # noqa: E402
 from Headline.model import HeadlineModel  # noqa: E402
-from Headline import instance, popup_place, x11_dock  # noqa: E402
+from Headline import instance, popup_place, widgets, x11_dock  # noqa: E402
 from Scope.Scope import ThemeIconProvider  # noqa: E402
 from Scope.window_icon import seiton_icon  # noqa: E402
 
@@ -42,6 +43,7 @@ def _rect(value) -> tuple:
 class HeadlineBackend(QObject):
     changed = Signal()
     dockChanged = Signal()
+    widgetsChanged = Signal()
     # "Open the panel": at an anchor {x, y, width, height} (the applet's button), or None: at
     # the pointer (the launcher, the shortcut). From a later start (Headline/instance.py).
     panelRequested = Signal("QVariant")
@@ -50,6 +52,7 @@ class HeadlineBackend(QObject):
         super().__init__()
         self._model = model
         self._dock = (self._read_dock(), self.placeMode())
+        self._widgets = widgets.shown()
         self._follow = QTimer(self)
         self._follow.setInterval(FOLLOW_MS)
         self._follow.timeout.connect(self._tick)
@@ -79,6 +82,31 @@ class HeadlineBackend(QObject):
     def _tick(self) -> None:
         self.followPlace()
         self.checkDock()
+        self.checkWidgets()
+
+    # --- widgets (Headline/widgets.py; Designdocument Headline.md, 3a) -------------------------
+
+    @Slot(result="QVariantList")
+    def widgets(self) -> list:
+        return self._widgets
+
+    @Slot(result=bool)
+    def checkWidgets(self) -> bool:
+        """Read the widgets' views anew; True when what they show changed."""
+        now = widgets.shown()
+        if now == self._widgets:
+            return False
+        self._widgets = now
+        self.widgetsChanged.emit()
+        return True
+
+    @Slot(str, str, result=bool)
+    def widgetTell(self, widget_id: str, command: str) -> bool:
+        return widgets.tell(widget_id, command)
+
+    @Slot(str, result=bool)
+    def widgetOpen(self, widget_id: str) -> bool:
+        return widgets.open_screen(widget_id)
 
     @staticmethod
     def _read_dock() -> str:
@@ -249,7 +277,10 @@ def main(argv: Optional[list] = None) -> int:
     server.listen()
     api = ScopeApi(start)
     link = LensLink(api, start_daemon=getenv("SCOPE_START_DAEMON", "1") != "0")
-    engine = load_headline(HeadlineModel(api, link, start), app)
+    # The active project for whoever wants it - the clock reads it (Designdocument Time.md, 4.1).
+    told = active_file()
+    report = lambda project, person: write_active(told, Path(project) if project else None, person)  # noqa: E731
+    engine = load_headline(HeadlineModel(api, link, start, report=report), app)
     if not engine.rootObjects():
         return 1
     window = engine.rootObjects()[0]

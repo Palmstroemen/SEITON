@@ -167,3 +167,38 @@ def test_a_perspective_puts_the_lens_on_and_off(world):
     assert model.view()["lens"]["active"]
     assert model.wear(["04_Finanz"])  # the active one again: off
     assert not model.perspectives()[0]["active"] and not model.view()["lens"]["active"]
+
+
+# --- the active project, for whoever wants it (the clock; Designdocument Headline.md, 3a) ----
+
+def _reporting(world, start):
+    from core.scope_api import ScopeApi
+    from daemon.lens_link import LensLink
+    from Headline.model import HeadlineModel
+
+    told = []
+    api = ScopeApi(str(start))
+    model = HeadlineModel(api, LensLink(api, start_daemon=False), str(start),
+                          report=lambda project, person: told.append((project, person)))
+    return model, told
+
+
+def test_it_tells_the_active_project_at_the_start_and_on_every_change(world):
+    model, told = _reporting(world, world["studio"] / "01_Info")
+    assert told[-1][0] == str(world["studio"])  # the project, not the folder in it
+    assert told[-1][1]  # and who works in it
+    model.go(str(world["reisen"]))
+    assert told[-1][0] == str(world["reisen"])
+
+
+def test_a_folder_in_the_same_project_tells_nothing_new(world):
+    model, told = _reporting(world, world["studio"])
+    before = len(told)
+    model.go(str(world["studio"] / "01_Info"))
+    assert len(told) == before
+
+
+def test_outside_a_project_no_project(world):
+    model, told = _reporting(world, world["studio"])
+    model.go(str(world["root"]))  # the projects root holds projects, it is none
+    assert told[-1][0] is None
