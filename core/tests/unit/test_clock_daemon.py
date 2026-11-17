@@ -128,3 +128,61 @@ def test_the_launcher_stops_with_a_clear_sentence_under_no_new_privs(tmp_path, m
     assert launcher.run(tmp_path, sandbox=True) == 1
     assert started == []
     assert "no_new_privs" in capsys.readouterr().err
+
+
+# --- the clock as the Headline's widget (core/clock_widget.py; Designdocument Headline.md, 3a) -
+
+@pytest.fixture
+def widget_service(tmp_path):
+    from core import clock_widget as cw
+
+    ledger = cw.Ledger(tmp_path / "ledger.json")
+    clock = ck.Clock(writer=cw.counting(lambda p, person, s: None, ledger), store=tmp_path / "c.json")
+    now = Now()
+    active = tmp_path / "active-project.json"
+    widget = daemon.Widget(folder=tmp_path / "seiton-clock", ledger=ledger, language="de")
+    svc = daemon.ClockService(clock, active=active, idle=lambda: timedelta(0), inhibited=lambda: False,
+                              now=now, widget=widget)
+    return svc, now, active, tmp_path / "seiton-clock"
+
+
+def _view(folder):
+    import json
+    return json.loads((folder / "view.json").read_text(encoding="utf-8"))
+
+
+def test_every_step_writes_the_view(widget_service):
+    svc, now, active, folder = widget_service
+    cs.write_active(active, Path("/p/Küche"), "Oliver")
+    svc.step()
+    now.value += timedelta(minutes=15)
+    svc.step()
+    view = _view(folder)
+    assert view["text"] == "Küche · 0:15" and view["state"] == "active"
+    assert view["items"][0]["path"] == "/p/Küche"  # worked on last
+
+
+def test_a_dropped_command_is_obeyed_at_once(widget_service):
+    svc, now, active, folder = widget_service
+    cs.write_active(active, Path("/p/Küche"), "Oliver")
+    svc.step()
+    (folder / "commands").mkdir(parents=True, exist_ok=True)
+    (folder / "commands" / "1-stop").write_text("")
+    assert svc.listen() is True
+    assert svc.clock.state == "stopped" and _view(folder)["state"] == "calm"
+    assert svc.listen() is False  # taken once
+
+
+def test_the_sandbox_may_write_the_widgets_folder_and_nothing_more(tmp_path, monkeypatch):
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path / "state"))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "run"))
+    from core.settings import Settings
+    place = sb.Place(home=tmp_path / "home", runtime=tmp_path / "run", dbus="unix:path=/run/user/1000/bus")
+    mount = launcher.drive_place(str(tmp_path / "run"))
+    command = launcher.sandboxed(tmp_path / "Projekte", python="/usr/bin/python3", settings=Settings(),
+                                 mount=mount, place=place)
+    pairs = {(command[i], command[i + 1], command[i + 2]) for i in range(len(command) - 2)}
+    assert ("--bind", str(tmp_path / "run" / "seiton-clock"), str(sb.INSIDE / "widget")) in pairs
+    program = command[command.index("--") + 1:]
+    assert program[program.index("--widget") + 1] == str(sb.INSIDE / "widget")

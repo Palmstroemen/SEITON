@@ -21,6 +21,7 @@ from typing import List, Optional, Sequence
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
+from core import clock_widget as cw  # noqa: E402
 from core import sandbox as sb  # noqa: E402
 from core.clock import default_store  # noqa: E402
 from core.clock_sources import active_file  # noqa: E402
@@ -76,14 +77,20 @@ def sandboxed(projects_root: Path, *, python: str, settings: Settings, mount: Pa
     store.parent.mkdir(parents=True, exist_ok=True)
     active = active_file()
     active.parent.mkdir(parents=True, exist_ok=True)
+    # Its widget in the Headline (core/clock_widget.py): the one folder it writes besides its
+    # state - its view, and the commands the Headline drops there.
+    widget = cw.folder()
+    widget.mkdir(parents=True, exist_ok=True)
     binds = sb.role_binds(role, mount=mount) + [
         sb.Bind(store.parent, sb.INSIDE / "state", writable=True),
         sb.Bind(active.parent, sb.INSIDE / "run", writable=False),
+        sb.Bind(widget, sb.INSIDE / "widget", writable=True),
     ]
     program = [python, str(REPO / "daemon" / "clock_daemon.py"),
                "--drive", str(sb.INSIDE / "0_Admin" / "Zeitaufwand"), "--projects-root", str(projects_root),
                "--store", str(sb.INSIDE / "state" / store.name),
-               "--active", str(sb.INSIDE / "run" / active.name), *clock_arguments(settings)]
+               "--active", str(sb.INSIDE / "run" / active.name), "--widget", str(sb.INSIDE / "widget"),
+               *clock_arguments(settings)]
     return sb.command(program, place=place, binds=binds, env={"PYTHONPATH": str(REPO)}, info_fd=info_fd)
 
 
