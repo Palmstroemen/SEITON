@@ -5,6 +5,7 @@
 #   ./install.sh --suntree       also SunTree at login
 #   ./install.sh --thumbnailer   also Markdown previews in the file browsers
 #   ./install.sh --headline      also the Headline at login (the line at the top edge)
+#   ./install.sh --clock         also the time tracking at login (its clock)
 #   ./install.sh --yes           ask nothing
 #   ./install.sh --uninstall     take it away again (settings and templates stay)
 set -euo pipefail

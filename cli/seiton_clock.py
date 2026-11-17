@@ -165,13 +165,44 @@ def run(projects_root: Path, *, sandbox: bool = True) -> int:
             drive.terminate()
 
 
+def default_root(home: Optional[Path] = None) -> Optional[Path]:
+    """Started without a root (at login, from the time screen): the first root below the home
+    folder, as the Headline does (Designdocument Perspective Resolver MVP.md, A11)."""
+    from core.scope_api import roots_below  # late: heavy
+    below = roots_below(Path(home) if home is not None else Path.home())
+    return below[0] if below else None
+
+
+def hold_lock(folder: Path):
+    """One clock per user: the lock in the clock's widget folder, held while it runs; None when
+    another clock holds it."""
+    import fcntl
+    folder = Path(folder)
+    folder.mkdir(parents=True, exist_ok=True)
+    handle = open(folder / "clock.lock", "a")
+    try:
+        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        handle.close()
+        return None
+    return handle
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Start the clock of the time tracking with its role.")
-    parser.add_argument("--projects-root", type=Path, required=True,
-                        help="the folder holding the projects (e.g. .../Projekte)")
+    parser.add_argument("--projects-root", type=Path, default=None,
+                        help="the folder holding the projects; else the first root below the home folder")
     parser.add_argument("--no-sandbox", action="store_true", help="run without bubblewrap and role drive")
     args = parser.parse_args(argv)
-    return run(args.projects_root.expanduser().resolve(), sandbox=not args.no_sandbox)
+    lock = hold_lock(cw.folder())
+    if lock is None:
+        return 0  # a clock runs already (a second start from the time screen, or at login)
+    root = args.projects_root or default_root()
+    if root is None:
+        print(f"{PROGRAM}: no projects root below {Path.home()}; give one with --projects-root",
+              file=sys.stderr)
+        return 1
+    return run(Path(root).expanduser().resolve(), sandbox=not args.no_sandbox)
 
 
 if __name__ == "__main__":

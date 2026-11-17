@@ -5,6 +5,7 @@
     ./install.sh --suntree       also SunTree at login (Ctrl+Alt+Space)
     ./install.sh --thumbnailer   also Markdown previews in the file browsers
     ./install.sh --headline      also the Headline at login (the line at the top edge)
+    ./install.sh --clock         also the time tracking at login (its clock)
     ./install.sh --yes           ask nothing: system packages yes, extras only as given
     ./install.sh --uninstall     take away what it wrote; settings and templates stay
 
@@ -125,6 +126,7 @@ class Options:
     suntree: bool = False
     thumbnailer: bool = False
     headline: bool = False  # the Headline at login
+    clock: bool = False  # the time tracking's clock at login
     system_packages: bool = True
 
 
@@ -296,6 +298,19 @@ def clock_widget(places: Places, written: Written) -> None:
                  json.dumps(registration, ensure_ascii=False, indent=2) + "\n")
 
 
+def clock_at_login(places: Places, written: Written) -> None:
+    """The clock of the time tracking at login (cli/seiton_clock.py: its role's drive, its
+    sandbox; the first root below the home folder)."""
+    written.text(places.config.parent / "autostart" / f"{file_name('clock')}.desktop", (
+        "[Desktop Entry]\n"
+        "Type=Application\n"
+        f"Name={NAME} Time\n"
+        f"Exec={_quoted(places.bin / file_name('clock'))}\n"
+        f"Icon={APP_ID}\n"
+        "Terminal=false\n"
+        "X-GNOME-Autostart-enabled=true\n"))
+
+
 def headline_at_login(places: Places, written: Written) -> None:
     written.text(places.config.parent / "autostart" / f"{HEADLINE}.desktop", (
         "[Desktop Entry]\n"
@@ -364,6 +379,8 @@ def install(places: Places, options: Options, run: Run = run_command, ask: Ask =
         thumbnailer(places, written)
     if options.headline:
         headline_at_login(places, written)
+    if options.clock:
+        clock_at_login(places, written)
     _write_manifest(places, written)
     print(f"\n{NAME} is installed. Start it from the menu or with: {places.bin / APP_ID}")
     if which("cinnamon"):
@@ -389,6 +406,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--suntree", action="store_true", help="SunTree at login (Ctrl+Alt+Space)")
     parser.add_argument("--thumbnailer", action="store_true", help="Markdown previews in the file browsers")
     parser.add_argument("--headline", action="store_true", help="the Headline at login (the line at the top edge)")
+    parser.add_argument("--clock", action="store_true", help="the time tracking at login (its clock)")
     parser.add_argument("--no-system-packages", action="store_true", help="leave the system packages alone")
     parser.add_argument("--yes", action="store_true", help="ask nothing")
     parser.add_argument("--uninstall", action="store_true", help="take away what was installed")
@@ -401,7 +419,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     suntree_wanted = args.suntree or (not args.yes and ask_user("Also SunTree, the folder fan, at login (Ctrl+Alt+Space)?"))
     previews_wanted = args.thumbnailer or (not args.yes and ask_user("Also Markdown previews in the system's file browsers?"))
     headline_wanted = args.headline or (not args.yes and ask_user("Also the Headline at login (the line at the top edge)?"))
-    install(places, Options(suntree=suntree_wanted, thumbnailer=previews_wanted, headline=headline_wanted,
+    clock_wanted = args.clock or (not args.yes and ask_user("Also the time tracking at login (its clock counts the time per project)?"))
+    install(places, Options(suntree=suntree_wanted, thumbnailer=previews_wanted, headline=headline_wanted, clock=clock_wanted,
                             system_packages=not args.no_system_packages), ask=ask)
     return 0
 

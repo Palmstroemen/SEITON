@@ -196,3 +196,44 @@ def test_what_the_recent_list_shows_reaches_the_clock(tmp_path, monkeypatch):
     Settings().set("Time/recentShows", "week")
     args = launcher.clock_arguments(Settings())
     assert args[args.index("--recent") + 1] == "week"
+
+
+# --- started at login or from the time screen (step 2a, part 4) --------------------------------
+
+def test_without_a_root_it_takes_the_first_below_the_home(tmp_path):
+    from core.brand import META_DIR
+    (tmp_path / "Dokumente" / META_DIR).mkdir(parents=True)
+    (tmp_path / "Dokumente" / META_DIR / "Project.md").write_text("x")
+    assert launcher.default_root(tmp_path) == tmp_path / "Dokumente"
+    assert launcher.default_root(tmp_path / "Dokumente") is None  # nothing below a root itself
+
+
+def test_the_start_without_a_root_runs_on_the_found_one(tmp_path, monkeypatch):
+    found = tmp_path / "Dokumente"
+    monkeypatch.setattr(launcher, "default_root", lambda home=None: found)
+    started = []
+    monkeypatch.setattr(launcher, "run", lambda root, sandbox=True: started.append((root, sandbox)) or 0)
+    monkeypatch.setattr(launcher, "hold_lock", lambda folder: object())
+    assert launcher.main([]) == 0
+    assert started == [(found, True)]
+
+
+def test_without_any_root_it_says_so(monkeypatch, capsys):
+    monkeypatch.setattr(launcher, "default_root", lambda home=None: None)
+    monkeypatch.setattr(launcher, "hold_lock", lambda folder: object())
+    assert launcher.main([]) == 1
+    assert "--projects-root" in capsys.readouterr().err
+
+
+def test_one_clock_per_user(tmp_path):
+    first = launcher.hold_lock(tmp_path / "seiton-clock")
+    assert first is not None
+    assert launcher.hold_lock(tmp_path / "seiton-clock") is None  # a second start ends
+    first.close()
+    assert launcher.hold_lock(tmp_path / "seiton-clock") is not None
+
+
+def test_a_second_start_ends_quietly(monkeypatch):
+    monkeypatch.setattr(launcher, "hold_lock", lambda folder: None)
+    monkeypatch.setattr(launcher, "run", lambda *a, **k: pytest.fail("started twice"))
+    assert launcher.main(["--projects-root", "/tmp"]) == 0

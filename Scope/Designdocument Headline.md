@@ -149,6 +149,11 @@ widget shows grey "Clock not running", and its click starts it.
    goes 0.5 s after the pointer left, not while a dropdown is open.
 2a. **Widgets:** write_active; registering, view, command files (section 3a); the clock as the
    first widget, with its time screen as its own window, and its start at login.
+   Built 2026-11-17: `Headline/widgets.py` and the active project (part 1);
+   `core/clock_widget.py`, the clock's view and commands, the time in all beside the projects
+   worked on last (part 2); `Time/`, the time screen (part 3); `seiton-clock` without a root
+   takes the first below the home folder, one clock per user (a lock), `./install.sh --clock`
+   starts it at login (part 4). Not yet tried with FUSE and bubblewrap on the desktop.
 3. **The panel:** the same model as a vertical list, with the perspectives and the buttons;
    opened at the pointer (launcher, shortcut).
    Built 2026-11-17: `Headline/Panel.qml` - the path, the standard folders, the root's

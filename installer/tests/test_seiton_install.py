@@ -317,6 +317,16 @@ def test_the_clock_registers_as_the_headlines_widget(places, monkeypatch):
     assert set(registration["commands"]) == {"start", "stop"}
 
 
+def test_the_clock_at_login_only_when_asked(places):
+    login = places.config.parent / "autostart" / "seiton-clock.desktop"
+    _install(places)
+    assert not login.exists()
+    _install(places, clock=True)
+    assert f"Exec={inst._quoted(places.bin / 'seiton-clock')}\n" in login.read_text(encoding="utf-8")
+    inst.uninstall(places, run=Runner())
+    assert not login.exists()
+
+
 def test_uninstall_takes_the_registration_away(places):
     _install(places)
     inst.uninstall(places, run=Runner())
