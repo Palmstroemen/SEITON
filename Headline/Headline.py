@@ -26,7 +26,7 @@ from core.scope_api import ScopeApi  # noqa: E402
 from core.settings import Settings  # noqa: E402
 from daemon.lens_link import LensLink  # noqa: E402
 from Headline.model import HeadlineModel  # noqa: E402
-from Headline import popup_place  # noqa: E402
+from Headline import popup_place, x11_dock  # noqa: E402
 from Scope.Scope import ThemeIconProvider  # noqa: E402
 from Scope.window_icon import seiton_icon  # noqa: E402
 
@@ -39,13 +39,15 @@ def _rect(value) -> tuple:
 
 class HeadlineBackend(QObject):
     changed = Signal()
+    dockChanged = Signal()
 
     def __init__(self, model: HeadlineModel) -> None:
         super().__init__()
         self._model = model
+        self._dock = self._read_dock()
         self._follow = QTimer(self)
         self._follow.setInterval(FOLLOW_MS)
-        self._follow.timeout.connect(self.followPlace)
+        self._follow.timeout.connect(self._tick)
 
     def start_following(self) -> None:
         self._follow.start()
@@ -68,6 +70,28 @@ class HeadlineBackend(QObject):
         if ok:
             self.changed.emit()
         return ok
+
+    def _tick(self) -> None:
+        self.followPlace()
+        self.checkDock()
+
+    @staticmethod
+    def _read_dock() -> str:
+        return str(Settings().get("Headline/dock"))
+
+    @Slot(result=str)
+    def dockMode(self) -> str:
+        return self._dock
+
+    @Slot(result=bool)
+    def checkDock(self) -> bool:
+        """Read the setting anew (Setup may have changed it); True when it changed."""
+        now = self._read_dock()
+        if now == self._dock:
+            return False
+        self._dock = now
+        self.dockChanged.emit()
+        return True
 
     @Slot(result=bool)
     def followPlace(self) -> bool:
@@ -105,6 +129,18 @@ class HeadlineBackend(QObject):
         return popup_place.side(rect, (width, height), self._room(rect))
 
 
+def dock(window, backend: HeadlineBackend) -> bool:
+    """The line as a dock at the top of its screen (X11): with its room kept while always
+    there, without while it hides itself. False where there is no X11 (offscreen, Wayland)."""
+    if QGuiApplication.platformName() != "xcb":
+        return False
+    screen = window.screen().geometry()
+    height = int(window.property("lineHeight"))
+    partial = (x11_dock.strut((screen.x(), screen.y(), screen.width(), screen.height()), height)
+               if backend.dockMode() == "keep" else None)
+    return x11_dock.apply_to(int(window.winId()), partial)
+
+
 def load_headline(model: HeadlineModel, app: QGuiApplication) -> QQmlApplicationEngine:
     """The Headline's window on the model (no root object when main.qml fails). Shared by main()
     and the tests, so both load it alike."""
@@ -127,7 +163,11 @@ def main() -> int:
     engine = load_headline(HeadlineModel(api, link, start), app)
     if not engine.rootObjects():
         return 1
-    engine._backend.start_following()
+    window = engine.rootObjects()[0]
+    backend = engine._backend
+    dock(window, backend)
+    backend.dockChanged.connect(lambda: dock(window, backend))
+    backend.start_following()
     code = app.exec()
     link.close()
     return code

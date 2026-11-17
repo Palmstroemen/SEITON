@@ -78,6 +78,10 @@ Both show the same: one model, two ways of drawing it.
   the Headline look alike.
 - **Dragging onto a folder** (to file something there) works in the line and in the panel, as in
   Scope and SunTree.
+- **A click alone bears no embryo** (decided 2026-11-17, for Scope, SunTree and the Headline
+  alike): a suggested folder comes into being only by a drop onto it, or by making something in
+  it (right click: new note, new folder). Going there, looking at it, putting the lens on it
+  leave the disk as it was (`core/tests/unit/test_embryo_click_bears_nothing.py`).
 
 ### The desktop
 
@@ -135,6 +139,9 @@ widget shows grey "Clock not running", and its click starts it.
    the top line drawn from the model (CWD, standard folders, buttons), the CWD dropdown and the
    cascade as windows that open towards the room. Tested offscreen, as Scope (TDD, harnesses).
 2. **The top edge:** always there (dock, strut) or hiding itself; the Headline tab in Setup.
+   Built 2026-11-17: `Headline/x11_dock.py` (dock type, strut), the setting `Headline/dock`
+   (keep, hide), read anew every second; hiding, the line is a 2 px edge that opens at once and
+   goes 0.5 s after the pointer left, not while a dropdown is open.
 2a. **Widgets:** write_active; registering, view, command files (section 3a); the clock as the
    first widget, with its time screen as its own window, and its start at login.
 3. **The panel:** the same model as a vertical list, with the perspectives and the buttons;

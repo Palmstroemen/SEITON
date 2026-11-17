@@ -635,3 +635,16 @@ def test_the_small_crown_comes_from_suntree_only_when_it_is_there():
     source = (SCOPE_DIR / "SetupPage.qml").read_text(encoding="utf-8")
     assert "CrownPreview {" not in source
     assert 'if (root.sunTreePresent) setSource("CrownPreview.qml"' in source
+
+
+def test_the_headline_keeps_its_room_or_hides_itself(page):
+    # Scope/Designdocument Headline.md, 1: as a taskbar can; the Headline reads it within a second.
+    from core.settings import Settings
+
+    view, _ = page
+    _click(view, _named(view, "tabHeadline"))
+    assert _named(view, "headlineDock_keep").property("on")
+    _click(view, _named(view, "headlineDock_hide"))
+    assert Settings().get("Headline/dock") == "hide" and _named(view, "headlineDock_hide").property("on")
+    _click(view, _named(view, "headlineDock_keep"))
+    assert Settings().get("Headline/dock") == "keep"

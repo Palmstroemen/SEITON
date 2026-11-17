@@ -46,6 +46,9 @@ SETTINGS: Dict[str, Tuple[type, Any, Any]] = {
     "Scope/projectsStyle": (str, "text", {"text", "smallIcon", "largeIcon"}),
     "Scope/instantReopen": (bool, True, None),
     "Scope/previewTuning": (str, "balanced", {"soft", "balanced", "aggressive"}),
+    # The Headline at the top edge (Scope/Designdocument Headline.md, 1): always there, keeping
+    # its room, or hiding itself until the pointer touches the edge.
+    "Headline/dock": (str, "keep", {"keep", "hide"}),
     # SunTree's crown (SunTree/Designdocument Krone.md, 5); line and radius as shares of R.
     "SunTree/lineT": (float, 0.7, (0.5, 0.85)),
     "SunTree/inner": (float, 0.2, (0.1, 0.35)),

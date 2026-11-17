@@ -39,6 +39,7 @@ Rectangle {
     property bool showSuggestionsOn: settings ? settings.setting("Scope/showSuggestions") === true : true
     property bool showHiddenOn: settings ? settings.setting("Scope/showHidden") === true : false
     property string templatesStyle: settings ? String(settings.setting("Scope/templatesStyle")) : "smallIcon"
+    property string headlineDock: settings ? String(settings.setting("Headline/dock")) : "keep"
     property string projectsStyle: settings ? String(settings.setting("Scope/projectsStyle")) : "text"
     property bool instantReopenOn: settings ? settings.setting("Scope/instantReopen") === true : true
     property string previewTuning: settings ? String(settings.setting("Scope/previewTuning")) : "balanced"
@@ -890,11 +891,26 @@ Rectangle {
                 }
             }
 
-            ColumnLayout {  // Headline
+            ColumnLayout {  // Headline (Scope/Designdocument Headline.md)
+                spacing: 8
+                Heading { text: qsTr("At the top edge") }
+                Choices {
+                    // As a taskbar can: always there, keeping its room, or hiding itself until
+                    // the pointer touches the edge.
+                    prefix: "headlineDock"
+                    options: [{ value: "keep", label: qsTr("Always there") }, { value: "hide", label: qsTr("Hides itself") }]
+                    current: root.headlineDock
+                    onChosen: function(value) { root.headlineDock = value; root.keep("Headline/dock", value) }
+                }
                 Text {
-                    text: qsTr("The Headline's settings come here with the Headline.")
+                    text: root.headlineDock === "keep"
+                        ? qsTr("Windows stop below the line.")
+                        : qsTr("The line comes when the pointer touches the top edge.")
                     color: root.mutedColor
-                    font.pixelSize: root.baseFont
+                    font.pixelSize: root.baseFont - 1
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1  // its words do not widen the page
                 }
                 Item { Layout.fillHeight: true }
             }

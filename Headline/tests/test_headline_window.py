@@ -128,3 +128,57 @@ def test_the_way_up_is_a_window_of_its_own_below_the_line(started):
     line = _find(engine, "headlineLine")
     assert climb.y() >= line.y() + line.height()  # from the top it drops down
     assert [o.property("label") for o in _all(started, "dropRow", climb)] == ["Projekte", "Musikstudio"]
+
+
+def _wait(app, ms):
+    import time
+    end = time.monotonic() + ms / 1000
+    while time.monotonic() < end:
+        app.processEvents()
+        time.sleep(0.01)
+
+
+def _call(item, name):
+    QMetaObject.invokeMethod(item, name)
+
+
+def test_always_there_it_keeps_its_height(started):
+    line = _find(started, "headlineLine")
+    assert line.property("dockMode") == "keep"
+    assert line.height() == line.property("lineHeight")
+
+
+@pytest.fixture
+def hiding(world, monkeypatch):
+    from core.settings import Settings
+
+    assert Settings().set("Headline/dock", "hide")
+    return world
+
+
+def test_hiding_itself_it_is_a_thin_edge_until_the_pointer_comes(hiding, started):
+    app = started["app"]
+    line = _find(started, "headlineLine")
+    _settle(app)
+    assert line.property("dockMode") == "hide"
+    assert line.height() <= 2
+    _call(line, "pointerEntered")
+    _settle(app)
+    assert line.height() == line.property("lineHeight")  # at once
+    _call(line, "pointerLeft")
+    _wait(app, 200)
+    assert line.height() == line.property("lineHeight")  # not yet
+    _wait(app, 500)
+    assert line.height() <= 2  # gone about 0.5 s after the pointer left
+
+
+def test_while_a_dropdown_is_open_it_stays(hiding, started):
+    app = started["app"]
+    line = _find(started, "headlineLine")
+    _call(line, "pointerEntered")
+    _settle(app)
+    _activate(_find(started, "cwdButton"))
+    _settle(app)
+    _call(line, "pointerLeft")
+    _wait(app, 800)
+    assert line.height() == line.property("lineHeight")

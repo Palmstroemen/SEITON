@@ -3,8 +3,8 @@ import QtQuick.Window 2.15
 import "../Scope"
 
 // The Headline's line (Scope/Designdocument Headline.md, 2): the CWD with its cascade to climb,
-// the standard folders there, as many as fit, the rest behind ». Docking at the top edge is
-// step 2; here a frameless line across the screen.
+// the standard folders there, as many as fit, the rest behind ». At the top edge as a dock
+// (Headline/x11_dock.py): always there, or a thin edge that opens when the pointer comes.
 Window {
     id: line
     objectName: "headlineLine"
@@ -16,12 +16,18 @@ Window {
     readonly property var folders: view.folders || []
     // How many folders fit beside the CWD and the » (worked out from their widths).
     property int shownCount: folders.length
+    // Always there ("keep") or hiding itself ("hide"), as set in Setup (tab Headline).
+    property string dockMode: headline.dockMode()
+    readonly property int edgeHeight: 2
+    property bool pointerInside: false
+    readonly property bool popupOpen: climbList.visible || cascade.visible || moreList.visible
+    readonly property bool expanded: dockMode === "keep" || pointerInside || popupOpen
 
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
     x: Screen.virtualX
     y: Screen.virtualY
     width: Screen.width
-    height: lineHeight
+    height: expanded ? lineHeight : edgeHeight
     visible: true
     color: theme.bg || "#0f1014"
     title: "Headline"
@@ -50,6 +56,28 @@ Window {
     Connections {
         target: headline
         function onChanged() { line.refresh() }
+        function onDockChanged() { line.dockMode = headline.dockMode() }
+    }
+
+    // The pointer at the edge opens the line at once; it goes about 0.5 s after the pointer
+    // left, not while a dropdown of it is open.
+    function pointerEntered() {
+        collapseTimer.stop()
+        pointerInside = true
+    }
+    function pointerLeft() {
+        collapseTimer.restart()
+    }
+    Timer {
+        id: collapseTimer
+        interval: 500
+        onTriggered: {
+            if (line.popupOpen) { restart(); return }
+            line.pointerInside = false
+        }
+    }
+    HoverHandler {
+        onHoveredChanged: hovered ? line.pointerEntered() : line.pointerLeft()
     }
 
     function go(path) {
@@ -61,7 +89,8 @@ Window {
 
     Row {
         id: row
-        anchors.verticalCenter: parent.verticalCenter
+        visible: line.expanded
+        y: (line.lineHeight - height) / 2
         x: 4
         spacing: 4
 

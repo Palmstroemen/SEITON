@@ -43,7 +43,14 @@ def started(tmp_path_factory):
         app.processEvents()
     finally:
         qInstallMessageHandler(previous)
-    return engine, messages
+    yield engine, messages
+    # Leave nothing behind for the tests after this one: Scope started in German and installed
+    # its translator into the application (they would all run in German), and its window.
+    engine._backend.setLanguage("en")
+    for window in engine.rootObjects():
+        window.close()
+    engine.deleteLater()
+    app.processEvents()
 
 
 def test_scope_starts_without_qml_errors(started):
