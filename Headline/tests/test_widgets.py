@@ -117,3 +117,22 @@ def test_a_broken_registration_is_left_out(tmp_path, monkeypatch, registration):
     widgets.widgets_dir().mkdir(parents=True)
     (widgets.widgets_dir() / "w.json").write_text(json.dumps(registration))
     assert widgets.registered() == {}
+
+
+def test_a_counter_the_headline_counts_on(clock):
+    _view(clock, text="Küche · 2:15", state="active", counter={"prefix": "Küche · ", "since": 1000.5})
+    [shown] = widgets.shown()
+    assert shown["counter"] == {"prefix": "Küche · ", "since": 1000.5}
+
+
+@pytest.mark.parametrize("counter", [{"prefix": 5, "since": 1}, {"prefix": "x", "since": "1"},
+                                     {"prefix": "x" * 200, "since": 1}, "running"])
+def test_a_broken_counter_is_left_out(clock, counter):
+    _view(clock, text="Küche · 2:15", state="active", counter=counter)
+    [shown] = widgets.shown()
+    assert shown["counter"] is None and shown["text"] == "Küche · 2:15"
+
+
+def test_seconds_shown():
+    assert widgets.counted({"prefix": "Küche · ", "since": 1000.0}, now=1000.0 + 2 * 3600 + 15 * 60 + 7) == "Küche · 2:15:07"
+    assert widgets.counted({"prefix": "", "since": 1000.0}, now=999.0) == "0:00:00"

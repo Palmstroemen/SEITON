@@ -195,3 +195,22 @@ def test_what_the_list_shows_is_a_setting():
     from core.settings import SETTINGS
     kind, default, allowed = SETTINGS["Time/recentShows"]
     assert default == "total" and allowed == {"total", "week", "today"}
+
+
+# --- seconds: the Headline counts on between the clock's views (2026-11-17) --------------------
+
+def test_while_it_runs_a_counter_the_headline_counts_on(tmp_path, ledger):
+    clock = _clock(tmp_path, ledger)
+    ledger.add(Path("/p/Küche"), NOW.date(), timedelta(hours=2))
+    clock.set_project(Path("/p/Küche"), "Oliver", NOW - timedelta(minutes=15, seconds=7))
+    view = cw.render(clock, ledger, NOW, language="de")
+    assert view["counter"]["prefix"] == "Küche · "
+    # where today's time would be naught: now minus 2:15:07
+    assert NOW.timestamp() - view["counter"]["since"] == pytest.approx(2 * 3600 + 15 * 60 + 7)
+
+
+def test_standing_no_counter(tmp_path, ledger):
+    clock = _clock(tmp_path, ledger)
+    clock.set_project(Path("/p/Küche"), "Oliver", NOW - timedelta(minutes=15))
+    clock.stop(NOW)
+    assert "counter" not in cw.render(clock, ledger, NOW, language="de")

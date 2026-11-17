@@ -12,6 +12,20 @@ Window {
     property var view: headline.view()
     // What other programs put in (Headline/widgets.py): the time tracking first.
     property var widgets: headline.widgets()
+    // A widget's counter counts on to the second (Headline/widgets.py, counter).
+    property real nowSeconds: Date.now() / 1000
+    Timer {
+        interval: 1000
+        repeat: true
+        running: line.widgets.some(function(w) { return !!w.counter })
+        onTriggered: line.nowSeconds = Date.now() / 1000
+    }
+    function counted(counter) {
+        var seconds = Math.max(0, Math.floor(nowSeconds - counter.since))
+        var minutes = Math.floor(seconds / 60) % 60
+        return counter.prefix + Math.floor(seconds / 3600) + ":" + ("0" + minutes).slice(-2)
+               + ":" + ("0" + seconds % 60).slice(-2)
+    }
     property var theme: headline.colorScheme()
     property real embryoOpacity: headline.embryoOpacity()
     readonly property int lineHeight: 30
@@ -202,7 +216,7 @@ Window {
                 spacing: 2
                 FolderItem {
                     objectName: "widget"
-                    label: modelData.text
+                    label: modelData.counter ? line.counted(modelData.counter) : modelData.text
                     style: "text"
                     compactHeight: line.lineHeight - 4
                     fillColor: modelData.state === "active" ? (line.theme.smallButtonActiveBg || "#2c3a55")

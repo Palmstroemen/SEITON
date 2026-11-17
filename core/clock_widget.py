@@ -160,6 +160,11 @@ def render(clock, ledger: Ledger, now: datetime, *, language: str,
         today = ledger.on(Path(project), now.date()) + running
         state = {"runs": "active", "asks": "asking"}.get(clock.state, "calm")
         view.update(text=f"{Path(project).name} · {_hours(today)}", state=state)
+        if clock.state in ("runs", "asks"):
+            # The Headline counts on between views, to the second: from where today's time
+            # would be naught (Headline/widgets.py, counter).
+            view["counter"] = {"prefix": f"{Path(project).name} · ",
+                               "since": now.timestamp() - today.total_seconds()}
         if clock.state == "asks":
             view["question"] = {"text": words["ask"].format(project=Path(project).name),
                                 "answers": [{"id": "yes", "label": words["yes"]},

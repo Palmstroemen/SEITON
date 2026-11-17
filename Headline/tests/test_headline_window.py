@@ -376,3 +376,16 @@ def test_light_and_dark_switch_at_once(started):
     _settle(started["app"])
     assert Settings().get("General/darkTheme") is (not before)
     assert line.property("theme")["bg"] != colour
+
+
+def test_a_running_widget_counts_the_seconds(a_clock, started):
+    import json
+    import re
+    import time as clock_time
+    view = json.loads((a_clock / "view.json").read_text())
+    view.update(state="active", counter={"prefix": "Musikstudio · ", "since": clock_time.time() - 3725})
+    (a_clock / "view.json").write_text(json.dumps(view))
+    started["engine"]._backend.checkWidgets()
+    _wait(started["app"], 1200)
+    label = _all(started, "widget")[0].property("label")
+    assert re.fullmatch(r"Musikstudio · 1:02:0\d", label), label

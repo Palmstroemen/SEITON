@@ -9,6 +9,8 @@ not the clock. A widget may be missing, or be replaced by another one.
 - It **shows** what `<folder>/view.json` says: `text`, `state` (calm, active, asking), perhaps
   `tooltip`, a `question` with `answers`, a short list of `items` ({text, path}). It rewrites
   the file when something changes; older than staleAfter, it shows nothing.
+- A **counter** (optional): `{"prefix", "since"}` - the Headline counts on to the second between
+  views (the clock writes its view every 15 s): prefix and the time since, H:MM:SS.
 - It **is told** by command files dropped into `<folder>/commands/`: an answer to its question,
   or one of the commands it declared.
 - Its **screen is its own**: a click runs its `open` command.
@@ -90,6 +92,21 @@ def _items(value: Any) -> List[Dict[str, str]]:
     return kept[:MAX_ITEMS]
 
 
+def _counter(value: Any) -> Optional[Dict[str, Any]]:
+    if not isinstance(value, dict):
+        return None
+    prefix, since = _text(value.get("prefix"), 60), value.get("since")
+    if prefix is None or type(since) not in (int, float):
+        return None
+    return {"prefix": prefix, "since": float(since)}
+
+
+def counted(counter: Dict[str, Any], now: Optional[float] = None) -> str:
+    """A counter as shown: its prefix and the time since, to the second (H:MM:SS)."""
+    seconds = max(0, int((now if now is not None else time.time()) - counter["since"]))
+    return f"{counter['prefix']}{seconds // 3600}:{seconds // 60 % 60:02d}:{seconds % 60:02d}"
+
+
 def view_of(widget: Dict[str, Any], now: Optional[float] = None) -> Optional[Dict[str, Any]]:
     """What a widget shows, checked; None when its view is missing, broken or stale."""
     path = widget["folder"] / "view.json"
@@ -105,7 +122,8 @@ def view_of(widget: Dict[str, Any], now: Optional[float] = None) -> Optional[Dic
     if text is None or state not in STATES:
         return None
     return {"text": text, "state": state, "tooltip": _text(data.get("tooltip"), 200) or "",
-            "question": _question(data.get("question")), "items": _items(data.get("items"))}
+            "question": _question(data.get("question")), "items": _items(data.get("items")),
+            "counter": _counter(data.get("counter"))}
 
 
 def shown(now: Optional[float] = None) -> List[Dict[str, Any]]:
