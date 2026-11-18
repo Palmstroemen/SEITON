@@ -1,3 +1,5 @@
+> Archived 2026-11-18 – the first logbook of June 2025, then without the .md ending. Today: `docs/ProjectLogbook.md`. SEITON was called MyOS until November 2026.
+
 # 📖 MyOS: IDEAS / TODO / LEARNINGS
 
 ---

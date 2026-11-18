@@ -50,9 +50,6 @@ SEITON/
 the system Python is refused on newer distributions (PEP 668). The tutorial's example data also
 needs `reportlab` in that venv (`pip install reportlab`); without it its tests are skipped.
 
-`requirements-full.txt` still points to `core/requirements.txt`, a second, older list (other Qt
-version, `pynput` with its dependencies). Use `installer/requirements.txt`.
-
 ### Run Tests
 
 ```bash

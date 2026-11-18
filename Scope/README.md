@@ -5,7 +5,7 @@ QML-based file browser for SEITON: project and template navigation, tags, and fi
 ## Overview
 
 - **Two browser rows:** Templates (standard folders / embryos) and Projects (CWP and subprojects). Each row can show a path breadcrumb and folder list. The Projects row is off by default (setting `Scope/projectsRow`, switched in Setup).
-- **Concepts:** CWD/CWP (current working directory/project) and CTD (current target directory) for preview and file list. See [Vision/GUI Filebrowser.md](../Vision/GUI%20Filebrowser.md) for definitions and [main.qml](main.qml) comment block for code mapping.
+- **Concepts:** CWD/CWP (current working directory/project) and CTD (current target directory) for preview and file list. See [docs/Vision/GUI Filebrowser.md](../docs/Vision/GUI%20Filebrowser.md) for definitions and [main.qml](main.qml) comment block for code mapping.
 - **X-ray** (on by default, button in the side panel): files of small folders are shown in their place while the list fits the FilesPanel without scrolling (`core/xray.py`); a large, faint folder lies behind them, the tooltip says where they lie. Recomputed on folder change and when a resize has settled.
 - **Sorting by date** (`core/filing.py`, see `core/Dokumentation/Designdocument Sort.md`): a folder with `.seiton/Sort.md` shows its loose files in virtual year/month folders (faint) and files them into real ones once it holds more than `NewLevelFrom` files; filed when listed, at start and daily. "Enable sorting" (gives the folder shown a rule) is in the backend (`enableSorting`), but no button calls it yet.
 - **Rename:** F2 renames the entries selected in the FilesPanel; folders in the browser rows: hold the mouse button, or right click → Rename.

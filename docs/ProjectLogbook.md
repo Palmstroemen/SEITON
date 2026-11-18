@@ -480,7 +480,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
 
 ## 📐 DESIGN DOCS
 
-- `Designdokument.md`
+- `docs/Designdokument.md`
 - `PostFix/Designdokument.md`
 - `docs/INDEX.md` — zentrale Doku-Übersicht
 - `core/Dokumentation/Designdocument Projects.md`

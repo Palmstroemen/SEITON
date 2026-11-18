@@ -10,7 +10,7 @@ Das ist, wenn ich im Filebrowser ein File verschieben will und per Click ein Fil
 *Ich bin noch nicht sicher, ob es das braucht, und ob wir nicht mit dem CWD durchkommen. Aber als Konzept nehmen wir's einmal.*
 
 ### Implementierung in Scope
-In der Scope-GUI ([Scope/main.qml](Scope/main.qml)) sind die Begriffe wie folgt umgesetzt:
+In der Scope-GUI ([Scope/main.qml](../../Scope/main.qml)) sind die Begriffe wie folgt umgesetzt:
 - **CWD/CWP:** Beide werden durch die Property `cwp` abgebildet (Pfad zum aktuellen Projektordner). Die Dateiliste und viele Operationen beziehen sich auf den „aktuell sichtbaren Pfad“, der entweder über den bestätigten CTD oder über `cwp` kommt.
 - **CTD:** Properties `previewCTDPath` (Vorschau beim Navigieren im Ordnerbaum) und `committedCTDPath` (bestätigter Zielpfad); Funktionen `previewCTD(path)` und `commitCTD(path)`. Welcher Pfad für die Dateiliste gilt, liefert `currentFilesPath()` (Fallback auf `cwp`, wenn kein CTD gesetzt).
 

@@ -17,7 +17,7 @@ Versuchen, die Ablage neu zu denken.
 **Benutzt jemand SEITON nach einer Woche freiwillig weiter?**
 
 Nicht „gefällt es?", sondern „bleibt es?". Jeder Schritt unten muss sich daran messen lassen. Die
-ersten Antworten kommen vom Testrechner ([docs/TEST-MACHINE.md](docs/TEST-MACHINE.md)).
+ersten Antworten kommen vom Testrechner ([docs/TEST-MACHINE.md](TEST-MACHINE.md)).
 
 ## 1_Info – Was die Vorläufer lehren
 

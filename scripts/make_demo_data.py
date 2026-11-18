@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build the data for the three-minute demo (Vision/Demo in drei Minuten.md), fresh on every run.
+Build the data for the three-minute demo (docs/Vision/Demo in drei Minuten.md), fresh on every run.
 
     python3 scripts/make_demo_data.py <target> [--templates <folder with Standard>]
 

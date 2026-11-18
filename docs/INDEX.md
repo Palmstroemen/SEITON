@@ -5,9 +5,9 @@
 | Document | Purpose |
 |----------|---------|
 | [../README.md](../README.md) | Project overview, quick start |
-| [../Designdokument.md](../Designdokument.md) | Contributor entry point, architecture, design principles |
-| [../ProjectLogbook.md](../ProjectLogbook.md) | Operational roadmap, learnings, open questions |
-| [../Roadmap.md](../Roadmap.md) | Strategic roadmap: lessons from earlier attempts, what comes now, next, later |
+| [Designdokument.md](Designdokument.md) | Contributor entry point, architecture, design principles |
+| [ProjectLogbook.md](ProjectLogbook.md) | Operational roadmap, learnings, open questions |
+| [Roadmap.md](Roadmap.md) | Strategic roadmap: lessons from earlier attempts, what comes now, next, later |
 
 ## Status & Security
 
@@ -67,7 +67,7 @@
 
 ## Vision (German)
 
-Concept notes in [../Vision/](../Vision/), among them [Die Methode auf einer Seite](../Vision/Die%20Methode%20auf%20einer%20Seite.md) and [Wie aus einem Projekt eine Firma wächst](../Vision/Wie%20aus%20einem%20Projekt%20eine%20Firma%20w%C3%A4chst.md).
+Concept notes in [Vision/](Vision/), among them [Die Methode auf einer Seite](Vision/Die%20Methode%20auf%20einer%20Seite.md) and [Wie aus einem Projekt eine Firma wächst](Vision/Wie%20aus%20einem%20Projekt%20eine%20Firma%20w%C3%A4chst.md).
 
 ## Archived
 
@@ -78,3 +78,5 @@ Concept notes in [../Vision/](../Vision/), among them [Die Methode auf einer Sei
 | [archive/README3.md](archive/README3.md) | Superseded by root README |
 | [archive/Technical Intro.md](archive/Technical%20Intro.md) | Early FUSE prototype (`myos_core.py`) |
 | [archive/MyOS Tests Dokumentation.md](archive/MyOS%20Tests%20Dokumentation.md) | Test suite of an early state |
+| [archive/ProjectLogbook 2025.md](archive/ProjectLogbook%202025.md) | The first logbook (June 2025) |
+| [archive/MD Workflow/](archive/MD%20Workflow/) | Idea of February 2026: Markdown first, exports, Dolphin actions |

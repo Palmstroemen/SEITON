@@ -13,7 +13,7 @@ A perspective is a **lens**: one looks at the projects from a department's point
 Normally one looks from a project: `/Projekte/Job/4_Finanz/Rechnungen`. Wearing the lens
 of the finance department, the path is turned round: `/4_Finanz/Projekte/Job/Rechnungen`.
 Below `/4_Finanz` one sees only finances, but those of all projects ("the shelf",
-`/4_Finanz/Projekte`). See "Vision/Brillen und die runde Halle.md".
+`/4_Finanz/Projekte`). See "docs/Vision/Brillen und die runde Halle.md".
 
 Example. Two passions: making music and travelling, so two projects, `/Musikstudio` and
 `/Reisen`.
@@ -39,7 +39,7 @@ Example. Two passions: making music and travelling, so two projects, `/Musikstud
 
 - **CWD** - where I am: the path line without a frame (A3). Its project's Desk applies
   without a lens.
-- **CTD** - where I look and drop (see "Vision/GUI Filebrowser.md"). With a lens on, the
+- **CTD** - where I look and drop (see "docs/Vision/GUI Filebrowser.md"). With a lens on, the
   lens is the CTD: it can point into another project than the CWD.
 - **Lens (CPD)** - the turned path, e.g. `/4_Finanz/Ausgangsrechnungen/2026/Projekte/Reisen`
   in the session's form (`cpd`): the department path (template side), the project, and a tail.
@@ -72,7 +72,7 @@ is no second place to come back to - the line is where one is, with or without a
    level's children open to the right - at `Projekte` the main projects, at `Wohnen` the
    Wohnen projects. (The earlier "on click, never on hover" is replaced there: in M the
    dropdown opens on hover.) H and V keep the projects row with its path line.
-3. **The shelf** (the user's picture, "Vision/Brillen und die runde Halle.md"): in the
+3. **The shelf** (the user's picture, "docs/Vision/Brillen und die runde Halle.md"): in the
    finance department one has a shelf whose folders are labelled with the projects. In
    Scope that is what opens to the right of a level in M's dropdown: the projects there.
    With a lens, choosing one moves the lens; the frame stays. A flat view of the CLD of
@@ -437,7 +437,7 @@ name the perspectives it wants at hand, deeper ones too:
 
 (in the root's `.seiton`, say `Perspectives.md`). Each appears as an entry of its own in the
 root's drive, turned at that place: `~/Perspektiven/Dokumente/92_Bilder/<project>/...` holds the
-pictures of all projects. That is the FreeDMS idea of programs as roles (Designdokument.md,
+pictures of all projects. That is the FreeDMS idea of programs as roles (docs/Designdokument.md,
 "Ideas from FreeDMS", 6): a photo program is given `92_Bilder`, a bookkeeping program `4_Finanz`,
 and sees exactly that across all projects and nothing else.
 

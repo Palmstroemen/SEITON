@@ -30,11 +30,11 @@ Test suite: `python3 -m pytest` from the repository root (every test folder, see
 
 ## Current Priorities
 
-The order comes from [Roadmap.md](../Roadmap.md) ("Jetzt"):
+The order comes from [Roadmap.md](Roadmap.md) ("Jetzt"):
 
 1. Evaluating the test machine: does someone still use SEITON after a week? (`docs/TEST-MACHINE.md`)
 2. One entry case: the small business (customer, numbered invoice as PDF, open invoices, reminder)
-3. The method on one page (`Vision/Die Methode auf einer Seite.md`)
+3. The method on one page (`docs/Vision/Die Methode auf einer Seite.md`)
 
 Besides: fixing what the review of 2026-11-18 found (`docs/Prüfung 2026-11-18.md`).
 
@@ -64,4 +64,4 @@ Besides: fixing what the review of 2026-11-18 found (`docs/Prüfung 2026-11-18.m
 
 ## Operational Details
 
-For the full operational roadmap, open questions, and learnings, see [ProjectLogbook.md](../ProjectLogbook.md) in the repository root.
+For the full operational roadmap, open questions, and learnings, see [ProjectLogbook.md](ProjectLogbook.md).

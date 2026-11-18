@@ -205,7 +205,7 @@ its own keys (`HeadlineBackend.OWN_SETTINGS`); a change takes effect at once.
 
 ## 5. Open
 
-- The name: "Headline" fits the top edge, less a panel from the taskbar (Vision/Namen der
+- The name: "Headline" fits the top edge, less a panel from the taskbar (docs/Vision/Namen der
   Werkzeuge.md is choosing Japanese names).
 - What shows when one is not in a project (no root found below, A11): the roots? nothing?
 - Whether the line also shows the projects of the current level (the "shelf" of E4).

@@ -12,7 +12,7 @@ Until November 2026 the project was called MyOS; in some places that name still 
 
 **Current phase:** MVP implementation. The core API, Scope, the Headline, the time tracking, the CLI tools, the perspectives drive and a first Nextcloud integration are in place and being hardened. Not a complete operating system.
 
-For a concise status snapshot and priorities, see [docs/STATUS.md](docs/STATUS.md). For the operational roadmap and open questions, see [ProjectLogbook.md](ProjectLogbook.md).
+For a concise status snapshot and priorities, see [docs/STATUS.md](docs/STATUS.md). For the operational roadmap and open questions, see [docs/ProjectLogbook.md](docs/ProjectLogbook.md).
 
 ---
 
@@ -49,12 +49,12 @@ The building blocks exist but are fragmented. SEITON aims to unify them into one
 | **templates/** | The templates SEITON ships (Standard, Person, Firma, Development) |
 | **installer/** | The installer (`install.sh` starts it) and its requirements |
 | **cli/** | CLI tools (myls, myproject, mytag, myedit, myfilter, etc.) |
-| **docs/** | Documentation index, development guide, conventions, security |
-| **Vision/** | Concept and GUI notes (e.g. CWD/CWP/CTD) |
+| **docs/** | Design entry point, roadmap, logbook, status, development guide, conventions, security |
+| **docs/Vision/** | Concept and GUI notes (e.g. CWD/CWP/CTD) |
 | **Learning SEITON/** | Tutorial and learning content (DE/EN) |
 | **SEITON_Test/** | Local test data for the GUI (not in the repository) |
 
-Design documents live under `core/Dokumentation/`. Entry points: [Designdokument.md](Designdokument.md), [docs/INDEX.md](docs/INDEX.md).
+Design documents live under `core/Dokumentation/`. Entry points: [docs/Designdokument.md](docs/Designdokument.md), [docs/INDEX.md](docs/INDEX.md).
 
 ---
 

@@ -1,3 +1,5 @@
+> Archived 2026-11-18 – an idea from February 2026 (Markdown first, exports to Office, Dolphin actions, an Obsidian plugin); nothing of it is used today.
+
 Vorteile dieses Systems:
 MD-first: Gedanken zuerst in Markdown
 

@@ -187,7 +187,7 @@ ApplicationWindow {
     /// The folder shown in the FilesPanel (currentFilesPath) is a project; set by updateFiles.
     property bool hasProjectInFilesPath: false
 
-    // --- Pfadkonzepte CWD / CWP / CTD (Begriffe: siehe Vision/GUI Filebrowser.md, Abschnitt Begriffe) ---
+    // --- Pfadkonzepte CWD / CWP / CTD (Begriffe: siehe docs/Vision/GUI Filebrowser.md, Abschnitt Begriffe) ---
     // CWD (Current Working Directory): Im Scope durch die Property cwp repräsentiert; der „Arbeitspfad“
     //     ist hier das aktuelle Projektverzeichnis.
     // CWP (Current Working Project): Im Code die Property cwp (Pfad zum aktuellen Projektordner, z. B. /Projekte/Haus/Dach).
