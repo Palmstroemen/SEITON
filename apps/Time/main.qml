@@ -107,10 +107,52 @@ ApplicationWindow {
                 font.pixelSize: root.baseFont + 6
                 font.bold: true
             }
-            Label2 {
-                objectName: "nowText"
-                visible: root.nowView.clockRuns
-                text: root.nowView.text
+            Column {  // in the middle of the page (the column is only as wide as its widest)
+                Layout.preferredWidth: root.width - 32
+                spacing: 10
+                TimeDial {  // today's time as a stopwatch (TimeDial.qml)
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    theme: root.theme
+                    todaySeconds: root.nowView.todaySeconds || 0
+                    since: root.nowView.since || 0
+                    label: qsTr("today")
+                    // Stopped by hand, said in the dial: else one forgets it (Z8).
+                    stopped: root.nowView.clock === "stopped"
+                    stoppedText: qsTr("stopped")
+                }
+                Row {  // for whom it counts: the system's picture and the name in the project
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 8
+                    Rectangle {
+                        width: 32
+                        height: 32
+                        radius: 16
+                        color: root.theme.smallButtonBg || "#2c3040"
+                        clip: true
+                        Image {
+                            objectName: "nowPicture"
+                            anchors.fill: parent
+                            source: root.nowView.picture || ""
+                            visible: source != ""
+                            fillMode: Image.PreserveAspectCrop
+                            sourceSize.width: 64
+                            sourceSize.height: 64
+                        }
+                        Text {  // without a picture: the first letter
+                            anchors.centerIn: parent
+                            visible: !(root.nowView.picture || "")
+                            text: String(root.nowView.person || "?").charAt(0).toUpperCase()
+                            color: root.theme.text || "#e6e6e6"
+                            font.pixelSize: 16
+                            font.bold: true
+                        }
+                    }
+                    Label2 {
+                        objectName: "nowPerson"
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: root.nowView.person || ""
+                    }
+                }
             }
             Muted {
                 objectName: "clockNotRunning"

@@ -10,6 +10,7 @@ No Qt here; its window only draws it.
 
 from __future__ import annotations
 
+import getpass
 import json
 import re
 import time as clock_time
@@ -70,16 +71,41 @@ def stretch_of(row: Dict[str, Any], kind: Optional[str] = None) -> Optional[tl.S
         return None
 
 
+
+def _seconds_of(short: Any) -> int:
+    """"2:15" (or "0:15 · gestoppt", the clock's short text) as seconds; 0 without."""
+    match = re.match(r"^\s*(\d+):([0-5]\d)", str(short or ""))
+    return int(match.group(1)) * 3600 + int(match.group(2)) * 60 if match else 0
+
+
+def system_face(home: Optional[Path] = None, login: Optional[str] = None,
+                accounts: Path = Path("/var/lib/AccountsService/icons")) -> Optional[Path]:
+    """The person's picture as the system keeps it (AccountsService, which the login screen
+    and the desktop show), else ~/.face; None without one."""
+    home = Path(home) if home is not None else Path.home()
+    try:
+        login = login or getpass.getuser()
+    except Exception:
+        login = ""
+    for candidate in ([accounts / login] if login else []) + [home / ".face", home / ".face.icon"]:
+        try:
+            if candidate.is_file():
+                return candidate
+        except OSError:
+            continue
+    return None
+
 class TimeModel:
     def __init__(self, *, active: Optional[Path] = None, widget: Optional[Path] = None,
                  today: Callable[[], date] = date.today, language: str = "de",
-                 ledger: Optional[Path] = None) -> None:
+                 ledger: Optional[Path] = None, face: Optional[Callable[[], Optional[Path]]] = None) -> None:
         self._active = Path(active) if active is not None else active_file()
         # The clock's ledger: the projects worked on last, to choose from (Z7).
         self._ledger = Path(ledger) if ledger is not None else default_store().with_name("ledger.json")
         self._widget = Path(widget) if widget is not None else cw.folder()
         self._today = today
         self._language = language
+        self._face = face if face is not None else system_face
 
     def today(self) -> date:
         return self._today()
@@ -109,9 +135,19 @@ class TimeModel:
     def now(self) -> Dict[str, Any]:
         project = self.active_project()
         view = self._clock_view()
+        counter = (view or {}).get("counter")
+        since = counter.get("since") if isinstance(counter, dict) else None
+        face = self._face()
         return {"project": str(project) if project else "", "projectName": project.name if project else "",
                 "clockRuns": view is not None, "text": (view or {}).get("text", ""),
-                "state": (view or {}).get("state", "calm"), "clock": str((view or {}).get("clock") or "")}
+                "state": (view or {}).get("state", "calm"), "clock": str((view or {}).get("clock") or ""),
+                # The dial (2026-11-18): today's time as the view says it, and while it counts
+                # where it would be naught - the screen counts on to the second from there.
+                "todaySeconds": _seconds_of((view or {}).get("short")),
+                "since": float(since) if type(since) in (int, float) else 0,
+                # Who is counted: the person of the project, with the system's picture.
+                "person": self._person(project) if project else "",
+                "picture": face.as_uri() if face is not None else ""}
 
     def _clock_view(self) -> Optional[Dict[str, Any]]:
         path = self._widget / "view.json"

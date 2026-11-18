@@ -126,3 +126,44 @@ def test_a_chosen_project_stays_chosen_when_the_screen_refreshes(started, tmp_pa
     QMetaObject.invokeMethod(window, "refresh")
     started["app"].processEvents()
     assert window.property("project") == str(other)
+
+
+# --- the dial on Now (2026-11-18): a green wedge for the hour, a seconds hand while it counts --
+
+def _view(started, **view):
+    import json
+    folder = started["project"].parents[1] / "run" / "seiton-clock"
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "view.json").write_text(json.dumps(view))
+    started["window"].setProperty("nowView", started["engine"].rootContext().contextProperty("timeScreen").now())
+    started["app"].processEvents()
+
+
+def test_the_dial_counts_on_while_the_clock_counts(started):
+    import time as clock_time
+    _view(started, text="Küche · 2:15", short="2:15", state="active", clock="runs",
+          counter={"prefix": "Küche · ", "shortPrefix": "", "since": clock_time.time() - (2 * 3600 + 15 * 60 + 7)})
+    [dial] = _named(started, "nowDial")
+    assert dial.property("running") is True
+    assert abs(dial.property("seconds") - (2 * 3600 + 15 * 60 + 7)) < 3
+    assert dial.property("wedgeAngle") == pytest.approx(15 / 60 * 360, abs=1)
+
+
+def test_standing_the_dial_stands(started):
+    _view(started, text="Küche · 0:15 · gestoppt", short="0:15 · gestoppt", state="calm", clock="stopped")
+    [dial] = _named(started, "nowDial")
+    assert dial.property("running") is False and dial.property("seconds") == 15 * 60
+
+
+def test_now_says_for_whom_it_counts(started):
+    [person] = _named(started, "nowPerson")
+    assert person.property("text") == "Oliver"
+
+
+def test_stopped_is_said_in_the_dial_and_no_line_repeats_the_time(started):
+    _view(started, text="Küche · 0:15 · gestoppt", short="0:15 · gestoppt", state="calm", clock="stopped")
+    [stopped] = _named(started, "dialStopped")
+    assert stopped.property("visible") and stopped.property("text") == "stopped"
+    assert _named(started, "nowText") == []
+    _view(started, text="Küche · 0:15", short="0:15", state="calm", clock="paused")
+    assert not _named(started, "dialStopped")[0].property("visible")  # a pause is no stop

@@ -263,3 +263,51 @@ def test_adding_to_another_project_with_a_beginning(model, world):
     rows = [r for r in model.entries(str(world["haus"])) if r["note"] == "Holz"]
     assert rows == [dict(rows[0], start="14:30", minutes=45, kind="added")]
     assert read_active(world["active"])[0] == world["kueche"]  # the clock stays where it is
+
+
+# --- the dial on Now and who is counted (2026-11-18) -------------------------------------------
+
+def _clock_view(world, **view):
+    world["widget"].mkdir(parents=True, exist_ok=True)
+    (world["widget"] / "view.json").write_text(json.dumps(view))
+
+
+def test_now_gives_todays_time_and_since_when_it_counts(model, world):
+    _clock_view(world, text="Küche · 2:15", short="2:15", state="active", clock="runs",
+                counter={"prefix": "Küche · ", "shortPrefix": "", "since": 1000.5})
+    now = model.now()
+    assert now["todaySeconds"] == 2 * 3600 + 15 * 60 and now["since"] == 1000.5
+
+
+def test_standing_no_since(model, world):
+    _clock_view(world, text="Küche · 0:15 · gestoppt", short="0:15 · gestoppt", state="calm", clock="stopped")
+    now = model.now()
+    assert now["todaySeconds"] == 15 * 60 and now["since"] == 0
+
+
+def test_without_the_clock_nothing_counted(model):
+    now = model.now()
+    assert now["todaySeconds"] == 0 and now["since"] == 0
+
+
+def test_now_names_the_person_counted_and_their_picture(world, tmp_path):
+    from apps.Time.model import TimeModel
+    face = tmp_path / "face.png"
+    face.write_bytes(b"png")
+    model = TimeModel(active=world["active"], widget=world["widget"], today=lambda: TODAY, face=lambda: face)
+    now = model.now()
+    assert now["person"] == "Oliver" and now["picture"] == face.as_uri()
+    model = TimeModel(active=world["active"], widget=world["widget"], today=lambda: TODAY, face=lambda: None)
+    assert model.now()["picture"] == ""
+
+
+def test_the_picture_from_the_system(tmp_path):
+    from apps.Time.model import system_face
+    home, accounts = tmp_path / "home", tmp_path / "accounts"
+    home.mkdir()
+    accounts.mkdir()
+    assert system_face(home=home, login="oliver", accounts=accounts) is None
+    (home / ".face").write_bytes(b"x")
+    assert system_face(home=home, login="oliver", accounts=accounts) == home / ".face"
+    (accounts / "oliver").write_bytes(b"x")  # the system's account settings come first
+    assert system_face(home=home, login="oliver", accounts=accounts) == accounts / "oliver"
