@@ -1,6 +1,6 @@
 Dank der Berechtigungen sieht deine Finanzabteilung also nur die /4_Finanz/-Ordner mit allem, was darin liegt. Wäre es nicht schön, wenn auch du einen gebündelten Blick auf deine Finanzen hättest? Oder auf deine rechtlichen Angelegenheiten? Auf deine Entwicklung oder deine Kommunikation?
 
-Du darfst vielleicht alle deine Daten sehen, willst dich aber auf einen bestimmten Teil davon konzentrieren. Dafür gibt es Filter. Bau sie dir ganz einfach selbst! Bau verschiedene Filter für verschiedene Projekte, oder nutze manche Filter für alle.
+Du darfst vielleicht alle deine Daten sehen, willst dich aber auf einen bestimmten Teil davon konzentrieren. Dafür gibt es Filter: kleine Notizen (Filter.md), die in einem Ordner liegen und für ihn und alles darunter gelten. Verschiedene Projekte können verschiedene Filter haben, manche Filter können für alle gelten. Eine Oberfläche, mit der du sie dir selbst baust, kommt noch.
 
 Ein Filter kann so etwas sein wie der Heute-Bildschirm mancher Apps. Er zeigt dir auf einen Blick das Neueste, das Dringendste, das Interessanteste.
 

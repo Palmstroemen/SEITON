@@ -13,7 +13,7 @@ Klick links auf *Team*: Scope zeigt nur noch, worauf das Team zugreifen darf. Ei
 Öffne *.seiton/ACLs.md*. *.seiton* ist ein versteckter Ordner – in Scope zeigst du ihn mit ⚙ → Scope → Versteckte Ordner. Unter **## Gast** steht `- /1_Info/: read`. Diese eine Zeile sagt: Gäste dürfen /1_Info/ lesen – und sonst nichts.
 
 ## 4. Selbst Admin werden (für Fortgeschrittene)
-Rechte ändern darf nur, wer Admin ist – und in der Musterfirma ist das noch niemand. Schreib in der ACLs.md unter **# Users** eine neue Zeile: deinen Benutzernamen auf diesem Computer (so heißt dein persönlicher Ordner unter /home), einen Doppelpunkt und *Admin*, zum Beispiel `maria: Admin`.
+Rechte ändern darf nur, wer Admin ist – und in der Musterfirma ist das noch niemand. Schreib in der ACLs.md unter **# Users** eine neue Zeile: deinen Benutzernamen auf diesem Computer (so heißt dein persönlicher Ordner unter /home), einen Doppelpunkt und *Admin*, zum Beispiel `maria: Admin`. Hast du dich in Übung 1 schon als jemand eingetragen, hängst du stattdessen bei dieser Person `, Admin` an.
 Zurück in Scope änderst du jetzt mit einem **Rechtsklick** auf eine Gruppe ihre Rechte für den angezeigten Ordner. Gib zum Beispiel dem Team in *4_Finanz* Leserechte. Schau danach in die ACLs.md: Genau eine Zeile ist dazugekommen. Die vorige Fassung bewahrt SEITON in *.seiton/ACLs-history* auf.
 
 ## 5. Eine neue Kollegin

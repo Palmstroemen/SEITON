@@ -13,7 +13,7 @@ Click *Team* on the left: Scope only shows what the team may access. A second cl
 Open *.seiton/ACLs.md*. *.seiton* is a hidden folder – in Scope you show it with ⚙ → Scope → Hidden folders. Under **## Guest** it says `- /1_Info/: read`. This one line says: guests may read /1_Info/ – and nothing else.
 
 ## 4. Become admin yourself (advanced)
-Only an admin may change rights – and in the Sample Company nobody is one yet. In ACLs.md, under **# Users**, write a new line: your user name on this computer (the name of your personal folder under /home), a colon, and *Admin*, for example `maria: Admin`.
+Only an admin may change rights – and in the Sample Company nobody is one yet. In ACLs.md, under **# Users**, write a new line: your user name on this computer (the name of your personal folder under /home), a colon, and *Admin*, for example `maria: Admin`. If you already said who you are in exercise 1, add `, Admin` to that person's line instead.
 Back in Scope, you can now **right-click** a group to change its rights for the folder shown. For example, give the team read access in *4_Finanz*. Then look into ACLs.md: exactly one line has been added. SEITON keeps the previous version in *.seiton/ACLs-history*.
 
 ## 5. A new colleague

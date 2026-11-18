@@ -245,9 +245,12 @@ def test_comment_and_finish_only_work_in_a_tutorial_copy(lesson):
     recorder = _Recorder()
     launcher = _launcher(lesson, recorder)
     launcher.confirm_finish = lambda: (True, "")
+    told = []
+    launcher.tell = told.append
     launcher.open(QUrl(f"{S}:finish"))
     launcher.open(QUrl(f"{S}:comment"))
     assert recorder.started == []
+    assert len(told) == 2 and "test machine" in told[0]  # said, not silent (L6)
 
 
 def test_scope_from_an_exercise_starts_without_the_lens_drive(lesson):

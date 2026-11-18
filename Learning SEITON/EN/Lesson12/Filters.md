@@ -1,6 +1,6 @@
 Thanks to permissions, your finance department only sees the /4_Finanz/ folders with everything inside them. Wouldn't it be nice if you, too, had a focused view of your finances? Or of your legal matters? Of your development or your communication?
 
-You might be allowed to see all your data, but you want to focus on a specific part of it. That's what filters are for. Build them yourself, easily! Build different filters for different projects, or use some filters for all of them.
+You might be allowed to see all your data, but you want to focus on a specific part of it. That's what filters are for: small notes (Filter.md) that lie in a folder and hold for it and everything below. Different projects can have different filters, some filters can hold for all of them. A way to build them yourself in the interface is still to come.
 
 A filter can be something like the Today screen of some apps. It shows you the newest, the most urgent, the most interesting at a glance.
 

@@ -216,12 +216,22 @@
 <context>
     <name>ExerciseLauncher</name>
     <message>
-        <location filename="../exercise_links.py" line="227"/>
+        <location filename="../exercise_links.py" line="208"/>
+        <source>Comments and &quot;Finished&quot; only work on the test machine, in a copy of the tutorial.</source>
+        <translation>Kommentare und „Bin fertig“ gibt es nur auf dem Testrechner, in einer Kopie der Lektionen.</translation>
+    </message>
+    <message>
+        <location filename="../exercise_links.py" line="230"/>
+        <source>Tutorial</source>
+        <translation>Lektionen</translation>
+    </message>
+    <message>
+        <location filename="../exercise_links.py" line="234"/>
         <source>Finished</source>
         <translation>Fertig</translation>
     </message>
     <message>
-        <location filename="../exercise_links.py" line="228"/>
+        <location filename="../exercise_links.py" line="235"/>
         <source>Done with the tutorial? Your notes and comments are collected and the computer is made ready for the next tester.
 
 Your name (optional):</source>

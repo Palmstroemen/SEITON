@@ -19,7 +19,7 @@ And for your finances maybe:
 * not paid
 * postponed
 * waiting
-* enforced
+* collected
 * paid
 
 So projects should **contain** the flood of tags that would otherwise overwhelm your whole system. That's exactly what projects in SEITON can do.

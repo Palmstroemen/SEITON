@@ -23,7 +23,7 @@ from typing import Callable, List, NamedTuple, Optional, Set, Tuple
 from urllib.parse import parse_qs, unquote, urlsplit
 
 from PySide6.QtCore import QObject, QTimer, QUrl, Slot
-from PySide6.QtWidgets import QInputDialog, QLineEdit
+from PySide6.QtWidgets import QInputDialog, QLineEdit, QMessageBox
 
 from core.brand import LEGACY_URL_SCHEMES, URL_SCHEME, env_name
 
@@ -160,6 +160,7 @@ class ExerciseLauncher(QObject):
         self._pending = None  # (windows before, scope pid, folder name, tries left)
         self._placed = {}
         self.confirm_finish = self._ask_finish  # -> (confirmed, name); replaceable in tests
+        self.tell = self._tell  # a short message to the reader; replaceable in tests
 
     @property
     def placing(self) -> bool:
@@ -202,7 +203,10 @@ class ExerciseLauncher(QObject):
         # scripts/testrun.py (marker in its root) may start it, and only after asking.
         root = testrun.copy_root(base) if base is not None else None
         if root is None:
+            # Said, not only on stderr: started from the desktop, nothing else would show.
             print(f"[PostFix] {SCHEME}:{command} only works in a tutorial copy", file=sys.stderr)
+            self.tell(self.tr("Comments and \"Finished\" only work on the test machine, in a copy of "
+                              "the tutorial."))
             return
         if command == "comment":
             note = testrun.comment_note(base)
@@ -221,6 +225,9 @@ class ExerciseLauncher(QObject):
             self._popen(argv, cwd=str(self._repo_root), start_new_session=True, **kwargs)
         except OSError as error:
             print(f"[PostFix] could not start {argv[0]}: {error}", file=sys.stderr)
+
+    def _tell(self, text: str) -> None:
+        QMessageBox.information(None, self.tr("Tutorial"), text)
 
     def _ask_finish(self):
         name, confirmed = QInputDialog.getText(
