@@ -1,8 +1,8 @@
 import QtQuick 2.15
 
 // The dial on Now (2026-11-18; TimeDial: Controls has a Dial). It only shows whether the clock
-// runs: while it counts, a seconds hand goes round once a minute and draws a green wedge after
-// it; standing, the wedge stays where it was, grey, and the hand is gone. Today's time stands in
+// runs: while it counts, a green wedge grows round once a minute (no hand: 2026-11-19);
+// standing, it stays where it was, grey. Today's time stands in
 // the middle as h:mm h.
 Item {
     id: dial
@@ -86,20 +86,6 @@ Item {
                 g.moveTo(cx + Math.cos(a) * (r - 2), cy + Math.sin(a) * (r - 2))
                 g.lineTo(cx + Math.cos(a) * (r - (i % 3 === 0 ? 12 : 8)), cy + Math.sin(a) * (r - (i % 3 === 0 ? 12 : 8)))
                 g.stroke()
-            }
-            if (dial.running) {  // the seconds hand
-                var s = top + dial.wedgeAngle * Math.PI / 180
-                g.strokeStyle = "#e2402b"
-                g.lineWidth = 2
-                g.lineCap = "round"
-                g.beginPath()
-                g.moveTo(cx, cy)
-                g.lineTo(cx + Math.cos(s) * (r - 10), cy + Math.sin(s) * (r - 10))
-                g.stroke()
-                g.beginPath()
-                g.arc(cx, cy, 4, 0, 2 * Math.PI)
-                g.fillStyle = "#e2402b"
-                g.fill()
             }
         }
     }

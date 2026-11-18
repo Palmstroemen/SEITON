@@ -181,7 +181,7 @@ the Headline, the launcher - brings the one open to the front. Its own icon, a s
 
 - **Now**: the active project, today's time in it, Start/Stop. In the middle a dial
   (2026-11-18, `apps/Time/TimeDial.qml`) that only shows whether the clock runs: while it counts
-  a red seconds hand goes round once a minute and draws a green wedge after it; standing, the
+  a green wedge grows round once a minute (the red hand went, 2026-11-19); standing, the
   wedge stays where it was, grey, and "gestoppt" stands in red when stopped by hand. The wedge
   is no measure: it begins at the top and, started again, goes on from where it stood. A click
   on Start or Stop moves the dial at once; the screen then reads the clock four times a second
