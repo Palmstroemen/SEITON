@@ -2303,8 +2303,9 @@ class ScopeApi:
         target = self._resolve_path(path)
         if not target.is_dir():
             return None
-        config_path = self._desk_service.find_config(target, config_name="Desk.md")
-        if config_path is None:
+        # Not inherited: the icon belongs to its project (Designdocument Desk, 4; D9).
+        config_path = target / META_DIR / "Desk.md"
+        if not config_path.is_file():
             return None
         try:
             desk = DeskConfig.from_file(config_path)
@@ -2787,6 +2788,14 @@ class ScopeApi:
         return removed
 
     def move_entry(self, source: str, target_dir: str) -> bool:
+        # A suggestion born for this drop goes back to being one when nothing came (API10).
+        born_here = not self._entry_exists(Path(target_dir).expanduser())
+        moved = self._move_entry(source, target_dir)
+        if not moved and born_here:
+            self._reabsorb_emptied_folders([Path(target_dir).expanduser().resolve()])
+        return moved
+
+    def _move_entry(self, source: str, target_dir: str) -> bool:
         _dbg = getenv("DEBUG_BIRTH")
         if _dbg:
             print(f"[birth] move_entry source={source!r} target_dir={target_dir!r}")
@@ -2834,6 +2843,7 @@ class ScopeApi:
             "reabsorbed": [],
         }
         emptied: List[Path] = []
+        born_here = not self._entry_exists(Path(target_dir).expanduser())  # a suggestion, born now
         dst_dir, target_reason = self._resolve_or_materialize_target_dir(target_dir)
         if _dbg:
             print(f"[birth] move_entries after resolve: dst_dir={dst_dir!r} reason={target_reason!r}")
@@ -2888,6 +2898,8 @@ class ScopeApi:
             except Exception:
                 result["errors"].append({"source": src_key, "reason": "move_failed"})
 
+        if born_here and not result["moved"]:
+            emptied.append(dst_dir)  # born for this drop, and nothing came: a suggestion again
         result["reabsorbed"] = self._reabsorb_emptied_folders(emptied)
         result["ok"] = len(result["errors"]) == 0
         return result

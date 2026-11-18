@@ -941,6 +941,13 @@ ApplicationWindow {
             return qsTr("Entry was selected multiple times.")
         case "acl_rules_conflict":
             return qsTr("Access rules are already waiting for this place; ask whoever manages the rights.")
+        case "acl_denied_target":
+            return qsTr("You may not put anything here.")
+        case "acl_denied":
+        case "acl_denied_source":
+            return qsTr("You may not move this.")
+        case "invalid_path":
+            return qsTr("This is no valid path.")
         default:
             return qsTr("Operation skipped.")
         }
@@ -977,7 +984,8 @@ ApplicationWindow {
                     lines.push(qsTr("Could not move:"))
                     for (var e = 0; e < errors.length; e++) {
                         var err = errors[e]
-                        var errSource = PathUtils.basename(err && err.source ? err.source : "")
+                        // An error of the target (no write right there) names the target.
+                        var errSource = PathUtils.basename(err && err.source ? err.source : (err && err.target ? err.target : ""))
                         var errReason = err && err.reason ? err.reason : "error"
                         lines.push("- " + errSource + ": " + _moveReasonText(errReason))
                     }

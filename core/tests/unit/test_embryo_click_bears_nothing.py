@@ -123,3 +123,31 @@ def test_the_listing_shows_the_suggestions_of_the_listed_folders_project(tmp_pat
     api = ScopeApi(str(root))  # Scope stands in the parent project
     names = {e["name"] for e in api.list_entries(str(studio)) if e.get("isEmbryo")}
     assert names == {"Aufnahmen"}
+
+
+def test_a_refused_drop_on_a_suggestion_leaves_no_empty_folder(world):
+    """"docs/Prüfung 2026-11-18.md", API10."""
+    from core.scope_api import ScopeApi
+
+    api = ScopeApi(str(world["studio"]))
+    report = api.move_entries([str(world["studio"] / "fehlt.pdf")], str(world["embryo"]))
+    assert not report["moved"]
+    assert not world["embryo"].exists()  # still a suggestion
+    assert not api.move_entry(str(world["studio"] / "fehlt.pdf"), str(world["embryo"]))
+    assert not world["embryo"].exists()
+
+
+def test_a_project_icon_belongs_to_its_project(tmp_path, monkeypatch):
+    """"docs/Prüfung 2026-11-18.md", D9: not inherited, and kept with inherit: not."""
+    from core.scope_api import ScopeApi
+
+    monkeypatch.delenv(env_name("TEMPLATES_DIR"), raising=False)
+    root = _project(tmp_path / "Projekte")
+    (root / META_DIR / "Desk.md").write_text("# Desk\nProjectIcon: 🏠\nThemePreset: Mint-Y\n")
+    sub = _project(root / "Garten")
+    own = _project(root / "Werkstatt")
+    (own / META_DIR / "Desk.md").write_text("# Desk\ninherit: not\nProjectIcon: 🔧\n")
+    api = ScopeApi(str(root))
+    assert api.get_project_icon(str(root)) == "🏠"
+    assert api.get_project_icon(str(sub)) is None
+    assert api.get_project_icon(str(own)) == "🔧"

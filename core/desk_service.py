@@ -200,10 +200,13 @@ class DeskService:
         changed = applied is not None and any(
             getattr(applied, f) is not None and getattr(current, f) != getattr(applied, f) for f in _STATE_FIELDS
         )
-        if changed and shared.get("owner"):
-            # The user changed the desktop since MyOS set it: keep it where it was changed.
+        owner_file = Path(shared["owner"]) if shared.get("owner") else None
+        if changed and owner_file is not None and owner_file.parent.parent.is_dir():
+            # The user changed the desktop since MyOS set it: keep it where it was changed -
+            # unless that project is gone (renamed, in the trash): its old place is not built
+            # anew for it (X5).
             try:
-                write_desk_values(Path(shared["owner"]), current)
+                write_desk_values(owner_file, current)
             except OSError:
                 pass  # not writable there (a template, say): not kept, the desktop still follows
 

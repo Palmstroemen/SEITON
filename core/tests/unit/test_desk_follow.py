@@ -408,3 +408,18 @@ def test_writing_the_taskbar_replaces_only_its_list(tmp_path):
     desk.write_text("# Desk\nThemePreset: Alt\n\n# Andere\nx: 1\n")
     write_desk_values(desk, DesktopState(taskbar=()))
     assert desk.read_text() == "# Desk\nThemePreset: Alt\n\n## Taskbar\n\n# Andere\nx: 1\n"
+
+
+def test_a_change_before_a_rename_builds_no_ghost_folder(tree):
+    """"docs/Prüfung 2026-11-18.md", X5: the change landed in <old>/.seiton/Desk.md, a folder of
+    the old name came back."""
+    desktop = FakeDesktop()
+    service = _service(desktop)
+    service.refresh_context(tree["haus"])
+    desktop.user_changes(wallpaper="/bg/haus.jpg")
+    renamed = tree["haus"].with_name("Haus neu")
+    tree["haus"].rename(renamed)
+
+    service.refresh_context(tree["garten"])
+
+    assert not tree["haus"].exists()

@@ -1258,8 +1258,8 @@ Fehlgeschlagen: %3</translation>
     <message>
         <location filename="../main.qml" line="363"/>
         <location filename="../main.qml" line="365"/>
-        <location filename="../main.qml" line="1109"/>
-        <location filename="../main.qml" line="1119"/>
+        <location filename="../main.qml" line="1117"/>
+        <location filename="../main.qml" line="1127"/>
         <source>New Folder</source>
         <translation>Neuer Ordner</translation>
     </message>
@@ -1315,95 +1315,110 @@ Fehlgeschlagen: %3</translation>
     </message>
     <message>
         <location filename="../main.qml" line="945"/>
+        <source>You may not put anything here.</source>
+        <translation>Hier darfst du nichts ablegen.</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="948"/>
+        <source>You may not move this.</source>
+        <translation>Das darfst du nicht verschieben.</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="950"/>
+        <source>This is no valid path.</source>
+        <translation>Das ist kein gültiger Pfad.</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="952"/>
         <source>Operation skipped.</source>
         <translation>Vorgang übersprungen.</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="971"/>
+        <location filename="../main.qml" line="978"/>
         <source>Moved: %1</source>
         <translation>Verschoben: %1</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="977"/>
+        <location filename="../main.qml" line="984"/>
         <source>Could not move:</source>
         <translation>Konnte nicht verschieben:</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="989"/>
+        <location filename="../main.qml" line="997"/>
         <source>Skipped:</source>
         <translation>Übersprungen:</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="1055"/>
+        <location filename="../main.qml" line="1063"/>
         <source>Really move %1 folder(s) to &quot;%2&quot;?</source>
         <translation>Soll(en) %1 Ordner wirklich nach &quot;%2&quot; verschoben werden?</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="1064"/>
+        <location filename="../main.qml" line="1072"/>
         <source>After moving, it will be sorted into:
 %1</source>
         <translation>Nach dem Verschieben wird einsortiert nach:
 %1</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="1077"/>
+        <location filename="../main.qml" line="1085"/>
         <source>New Note</source>
         <translation>Neue Notiz</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="1079"/>
+        <location filename="../main.qml" line="1087"/>
         <source>Could not create a note in this folder.</source>
         <translation>Konnte in diesem Ordner keine Notiz erstellen.</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="1264"/>
+        <location filename="../main.qml" line="1272"/>
         <source>Batch rename currently works for files only.</source>
         <translation>Sammelumbenennung funktioniert aktuell nur für Dateien.</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="1317"/>
+        <location filename="../main.qml" line="1325"/>
         <source>Virtual embryo folders cannot be deleted.</source>
         <translation>Virtuelle Embryo-Ordner können nicht gelöscht werden.</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="1323"/>
+        <location filename="../main.qml" line="1331"/>
         <source>Embryo folders were skipped when deleting: %1</source>
         <translation>Embryo-Ordner wurden beim Löschen übersprungen: %1</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="1369"/>
+        <location filename="../main.qml" line="1377"/>
         <source>Deleted: %1 file(s)
 Not deleted: %2 file(s)</source>
         <translation>Gelöscht: %1 Datei(en)
 Nicht gelöscht: %2 Datei(en)</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="2583"/>
+        <location filename="../main.qml" line="2591"/>
         <source>Search      + deep    # all</source>
         <translation>Suchen      + tief    # alle</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="2717"/>
+        <location filename="../main.qml" line="2725"/>
         <source>Scope ▼</source>
         <translation>Scope ▼</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="2717"/>
+        <location filename="../main.qml" line="2725"/>
         <source>Scope ▲</source>
         <translation>Scope ▲</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="2777"/>
+        <location filename="../main.qml" line="2785"/>
         <source>Minimal view: the current folder top left, the path above it on hover</source>
         <translation>Minimalansicht: der aktuelle Ordner oben links, der Pfad darüber beim Darüberfahren</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="2889"/>
+        <location filename="../main.qml" line="2897"/>
         <source>Rename</source>
         <translation>Umbenennen</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="2893"/>
+        <location filename="../main.qml" line="2901"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
