@@ -74,6 +74,18 @@ def test_undo_brings_back_a_folder_the_drop_emptied(world, suntree, tmp_path):
     assert (ausgaben / "Quittung.pdf").exists()  # born again by it
 
 
+def test_a_drop_reports_what_it_could_not_move(world, suntree, tmp_path):
+    target = world["noten"] / "2025"
+    (target / "Rechnung.pdf").write_text("there already")
+    clash = _incoming(tmp_path)
+    other = _incoming(tmp_path, "Brief.pdf")
+
+    done = suntree.dropFiles([str(clash), str(other)], str(target))
+
+    assert done["count"] == 1 and done["failed"] == 1
+    assert clash.exists() and (target / "Brief.pdf").exists()
+
+
 # --- the window ----------------------------------------------------------------------------
 
 def test_a_drop_puts_suntree_away_and_leaves_a_notice(world, window, tmp_path):
@@ -93,6 +105,36 @@ def test_a_drop_puts_suntree_away_and_leaves_a_notice(world, window, tmp_path):
     assert drawn.width() == notice.width() > 100
     _call(window, "noticeUndo")
     assert source.exists() and not notice.isVisible()
+
+
+def test_a_failed_drop_still_says_so(world, window, tmp_path):
+    _shown(window)
+    geo = _call(window, "crownGeo", 1)
+    _dive(window, 2 * (geo["T"] - geo["ri"]) + 20)
+    target = Path(_call(window, "crownHit")["row"]["path"])
+    source = _incoming(tmp_path)
+    (target / source.name).write_text("there already")
+
+    assert _call(window, "crownDropUrls", ["file://" + str(source)])
+
+    notice = _notice(window)
+    assert notice.isVisible() and "1 not moved" in notice.property("text")
+    assert not notice.property("canUndo")  # nothing to undo
+    assert _gone(window)
+
+
+def test_a_failed_undo_stays_on_the_notice(world, suntree, window, tmp_path):
+    source = _incoming(tmp_path)
+    target = world["noten"] / "2025"
+    done = suntree.dropFiles([str(source)], str(target))
+    _call(window, "showNotice", done["count"], done["place"], 0)
+    (target / "Rechnung.pdf").unlink()  # gone meanwhile: nothing to bring back
+
+    _call(window, "noticeUndo")
+
+    notice = _notice(window)
+    assert notice.isVisible() and notice.property("text") == "Undo failed"
+    assert not notice.property("canUndo")
 
 
 def test_a_single_click_looks_a_double_click_goes_there_and_away(world, suntree, window):

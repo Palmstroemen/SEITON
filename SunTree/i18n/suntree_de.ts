@@ -4,22 +4,32 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../main.qml" line="698"/>
+        <location filename="../main.qml" line="774"/>
         <source>1 file → %1</source>
         <translation>1 Datei → %1</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="698"/>
+        <location filename="../main.qml" line="774"/>
         <source>%1 files → %2</source>
         <translation>%1 Dateien → %2</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="907"/>
+        <location filename="../main.qml" line="776"/>
+        <source>%1 not moved</source>
+        <translation>%1 nicht verschoben</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="796"/>
+        <source>Undo failed</source>
+        <translation>Rückgängig fehlgeschlagen</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="997"/>
         <source>Clipboard (%1)</source>
         <translation>Clipboard (%1)</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="1012"/>
+        <location filename="../main.qml" line="1105"/>
         <source>Undo</source>
         <translation>Rückgängig</translation>
     </message>

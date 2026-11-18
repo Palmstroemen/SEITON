@@ -103,3 +103,13 @@ def test_showing_takes_the_snapshot_behind_the_panel(world, suntree, window):
     assert panel.property("backdrop").startswith("image://backdrop/")
     tint = window.findChild(QQuickItem, "stemPanelTint")
     assert tint.property("color").alpha() > 0 and tint.property("color").black() == 255
+
+
+def test_escape_puts_suntree_away(world, window):
+    """"docs/Prüfung 2026-11-18.md", ST5: Esc only let the crown go."""
+    _shown(window)
+    window.requestActivate()
+    QGuiApplication.instance().processEvents()
+    QTest.keyClick(window, Qt.Key_Escape)
+    QGuiApplication.instance().processEvents()
+    assert _gone(window)

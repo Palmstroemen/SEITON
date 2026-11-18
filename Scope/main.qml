@@ -469,7 +469,11 @@ ApplicationWindow {
     function createProjectAt(target) {
         if (target.length === 0 || !hasBackend() || typeof backend.createProject !== "function") return
         var shownFolder = target === currentFilesPath()
-        if (!backend.createProject(target)) return
+        if (!backend.createProject(target)) {
+            // Said, not silent (E6): the same checks as myproject create.
+            showReport(qsTr("\"%1\" cannot become a project here (a template folder, outside the projects, or no write right).").arg(PathUtils.basename(target)))
+            return
+        }
         // The folder shown became a project: be in it, like after a double click.
         if (shownFolder) {
             setCwp(target, "filesPane.createProject")
@@ -2064,6 +2068,7 @@ ApplicationWindow {
     }
 
     onCwpChanged: {
+        if (renameActive) cancelRename()  // else it stayed on and blocked F2 (F8)
         selectedEntryPaths = []
         selectedTags = []
         lensSetCwd()
@@ -2245,6 +2250,8 @@ ApplicationWindow {
             }
             setCwp(cwp)
             updateSubProjects()
+        } else {
+            showReport(qsTr("Could not rename \"%1\".").arg(oldName))  // as the dialog says (F7)
         }
         cancelRename()
     }

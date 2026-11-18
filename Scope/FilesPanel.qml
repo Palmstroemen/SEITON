@@ -363,7 +363,8 @@ Rectangle { // Files panel
         if (itemIsSelected && selectedPaths && selectedPaths.length > 0) {
             for (var i = 0; i < selectedPaths.length; i++) {
                 var p = selectedPaths[i]
-                if (p && p.length > 0) {
+                // Suggestions and virtual folders are not on disk: they are not dragged along (F10).
+                if (p && p.length > 0 && !isPathEmbryo(p)) {
                     paths.push(p)
                 }
             }
@@ -2112,7 +2113,7 @@ Rectangle { // Files panel
         MenuItem {
             text: qsTr("Move into New Folder")
             enabled: root.contextTargetSelection.length > 1
-            onTriggered: root.moveSelectedIntoNewFolderRequested(root.contextTargetSelection)
+            onTriggered: root.moveSelectedIntoNewFolderRequested(root.contextTargetRealSelection)  // no suggestions (F10)
         }
     }
 

@@ -758,19 +758,30 @@ ApplicationWindow {
         var sources = []
         for (var j = 0; j < urls.length; j++) sources.push(decodeURIComponent(String(urls[j]).replace(/^file:\/\//, "")))
         var done = sunTreeBackend.dropFiles(sources, target)
-        if (!done || !done.count) return false
-        showNotice(done.count, done.place)
+        if (!done || (!done.count && !done.failed)) return false
+        showNotice(done.count, done.place, done.failed || 0)
         putAway()
         return true
     }
 
-    /// After a drop: where the files went, with undo - SunTree itself is gone.
-    function showNotice(count, place) {
+    /// After a drop: where the files went, with undo, and how many could not go (a name already
+    /// there, no right) - SunTree itself is gone.
+    function showNotice(count, place, failed) {
         var parts = String(place || "").split("/").filter(function(p) { return p.length > 0 })
         var where = parts.slice(-2).join("/")
-        dropNotice.text = count === 1 ? qsTr("1 file → %1").arg(where) : qsTr("%1 files → %2").arg(count).arg(where)
+        var said = []
+        if (count > 0)
+            said.push(count === 1 ? qsTr("1 file → %1").arg(where) : qsTr("%1 files → %2").arg(count).arg(where))
+        if (failed > 0)
+            said.push(qsTr("%1 not moved").arg(failed))
+        sayOnNotice(said.join(" · "), count > 0)
+    }
+
+    function sayOnNotice(text, canUndo) {
+        dropNotice.text = text
+        dropNotice.canUndo = canUndo
         // Sized here: the platform writes a window's size back and so loses a binding.
-        dropNotice.width = noticeText.implicitWidth + noticeRow.spacing + undoButton.width + 32
+        dropNotice.width = noticeText.implicitWidth + (canUndo ? noticeRow.spacing + undoButton.width : 0) + 32
         dropNotice.x = dropNotice.screen.virtualX + (dropNotice.screen.width - dropNotice.width) / 2
         dropNotice.y = dropNotice.screen.virtualY + dropNotice.screen.height - dropNotice.height - 60
         dropNotice.visible = true
@@ -778,9 +789,12 @@ ApplicationWindow {
     }
 
     function noticeUndo() {
-        sunTreeBackend.undoDrop()
-        noticeTimer.stop()
-        dropNotice.visible = false
+        if (sunTreeBackend.undoDrop()) {
+            noticeTimer.stop()
+            dropNotice.visible = false
+        } else {
+            sayOnNotice(qsTr("Undo failed"), false)
+        }
     }
 
     /// Up the stem to a parent, the way back of drawing in: the stem's entries glide to their
@@ -1047,6 +1061,7 @@ ApplicationWindow {
         id: dropNotice
         objectName: "dropNotice"
         property string text: ""
+        property bool canUndo: true
         flags: Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus
         transientParent: null  // its own window: SunTree's goes away as it shows
         color: "transparent"
@@ -1076,6 +1091,7 @@ ApplicationWindow {
 
                 Rectangle {
                     id: undoButton
+                    visible: dropNotice.canUndo
                     width: undoLabel.implicitWidth + 20
                     height: 28
                     radius: 7
@@ -1122,7 +1138,8 @@ ApplicationWindow {
 
     Shortcut {
         sequence: "Escape"
-        onActivated: crownRelease(true)
+        // Holding the crown: let it go; else Esc puts SunTree away (ST5).
+        onActivated: crownActive !== 0 ? crownRelease(true) : putAway()
     }
 
     Shortcut {

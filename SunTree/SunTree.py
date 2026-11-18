@@ -341,8 +341,9 @@ class SunTreeBackend(QObject):
 
     @Slot("QVariantList", str, result="QVariantMap")
     def dropFiles(self, sources, target_dir: str) -> dict:
-        """Files dropped onto a folder (one action, then gone): {count, place} - place is where
-        they lie now (a sorted folder files them on). Remembered for undoDrop."""
+        """Files dropped onto a folder (one action, then gone): {count, place, failed} - place is
+        where they lie now (a sorted folder files them on), failed how many stayed where they
+        were (a name already there, no right). Remembered for undoDrop."""
         if target_dir == self._clipboard:
             self._ensure_clipboard_dir()
         result = self._adapter.move_entries([str(s) for s in (sources or [])], target_dir)
@@ -354,7 +355,7 @@ class SunTreeBackend(QObject):
         if self._last_drop:
             self.dataChanged.emit()
         place = str(Path(self._last_drop[-1]["now"]).parent) if self._last_drop else target_dir
-        return {"count": len(self._last_drop), "place": place}
+        return {"count": len(self._last_drop), "place": place, "failed": len(result.get("errors", []))}
 
     @Slot(int, int, int)
     def glidePointerTo(self, x: int, y: int, ms: int) -> None:
@@ -493,7 +494,7 @@ def main() -> int:
 
     app = QGuiApplication(sys.argv)
     app.setApplicationName("SunTree")
-    install_translator(app, "de")  # German, as Scope starts
+    install_translator(app, str(Settings().get("General/language")))  # as set in Setup (R1)
     app.setWindowIcon(seiton_icon())  # SEITON's box, as Scope
 
     api = ScopeApi(start_path)

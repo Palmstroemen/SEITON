@@ -19,6 +19,17 @@ except ImportError:
     from single_instance import InstanceServer, hand_over, server_name
 
 
+def _language_setting() -> str:
+    """The language set in Setup (General/language), else German (R1)."""
+    try:
+        from core.settings import Settings
+
+        value = str(Settings().get("General/language") or "de")
+    except Exception:
+        return "de"
+    return value if value in ("de", "en") else "de"
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="PostFix Markdown editor")
     parser.add_argument("path", nargs="?", help="Markdown file to open")
@@ -114,7 +125,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--lang",
         choices=["de", "en"],
-        default=getenv("UI_LANG", "de"),
+        default=getenv("UI_LANG", "") or _language_setting(),
         help="UI language (de or en)",
     )
     return parser
