@@ -152,3 +152,29 @@ def test_basic_extended():
         # Should run without errors
         lister.list_extended()
         lister.list_extended(color=True)
+
+
+def test_recent_lists_the_newest_files_below(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", CLI3: --recent printed nothing."""
+    import os
+    import subprocess
+    import sys
+
+    from core.brand import META_DIR
+
+    (tmp_path / "Finanz" / "2026").mkdir(parents=True)
+    (tmp_path / ".versteckt").mkdir()
+    (tmp_path / META_DIR).mkdir()
+    made = [("alt.md", 1000), ("Finanz/2026/neu.pdf", 3000), ("Finanz/mittel.txt", 2000),
+            (".versteckt/geheim.md", 4000), (f"{META_DIR}/Project.md", 5000)]
+    for name, when in made:
+        (tmp_path / name).write_text("x")
+        os.utime(tmp_path / name, (when, when))
+    script = Path(__file__).parent.parent.parent / "cli" / "myls.py"
+    shown = subprocess.run([sys.executable, str(script), str(tmp_path), "--recent=2"],
+                           capture_output=True, text=True).stdout
+    lines = [line for line in shown.splitlines() if line.strip()]
+    assert len(lines) == 2, shown
+    assert "neu.pdf" in lines[0] and "Finanz/2026" in lines[0]
+    assert "mittel.txt" in lines[1]
+    assert "geheim" not in shown and "Project.md" not in shown

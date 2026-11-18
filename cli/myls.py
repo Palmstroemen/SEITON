@@ -18,9 +18,9 @@ try:
     # Try to import the core
     sys.path.insert(0, str(Path(__file__).parent.parent))
     from core.localBlueprintLayer import Blueprint
-    from core.tags import read_tags
+    from core.tags import read_tags, tag_list
     from core.xray import xray_listing
-    from core.brand import NAME
+    from core.brand import META_DIR, NAME
     HAS_CORE = True
 except ImportError:
     HAS_CORE = False
@@ -118,7 +118,8 @@ class Lister:
             print(f"\nProject has {total_embryos} total embryos available")
 
     def list_tags(self) -> None:
-        """List files with tags from filesystem metadata."""
+        """List entries with tags: a file's from its extended attributes, a folder's from its
+        .seiton/myTags.md, as Scope shows them (CLI2)."""
         tags_found = False
         try:
             items = sorted(self.root.iterdir())
@@ -127,7 +128,10 @@ class Lister:
             return
 
         for item in items:
-            tags = read_tags(item) if HAS_CORE else {}
+            if HAS_CORE and item.is_dir() and not item.is_symlink():
+                tags = dict.fromkeys(tag_list(item / META_DIR / "myTags.md"))
+            else:
+                tags = read_tags(item) if HAS_CORE else {}
             if not tags:
                 continue
             tags_found = True
@@ -164,8 +168,28 @@ class Lister:
         pass
     
     def list_recent(self, limit: int = 10, roentgen: bool = False) -> None:
-        # ... existing implementation
-        pass
+        """The newest files below this folder, newest first, each with when it changed and
+        where it lies (as an x-ray says it). Hidden folders and the settings folders are not
+        looked into; symlinks are not followed."""
+        found = []
+        for folder, dirs, files in os.walk(self.root):
+            dirs[:] = [d for d in dirs if not d.startswith(".")]
+            for name in files:
+                if name.startswith("."):
+                    continue
+                path = Path(folder) / name
+                try:
+                    if path.is_symlink():
+                        continue
+                    found.append((path.stat().st_mtime, path))
+                except OSError:
+                    continue
+        found.sort(key=lambda item: item[0], reverse=True)
+        for when, path in found[:max(0, int(limit))]:
+            stamp = time.strftime("%Y-%m-%d %H:%M", time.localtime(when))
+            where = path.parent.relative_to(self.root).as_posix()
+            place = f"   (in {where})" if where != "." else ""
+            print(f"{stamp}  📄 {path.name}{place}")
     
     def list_roentgen(self, limit: Optional[int] = None) -> None:
         """

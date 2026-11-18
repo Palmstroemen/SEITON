@@ -66,7 +66,7 @@ Examples:
 ---
 
 ## **mytag**
-Tag utilities (xattr-based).
+Tags of files and folders. A file's tags are its extended attributes (with an optional value: `wichtig=60`); a folder's are the ones Scope shows and filters by, in its `.seiton/myTags.md`, plain tags without a value (`set` refuses them). `myls --tags` shows both.
 
 Examples:
 - `mytag list file.txt`

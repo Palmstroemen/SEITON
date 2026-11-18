@@ -159,3 +159,28 @@ def test_the_creators_groups_come_along_when_the_template_lacks_them(tree, peopl
     assert "change" in policy.rights_for("admin", f"/{META_DIR}/ACLs.md")
     assert policy.roles_for_user("oliver") == {"admin"}
     assert text.index("## Admin") < text.index("# Users")
+
+
+def test_the_creator_manages_a_top_project_with_the_templates_rules(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", E4: no ACLs above and none named in the template's rules,
+    so nobody could change the rights of the first project of a new user."""
+    from core.acl_edit import can_edit
+    from core.acl_view import ACLView
+    from core.template_seed import seed_from_templates
+
+    template = tmp_path / META_DIR / "Templates" / "Standard"
+    (template / META_DIR).mkdir(parents=True)
+    (template / "04_Finanz").mkdir()
+    (template / META_DIR / "ACLs.md").write_text("# Permissions\n\n## Buchhaltung\n- /04_Finanz/: read, write\n")
+    top = tmp_path / "Dokumente"
+    (top / META_DIR).mkdir(parents=True)
+    (top / META_DIR / "Project.md").write_text(project_heading() + "\n")
+    (top / META_DIR / "Templates.md").write_text("# Templates\nStandard\n")
+
+    seed_from_templates(top)
+
+    acls = top / META_DIR / "ACLs.md"
+    assert can_edit(acls, "oliver")
+    assert "read" in ACLView.for_path(top / "04_Finanz").rights_for_user("oliver", top / "04_Finanz")
+    text = acls.read_text()
+    assert "## Buchhaltung" in text and "# Users" in text

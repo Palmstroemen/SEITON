@@ -502,6 +502,33 @@ def _edit_user_line(text: str, user_key: str, role_names: List[str], keep: Set[s
     return "".join(lines)
 
 
+def make_creator_admin(acl_file: Path, creator: str) -> None:
+    """After acl_file came from a template into a top project (no ACLs above it): its creator
+    becomes its Admin - may do everything and change the rights - when the file does not list
+    them yet. Else nobody could change the rights of a new user's first project ("docs/Prüfung
+    2026-11-18.md", E4). The template's own groups and rules stay as they are."""
+    text = acl_file.read_text(encoding="utf-8")
+    people = _users_lines(text)
+    if people is not None and creator.lower() in {_user_line_key(line) for line in _visible(people)}:
+        return
+    edited = text.rstrip("\n") + "\n"
+    if "admin" not in _section_keys(edited):
+        edited = _insert_before_users(edited, f"## Admin\n- /*: read, write, delete\n- /{META_DIR}/ACLs.md: read, write, change\n")
+    if people is None:
+        edited = edited.rstrip("\n") + f"\n\n# Users\n{creator}: Admin\n"
+    else:
+        edited = _insert_user_line(edited, f"{creator}: Admin\n")
+    acl_file.write_text(edited, encoding="utf-8")
+
+
+def _insert_before_users(text: str, section: str) -> str:
+    """text with section (a "## role" block) before "# Users", or at its end."""
+    match = re.search(r"^# Users\s*$", text, flags=re.MULTILINE)
+    if match is None:
+        return text.rstrip("\n") + "\n\n" + section
+    return text[:match.start()].rstrip("\n") + "\n\n" + section + "\n" + text[match.start():]
+
+
 def complete_people(acl_file: Path, previous_acl_file: Path, creator: str) -> None:
     """
     After acl_file came from a template into a new project: without a "# Users" of its

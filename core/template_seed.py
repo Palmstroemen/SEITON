@@ -15,8 +15,8 @@ from typing import List
 
 from core.acl import find_acl_project_root
 from core.template_place import find_templates_dir
-from core.acl_edit import complete_people
-from core.identity import acl_user_for
+from core.acl_edit import complete_people, make_creator_admin
+from core.identity import acl_user_for, person_for
 from core.project import ProjectConfig
 from core.brand import META_DIR
 
@@ -29,6 +29,7 @@ def seed_from_templates(project_root: Path) -> List[Path]:
     # Before ACLs.md is copied: who the creator is and which ACLs governed the place so far.
     previous_root = find_acl_project_root(project_root)
     creator = acl_user_for(project_root)
+    creator_name = person_for(project_root)  # as the person writes their name
     templates_dir = find_templates_dir(project_root)
     if templates_dir is None:
         return []
@@ -50,4 +51,6 @@ def seed_from_templates(project_root: Path) -> List[Path]:
     acl_file = project_root / META_DIR / "ACLs.md"
     if acl_file in copied and previous_root is not None and previous_root != project_root:
         complete_people(acl_file, previous_root / META_DIR / "ACLs.md", creator)
+    elif acl_file in copied and previous_root is None and creator:
+        make_creator_admin(acl_file, creator_name or creator)  # a top project (E4)
     return copied
