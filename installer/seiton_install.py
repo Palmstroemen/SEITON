@@ -153,8 +153,15 @@ def package_manager(which: Which = shutil.which) -> Optional[str]:
     return None
 
 
+# Packages that went under another name in newer releases: either one counts
+# (Ubuntu 24.04, Mint 22, Debian 13 call libfuse2 libfuse2t64; I12).
+SAME_AS = {"libfuse2": ("libfuse2t64",)}
+
+
 def missing_packages(manager: str, run: Run) -> List[str]:
-    return [p for p in PACKAGES[manager] if run([*QUERY[manager], p], quiet=True) != 0]
+    def there(package: str) -> bool:
+        return any(run([*QUERY[manager], name], quiet=True) == 0 for name in (package, *SAME_AS.get(package, ())))
+    return [p for p in PACKAGES[manager] if not there(p)]
 
 
 class Written:
@@ -397,6 +404,17 @@ def install(places: Places, options: Options, run: Run = run_command, ask: Ask =
         print(f"(Add {places.bin} to PATH to start it and the CLI tools by name.)")
 
 
+def wanted_at_login(flag: bool, question: str, entry: Path, ask: Ask) -> bool:
+    """Whether a program is to start at login. Already set up (its entry there): not asked
+    again - an N would not stop it - and said how to stop it (I6)."""
+    if flag:
+        return True
+    if entry.exists():
+        print(f"{entry.stem} at login: already on (to stop it, remove {entry})")
+        return True
+    return ask(question)
+
+
 def uninstall(places: Places, run: Run = run_command) -> None:
     for line in _read_manifest(places):
         path = Path(line)
@@ -424,10 +442,16 @@ def main(argv: Optional[List[str]] = None) -> int:
         uninstall(places)
         return 0
     ask = (lambda question: True) if args.yes else ask_user
-    suntree_wanted = args.suntree or (not args.yes and ask_user("Also SunTree, the folder fan, at login (Ctrl+Alt+Space)?"))
-    previews_wanted = args.thumbnailer or (not args.yes and ask_user("Also Markdown previews in the system's file browsers?"))
-    headline_wanted = args.headline or (not args.yes and ask_user("Also the Headline at login (the line at the top edge)?"))
-    clock_wanted = args.clock or (not args.yes and ask_user("Also the time tracking at login (its clock counts the time per project; the Headline comes along, it tells the clock the project)?"))
+    ask_extra = (lambda question: False) if args.yes else ask_user
+    autostart = places.config.parent / "autostart"
+    suntree_wanted = wanted_at_login(args.suntree, "Also SunTree, the folder fan, at login (Ctrl+Alt+Space)?",
+                                     autostart / file_name("suntree.desktop"), ask_extra)
+    previews_wanted = args.thumbnailer or ask_extra("Also Markdown previews in the system's file browsers?")
+    headline_wanted = wanted_at_login(args.headline, "Also the Headline at login (the line at the top edge)?",
+                                      autostart / f"{HEADLINE}.desktop", ask_extra)
+    clock_wanted = wanted_at_login(args.clock, "Also the time tracking at login (its clock counts the time per "
+                                   "project; the Headline comes along, it tells the clock the project)?",
+                                   autostart / f"{file_name('clock')}.desktop", ask_extra)
     install(places, Options(suntree=suntree_wanted, thumbnailer=previews_wanted, headline=headline_wanted, clock=clock_wanted,
                             system_packages=not args.no_system_packages), ask=ask)
     return 0

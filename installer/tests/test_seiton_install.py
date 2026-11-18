@@ -404,3 +404,25 @@ def test_a_half_made_venv_is_made_anew(places):
     runner = _install(places)
     made = [c for c in runner.commands if c[1:3] == ["-m", "venv"]]
     assert made and "--clear" in made[0]
+
+
+def test_libfuse2_under_its_new_debian_name_counts():
+    """"docs/Prüfung 2026-11-18.md", I12: Ubuntu 24.04, Mint 22, Debian 13 call it libfuse2t64."""
+    runner = Runner(installed=[p for p in inst.PACKAGES["apt"] if p != "libfuse2"] + ["libfuse2t64"])
+    assert "libfuse2" not in inst.missing_packages("apt", runner)
+    assert "libfuse2" in inst.missing_packages("apt", Runner(installed=[]))
+
+
+def test_an_update_does_not_ask_again_for_what_starts_at_login(places, monkeypatch, capsys):
+    """"docs/Prüfung 2026-11-18.md", I6: answering N at an update left it starting anyway."""
+    entry = places.config.parent / "autostart" / f"{inst.HEADLINE}.desktop"
+    entry.parent.mkdir(parents=True)
+    entry.write_text("[Desktop Entry]\n")
+    asked = []
+    assert inst.wanted_at_login(False, "Also the Headline at login?", entry,
+                                ask=lambda q: asked.append(q) or False) is True
+    assert asked == [] and str(entry) in capsys.readouterr().out
+    entry.unlink()
+    assert inst.wanted_at_login(False, "Also the Headline at login?", entry,
+                                ask=lambda q: asked.append(q) or False) is False
+    assert asked == ["Also the Headline at login?"]

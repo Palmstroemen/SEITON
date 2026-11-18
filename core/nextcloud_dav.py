@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import base64
+import http.client
 import json
 import urllib.error
 import urllib.request
@@ -65,6 +66,10 @@ def _urllib_transport(method, url, body, headers, auth):
         return error.code, error.read()
     except urllib.error.URLError as error:
         raise NextcloudError(f"Nextcloud is not reachable at {url}: {error.reason}") from error
+    except (OSError, http.client.HTTPException) as error:
+        # A timeout or a connection dropped while reading (C7): said as Nextcloud's, and that a
+        # sync may have sent a part already - running it again finishes it.
+        raise NextcloudError(f"Nextcloud did not answer at {url}: {error} (run it again)") from error
 
 
 class NextcloudDAV:

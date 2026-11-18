@@ -334,3 +334,18 @@ def test_a_nextcloud_under_a_path_is_found(monkeypatch):
     transport = _transport(prefixed)
     dav = NextcloudDAV("http://localhost:8081/nextcloud", "oliver", "secret", "Projekte", transport=transport)
     assert set(dav.tree()) == {"/", "/Familie", "/Job", "/Familie/Kind", "/Familie/Notiz für Tom.md"}
+
+
+def test_a_dropped_connection_is_said_as_nextclouds(monkeypatch):
+    """"docs/Prüfung 2026-11-18.md", C7: a timeout read "Error: timed out", Nextcloud unnamed."""
+    import socket
+
+    from core import nextcloud_dav as nd
+
+    def broken(request, timeout=None):
+        raise socket.timeout("timed out")
+
+    monkeypatch.setattr(nd.urllib.request, "urlopen", broken)
+    with pytest.raises(nd.NextcloudError) as raised:
+        nd._urllib_transport("PROPFIND", "http://localhost:8081/remote.php", b"", {}, ("a", "b"))
+    assert "Nextcloud" in str(raised.value)

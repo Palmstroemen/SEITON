@@ -2,6 +2,8 @@
 (empty) and every file of a .MyOS, built from a WebDAV walk; no user documents. Rebuilt when
 the Team folder's ETag changes; a rebuild that fails keeps the shadow there was."""
 
+from pathlib import Path
+
 import pytest
 
 from cloud.service.shadow import ShadowKeeper, build_shadow, matters
@@ -139,3 +141,17 @@ def test_the_trash_does_not_come(tmp_path):
     assert not matters(f"/{META_DIR}/Trash/files/Urlaub.mp4", False)
     assert not matters(f"/{META_DIR}/Trash/files", True)
     assert matters(f"/{META_DIR}/ACLs.md", False)
+
+
+def test_the_views_of_old_shadows_go(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", C6: ACLView kept every shadow's policy for good."""
+    from core.acl_view import ACLView
+
+    dav = FakeDAV()
+    keeper = ShadowKeeper(tmp_path / "base", dav)
+    for n in range(4):
+        dav.tag = f'"{n}"'
+        keeper.refresh()
+        ACLView.for_path(keeper.root)
+    kept = {key[0] for key in ACLView._cache if tmp_path in Path(key[0]).parents}
+    assert all(any(b == k or b in Path(k).parents for b in keeper._built) for k in kept), kept

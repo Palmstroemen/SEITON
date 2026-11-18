@@ -95,8 +95,18 @@ class ShadowKeeper:
         self._built.append(target)
         # The one before stays: a request may still be reading it.
         while len(self._built) > 2:
-            shutil.rmtree(self._built.pop(0), ignore_errors=True)
+            gone = self._built.pop(0)
+            shutil.rmtree(gone, ignore_errors=True)
+            _forget_views_below(gone)
         return True
+
+
+def _forget_views_below(gone: Path) -> None:
+    """The ACL views read from a shadow that went: else the core kept them all for good (C6)."""
+    from core.acl_view import ACLView
+
+    for key in [k for k in ACLView._cache if k[0] == gone or gone in Path(k[0]).parents]:
+        ACLView._cache.pop(key, None)
 
 
 def _parts(path: str) -> List[str]:
