@@ -243,5 +243,7 @@ def obey(clock, command: str, now: datetime) -> None:
 
 def registration(place: Path, open_command: List[str], language: str = "de") -> Dict[str, Any]:
     """The widget's file for the Headline (<config>/headline/widgets/clock.json)."""
+    # icon: the Headline shows the stopwatch greyed while no clock runs - a click opens the
+    # time screen, which can start it (2026-11-18).
     return {"name": _words(language)["name"], "folder": str(place), "open": list(open_command),
-            "commands": ["start", "stop"], "staleAfter": 60}
+            "commands": ["start", "stop"], "staleAfter": 60, "icon": "stopwatch"}

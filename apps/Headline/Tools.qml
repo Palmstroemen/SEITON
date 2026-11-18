@@ -66,12 +66,6 @@ Row {
         onActivate: { headline.openScope("clipboard"); tools.used() }
     }
     Tool {
-        objectName: "toolTime"
-        iconName: "appointment-soon"
-        tip: qsTr("Time tracking")
-        onActivate: { headline.openTime(); tools.used() }
-    }
-    Tool {
         objectName: "toolTheme"
         iconName: "weather-clear-night"
         tip: qsTr("Light / dark")

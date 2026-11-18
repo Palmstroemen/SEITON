@@ -46,5 +46,7 @@ def no_real_desktop_changes(monkeypatch, tmp_path_factory):
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path_factory.mktemp("config")))
     # Nor the user's cache (Scope's thumbnails): a cache of their own.
     monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path_factory.mktemp("cache")))
+    # Nor the user's state (the clock's, the Headline's last place): a state of their own.
+    monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path_factory.mktemp("state")))
     # Nor start a perspective daemon that mounts a drive (Scope starts one by default).
     monkeypatch.setenv(env_name("SCOPE_START_DAEMON"), "0")

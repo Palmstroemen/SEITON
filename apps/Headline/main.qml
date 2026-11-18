@@ -39,7 +39,7 @@ Window {
     property string dockMode: headline.dockMode()
     readonly property int edgeHeight: 2
     property bool pointerInside: false
-    readonly property bool popupOpen: climbList.visible || cascade.visible || moreList.visible
+    readonly property bool popupOpen: climbList.visible || cascade.visible || moreList.visible || deeperOpen
     // A widget that asks (the clock's "Still working on ...?") must be seen: hidden, the line
     // comes out while it asks (review 2026-11-18, H8).
     readonly property bool asking: (widgets || []).some(function(w) { return w.state === "asking" })
@@ -134,24 +134,84 @@ Window {
     // The pointer at the edge opens the line at once; it goes about 0.5 s after the pointer
     // left, not while a dropdown of it is open.
     // The dropdowns close once the pointer has left them and the line for about 0.6 s.
-    readonly property bool pointerNearPopups: pointerInside || climbList.pointerInside
+    // pointerOnLine: the pointer is over the line now; pointerInside: the line stays out (it is
+    // kept while a dropdown is open). The dropdowns close by the first: by the second they
+    // waited for each other and stayed for ever (2026-11-18).
+    property bool pointerOnLine: false
+    readonly property bool pointerNearPopups: pointerOnLine || climbList.pointerInside
                                               || cascade.pointerInside || moreList.pointerInside
+                                              || deeperPointer
     Timer {
         id: popupCloser
         interval: 600
         running: line.popupOpen && !line.pointerNearPopups
         onTriggered: {
             climbList.close()
-            cascade.close()
+            line.closeCascades(1)
             moreList.close()
+        }
+    }
+
+    // The cascades beside the way up, as deep as the folders go (2026-11-18: only one step to
+    // the right could be opened). Level 1 is `cascade`; the deeper ones are made when needed
+    // ("cascade2", "cascade3", ...) and kept.
+    property var deeper: []
+    property bool deeperOpen: false
+    property bool deeperPointer: false
+    function recountDeeper() {
+        var open = false, near = false
+        for (var i = 0; i < deeper.length; i++) {
+            open = open || deeper[i].visible
+            near = near || (deeper[i].visible && deeper[i].pointerInside)
+        }
+        deeperOpen = open
+        deeperPointer = near
+    }
+    function cascadeAt(level) {
+        if (level === 1) return cascade
+        while (deeper.length < level - 1) {
+            var made = deeperCascade.createObject(line, { objectName: "cascade" + (deeper.length + 2),
+                                                          level: deeper.length + 2 })
+            deeper.push(made)
+        }
+        return deeper[level - 2]
+    }
+    // Hovering a row of level-1 (or a step of the way up for level 1): its folders beside it.
+    function openCascade(level, item, entry) {
+        closeCascades(level + 1)
+        var list = cascadeAt(level)
+        list.entries = headline.children(entry.path)
+        list.currentPath = line.view.cwd
+        if (list.entries.length > 0) list.besides(item)
+        else list.close()
+        recountDeeper()
+    }
+    function closeCascades(from) {
+        if (from <= 1) cascade.close()
+        for (var i = Math.max(0, from - 2); i < deeper.length; i++) deeper[i].close()
+        recountDeeper()
+    }
+    Component {
+        id: deeperCascade
+        DropList {
+            property int level: 2
+            theme: line.theme
+            baseFont: line.baseFont
+            onDropped: function(payload, path) { line.dropped(payload, path) }
+            onChosen: function(path) { line.go(path) }
+            onHovered: function(item, entry) { line.openCascade(level + 1, item, entry) }
+            onVisibleChanged: line.recountDeeper()
+            onPointerInsideChanged: line.recountDeeper()
         }
     }
 
     function pointerEntered() {
         collapseTimer.stop()
+        pointerOnLine = true
         pointerInside = true
     }
     function pointerLeft() {
+        pointerOnLine = false
         collapseTimer.restart()
     }
     Timer {
@@ -168,7 +228,7 @@ Window {
 
     function go(path) {
         climbList.close()
-        cascade.close()
+        closeCascades(1)
         moreList.close()
         headline.go(path)
     }
@@ -221,6 +281,7 @@ Window {
             compactHeight: line.lineHeight - 4
             iconSource: "image://theme/folder-open"
             projectBadge: !!line.view.project
+            smallProjectP: true  // a folder with a small P (2026-11-18)
             batchSource: line.view.batch || ""
             batchText: line.view.batchText || ""
             fillColor: line.theme.smallButtonActiveBg || "#2c3a55"
@@ -245,7 +306,9 @@ Window {
                         widgetId: modelData.id
                         beating: modelData.state === "active"
                         warn: !!modelData.warn
-                        tip: modelData.tooltip || modelData.text
+                        off: modelData.state === "off"
+                        tip: off ? qsTr("%1 is not running - a click opens it").arg(modelData.name)
+                                 : (modelData.tooltip || modelData.text)
                         color: line.theme.text || "#e6e6e6"
                         onOpened: function(widgetId) { headline.widgetOpen(widgetId) }
                         onTipWanted: function(anchor, text) { tipWindow.ask(anchor, text) }
@@ -254,7 +317,7 @@ Window {
                 }
             }
             onActivate: {
-                if (climbList.visible) { climbList.close(); cascade.close(); return }
+                if (climbList.visible) { climbList.close(); line.closeCascades(1); return }
                 climbList.entries = headline.climb()
                 climbList.currentPath = line.view.cwd
                 climbList.dropBelow(cwdButton, line)
@@ -380,20 +443,16 @@ Window {
         theme: line.theme
         baseFont: line.baseFont
         onChosen: function(path) { line.go(path) }
-        onHovered: function(item, entry) {
-            cascade.entries = headline.children(entry.path)
-            cascade.currentPath = line.view.cwd
-            if (cascade.entries.length > 0) cascade.besides(item)
-            else cascade.close()
-        }
+        onHovered: function(item, entry) { line.openCascade(1, item, entry) }
     }
-    DropList {  // beside a step: its folders
+    DropList {  // beside a step: its folders; beside a row of it the next level, and so on
         id: cascade
         onDropped: function(payload, path) { line.dropped(payload, path) }
         objectName: "cascade"
         theme: line.theme
         baseFont: line.baseFont
         onChosen: function(path) { line.go(path) }
+        onHovered: function(item, entry) { line.openCascade(2, item, entry) }
     }
     DropList {
         id: moreList

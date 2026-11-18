@@ -334,6 +334,7 @@ def test_the_clock_registers_as_the_headlines_widget(places, monkeypatch):
     assert registration["folder"] == "/run/user/4711/seiton-clock"
     assert registration["open"] == [str(places.bin / "seiton-time")]
     assert set(registration["commands"]) == {"start", "stop"}
+    assert registration["icon"] == "stopwatch"  # greyed in the Headline while no clock runs
 
 
 def test_the_clock_at_login_only_when_asked(places):

@@ -70,8 +70,30 @@ def test_going_nowhere_is_refused(world):
 def test_the_path_to_climb_runs_from_the_projects_root_down(world):
     model = _model(world["studio"])
     model.go(str(world["studio"] / "01_Info"))
-    assert [step["name"] for step in model.climb()] == ["Projekte", "Musikstudio", "01_Info"]
-    assert model.climb()[0]["path"] == str(world["root"])
+    below = [step for step in model.climb() if not step["above"]]
+    assert [step["name"] for step in below] == ["Projekte", "Musikstudio", "01_Info"]
+    assert below[0]["path"] == str(world["root"])
+
+
+def test_the_way_up_goes_on_above_the_projects_root(world):
+    """One could not leave the projects root, into /home say (2026-11-18): the folders above it
+    come first, marked as above (outside SEITON's projects)."""
+    model = _model(world["studio"])
+    steps = model.climb()
+    assert steps[0]["path"] == "/" and steps[0]["above"]
+    above = [Path(step["path"]) for step in steps if step["above"]]
+    assert above == list(reversed(world["root"].parents))
+    assert model.go(str(world["root"].parent))  # and one may go there
+
+
+def test_the_way_up_and_the_cascade_carry_the_project_colours(world):
+    (world["studio"] / META_DIR / "Color.md").write_text("#445566\n")
+    model = _model(world["studio"])
+    model.go(str(world["studio"] / "01_Info"))
+    steps = {s["name"]: s for s in model.climb()}
+    assert steps["Musikstudio"]["color"] == "#445566" and steps["01_Info"]["color"] == ""
+    rows = {r["name"]: r for r in model.children(str(world["root"]))}
+    assert rows["Musikstudio"]["color"] == "#445566"
 
 
 def test_with_the_lens_on_it_shows_the_lens_folder(world):

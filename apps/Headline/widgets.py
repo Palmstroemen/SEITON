@@ -18,7 +18,9 @@ not the clock. A widget may be missing, or be replaced by another one.
 - An **icon** (optional): one the Headline knows (ICONS). Such a widget sits as that icon in the
   CWD's tab instead of a button at the right; it beats while active, is pale while calm, and
   `warn` (true) marks it (the clock stopped by hand). Its text is then only in the tooltip; at
-  the right only its question, while it asks (2026-11-18).
+  the right only its question, while it asks (2026-11-18). Named in its registration too
+  (`icon`), it shows **off** while its view is missing or stale - greyed, a click opens its
+  screen (the clock not running: its time screen can start it).
 - It **is told** by command files dropped into `<folder>/commands/`: an answer to its question,
   or one of the commands it declared.
 - Its **screen is its own**: a click runs its `open` command.
@@ -76,7 +78,8 @@ def registered() -> Dict[str, Dict[str, Any]]:
                 or type(stale) is not int or stale <= 0):
             continue
         found[path.stem] = {"name": name, "folder": Path(folder), "open": list(command),
-                            "commands": list(commands), "staleAfter": stale}
+                            "commands": list(commands), "staleAfter": stale,
+                            "icon": data.get("icon") if data.get("icon") in ICONS else ""}
     return found
 
 
@@ -145,6 +148,13 @@ def view_of(widget: Dict[str, Any], now: Optional[float] = None) -> Optional[Dic
             "warn": data.get("warn") is True}
 
 
+def _off(widget: Dict[str, Any]) -> Dict[str, Any]:
+    """A widget with an icon whose view is missing or stale: its icon, greyed (state off)."""
+    return {"text": widget["name"], "state": "off", "tooltip": "", "question": None, "items": [],
+            "counter": None, "project": "", "short": "", "shortTooltip": "", "icon": widget["icon"],
+            "warn": False}
+
+
 def _in_project(view: Dict[str, Any], here: Optional[str]) -> Dict[str, Any]:
     """The view as shown while the Headline is in `here`: in the widget's own project its short
     text, the project named in the tooltip."""
@@ -166,6 +176,8 @@ def shown(now: Optional[float] = None, here: Optional[str] = None) -> List[Dict[
         view = view_of(widget, now)
         if view is not None:
             result.append({"id": widget_id, "name": widget["name"], **_in_project(view, here)})
+        elif widget["icon"]:
+            result.append({"id": widget_id, "name": widget["name"], **_off(widget)})
     return result
 
 

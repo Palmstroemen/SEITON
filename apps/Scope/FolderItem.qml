@@ -5,16 +5,21 @@ import "Theme/tag_chips.js" as TagChips
 
 Rectangle {
     // An italic "P" in the style of the text badges, top right, for projects that already
-    // carry an image badge (projects without one show the "P" as their text badge).
+    // carry an image badge (projects without one show the "P" as their text badge - or, with
+    // smallProjectP, this small one on the folder icon).
     component ProjectBadge: Text {
-        visible: root.projectBadge && root.batchSource !== ""
+        objectName: "projectP"
+        visible: root.projectBadge && (root.batchSource !== "" || root.shownSmallP)
         anchors.right: parent.right
         anchors.top: parent.top
         text: "P"
         color: "#000000"
         font.bold: true
         font.italic: true
-        font.pixelSize: Math.max(8, Math.round(parent.height * 0.32))
+        font.pixelSize: Math.max(8, Math.round(parent.height * (root.shownSmallP ? 0.5 : 0.32)))
+        // On the folder icon alone (smallProjectP) a light edge keeps it readable on any icon.
+        style: root.shownSmallP ? Text.Outline : Text.Normal
+        styleColor: "#ffffff"
     }
 
     id: root
@@ -33,9 +38,13 @@ Rectangle {
     /// The folder is a project: a small "P" at the top right of its icon.
     property bool projectBadge: false
     property real badgeOpacity: 1.0  // a suggested MyOS folder's badge is pale (Setup, General)
+    /// A project without a badge of its own: the folder icon with the small "P" on it, not the
+    /// big "P" in place of the icon (the Headline, 2026-11-18: the big one shouted).
+    property bool smallProjectP: false
+    readonly property bool shownSmallP: smallProjectP && projectBadge && !batchSource && !batchText
     /// The text badge drawn: the folder's own, else "P" for a project without a badge.
-    readonly property string shownBatchText: batchText || (projectBadge && !batchSource ? "P" : "")
-    readonly property bool shownBatchIsProjectP: !batchText && projectBadge && !batchSource
+    readonly property string shownBatchText: batchText || (projectBadge && !batchSource && !smallProjectP ? "P" : "")
+    readonly property bool shownBatchIsProjectP: !batchText && projectBadge && !batchSource && !smallProjectP
     /// X-ray view: the folder this file is seen through ("Rechnungen/2024"); a large, faint
     /// folder (xrayFolderSource) lies behind the file's icon, without a name.
     property string xrayVia: ""

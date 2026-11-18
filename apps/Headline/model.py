@@ -47,12 +47,15 @@ def sources_of(payload: str) -> List[str]:
 
 class HeadlineModel:
     def __init__(self, api, link, start_path: str,
-                 report: Optional[Callable[[Optional[str], str], None]] = None) -> None:
+                 report: Optional[Callable[[Optional[str], str], None]] = None,
+                 remember: Optional[Callable[[str], None]] = None) -> None:
         """api: a ScopeApi; link: the program's line to the lens (LensLink); report(project,
-        person): told the active project on every change of it (for the clock, 3a)."""
+        person): told the active project on every change of it (for the clock, 3a);
+        remember(place): told each new place (last_place.py: the next start goes back there)."""
         self._api = api
         self._link = link
         self._report = report
+        self._remember = remember
         self._reported: Optional[tuple] = None
         self._seen_lens: Optional[tuple] = None  # the lens as last seen (follow)
         self._cwd = str(Path(start_path).expanduser().resolve())
@@ -78,6 +81,8 @@ class HeadlineModel:
         self._link.call("set_cwd", {"path": self._cwd})
         self._link.update_context(self._cwd)
         self._tell_project()
+        if self._remember is not None:
+            self._remember(self._cwd)
         return True
 
     def active_project(self) -> Optional[str]:
@@ -168,18 +173,23 @@ class HeadlineModel:
             "folders": self._folders(shown or self._cwd),
         }
 
-    def climb(self) -> List[Dict[str, str]]:
-        """The steps from the projects root down to where one is (the CWD's cascade)."""
+    def climb(self) -> List[Dict[str, Any]]:
+        """The steps from "/" down to where one is (the CWD's cascade). Those above the projects
+        root are marked `above`: one may leave it, into /home say (2026-11-18), and sees where
+        SEITON's projects end. A project's step carries its colour, as Scope's rows."""
         cwd = Path(self._cwd)
         root = self._api.projects_root()
         top = Path(root) if root is not None else None
-        steps = [cwd]
-        for parent in cwd.parents:
-            if top is None or not (parent == top or top in parent.parents):
-                break
-            steps.append(parent)
-        return [{"name": step.name, "path": str(step), "project": (step / META_DIR / "Project.md").is_file(),
-                 **self._badge(step)} for step in reversed(steps)]
+        steps = [cwd, *cwd.parents]
+        return [{"name": step.name or "/", "path": str(step),
+                 "above": top is not None and step != top and step in top.parents,
+                 **self._looks(step)} for step in reversed(steps)]
+
+    def _looks(self, folder: Path) -> Dict[str, Any]:
+        """How a folder is drawn in the dropdowns: project (its P), its colour, its badge."""
+        project = (folder / META_DIR / "Project.md").is_file()
+        colour = getattr(self._api, "_resolve_effective_project_color", lambda _f: None)
+        return {"project": project, "color": (colour(folder) or "") if project else "", **self._badge(folder)}
 
     def _badge(self, folder: Path) -> Dict[str, str]:
         """A folder's own badge (its .seiton/batch.*), as Scope's rows show it."""

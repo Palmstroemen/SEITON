@@ -30,17 +30,17 @@
 <context>
     <name>Panel</name>
     <message>
-        <location filename="../Panel.qml" line="115"/>
+        <location filename="../Panel.qml" line="117"/>
         <source>Folders</source>
         <translation>Ordner</translation>
     </message>
     <message>
-        <location filename="../Panel.qml" line="142"/>
+        <location filename="../Panel.qml" line="145"/>
         <source>Perspectives</source>
         <translation>Perspektiven</translation>
     </message>
     <message>
-        <location filename="../Panel.qml" line="233"/>
+        <location filename="../Panel.qml" line="237"/>
         <source>More</source>
         <translation>Weitere</translation>
     </message>
@@ -142,11 +142,6 @@
     </message>
     <message>
         <location filename="../Tools.qml" line="71"/>
-        <source>Time tracking</source>
-        <translation>Zeiterfassung</translation>
-    </message>
-    <message>
-        <location filename="../Tools.qml" line="77"/>
         <source>Light / dark</source>
         <translation>Hell / Dunkel</translation>
     </message>
@@ -154,9 +149,14 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../main.qml" line="158"/>
+        <location filename="../main.qml" line="247"/>
         <source>Could not move: %1</source>
         <translation>Nicht verschoben: %1</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="310"/>
+        <source>%1 is not running - a click opens it</source>
+        <translation>%1 läuft nicht – ein Klick öffnet sie</translation>
     </message>
 </context>
 </TS>

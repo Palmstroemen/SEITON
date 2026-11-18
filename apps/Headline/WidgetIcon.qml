@@ -11,6 +11,7 @@ Item {
     property string widgetId: ""
     property bool beating: false
     property bool warn: false
+    property bool off: false  // registered, but not running (no view): greyed, a click opens it
     property string tip: ""
     property color color: "#e6e6e6"
     readonly property color warnColor: "#e5484d"
@@ -21,7 +22,7 @@ Item {
 
     width: 16
     height: 16
-    opacity: beating || warn ? 1.0 : 0.45
+    opacity: off ? 0.3 : (beating || warn ? 1.0 : 0.45)
 
     function open() { tipGone(); opened(widgetId) }
     function showTip() { tipWanted(icon, tip) }

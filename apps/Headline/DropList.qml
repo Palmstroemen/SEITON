@@ -81,6 +81,7 @@ Window {
                     batchSource: modelData.batch || ""
                     batchText: modelData.batchText || ""
                     projectBadge: !!modelData.project
+                    smallProjectP: true  // a folder with a small P (2026-11-18)
                     width: Math.max(implicitWidth, column.width)
                     label: modelData.name
                     style: "smallIcon"
@@ -88,7 +89,14 @@ Window {
                     compactHeight: list.rowHeight
                     iconSource: "image://theme/folder"
                     iconSourceHover: "image://theme/folder#active"
-                    fillColor: list.theme.pill || "#2c3040"
+                    // A project wears its colour, as in Scope's rows (2026-11-18): a tint of the
+                    // row, so its name stays readable; above the projects root the way is pale.
+                    readonly property color plainFill: list.theme.pill || "#2c3040"
+                    readonly property color ownColour: modelData.color || "transparent"
+                    fillColor: modelData.color
+                               ? Qt.tint(plainFill, Qt.rgba(ownColour.r, ownColour.g, ownColour.b, 0.45))
+                               : plainFill
+                    opacity: modelData.above ? 0.6 : 1.0
                     strokeColor: modelData.path === list.currentPath ? (list.theme.accentSecondary || "#6cabcd")
                                                                      : (list.theme.pillBorder || "#3a3f52")
                     textColor: list.theme.text || "#e6e6e6"

@@ -291,3 +291,8 @@ def test_the_short_tooltip_leaves_the_project_out(tmp_path, ledger):
     clock.stop(NOW)
     view = cw.render(clock, ledger, NOW, language="de")
     assert view["shortTooltip"] == "heute 2:15 h\n" + cw._words("de")["stoppedTip"]
+
+
+def test_its_registration_names_the_stopwatch():
+    # So the Headline shows it greyed while no clock runs (2026-11-18): the way to the time screen.
+    assert cw.registration(Path("/run/user/1/seiton-clock"), ["seiton-time"])["icon"] == "stopwatch"

@@ -129,7 +129,8 @@ def test_the_way_up_is_a_window_of_its_own_below_the_line(started):
     assert isinstance(climb, QWindow) and climb.isVisible()
     line = _find(engine, "headlineLine")
     assert climb.y() >= line.y() + line.height()  # from the top it drops down
-    assert [o.property("label") for o in _all(started, "dropRow", climb)] == ["Projekte", "Musikstudio"]
+    labels = [o.property("label") for o in _all(started, "dropRow", climb)]
+    assert labels[0] == "/" and labels[-2:] == ["Projekte", "Musikstudio"]  # above the root too
 
 
 def _wait(app, ms):
@@ -338,18 +339,19 @@ def test_they_close_once_the_pointer_left_them_and_the_line(started):
     climb.setProperty("pointerInside", True)
     _wait(app, 900)
     assert climb.isVisible()  # the pointer is in it
-    _find(started, "headlineLine").setProperty("pointerInside", True)
+    _find(started, "headlineLine").setProperty("pointerOnLine", True)
     climb.setProperty("pointerInside", False)
     _wait(app, 900)
     assert climb.isVisible()  # on the line it stays too
-    _find(started, "headlineLine").setProperty("pointerInside", False)
+    _find(started, "headlineLine").setProperty("pointerOnLine", False)
     _wait(app, 900)
     assert not climb.isVisible()
 
 
 # --- the tools: a row of small buttons on top of the way up and in the panel (2026-11-17) -----
 
-TOOLS = ["toolScope", "toolSetup", "toolSearch", "toolClipboard", "toolTime", "toolTheme"]
+# No time tool since 2026-11-18: the stopwatch in the CWD's tab opens the time screen.
+TOOLS = ["toolScope", "toolSetup", "toolSearch", "toolClipboard", "toolTheme"]
 
 
 def test_the_way_up_has_the_tools_on_top(started):
@@ -388,16 +390,6 @@ def test_scope_alone_opens_scope_here(started, world):
     _activate(_all(started, "toolScope", panel)[0])
     _settle(started["app"])
     assert ran[-1][-1] == str(world["studio"]) and ran[-1][-2].endswith("Scope.py")  # no task
-
-
-def test_time_opens_the_time_screen(started):
-    backend = started["engine"]._backend
-    ran = []
-    backend._start = ran.append
-    panel = _open_panel(started, None)
-    _activate(_all(started, "toolTime", panel)[0])
-    _settle(started["app"])
-    assert ran and "seiton-time" in ran[-1][0]
 
 
 def test_light_and_dark_switch_at_once(started):
@@ -706,7 +698,7 @@ def _stopwatch_view(folder, **view):
 def test_a_widget_with_an_icon_sits_in_the_cwd_s_tab(a_clock, started):
     _stopwatch_view(a_clock)
     started["engine"]._backend.checkWidgets()
-    _settle(started["app"])
+    _wait(started["app"], 300)  # rows are laid out with the next frame (late under load)
     assert _all(started, "widget") == []  # nothing at the right
     [icon] = _all(started, "widgetIcon")
     cwd = _find(started, "cwdButton")
@@ -792,3 +784,125 @@ def test_the_tooltip_is_a_window_of_its_own_below_the_line(a_clock, started):
     QMetaObject.invokeMethod(icon, "hideTip")
     _settle(started["app"])
     assert not tip.isVisible()
+
+
+# --- found on the desktop (2026-11-18) ---------------------------------------------------------
+
+@pytest.mark.parametrize("mode", ["keep", "hide"])
+def test_a_dropdown_left_without_a_choice_goes(world, started, mode):
+    """The dropdown stayed for ever when one chose nothing: the line counted the pointer as in
+    it while a dropdown was open, the dropdown waited for the pointer to leave the line."""
+    from core.settings import Settings
+    app = started["app"]
+    line = _find(started, "headlineLine")
+    Settings().set("Headline/dock", mode)
+    started["engine"]._backend.checkDock()
+    _settle(app)
+    _call(line, "pointerEntered")
+    _settle(app)
+    _activate(_find(started, "cwdButton"))
+    _settle(app)
+    climb = _find(started, "climbList")
+    assert climb.property("visible")
+    _call(line, "pointerLeft")  # and not into the dropdown
+    _wait(app, 1500)
+    assert not climb.property("visible")
+    if mode == "hide":
+        _wait(app, 800)
+        assert line.height() <= 2  # then the line slides out too
+
+
+def _open_cascade(started, level, path):
+    line = _find(started, "headlineLine")
+    QMetaObject.invokeMethod(line, "openCascade", Q_ARG("QVariant", level),
+                             Q_ARG("QVariant", _find(started, "cwdButton")), Q_ARG("QVariant", {"path": str(path)}))
+    _settle(started["app"])
+
+
+def _cascade_rows(started, level):
+    name = "cascade" if level == 1 else f"cascade{level}"
+    window = _find(started, name)
+    if window is None or not window.isVisible():
+        return None
+    return [o.property("label") for o in _all(started, "dropRow", window)]
+
+
+def test_the_cascades_go_as_deep_as_the_folders(world, started):
+    """Only one step to the right could be opened; in Scope's trial it went on (2026-11-18)."""
+    deep = world["studio"] / "01_Info" / "Archiv" / "2025"
+    deep.mkdir(parents=True)
+    _open_cascade(started, 1, world["root"])
+    assert "Musikstudio" in _cascade_rows(started, 1)
+    _open_cascade(started, 2, world["studio"])
+    assert _cascade_rows(started, 2) == ["01_Info"]
+    _open_cascade(started, 3, world["studio"] / "01_Info")
+    assert _cascade_rows(started, 3) == ["Archiv"]
+    _open_cascade(started, 4, world["studio"] / "01_Info" / "Archiv")
+    assert _cascade_rows(started, 4) == ["2025"]
+    assert _find(started, "headlineLine").property("popupOpen")
+    _open_cascade(started, 2, world["studio"])  # back up: the deeper ones go
+    assert _cascade_rows(started, 2) == ["01_Info"] and _cascade_rows(started, 3) is None
+    assert _cascade_rows(started, 4) is None
+
+
+def test_a_row_hovered_in_a_cascade_opens_the_next(world, started):
+    (world["studio"] / "01_Info" / "Archiv").mkdir(parents=True)
+    _open_cascade(started, 1, world["root"])
+    cascade = _find(started, "cascade")
+    [studio] = [o for o in _all(started, "dropRow", cascade) if o.property("label") == "Musikstudio"]
+    from PySide6.QtCore import QPoint
+    from PySide6.QtTest import QTest
+    middle = studio.mapToItem(None, studio.property("width") / 2, studio.property("height") / 2)
+    QTest.mouseMove(cascade, QPoint(int(middle.x()), int(middle.y())))
+    _settle(started["app"])
+    assert _cascade_rows(started, 2) == ["01_Info"]
+
+
+def test_a_project_row_wears_its_colour_and_the_way_above_is_pale(world, started):
+    (world["studio"] / META_DIR / "Color.md").write_text("#c03030\n")
+    _activate(_find(started, "cwdButton"))
+    _settle(started["app"])
+    climb = _find(started, "climbList")
+    rows = {o.property("label"): o for o in _all(started, "dropRow", climb)}
+    plain, studio = rows["Projekte"], rows["Musikstudio"]
+    assert studio.property("fillColor") != plain.property("fillColor")
+    assert studio.property("fillColor").red() > studio.property("fillColor").blue()  # tinted red
+    above = [o for name, o in rows.items() if name not in ("Projekte", "Musikstudio")]
+    assert above and all(o.property("opacity") < 1 for o in above)
+    assert plain.property("opacity") == 1
+
+
+def _visible_items(item, name):
+    return [c for c in _items(item) if c.objectName() == name and c.property("visible")]
+
+
+def test_a_project_is_a_folder_with_a_small_p_not_a_big_badge(started):
+    """The big P instead of the folder shouted (2026-11-18): a folder, a small P on it."""
+    _settle(started["app"])
+    cwd = _find(started, "cwdButton")
+    assert _visible_items(cwd, "badge") == []  # the folder icon stays
+    assert len(_visible_items(cwd, "projectP")) == 1
+    _activate(cwd)
+    _settle(started["app"])
+    climb = _find(started, "climbList")
+    [studio] = [o for o in _all(started, "dropRow", climb) if o.property("label") == "Musikstudio"]
+    assert _visible_items(studio, "badge") == [] and len(_visible_items(studio, "projectP")) == 1
+
+
+def test_without_a_clock_the_stopwatch_is_greyed_and_opens_the_time_screen(a_clock, started, monkeypatch):
+    import json
+    from apps.Headline import widgets
+    registration = json.loads((widgets.widgets_dir() / "clock.json").read_text())
+    registration["icon"] = "stopwatch"
+    (widgets.widgets_dir() / "clock.json").write_text(json.dumps(registration))
+    (a_clock / "view.json").unlink()  # no clock runs
+    opened = []
+    monkeypatch.setattr(widgets, "open_screen", lambda widget_id, *a, **k: opened.append(widget_id) or True)
+    started["engine"]._backend.checkWidgets()
+    _settle(started["app"])
+    [icon] = _all(started, "widgetIcon")
+    assert icon.property("off") is True and icon.property("opacity") < 0.45
+    assert icon.property("beating") is False and "not running" in icon.property("tip")
+    QMetaObject.invokeMethod(icon, "open")
+    _settle(started["app"])
+    assert opened == ["clock"]

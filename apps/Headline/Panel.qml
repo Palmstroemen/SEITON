@@ -33,7 +33,8 @@ Window {
 
     function refresh() {
         view = headline.view()
-        steps = headline.climb()
+        // The path from the projects root: the way above it is in the line's dropdown only.
+        steps = headline.climb().filter(function(step) { return !step.above })
         perspectives = headline.perspectives()
         widgets = headline.widgets()
     }
@@ -96,6 +97,7 @@ Window {
                         batchSource: modelData.batch || ""
                         batchText: modelData.batchText || ""
                         projectBadge: !!modelData.project
+                        smallProjectP: true  // a folder with a small P (2026-11-18)
                         label: modelData.name
                         style: "text"
                         compactHeight: panel.rowHeight - 4

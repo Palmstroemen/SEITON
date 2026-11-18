@@ -37,7 +37,11 @@ for whoever prefers the folders as a list.
 
 1. SEITON's box: the panel (section 1), Setup.
 2. The current folder (CWD) as a button; hovering opens the path to climb (the cascade, as M's
-   CWD dropdown today, up to the projects root).
+   CWD dropdown today). Since 2026-11-18 the way goes on above the projects root up to `/`,
+   those steps pale (one may leave the projects, into /home say); beside each step its folders,
+   beside each of them theirs again, as deep as the folders go. A project's row wears its
+   colour, as in Scope. A project is a folder with a small "P" on its icon, not the big "P" in
+   place of it that Scope's rows show (it shouted in the line). The panel's path still starts at the projects root.
 3. The project's standard folders, in a row, with their badges; suggested ones (embryos) pale, as
    in Scope; as many as fit, the rest behind ».
 4. The perspectives of the root (the favourites of Designdocument Perspective Resolver MVP.md,
@@ -73,7 +77,12 @@ Both show the same: one model, two ways of drawing it.
   the cascade are tool tip windows, not popups - on X11 a second popup took every click, and
   one could never click back in the way up. They close once the pointer has left them and the
   line for about 0.6 s, or after a choice; a whole row takes the click, as in a menu. Only the
-  panel is a popup (a click outside closes it); it has no cascade.
+  panel is a popup (a click outside closes it); it has no cascade. (2026-11-18: they stayed for
+  ever when one chose nothing - "the pointer is on the line" was kept while a dropdown was
+  open, and the dropdown waited for it; the two are apart now.)
+- **It starts where it was** (2026-11-18): started without a place - after an update, at login -
+  the Headline goes back to where it was last (`apps/Headline/last_place.py`, in SEITON's state
+  folder beside the clock's), not to the first root; else the clock had no project.
 - **They open towards the room.** Where the Headline sits tells the direction: from the top edge
   down, from a taskbar at the bottom up, at the left or right towards the middle. Qt gives the
   screen and the room left by the panels (`QScreen.geometry`, `availableGeometry`); from them,
@@ -159,9 +168,10 @@ does every 15 s.
 - **No widget, no gap:** if none is registered or its view is missing or stale, nothing shows.
 
 **Who starts the clock:** the installer's autostart entry (`./install.sh --clock`). Built
-besides: the Headline's tool "Time tracking" opens the time screen even when no clock runs, and
-the time screen can start the clock (`apps/Time/TimeScreen.py`, `startClock`). Not built: a grey
-"Clock not running" widget whose click starts it - without a clock, its widget does not show.
+besides: the time screen can start the clock (`apps/Time/TimeScreen.py`, `startClock`). Built
+2026-11-18: while no clock runs the stopwatch shows greyed ("Zeit läuft nicht"), the clock's
+registration names it (`icon`); a click opens the time screen. (Before, the Headline's tool
+"Time tracking" was that way; it went, the stopwatch does it.)
 
 ## 4. Steps
 
@@ -190,8 +200,8 @@ the time screen can start the clock (`apps/Time/TimeScreen.py`, `startClock`). N
    `Headline.py --panel`, hands "open the panel" to the one running, at the pointer or at an
    anchor (for the applet). Setup: "Where" - the top edge, or from the taskbar (no line then).
    Built since: the widgets in the panel (with their question, the last three, "More") and a
-   row of buttons (`apps/Headline/Tools.qml`: Open in Scope, Setup, Search, Clipboard, Time tracking,
-   Light / dark). Still open in the panel: the person, new project.
+   row of buttons (`apps/Headline/Tools.qml`: Open in Scope, Setup, Search, Clipboard,
+   Light / dark; "Time tracking" went on 2026-11-18 - the stopwatch in the CWD's tab opens it). Still open in the panel: the person, new project.
 4. **The Cinnamon applet:** the button in the taskbar that opens the panel above itself.
    Built 2026-11-17: `apps/Headline/cinnamon/seiton-headline@seiton/` - a button with SEITON's box;
    a click runs `seiton-headline --panel --anchor x,y,w,h` with where the button is (device

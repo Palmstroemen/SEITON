@@ -198,3 +198,41 @@ def test_in_its_project_the_short_tooltip(clock):
           tooltip="Küche: heute 2:15 h", shortTooltip="heute 2:15 h")
     assert widgets.shown(here="/p/Küche")[0]["tooltip"] == "heute 2:15 h"
     assert widgets.shown(here="/p/Auto")[0]["tooltip"] == "Küche: heute 2:15 h"
+
+
+# --- off: registered with an icon, but no view (no clock runs) (2026-11-18) ---------------------
+
+def _register_icon(clock, icon="stopwatch"):
+    registration = json.loads((widgets.widgets_dir() / "clock.json").read_text())
+    registration["icon"] = icon
+    (widgets.widgets_dir() / "clock.json").write_text(json.dumps(registration))
+
+
+def test_without_a_view_a_widget_with_an_icon_shows_off(clock):
+    _register_icon(clock)
+    [shown] = widgets.shown()
+    assert shown["state"] == "off" and shown["icon"] == "stopwatch" and shown["id"] == "clock"
+    assert shown["question"] is None and shown["counter"] is None and shown["warn"] is False
+
+
+def test_a_stale_view_too(clock):
+    _register_icon(clock)
+    _view(clock, text="Küche · 2:15", state="active", icon="stopwatch")
+    old = time.time() - 120
+    os.utime(clock / "view.json", (old, old))
+    assert widgets.shown()[0]["state"] == "off"
+
+
+def test_without_an_icon_nothing_as_before(clock):
+    assert widgets.shown() == []
+
+
+def test_an_unknown_icon_in_the_registration_is_none(clock):
+    _register_icon(clock, icon="rocket")
+    assert widgets.shown() == []
+
+
+def test_with_a_view_it_shows_the_view(clock):
+    _register_icon(clock)
+    _view(clock, text="Küche · 2:15", state="active", icon="stopwatch")
+    assert widgets.shown()[0]["state"] == "active"

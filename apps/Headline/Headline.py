@@ -12,7 +12,6 @@ its own settings (SettingsWindow.qml). One Headline per user (apps/Headline/inst
 
 from __future__ import annotations
 
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -47,7 +46,7 @@ from core.scope_api import ScopeApi, start_place  # noqa: E402  (start_place: sh
 from core.settings import Settings  # noqa: E402
 from daemon.lens_link import LensLink  # noqa: E402
 from apps.Headline.model import HeadlineModel  # noqa: E402
-from apps.Headline import instance, popup_place, widgets, x11_dock  # noqa: E402
+from apps.Headline import instance, last_place, popup_place, widgets, x11_dock  # noqa: E402
 from apps.Scope.Scope import ThemeIconProvider  # noqa: E402
 from apps.Scope.window_icon import seiton_icon  # noqa: E402
 
@@ -247,16 +246,6 @@ class HeadlineBackend(QObject):
         except OSError:
             return False
 
-    @Slot(result=bool)
-    def openTime(self) -> bool:
-        """The time screen of the time tracking (its launcher, written by the installer)."""
-        launcher = shutil.which("seiton-time") or str(Path.home() / ".local" / "bin" / "seiton-time")
-        try:
-            self._start([launcher])
-            return True
-        except OSError:
-            return False
-
     @Slot()
     def switchTheme(self) -> None:
         """Light / dark, for Scope, SunTree and the Headline (General/darkTheme)."""
@@ -352,7 +341,7 @@ def main(argv: Optional[list] = None) -> int:
     name = instance.server_name()
     if instance.hand_over(name, request or {"panel": None}):
         return 0
-    start = start_place(place)
+    start = last_place.start(place, start_place)  # without a place: where it was last
     app = QGuiApplication([sys.argv[0]])
     app.setApplicationName("Headline")
     app.setWindowIcon(seiton_icon())
@@ -367,7 +356,7 @@ def main(argv: Optional[list] = None) -> int:
     # The active project for whoever wants it - the clock reads it (Designdocument Time.md, 4.1).
     told = active_file()
     report = lambda project, person: write_active(told, Path(project) if project else None, person)  # noqa: E731
-    engine = load_headline(HeadlineModel(api, link, start, report=report), app)
+    engine = load_headline(HeadlineModel(api, link, start, report=report, remember=last_place.write), app)
     if not engine.rootObjects():
         return 1
     window = engine.rootObjects()[0]
