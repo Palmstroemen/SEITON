@@ -124,3 +124,33 @@ def test_an_unreadable_subfolder_does_not_empty_the_folder_rows(tmp_path, monkey
         assert {e["name"] for e in api.list_entries_quick(str(root))} >= {"Fotos", "Musik"}
     finally:
         (root / "Gesperrt").chmod(0o755)
+
+
+def test_the_template_row_hides_born_folders_one_may_not_read(tmp_path, monkeypatch):
+    """"docs/Prüfung 2026-11-18.md", API13."""
+    monkeypatch.delenv(env_name("TEMPLATES_DIR"), raising=False)
+    standard = tmp_path / META_DIR / "Templates" / "Standard"
+    for name in ("4_Finanz", "1_Info"):
+        (standard / name).mkdir(parents=True)
+    root = tmp_path / "P"
+    (root / META_DIR).mkdir(parents=True)
+    (root / META_DIR / "Project.md").write_text("# Project\n")
+    (root / META_DIR / "Templates.md").write_text("# Templates\nStandard\n")
+    (root / META_DIR / "ACLs.md").write_text(
+        "# Permissions\n\n## Team\n- /*: read, write\n- /4_Finanz/: none\n\n# Users\nKarl: Team\n")
+    for name in ("4_Finanz", "1_Info"):
+        (root / name).mkdir()
+        (root / name / "x.md").write_text("x")
+    shown = {e["name"] for e in ScopeApi(str(root)).list_templates(str(root), True)}
+    assert shown == {"1_Info"}
+
+
+def test_an_export_leaves_out_what_one_may_not_read(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", A12 - the project's settings and rights still travel."""
+    from core.exporter import export_subtree
+
+    root = _readers_project(tmp_path)
+    package = export_subtree(root / "Arbeit", tmp_path / "out").package_path
+    assert (package / "Arbeit" / "Offen.md").exists()
+    assert not (package / "Arbeit" / "Geheim.md").exists()
+    assert (package / META_DIR / "ACLs.md").exists()

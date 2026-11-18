@@ -9,12 +9,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, Union, Iterable
+from typing import Callable, Iterable, Optional, Union
 import logging
 import os
 import shutil
 import socket
 
+from core.acl_enforcement import allowed_at
 from core.project import ProjectConfig, ProjectFinder
 from core.template_place import TEMPLATES_REL, find_templates_dir
 from core.brand import META_DIR, project_heading
@@ -80,7 +81,7 @@ def export_subtree(
         (package_path / subtree_rel).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, package_path / subtree_rel)
     else:
-        _copy_tree_no_symlinks(source, package_path / subtree_rel)
+        _copy_tree_no_symlinks(source, package_path / subtree_rel, may_read=_may_read)
 
     # Copy project .MyOS from export root (its templates: only the used ones, below)
     _copy_tree_no_symlinks(export_root / META_DIR, package_path / META_DIR, skip={TEMPLATES_REL.name})
@@ -140,9 +141,15 @@ def _private(path: Path) -> bool:
     return path.name in PRIVATE and path.parent.name == META_DIR
 
 
-def _copy_tree_no_symlinks(src: Path, dst: Path, skip: Iterable[str] = ()) -> None:
+def _may_read(path: Path) -> bool:
+    """With enforcement on, what the person may not read is not packed (A12)."""
+    return allowed_at(path, "read")
+
+
+def _copy_tree_no_symlinks(src: Path, dst: Path, skip: Iterable[str] = (),
+                           may_read: Callable[[Path], bool] = lambda _p: True) -> None:
     """Copy src to dst without symlinks and without PRIVATE entries of a settings folder;
-    skip: names of folders directly in src left out."""
+    skip: names of folders directly in src left out; may_read: what to leave out besides."""
     if not src.exists():
         raise FileNotFoundError(f"Source path not found: {src}")
 
@@ -154,11 +161,12 @@ def _copy_tree_no_symlinks(src: Path, dst: Path, skip: Iterable[str] = ()) -> No
 
         # Filter out symlink dirs
         dirs[:] = [d for d in dirs if not (root_path / d).is_symlink()
-                   and not (root_path == src and d in skip) and not _private(root_path / d)]
+                   and not (root_path == src and d in skip) and not _private(root_path / d)
+                   and may_read(root_path / d)]
 
         for name in files:
             src_file = root_path / name
-            if src_file.is_symlink() or _private(src_file):
+            if src_file.is_symlink() or _private(src_file) or not may_read(src_file):
                 continue
             target_file = target_root / name
             shutil.copy2(src_file, target_file)

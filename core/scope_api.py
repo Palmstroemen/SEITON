@@ -1233,6 +1233,11 @@ class ScopeApi:
                     continue
                 if is_embryo and not include_embryos:
                     continue
+                if not is_embryo:
+                    # Security: a born folder one may not read is not shown, as in list_children.
+                    probe = self._acl_probe("read_dir", target / name)
+                    if probe and probe.enforced and not probe.allowed:
+                        continue
                 embryo_color = self._resolve_template_color_for_context(
                     context_blueprint, rel, name
                 )

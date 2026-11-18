@@ -13,6 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from core.acl_enforcement import allowed_at
 from core.perspective_fuse import mount_perspective_drive
 from core.brand import NAME  # noqa: E402
 
@@ -33,6 +34,8 @@ def main(argv=None) -> None:
         projects_root=str(Path(str(args.projects_root)).expanduser().resolve()),
         mount_point=str(Path(str(args.mount_point)).expanduser().resolve()),
         foreground=bool(args.foreground),
+        # Security: the person's ACLs at every path, as in Scope and the daemon's drive (B11).
+        may=lambda path, action: allowed_at(path, action),
     )
 
 

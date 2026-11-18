@@ -28,5 +28,7 @@ def test_main_mounts_the_drive(tmp_path, monkeypatch):
 
     myperspectivefs.main(["--projects-root", str(tmp_path / "Projekte"), "--mount-point", str(tmp_path / "Perspektiven")])
 
+    may = captured.pop("may")  # the ACL check of every access (B11)
+    assert callable(may)
     assert captured == {"projects_root": str((tmp_path / "Projekte").resolve()),
                         "mount_point": str((tmp_path / "Perspektiven").resolve()), "foreground": False}

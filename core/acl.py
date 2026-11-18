@@ -360,7 +360,11 @@ def _path_matches(rule_path: str, target_path: str) -> bool:
             if target_path == prefix or target_path.startswith(f"{prefix}/"):
                 return True
     if "*" in rule_path or "?" in rule_path:
-        return fnmatch.fnmatchcase(target_path, rule_path)
+        # A folder pattern ("/*/Geheim") reaches what lies in such a folder too, as a plain
+        # folder rule does: the target or one of the folders above it matches.
+        parts = [part for part in target_path.split("/") if part]
+        return any(fnmatch.fnmatchcase("/" + "/".join(parts[:depth]), rule_path)
+                   for depth in range(len(parts), 0, -1))
     return False
 
 
@@ -375,8 +379,13 @@ def _rule_base(rule_path: str) -> str:
 
 
 def _rule_depth(rule_path: str) -> int:
-    """How deep in the tree a rule's folder is (root = 0)."""
-    return len([part for part in _rule_base(rule_path).split("/") if part])
+    """How deep in the tree a rule reaches (root = 0): all its path parts, but for a trailing
+    bare "*" or "**" ("/Finanz/**" is 1, "/*" is 0). A wildcard in the middle counts as a part:
+    "/*/Geheim/" is 2, deeper than "/Finanz/" - else its "none" never won (A9)."""
+    parts = [part for part in str(rule_path or "").split("/") if part]
+    while parts and parts[-1] in ("*", "**"):
+        parts.pop()
+    return len(parts)
 
 
 def _nearest_rules(rules: Iterable[PermissionRule], target_path: str) -> List[PermissionRule]:

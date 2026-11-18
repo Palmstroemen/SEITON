@@ -212,6 +212,26 @@ def test_the_rights_files_need_change_also_to_be_moved_or_deleted(backend):
     assert auth.can_user_access("paul", "/Notizen/ACLs.md", "write")  # not in a settings folder
 
 
+@pytest.mark.parametrize("backend", ["legacy", "casbin"])
+def test_a_lock_with_a_wildcard_in_the_middle_still_locks(backend):
+    """"docs/Prüfung 2026-11-18.md", A9: /*/Geheim/ is deeper than /Finanz/, its none must win."""
+    import core.acl as acl_module
+    from core.acl import ACLAuthorizer, ACLPolicy, PermissionRule
+
+    if backend == "casbin" and acl_module._casbin is None:
+        pytest.skip("casbin not installed in test environment")
+    policy = ACLPolicy(
+        roles={"team"},
+        permissions={"team": [PermissionRule(path="/Finanz", rights={"read", "write"}),
+                              PermissionRule(path="/*/Geheim", rights={"none"})]},
+        users={"karl": {"team"}},
+    )
+    auth = ACLAuthorizer(policy, backend=backend)
+    assert auth.can_user_access("karl", "/Finanz/Rechnung.pdf", "read")
+    assert not auth.can_user_access("karl", "/Finanz/Geheim/Gehalt.pdf", "read")
+    assert not auth.can_user_access("karl", "/Finanz/Geheim", "read")
+
+
 def test_acl_authorizer_auto_backend_available():
     authorizer = _build_authorizer_fixture("auto")
     assert authorizer.backend in {"legacy", "casbin"}
