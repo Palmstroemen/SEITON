@@ -21,6 +21,10 @@ from core.project import ProjectFinder
 from core.brand import META_DIR, NAME
 
 TRASH_DIR = Path(META_DIR) / "Trash"
+# A project's .seiton with settings of its own, when it became an ordinary folder again
+# (core/project_unmake.py): restored, it is the folder's .seiton again.
+SETTINGS_NAME = f"{NAME} settings"
+_SETTINGS = re.compile(rf"^{re.escape(SETTINGS_NAME)}( \d+)?$")
 DEFAULT_RETENTION_DAYS = 30
 _DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 _TRASH_DAYS = re.compile(r"^\s*trash_days\s*:\s*(\d+)\s*$", re.MULTILINE)
@@ -122,6 +126,11 @@ def restore(project_root, name: str) -> Path:
     # plain file anybody with write access could edit).
     if not destination.resolve().is_relative_to(root.resolve()) or ".." in Path(entry.original).parts:
         raise TrashError(f"invalid original path {entry.original!r}")
+    settings_home = _settings_home(files / name, destination)
+    if settings_home is not None:
+        _settings_back(files / name, settings_home)
+        (info / f"{name}.trashinfo").unlink(missing_ok=True)
+        return settings_home
     if destination.exists() or destination.is_symlink():
         destination = _restored_name(destination)
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -168,6 +177,31 @@ def retention_days(project_root) -> int:
         parent = current.parent
         current = ProjectFinder.find_nearest(parent) if parent != current else None
     return DEFAULT_RETENTION_DAYS
+
+
+def _settings_home(stored: Path, destination: Path) -> Optional[Path]:
+    """The .seiton the settings of a former project go back to: its folder is no project
+    now, and nothing of them would replace what its .seiton holds. None: restored as any
+    folder (next to new settings, never over them)."""
+    folder = destination.parent
+    if not _SETTINGS.match(destination.name) or not stored.is_dir() or stored.is_symlink():
+        return None
+    home = folder / META_DIR
+    if not folder.is_dir() or (home / "Project.md").exists() or home.is_symlink():
+        return None
+    if home.exists() and (not home.is_dir() or any((home / item.name).exists() for item in stored.iterdir())):
+        return None
+    return home
+
+
+def _settings_back(stored: Path, home: Path) -> None:
+    if not home.exists():
+        _move(stored, home)
+        return
+    # Beside what stayed in it (the folder's settings from before it was a project).
+    for item in list(stored.iterdir()):
+        _move(item, home / item.name)
+    stored.rmdir()
 
 
 def _entry(root: Path, name: str) -> TrashEntry:

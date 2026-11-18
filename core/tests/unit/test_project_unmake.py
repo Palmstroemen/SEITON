@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 from core import trash
-from core.project import ProjectConfig
+from core.project import ProjectConfig, ProjectFinder
 from core.project_unmake import ProjectHasOwnSettings, can_unmake, own_settings, unmake_project
 from core.brand import META_DIR, NAME, env_name, project_heading
 
@@ -80,7 +80,22 @@ def test_with_consent_they_go_into_the_parents_trash(tree):
     entries = trash.list_trash(tree["projects"])
     assert [(e.original, e.is_dir, e.deleted_by) for e in entries] == [(f"Kunde/{NAME} settings", True, "oliver")]
     restored = trash.restore(tree["projects"], entries[0].name)
+    # Back as its .seiton: the folder is a project again, with its settings (P7).
+    assert restored == kunde / META_DIR
     assert (restored / "Tags.md").read_text() == "# Tags\nwichtig\n"
+    assert ProjectFinder.is_project(kunde)
+
+
+def test_settings_of_a_folder_that_is_a_project_again_come_back_beside_it(tree):
+    kunde = tree["kunde"]
+    (kunde / META_DIR / "Tags.md").write_text("# Tags\nwichtig\n")
+    unmake_project(kunde, "oliver", keep_own=True)
+    assert ProjectConfig.make_project(kunde)  # made a project anew meanwhile
+
+    entry = trash.list_trash(tree["projects"])[0]
+    restored = trash.restore(tree["projects"], entry.name)
+
+    assert restored == kunde / f"{NAME} settings"  # never over the new settings
 
 
 def test_subprojects_stay_projects(tree):
@@ -140,6 +155,20 @@ def test_turning_back_leaves_what_was_there_before(tree):
     assert (folder / META_DIR / "myTags.md").read_text() == "# Tags\nwichtig\n"
 
 
+def test_restored_settings_join_what_stayed_in_its_seiton(tree):
+    folder = _folder_with_settings(tree["projects"])
+    assert ProjectConfig.make_project(folder)
+    (folder / META_DIR / "Tags.md").write_text("# Tags\neigen\n")
+    unmake_project(folder, "oliver", keep_own=True)
+    assert not ProjectFinder.is_project(folder) and (folder / META_DIR / "myTags.md").exists()
+
+    entry = trash.list_trash(tree["projects"])[0]
+    restored = trash.restore(tree["projects"], entry.name)
+
+    assert restored == folder / META_DIR and ProjectFinder.is_project(folder)
+    assert (restored / "Tags.md").exists() and (restored / "myTags.md").exists()
+
+
 def test_with_consent_only_the_projects_own_go_into_the_trash(tree):
     folder = _folder_with_settings(tree["projects"])
     assert ProjectConfig.make_project(folder)
@@ -152,4 +181,7 @@ def test_with_consent_only_the_projects_own_go_into_the_trash(tree):
     entries = trash.list_trash(tree["projects"])
     assert [e.original for e in entries] == [f"Archiv/{NAME} settings"]
     restored = trash.restore(tree["projects"], entries[0].name)
-    assert sorted(p.name for p in restored.iterdir()) == sorted(["ACLs.md", "Project.md", ".created.json", "Desk.md"])
+    # Back in its .seiton, beside the folder's settings from before (P7).
+    assert restored == folder / META_DIR
+    assert sorted(p.name for p in restored.iterdir()) == sorted(
+        ["ACLs.md", "Project.md", ".created.json", "Desk.md", "Sort.md", "myTags.md"])

@@ -16,10 +16,10 @@ from typing import Dict, List
 
 from core import trash
 from core.template_place import find_templates_dir
-from core.brand import META_DIR, NAME, legacy_project_headings, project_heading
+from core.brand import META_DIR, legacy_project_headings, project_heading
 
 CREATED = ".created.json"  # in .MyOS: what creating the project wrote
-SETTINGS_NAME = f"{NAME} settings"  # .seiton with settings of its own, in the parent's trash
+SETTINGS_NAME = trash.SETTINGS_NAME  # .seiton with settings of its own, in the parent's trash
 
 
 class ProjectHasOwnSettings(Exception):

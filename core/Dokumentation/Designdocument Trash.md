@@ -53,7 +53,10 @@ So tools that know the freedesktop trash can read it; the path is the ACL path w
   cannot be deleted (they are not on disk).
 - **Restore:** move back to `Path`; if something of that name exists there now, restore
   as `<name> (restored)` instead of overwriting. Missing parent folders are recreated
-  (embryos are born on the way).
+  (embryos are born on the way). "SEITON settings" (a project turned back into a folder,
+  `core/project_unmake.py`) go back as the folder's `.seiton`: it is a project again. Only
+  when the folder is no project now and nothing in its `.seiton` would be replaced; else
+  they come back as a folder of that name.
 - **Delete finally / empty trash:** permanent, confirmed, per entry or for all entries the
   user may delete.
 - **Clean-up:** entries older than `trash_days` are removed when the project is opened
