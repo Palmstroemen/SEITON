@@ -348,11 +348,16 @@ def suntree(places: Places, run: Run) -> None:
 
 def thumbnailer(places: Places, written: Written) -> None:
     template = (places.repo / "installer" / file_name("md.thumbnailer")).read_text(encoding="utf-8")
-    python = str(places.python)
-    entry = (template.replace("TryExec=python3", f"TryExec={python}")
-             .replace("Exec=python3 ", f"Exec={python} ")
-             .replace("__REPO_ROOT__", str(places.repo)))
-    written.text(places.data / "thumbnailers" / file_name("md.thumbnailer"), entry)
+    script = places.repo / "scripts" / "seiton_md_thumbnailer.py"
+    exec_line = next(line for line in template.splitlines() if line.startswith("Exec="))
+    # Quoted: the file browsers split Exec like a shell (g_shell_parse_argv).
+    entry = (template.replace("TryExec=python3", f"TryExec={places.python}")
+             .replace(exec_line, f"Exec={_quoted(places.python)} {_quoted(script)} %i %o %s"))
+    folder = places.data / "thumbnailers"
+    written.text(folder / file_name("md.thumbnailer"), entry)
+    # The same definition under the former name (MyOS) would render every preview twice.
+    for former in ("myos-md.thumbnailer", "myos-markdown.thumbnailer"):
+        (folder / former).unlink(missing_ok=True)
 
 
 def _write_manifest(places: Places, written: Written) -> None:

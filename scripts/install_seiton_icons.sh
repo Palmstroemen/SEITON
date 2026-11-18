@@ -1,33 +1,18 @@
 #!/usr/bin/env bash
+# The purple SEITON folder icon, for setting it on a folder by hand. The emblems are put in
+# place by ./install.sh (installer/seiton_install.py, icons()).
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ICONS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/icons"
-HICOLOR_DIR="${ICONS_DIR}/hicolor"
-EMBLEM_DIR="${REPO_ROOT}/assets/icons/emblems"
-EMBLEM_LIGHT_DIR="${REPO_ROOT}/assets/icons/emblems-light"
 FOLDER_SRC="${REPO_ROOT}/assets/icons/seiton-folder-purple.svg"
 FOLDER_DEST="${ICONS_DIR}/seiton/seiton-folder-purple.svg"
 
 mkdir -p "$(dirname "${FOLDER_DEST}")"
-mkdir -p "${HICOLOR_DIR}/scalable/emblems"
-
-if [ -d "${EMBLEM_DIR}" ]; then
-  cp "${EMBLEM_DIR}"/emblem-seiton-*.svg "${HICOLOR_DIR}/scalable/emblems/"
-fi
-if [ -d "${EMBLEM_LIGHT_DIR}" ]; then
-  cp "${EMBLEM_LIGHT_DIR}"/emblem-seiton-*-light.svg "${HICOLOR_DIR}/scalable/emblems/"
-fi
 cp "${FOLDER_SRC}" "${FOLDER_DEST}"
 
-if command -v gtk-update-icon-cache >/dev/null 2>&1; then
-  gtk-update-icon-cache -q "${HICOLOR_DIR}" || true
-fi
-
-echo "Installed emblems: ${HICOLOR_DIR}/scalable/emblems/emblem-seiton-*.svg"
 echo "Installed folder icon: ${FOLDER_DEST}"
 echo ""
-echo "Apply to folders:"
-echo "  gio set -t stringv <folder> metadata::emblems emblem-seiton-projekt"
-echo "  gio set -t stringv <folder> metadata::emblems emblem-seiton-finanz"
+echo "Apply to a folder:"
 echo "  gio set -t string <folder> metadata::custom-icon \"file://${FOLDER_DEST}\""
+echo "Remove: rm \"${FOLDER_DEST}\""

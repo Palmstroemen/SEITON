@@ -240,11 +240,16 @@ def test_suntree_at_login(places):
 
 
 def test_markdown_previews_in_the_file_browsers(places):
+    former = places.data / "thumbnailers" / "myos-markdown.thumbnailer"
+    former.parent.mkdir(parents=True)
+    former.write_text("[Thumbnailer Entry]\n")  # the same under the former name: would render twice
     _install(places, thumbnailer=True)
     entry = (places.data / "thumbnailers" / "seiton-md.thumbnailer").read_text(encoding="utf-8")
     python = str(places.venv / "bin" / "python")
-    assert f"Exec={python} {REPO / 'scripts' / 'seiton_md_thumbnailer.py'} %i %o %s" in entry
+    # Quoted: the file browsers split Exec like a shell, a path with spaces broke apart (I10).
+    assert f'Exec="{python}" "{REPO / "scripts" / "seiton_md_thumbnailer.py"}" %i %o %s' in entry
     assert f"TryExec={python}" in entry and "__REPO_ROOT__" not in entry
+    assert not former.exists()
 
 
 # --- the Headline (Scope/Designdocument Headline.md) ---------------------------------------

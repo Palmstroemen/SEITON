@@ -11,10 +11,6 @@ Show attractive previews for `*.md` files in common Linux file browsers (Nautilu
 - **Thumbnailer registration:** `installer/seiton-md.thumbnailer` (a template; the installer fills in the paths)
 - **Installer integration:** `./install.sh --thumbnailer` (`installer/seiton_install.py`, `thumbnailer()`)
 
-Not used by any installer: `core/bin/seiton-md-thumbnailer` and
-`installer/thumbnailers/seiton-markdown.thumbnailer` (it points to `/usr/local/bin`, where
-nothing links the CLI). Leftovers from an earlier way ("Prüfung 2026-11-18", D11).
-
 ## Freedesktop Integration
 
 `seiton-md.thumbnailer` declares:
@@ -24,10 +20,9 @@ nothing links the CLI). Leftovers from an earlier way ("Prüfung 2026-11-18", D1
 Installed user-local to:
 - `~/.local/share/thumbnailers/seiton-md.thumbnailer`
 
-`./install.sh --thumbnailer` writes it with the venv's Python and the repo path, and lists it
-for `./install.sh --uninstall`. Definitions under the former name (`myos-md.thumbnailer`,
-`myos-markdown.thumbnailer`) are not removed by it yet ("Prüfung 2026-11-18", D10); the
-older helper `installer/install-thumbnailer.sh` does remove them.
+`./install.sh --thumbnailer` writes it with the venv's Python and the repo path (quoted), lists
+it for `./install.sh --uninstall` and removes definitions under the former name
+(`myos-md.thumbnailer`, `myos-markdown.thumbnailer`), which would render every preview twice.
 
 ## Rendering Rules
 

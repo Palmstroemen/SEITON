@@ -48,9 +48,8 @@ venv (which has Pillow). Then restart/reopen your file browser.
 ./install.sh --uninstall
 ```
 
-takes it away with everything else the installer wrote. Not yet: `./install.sh --thumbnailer`
-does not remove definitions under the former name (`myos-md.thumbnailer`,
-`myos-markdown.thumbnailer`); `./installer/install-thumbnailer.sh install` does.
+takes it away with everything else the installer wrote. `./install.sh --thumbnailer` also
+removes definitions under the former name (`myos-md.thumbnailer`, `myos-markdown.thumbnailer`).
 
 The older helper (`./installer/install-thumbnailer.sh install|check|uninstall`) writes the
 same file but runs the system's `python3`: without the system's Pillow
