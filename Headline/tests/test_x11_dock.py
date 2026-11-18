@@ -60,3 +60,12 @@ def test_hiding_itself_it_keeps_no_room():
     apply(display, 42, None)
     assert display.set["_NET_WM_WINDOW_TYPE"][2] == ["_NET_WM_WINDOW_TYPE_DOCK"]
     assert set(display.deleted) == {"_NET_WM_STRUT_PARTIAL", "_NET_WM_STRUT"}
+
+
+def test_scaled_the_strut_is_in_device_pixels():
+    # H4 (review 2026-11-18): Qt gives the screen's origin native, its size and the line's
+    # height logical; X11 wants device pixels - at a ratio of 2 half the line was kept.
+    from Headline.x11_dock import device_strut
+    assert device_strut((0, 0, 1920, 1080), 30, 2.0) == strut((0, 0, 3840, 2160), 60)
+    assert device_strut((3840, 0, 1280, 720), 30, 1.5) == strut((3840, 0, 1920, 1080), 45)
+    assert device_strut((0, 0, 1920, 1080), 30, 1.0) == strut((0, 0, 1920, 1080), 30)

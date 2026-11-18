@@ -38,7 +38,10 @@ Window {
     readonly property int edgeHeight: 2
     property bool pointerInside: false
     readonly property bool popupOpen: climbList.visible || cascade.visible || moreList.visible
-    readonly property bool expanded: dockMode === "keep" || pointerInside || popupOpen
+    // A widget that asks (the clock's "Still working on ...?") must be seen: hidden, the line
+    // comes out while it asks (review 2026-11-18, H8).
+    readonly property bool asking: (widgets || []).some(function(w) { return w.state === "asking" })
+    readonly property bool expanded: dockMode === "keep" || pointerInside || popupOpen || asking
 
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
     x: Screen.virtualX
@@ -78,7 +81,9 @@ Window {
         function onChanged() { line.refresh() }
         function onThemeChanged() {
             line.theme = headline.colorScheme()
+            line.embryoOpacity = headline.embryoOpacity()
             panelWindow.theme = line.theme
+            panelWindow.embryoOpacity = line.embryoOpacity
         }
         function onWidgetsChanged() {
             line.widgets = headline.widgets()
@@ -230,6 +235,17 @@ Window {
                     ToolTip.text: modelData.tooltip
                     onActivate: headline.widgetOpen(modelData.id)
                 }
+                Text {  // what it asks, before the answers
+                    objectName: "widgetQuestion"
+                    visible: !!modelData.question
+                    text: modelData.question ? modelData.question.text : ""
+                    color: line.theme.text || "#e6e6e6"
+                    font.pixelSize: line.baseFont
+                    height: line.lineHeight - 4
+                    verticalAlignment: Text.AlignVCenter
+                    leftPadding: 4
+                    rightPadding: 2
+                }
                 Repeater {
                     model: modelData.question ? modelData.question.answers : []
                     delegate: FolderItem {
@@ -251,6 +267,7 @@ Window {
 
     Panel {
         id: panelWindow
+        counted: line.counted
         theme: line.theme
         embryoOpacity: line.embryoOpacity
         baseFont: line.baseFont

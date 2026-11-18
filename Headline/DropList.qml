@@ -23,16 +23,25 @@ Window {
     HoverHandler { onHoveredChanged: list.pointerInside = hovered }
     color: theme.panel || "#202124"
     width: Math.max(160, column.implicitWidth + 8)
-    height: column.implicitHeight + 8
+    // Cut to the room when too tall (popup_place); kept apart so a short list after a cut
+    // one is as tall as it is again (review 2026-11-18, H2).
+    property int cutHeight: 0
+    height: cutHeight > 0 ? cutHeight : column.implicitHeight + 8
 
     function _rectOf(item) {
         var p = item.mapToGlobal(0, 0)
         return {x: Math.round(p.x), y: Math.round(p.y), width: Math.round(item.width), height: Math.round(item.height)}
     }
+    // The size as it is now: new entries are laid out first, not the list before them.
+    function _natural() {
+        cutHeight = 0
+        column.forceLayout()
+        return column.implicitHeight + 8
+    }
     function _put(placed) {
         x = placed.x
         y = placed.y
-        if (placed.height !== undefined) height = placed.height
+        cutHeight = placed.height !== undefined ? placed.height : 0
         show()
         raise()
     }
@@ -40,9 +49,13 @@ Window {
     function dropBelow(anchor, band) {
         var rect = _rectOf(anchor)
         if (band) { rect.y = band.y; rect.height = band.height }
-        _put(headline.placeDrop(rect, width, height))
+        var natural = _natural()
+        _put(headline.placeDrop(rect, width, natural))
     }
-    function besides(anchor) { _put(headline.placeSide(_rectOf(anchor), width, height)) }
+    function besides(anchor) {
+        var natural = _natural()
+        _put(headline.placeSide(_rectOf(anchor), width, natural))
+    }
 
     Flickable {
         anchors.fill: parent

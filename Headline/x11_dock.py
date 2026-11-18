@@ -21,6 +21,14 @@ def strut(screen: Rect, height: int) -> List[int]:
     return [0, 0, y + height, 0, 0, 0, 0, 0, x, x + width - 1, 0, 0]
 
 
+def device_strut(screen: Rect, height: int, ratio: float) -> List[int]:
+    """strut() from what Qt gives: the screen's origin in device pixels, its size and the
+    line's height in logical ones, scaled by the device pixel ratio (HiDPI, Cinnamon's text
+    scaling); X11 counts device pixels (review 2026-11-18, H4)."""
+    x, y, width, high = screen
+    return strut((x, y, round(width * ratio), round(high * ratio)), round(height * ratio))
+
+
 def apply(display, window_id: int, partial: Optional[List[int]]) -> None:
     """Make window_id a dock; with `partial` keeping that room, without it keeping none.
     display: an Xlib display (or anything with intern_atom, create_resource_object, flush)."""

@@ -389,3 +389,103 @@ def test_a_running_widget_counts_the_seconds(a_clock, started):
     _wait(started["app"], 1200)
     label = _all(started, "widget")[0].property("label")
     assert re.fullmatch(r"Musikstudio · 1:02:0\d", label), label
+
+
+# --- found in the review of 2026-11-18 -------------------------------------------------------
+
+def _besides(started, entries):
+    from PySide6.QtCore import Q_ARG as ARG
+    cascade = _find(started, "cascade")
+    cascade.setProperty("entries", entries)
+    QMetaObject.invokeMethod(cascade, "besides", ARG("QVariant", _find(started, "cwdButton")))
+    _settle(started["app"])
+    return cascade
+
+
+def test_a_cascade_too_tall_is_cut_and_a_short_one_after_it_is_not(world, started):
+    # H2: cut once, it stayed that tall; placed with the size of the list before.
+    room = QGuiApplication.primaryScreen().availableGeometry()
+    many = [{"name": f"Ordner {i:02d}", "path": str(world["root"] / f"O{i}")} for i in range(80)]
+    cascade = _besides(started, many)
+    assert cascade.y() + cascade.height() <= room.y() + room.height()
+    tall = cascade.height()
+    cascade = _besides(started, many[:3])
+    assert cascade.height() < tall / 4
+    column_height = cascade.contentItem().childItems()[0].property("contentHeight")
+    assert cascade.height() == column_height + 8
+
+
+def _perspectives(world, count):
+    standard = world["root"].parent / META_DIR / "Templates" / "Standard" / "04_Finanz"
+    for i in range(count):
+        (standard / f"Teil {i:02d}").mkdir(parents=True, exist_ok=True)
+    (world["root"] / META_DIR / "Perspectives.md").write_text(
+        "# Perspectives\n" + "".join(f"04_Finanz/Teil {i:02d}\n" for i in range(count)))
+
+
+def test_the_panel_in_the_middle_of_the_screen_is_cut_to_the_room(world, started):
+    # H3 (review 2026-11-18): at the pointer it took no cut, its lower part ran out.
+    _perspectives(world, 30)
+    room = QGuiApplication.primaryScreen().availableGeometry()
+    middle = {"x": 100, "y": room.y() + room.height() // 2, "width": 1, "height": 1}
+    panel = _open_panel(started, middle)
+    assert panel.y() >= room.y() and panel.y() + panel.height() <= room.y() + room.height()
+    above, below = panel.y() + panel.height() <= middle["y"], panel.y() >= middle["y"] + 1
+    assert above or below  # beside the pointer, not over it
+
+
+def test_the_open_panel_grows_towards_the_room(world, started):
+    # H3: what it shows changed while open - it kept its place and grew over the taskbar.
+    room = QGuiApplication.primaryScreen().availableGeometry()
+    button = {"x": 10, "y": room.y() + room.height() - 2, "width": 40, "height": 40}
+    panel = _open_panel(started, button)
+    small = panel.height()
+    _perspectives(world, 6)
+    started["engine"]._backend.changed.emit()
+    _settle(started["app"])
+    assert panel.height() > small
+    assert panel.y() + panel.height() <= button["y"]  # still above the button
+
+
+def test_light_dark_and_the_embryos_paleness_from_scope_or_setup_arrive(started):
+    # H7 (review 2026-11-18): only its own switch reached the line, which is always there.
+    from core.settings import Settings
+    window, backend = started["window"], started["engine"]._backend
+    before = window.property("theme")["bg"]
+    settings = Settings()
+    assert settings.set("General/darkTheme", not settings.get("General/darkTheme"))
+    assert settings.set("General/embryoOpacity", 0.7)
+    assert backend.checkTheme() is True
+    _settle(started["app"])
+    assert window.property("theme")["bg"] != before
+    assert abs(window.property("embryoOpacity") - 0.7) < 1e-6
+    assert backend.checkTheme() is False  # seen
+
+
+def test_the_widgets_question_stands_in_the_line(a_clock, started):
+    # H8 (review 2026-11-18): only "Yes" and "No" stood there, not what was asked.
+    _settle(started["app"])
+    [question] = _all(started, "widgetQuestion")
+    assert question.property("text") == "Still working on Musikstudio?" and question.property("visible")
+
+
+def test_hiding_itself_it_comes_out_while_a_widget_asks(hiding, a_clock, started):
+    # H8: hidden, the question was never seen and the clock paused at the time it asked.
+    _settle(started["app"])
+    line = _find(started, "headlineLine")
+    assert line.property("expanded") is True and line.height() == line.property("lineHeight")
+
+
+def test_the_panel_counts_the_seconds_too(a_clock, started):
+    # H8 (aside): the panel showed the widget's text without its counter.
+    import json
+    import re
+    import time as clock_time
+    view = json.loads((a_clock / "view.json").read_text())
+    view.update(state="active", counter={"prefix": "Musikstudio · ", "since": clock_time.time() - 3725})
+    (a_clock / "view.json").write_text(json.dumps(view))
+    started["engine"]._backend.checkWidgets()
+    panel = _open_panel(started, None)
+    _wait(started["app"], 1200)
+    label = _all(started, "panelWidget", panel)[0].property("label")
+    assert re.fullmatch(r"Musikstudio · 1:02:0\d", label), label

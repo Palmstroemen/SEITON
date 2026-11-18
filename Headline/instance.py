@@ -14,7 +14,7 @@ import os
 import socket
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 from core.brand import file_name
 
@@ -46,6 +46,42 @@ def accepted(message: Any) -> Optional[Dict[str, Any]]:
             and all(type(anchor[k]) is int for k in ANCHOR_KEYS)):
         return {"panel": {k: anchor[k] for k in ANCHOR_KEYS}}
     return None
+
+
+def parse_start(args: list) -> Tuple[Optional[str], Optional[dict]]:
+    """Headline.py [--panel [--anchor x,y,w,h]] [place] -> (place or None, request or None).
+    A broken anchor opens the panel at the pointer. Here, not in Headline.py: a later start
+    reads its arguments and hands over before it loads Qt (review 2026-11-18, H5)."""
+    place, request, rest = None, None, list(args)
+    anchor = None
+    if "--anchor" in rest:
+        at = rest.index("--anchor")
+        value = rest[at + 1] if at + 1 < len(rest) else ""
+        del rest[at:at + 2]
+        try:
+            numbers = [int(part) for part in value.split(",")]
+        except ValueError:
+            numbers = []
+        if len(numbers) == 4 and numbers[2] > 0 and numbers[3] > 0:
+            anchor = dict(zip(ANCHOR_KEYS, numbers))
+    if "--panel" in rest:
+        rest.remove("--panel")
+        request = {"panel": anchor}
+    places = [a for a in rest if not a.startswith("--")]
+    if places:
+        place = places[0]
+    return place, request
+
+
+def alive(name: str, timeout_ms: int = 500) -> bool:
+    """Whether a Headline answers on name's socket (connecting is enough)."""
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
+            connection.settimeout(timeout_ms / 1000)
+            connection.connect(socket_path(name))
+    except OSError:
+        return False
+    return True
 
 
 def hand_over(name: str, message: Dict[str, Any], timeout_ms: int = 1500) -> bool:
@@ -99,6 +135,10 @@ def _server_class():
             self.server.newConnection.connect(self._accept)
 
         def listen(self) -> bool:
+            """False when another Headline answers there: Qt would put its own socket over the
+            living one (review 2026-11-18, H6)."""
+            if alive(self.name):
+                return False
             if self.server.listen(self.path):
                 return True
             # Left over from a Headline that ended without cleaning up (hand_over found nobody).

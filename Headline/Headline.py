@@ -22,6 +22,15 @@ _HERE = Path(__file__).resolve().parent
 sys.path[:] = [p for p in sys.path if Path(p or ".").resolve() != _HERE]
 sys.path.insert(0, str(REPO_ROOT))
 
+if __name__ == "__main__":
+    # A later start (the applet, the launcher) hands over to the Headline running before it
+    # loads Qt and Scope - else the panel came 1.5 s late (review 2026-11-18, H5).
+    from Headline import instance as _instance
+
+    _place, _request = _instance.parse_start(sys.argv[1:])
+    if _instance.hand_over(_instance.server_name(), _request or {"panel": None}):
+        raise SystemExit(0)
+
 from PySide6.QtCore import QObject, QPoint, QRect, QTimer, QTranslator, QUrl, Signal, Slot  # noqa: E402
 from PySide6.QtGui import QCursor, QGuiApplication  # noqa: E402
 from PySide6.QtQml import QQmlApplicationEngine  # noqa: E402
@@ -60,6 +69,7 @@ class HeadlineBackend(QObject):
         self._start = lambda command: subprocess.Popen(command, cwd=str(REPO_ROOT),
                                                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         self._dock = (self._read_dock(), self.placeMode())
+        self._look = self._read_look()
         self._widgets = widgets.shown()
         self._follow = QTimer(self)
         self._follow.setInterval(FOLLOW_MS)
@@ -90,6 +100,7 @@ class HeadlineBackend(QObject):
     def _tick(self) -> None:
         self.followPlace()
         self.checkDock()
+        self.checkTheme()
         self.checkWidgets()
 
     # --- widgets (Headline/widgets.py; Designdocument Headline.md, 3a) -------------------------
@@ -137,6 +148,22 @@ class HeadlineBackend(QObject):
             return False
         self._dock = now
         self.dockChanged.emit()
+        return True
+
+    @staticmethod
+    def _read_look() -> tuple:
+        settings = Settings()
+        return (bool(settings.get("General/darkTheme")), float(settings.get("General/embryoOpacity")))
+
+    @Slot(result=bool)
+    def checkTheme(self) -> bool:
+        """Light / dark and the embryos' paleness, as Scope or Setup left them: the line is always
+        there and must not wait for a new start (review 2026-11-18, H7). True when one changed."""
+        now = self._read_look()
+        if now == self._look:
+            return False
+        self._look = now
+        self.themeChanged.emit()
         return True
 
     @Slot(result=bool)
@@ -190,6 +217,7 @@ class HeadlineBackend(QObject):
         """Light / dark, for Scope, SunTree and the Headline (General/darkTheme)."""
         settings = Settings()
         settings.set("General/darkTheme", not settings.get("General/darkTheme"))
+        self._look = self._read_look()
         self.themeChanged.emit()
 
     @Slot(result="QVariantMap")
@@ -228,7 +256,8 @@ def dock(window, backend: HeadlineBackend) -> bool:
         return False
     screen = window.screen().geometry()
     height = int(window.property("lineHeight"))
-    partial = (x11_dock.strut((screen.x(), screen.y(), screen.width(), screen.height()), height)
+    ratio = window.devicePixelRatio()
+    partial = (x11_dock.device_strut((screen.x(), screen.y(), screen.width(), screen.height()), height, ratio)
                if backend.dockMode() == "keep" else None)
     return x11_dock.apply_to(int(window.winId()), partial)
 
@@ -257,28 +286,7 @@ def install_translator(app: QGuiApplication, code: str) -> Optional[QTranslator]
     return translator
 
 
-def parse_start(args: list) -> Tuple[Optional[str], Optional[dict]]:
-    """Headline.py [--panel [--anchor x,y,w,h]] [place] -> (place or None, request or None).
-    A broken anchor opens the panel at the pointer."""
-    place, request, rest = None, None, list(args)
-    anchor = None
-    if "--anchor" in rest:
-        at = rest.index("--anchor")
-        value = rest[at + 1] if at + 1 < len(rest) else ""
-        del rest[at:at + 2]
-        try:
-            numbers = [int(part) for part in value.split(",")]
-        except ValueError:
-            numbers = []
-        if len(numbers) == 4 and numbers[2] > 0 and numbers[3] > 0:
-            anchor = dict(zip(instance.ANCHOR_KEYS, numbers))
-    if "--panel" in rest:
-        rest.remove("--panel")
-        request = {"panel": anchor}
-    places = [a for a in rest if not a.startswith("--")]
-    if places:
-        place = places[0]
-    return place, request
+parse_start = instance.parse_start  # read before Qt is loaded (H5)
 
 
 def start_place(place: Optional[str]) -> str:
@@ -313,7 +321,10 @@ def main(argv: Optional[list] = None) -> int:
     app.setWindowIcon(seiton_icon())
     install_translator(app, str(Settings().get("General/language")))
     server = instance.InstanceServer(name)
-    server.listen()
+    if not server.listen():
+        # Another one came up meanwhile (two starts at once): it gets the request (H6).
+        instance.hand_over(name, request or {"panel": None})
+        return 0
     api = ScopeApi(start)
     link = LensLink(api, start_daemon=getenv("SCOPE_START_DAEMON", "1") != "0")
     # The active project for whoever wants it - the clock reads it (Designdocument Time.md, 4.1).

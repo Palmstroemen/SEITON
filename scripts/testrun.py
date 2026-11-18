@@ -44,6 +44,9 @@ COMMENTS = "Meine Kommentare.md"
 FIRST_LESSON = Path("DE") / "Lektion01" / "Beginne HIER.md"
 # Settings a tester changes, reset for the next one (relative to the config home).
 SETTINGS = (CONFIG_DIR, "PostFixDev")
+# Written by the installer, not by a tester: kept when the settings are reset (review
+# 2026-11-18, I7 - else the Headline lost the clock's widget after the first tester).
+INSTALLED = (Path(CONFIG_DIR) / "headline" / "widgets",)
 # Files the programs write on their own; not what the tester did.
 NOISE = {".TagsHere.json"}
 
@@ -169,8 +172,17 @@ def prepare(places: Places, ismount=os.path.ismount, unmount=_fusermount) -> Non
         shutil.rmtree(places.tutorial)
     _build_pristine(places, places.tutorial)
     (places.tutorial / MARKER).write_text(json.dumps({"started": _now()}), encoding="utf-8")
-    for name in SETTINGS:
-        shutil.rmtree(places.config / name, ignore_errors=True)
+    with tempfile.TemporaryDirectory() as aside:
+        kept = []
+        for rel in INSTALLED:
+            source = places.config / rel
+            if source.is_dir():
+                shutil.copytree(source, Path(aside) / rel)
+                kept.append(rel)
+        for name in SETTINGS:
+            shutil.rmtree(places.config / name, ignore_errors=True)
+        for rel in kept:
+            shutil.copytree(Path(aside) / rel, places.config / rel)
 
 
 def _files(root: Path) -> dict:

@@ -50,3 +50,9 @@ def test_a_cascade_turns_left_at_the_right_edge():
 def test_a_cascade_low_on_the_screen_moves_up_to_fit():
     placed = side((400, 1000, 200, 28), (250, 300), BELOW_TASKBAR)
     assert placed["y"] == 1040 - 300 and placed["direction"] == "right"
+
+
+def test_a_cascade_taller_than_the_screen_is_cut_to_it():
+    # H2 (review 2026-11-18): over the projects root with 40 folders it ran out at the bottom.
+    placed = side((400, 300, 200, 28), (250, 1400), BELOW_LINE)
+    assert placed == {"x": 600, "y": 30, "direction": "right", "height": 1050}

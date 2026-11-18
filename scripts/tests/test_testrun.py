@@ -283,3 +283,14 @@ def test_the_tutorial_is_its_own_root_and_its_folders_can_become_projects(machin
     assert ScopeApi(str(vacation.parent)).create_project(str(vacation))
     names = [e["name"] for e in ScopeApi(str(vacation)).list_children(str(vacation), True, False)]
     assert {"admin", "info", "kommunikation"} <= set(names)
+
+
+def test_the_installers_widget_registration_stays(machine):
+    # I7 (review 2026-11-18): after the first "Bin fertig" the Headline had no time widget.
+    widgets = machine.config / CONFIG_DIR / "headline" / "widgets"
+    widgets.mkdir(parents=True)
+    (widgets / "clock.json").write_text('{"name": "Zeit"}', encoding="utf-8")
+    testrun.prepare(machine)
+    assert (widgets / "clock.json").read_text(encoding="utf-8") == '{"name": "Zeit"}'
+    assert not (machine.config / CONFIG_DIR / "Identity.md").exists()  # the tester's settings go
+    assert not (machine.config / CONFIG_DIR / f"{CONFIG_DIR}.conf").exists()

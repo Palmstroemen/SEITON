@@ -56,3 +56,63 @@ def test_handed_over_to_the_one_running(monkeypatch, tmp_path):
     thread.join(1)
     server.close()
     assert result.get("ok") is True and heard == [None]
+
+
+def _answering(path):
+    """A Headline that runs, as far as a later start sees: it answers "ok"."""
+    import socket
+    import threading
+    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    server.bind(path)
+    server.listen(4)
+
+    def serve():
+        while True:
+            try:
+                connection, _ = server.accept()
+            except OSError:
+                return
+            with connection:
+                try:
+                    if connection.recv(256):
+                        connection.sendall(b"ok\n")
+                except OSError:  # a look whether it is there, gone at once
+                    pass
+    threading.Thread(target=serve, daemon=True).start()
+    return server
+
+
+def test_a_second_headline_does_not_take_the_socket_of_one_running(monkeypatch, tmp_path):
+    # H6 (review 2026-11-18): Qt replaced the living socket; two Headlines ran, the first one
+    # out of reach.
+    from PySide6.QtCore import QCoreApplication
+    from Headline.instance import InstanceServer, socket_path
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path))
+    QCoreApplication.instance() or QCoreApplication([])
+    running = _answering(socket_path("seiton-headline-test"))
+    try:
+        second = InstanceServer("seiton-headline-test")
+        assert second.listen() is False
+        assert hand_over("seiton-headline-test", {"panel": None}) is True  # the first still answers
+    finally:
+        running.close()
+
+
+def test_a_later_start_hands_over_before_it_loads_qt(monkeypatch, tmp_path):
+    # H5 (review 2026-11-18): it loaded PySide6 and Scope first - 1.5 s until the panel came.
+    import os
+    import subprocess
+    import sys
+    from pathlib import Path
+    from Headline.instance import socket_path
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path))
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    running = _answering(socket_path(server_name()))
+    try:
+        script = Path(__file__).resolve().parents[1] / "Headline.py"
+        done = subprocess.run([sys.executable, "-X", "importtime", str(script), "--panel"],
+                              capture_output=True, text=True, timeout=30, env=dict(os.environ))
+    finally:
+        running.close()
+    assert done.returncode == 0
+    assert "PySide6" not in done.stderr

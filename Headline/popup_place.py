@@ -39,11 +39,16 @@ def drop(anchor: Rect, size: Size, room: Rect) -> Dict[str, int | str]:
 
 def side(anchor: Rect, size: Size, room: Rect) -> Dict[str, int | str]:
     """A cascade beside anchor: to the right when it fits, else to the left; its top at the
-    anchor's, moved up as far as needed to stay on the screen."""
+    anchor's, moved up as far as needed to stay on the screen. Taller than the screen, it
+    stands from its top and gets a "height" to be cut to, as drop() does."""
     ax, ay, aw, ah = anchor
     width, height = size
     rx, ry, rw, rh = room
     y = _clamp(ay, ry, ry + rh - height)
     if ax + aw + width <= rx + rw:
-        return {"x": ax + aw, "y": y, "direction": "right"}
-    return {"x": max(rx, ax - width), "y": y, "direction": "left"}
+        placed: Dict[str, int | str] = {"x": ax + aw, "y": y, "direction": "right"}
+    else:
+        placed = {"x": max(rx, ax - width), "y": y, "direction": "left"}
+    if height > rh:
+        placed["y"], placed["height"] = ry, rh
+    return placed

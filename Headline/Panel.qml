@@ -15,6 +15,8 @@ Window {
     property var widgets: []
     property var theme: ({})
     property real embryoOpacity: 0.4
+    // The line's counting (main.qml): a widget's counter to the second, as in the line.
+    property var counted: null
     property int baseFont: 13
     readonly property int rowHeight: 28
     readonly property int panelWidth: 300
@@ -22,7 +24,10 @@ Window {
     flags: Qt.Popup | Qt.FramelessWindowHint
     color: theme.panel || "#202124"
     width: panelWidth
-    height: Math.min(content.implicitHeight + 16, maximumHeight)
+    // Cut to the room when too tall (popup_place), kept apart from the natural height.
+    property int cutHeight: 0
+    property var anchorRect: null  // where it was opened: placed there again when it changes
+    height: cutHeight > 0 ? cutHeight : Math.min(content.implicitHeight + 16, maximumHeight)
     maximumHeight: Screen.desktopAvailableHeight * 0.8
 
     function refresh() {
@@ -34,22 +39,31 @@ Window {
     // anchor: {x, y, width, height} on the screen (the applet's button), or null: the pointer.
     function openAt(anchor) {
         refresh()
-        // Laid out now, not later: its height decides where it goes (upwards above a taskbar).
-        pathFlow.forceLayout()
-        content.forceLayout()
-        var rect = anchor || headline.pointerRect()
-        var placed = headline.placeDrop(rect, width, Math.min(content.implicitHeight + 16, maximumHeight))
-        x = placed.x
-        y = placed.y
+        anchorRect = anchor || headline.pointerRect()
+        place()
         show()
         raise()
         requestActivate()
     }
 
+    // Towards the room from its anchor, cut to it when too tall; again whenever what it
+    // shows changes while open, so it keeps growing away from the taskbar (review 2026-11-18, H3).
+    function place() {
+        if (!anchorRect) return
+        // Laid out now, not later: its height decides where it goes (upwards above a taskbar).
+        pathFlow.forceLayout()
+        content.forceLayout()
+        cutHeight = 0
+        var placed = headline.placeDrop(anchorRect, width, Math.min(content.implicitHeight + 16, maximumHeight))
+        x = placed.x
+        y = placed.y
+        cutHeight = placed.height !== undefined ? placed.height : 0
+    }
+
     Connections {
         target: headline
-        function onChanged() { if (panel.visible) panel.refresh() }
-        function onWidgetsChanged() { if (panel.visible) panel.widgets = headline.widgets() }
+        function onChanged() { if (panel.visible) { panel.refresh(); panel.place() } }
+        function onWidgetsChanged() { if (panel.visible) { panel.widgets = headline.widgets(); panel.place() } }
     }
 
     component Heading: Text {
@@ -154,7 +168,8 @@ Window {
                         objectName: "panelWidget"
                         hitAreaFullButton: true
                         width: content.width
-                        label: widgetColumn.entry.text
+                        label: widgetColumn.entry.counter && panel.counted ? panel.counted(widgetColumn.entry.counter)
+                                                                           : widgetColumn.entry.text
                         style: "text"
                         compactHeight: panel.rowHeight
                         fillColor: widgetColumn.entry.state === "active" ? (panel.theme.smallButtonActiveBg || "#2c3a55")
