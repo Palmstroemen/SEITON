@@ -1,9 +1,9 @@
 import QtQuick 2.15
 
-// The dial on Now (2026-11-18; TimeDial: Controls has a Dial): today's time in the active project as a stopwatch. One turn is an
-// hour: a green wedge from the top grows with the hour under way, the full hours stand in the
-// middle; while the clock counts, a thin seconds hand runs - one sees at a glance that it counts.
-// Standing, the wedge is grey and the hand gone.
+// The dial on Now (2026-11-18; TimeDial: Controls has a Dial). It only shows whether the clock
+// runs: while it counts, a seconds hand goes round once a minute and draws a green wedge after
+// it; standing, the wedge stays where it was, grey, and the hand is gone. Today's time stands in
+// the middle as h:mm h.
 Item {
     id: dial
     objectName: "nowDial"
@@ -16,14 +16,17 @@ Item {
     readonly property bool running: since > 0
     property real now: Date.now() / 1000
     readonly property real seconds: running ? Math.max(0, now - since) : todaySeconds
-    readonly property real wedgeAngle: (seconds % 3600) / 3600 * 360
+    readonly property real liveAngle: (seconds % 60) * 6
+    property real lastAngle: 0  // where the wedge stood when the clock stopped
+    onLiveAngleChanged: if (running) lastAngle = liveAngle
+    readonly property real wedgeAngle: running ? liveAngle : lastAngle
     readonly property color wedgeColor: running ? "#3fae5f" : (theme.setupMuted || "#9aa0ad")
 
     implicitWidth: 200
     implicitHeight: 200
 
     Timer {
-        interval: 1000
+        interval: 250  // the wedge goes on smoothly
         repeat: true
         running: dial.running && dial.visible
         triggeredOnStart: true
@@ -48,7 +51,7 @@ Item {
             g.lineWidth = 3
             g.strokeStyle = dial.theme.pillBorder || "#3a3f52"
             g.stroke()
-            if (dial.wedgeAngle > 0) {  // the hour under way
+            if (dial.wedgeAngle > 0) {  // the minute under way
                 g.beginPath()
                 g.moveTo(cx, cy)
                 g.arc(cx, cy, r - 6, top, top + dial.wedgeAngle * Math.PI / 180)
@@ -68,7 +71,7 @@ Item {
                 g.stroke()
             }
             if (dial.running) {  // the seconds hand
-                var s = top + (Math.floor(dial.seconds) % 60) * Math.PI / 30
+                var s = top + dial.wedgeAngle * Math.PI / 180
                 g.strokeStyle = "#e2402b"
                 g.lineWidth = 2
                 g.lineCap = "round"

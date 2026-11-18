@@ -146,7 +146,8 @@ def test_the_dial_counts_on_while_the_clock_counts(started):
     [dial] = _named(started, "nowDial")
     assert dial.property("running") is True
     assert abs(dial.property("seconds") - (2 * 3600 + 15 * 60 + 7)) < 3
-    assert dial.property("wedgeAngle") == pytest.approx(15 / 60 * 360, abs=1)
+    # The wedge only shows that it runs (2026-11-18): it follows the seconds, a turn a minute.
+    assert dial.property("wedgeAngle") == pytest.approx((dial.property("seconds") % 60) * 6, abs=7)
 
 
 def test_standing_the_dial_stands(started):
@@ -167,3 +168,30 @@ def test_stopped_is_said_in_the_dial_and_no_line_repeats_the_time(started):
     assert _named(started, "nowText") == []
     _view(started, text="Küche · 0:15", short="0:15", state="calm", clock="paused")
     assert not _named(started, "dialStopped")[0].property("visible")  # a pause is no stop
+
+
+
+def test_standing_the_wedge_stays_where_it_was(started):
+    import time as clock_time
+    _view(started, text="Küche · 0:15", short="0:15", state="active", clock="runs",
+          counter={"prefix": "", "shortPrefix": "", "since": clock_time.time() - (15 * 60 + 20)})
+    [dial] = _named(started, "nowDial")
+    running = dial.property("wedgeAngle")
+    assert running > 0
+    _view(started, text="Küche · 0:15 · gestoppt", short="0:15 · gestoppt", state="calm", clock="stopped")
+    assert dial.property("running") is False and dial.property("wedgeAngle") == pytest.approx(running, abs=7)
+
+
+def test_start_and_stop_sit_evenly_under_the_dial(started):
+    from PySide6.QtQuick import QQuickItem
+    window = started["window"]
+    started["app"].processEvents()
+    dial = window.findChild(QQuickItem, "nowDial")
+    start = window.findChild(QQuickItem, "startButton")
+    stop = window.findChild(QQuickItem, "stopButton")
+    middle = dial.mapToScene(dial.boundingRect().center()).x()
+    left = start.mapToScene(start.boundingRect().topLeft())
+    right = stop.mapToScene(stop.boundingRect().topRight())
+    assert abs((left.x() + right.x()) / 2 - middle) <= 2
+    assert left.y() > dial.mapToScene(dial.boundingRect().bottomLeft()).y()
+    assert start.width() == stop.width()

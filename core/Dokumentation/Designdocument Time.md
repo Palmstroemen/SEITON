@@ -180,10 +180,11 @@ the Headline, the launcher - brings the one open to the front. Its own icon, a s
 (`assets/brand/seiton-time.svg`), so it is told apart from SEITON's box in the taskbar.
 
 - **Now**: the active project, today's time in it, Start/Stop. In the middle a dial
-  (2026-11-18, `apps/Time/TimeDial.qml`): one turn is an hour, a green wedge grows with the hour
-  under way, the full hours stand in the middle as `h:mm h`; while the clock counts a red seconds
-  hand runs, standing the wedge is grey. Below it the person counted, with the system's picture
-  (AccountsService, else `~/.face`; without one the first letter) - so one is sure for whom.
+  (2026-11-18, `apps/Time/TimeDial.qml`) that only shows whether the clock runs: while it counts
+  a red seconds hand goes round once a minute and draws a green wedge after it; standing, the
+  wedge stays where it was, grey, and "gestoppt" stands in red when stopped by hand. Today's time
+  in the middle as `h:mm h`. Start and Stop evenly below it, then the person counted, with the
+  system's picture (AccountsService, else `~/.face`; without one the first letter).
 - **Entries**: one's own rows of the active project, newest first; edit, delete, **Add**.
   Choosing another project: not built yet.
 - **Overview**: the active project with its children (section 3), by period (today, this week,

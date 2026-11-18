@@ -120,6 +120,41 @@ ApplicationWindow {
                     stopped: root.nowView.clock === "stopped"
                     stoppedText: qsTr("stopped")
                 }
+                Row {  // Start and Stop, evenly under the dial
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 12
+                    readonly property real buttonWidth: Math.max(startButton.implicitWidth, stopButton.implicitWidth, 90)
+                    Button {
+                        id: startButton
+                        objectName: "startButton"
+                        width: parent.buttonWidth
+                        text: qsTr("Start")
+                        enabled: root.nowView.clockRuns && root.nowView.state !== "active"
+                        onClicked: timeScreen.start()
+                    }
+                    Button {
+                        id: stopButton
+                        objectName: "stopButton"
+                        width: parent.buttonWidth
+                        text: qsTr("Stop")
+                        // Also in a pause: a lunch break can become "stopped" (Z8).
+                        enabled: root.nowView.clockRuns && root.nowView.clock !== "stopped" && root.nowView.clock !== "stands"
+                        onClicked: timeScreen.stop()
+                    }
+                }
+                Muted {
+                    objectName: "clockNotRunning"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    visible: !root.nowView.clockRuns
+                    text: qsTr("The clock is not running.")
+                }
+                Button {
+                    objectName: "startClockButton"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    visible: !root.nowView.clockRuns
+                    text: qsTr("Start the clock")
+                    onClicked: timeScreen.startClock()
+                }
                 Row {  // for whom it counts: the system's picture and the name in the project
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 8
@@ -152,33 +187,6 @@ ApplicationWindow {
                         anchors.verticalCenter: parent.verticalCenter
                         text: root.nowView.person || ""
                     }
-                }
-            }
-            Muted {
-                objectName: "clockNotRunning"
-                visible: !root.nowView.clockRuns
-                text: qsTr("The clock is not running.")
-            }
-            RowLayout {
-                spacing: 8
-                Button {
-                    objectName: "startButton"
-                    text: qsTr("Start")
-                    enabled: root.nowView.clockRuns && root.nowView.state !== "active"
-                    onClicked: timeScreen.start()
-                }
-                Button {
-                    objectName: "stopButton"
-                    text: qsTr("Stop")
-                    // Also in a pause: a lunch break can become "stopped" (Z8).
-                    enabled: root.nowView.clockRuns && root.nowView.clock !== "stopped" && root.nowView.clock !== "stands"
-                    onClicked: timeScreen.stop()
-                }
-                Button {
-                    objectName: "startClockButton"
-                    visible: !root.nowView.clockRuns
-                    text: qsTr("Start the clock")
-                    onClicked: timeScreen.startClock()
                 }
             }
             Item { Layout.fillHeight: true }
