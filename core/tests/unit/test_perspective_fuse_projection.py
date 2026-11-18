@@ -120,7 +120,7 @@ def test_the_virtual_levels_cannot_be_written(world):
 def test_denied_by_acls(world):
     studio_finance = world["studio"] / "04_Finanz"
     fs = PerspectiveDriveFuse(PerspectiveDrive(
-        world["root"], may=lambda path, action: not (action == "write" and studio_finance in [path, *path.parents])))
+        world["root"], may=lambda path, action: not (action in ("write", "delete") and studio_finance in [path, *path.parents])))
 
     assert stat.S_ISREG(fs.getattr("/04_Finanz/Projekte/Musikstudio/r1.pdf")["st_mode"])
     assert _errno(lambda: fs.create("/04_Finanz/Projekte/Musikstudio/neu.pdf", 0o644)) == errno.EACCES
@@ -135,3 +135,15 @@ def test_where_the_lens_enters_a_project_stays(world):
         assert _errno(lambda: fs.rmdir(path)) == errno.EACCES
         assert _errno(lambda: fs.rename(path, path + "2")) == errno.EACCES
     assert world["reisen"].is_dir() and (world["studio"] / "04_Finanz").is_dir()
+
+
+def test_deleting_needs_delete_not_only_write(world):
+    """"docs/Prüfung 2026-11-18.md", B2: "delete" is a right of its own (not in "write"), also
+    for a program with a role (the clock may write its file, not delete it)."""
+    fs = PerspectiveDriveFuse(PerspectiveDrive(world["root"], may=lambda path, action: action != "delete"))
+    note = "/04_Finanz/Projekte/Musikstudio/r1.pdf"
+    assert _errno(lambda: fs.unlink(note)) == errno.EACCES
+    assert (world["studio"] / "04_Finanz" / "r1.pdf").exists()
+    (world["studio"] / "04_Finanz" / "Alt").mkdir()
+    assert _errno(lambda: fs.rmdir("/04_Finanz/Projekte/Musikstudio/Alt")) == errno.EACCES
+    fs.write(note, b"", 0, fs.open(note, os.O_WRONLY))  # writing it still works

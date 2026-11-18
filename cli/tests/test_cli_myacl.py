@@ -216,3 +216,17 @@ def test_the_plan_lets_read_an_embryo_who_may_read_where_it_is_born(tmp_path):
     assert not any(row[:1] == [f"/{META_DIR}/Embryos/Finanz"] and row[2:3] == ["anna"] for row in rows)  # read, as above
     assert [f"/{META_DIR}/Embryos.json", "user", "anna", "-"] in rows
     assert [f"/{META_DIR}/ACLs.md", "user", "anna", "-"] in rows
+
+
+def test_check_knows_everyone_and_self(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", A4: myacl check said no where the checks say yes."""
+    root = _project(tmp_path / "Projekte")
+    (root / "0_Admin" / "Zeitaufwand").mkdir(parents=True)
+    (root / META_DIR / "ACLs.md").write_text(
+        "# Permissions\n\n## Finanz\n- /Finanz/: read\n\n"
+        "## Everyone\n- /0_Admin/Zeitaufwand/{Self}.md: read, write\n\n# Users\nBen: Finanz\n")
+    own = root / "0_Admin" / "Zeitaufwand" / "Ben.md"
+    result = _run(["check", "Ben", str(own), "write"], tmp_path)
+    assert result.returncode == 0 and "yes" in result.stdout, (result.stdout, result.stderr)
+    other = root / "0_Admin" / "Zeitaufwand" / "Anna.md"
+    assert _run(["check", "Ben", str(other), "write"], tmp_path).returncode == 1

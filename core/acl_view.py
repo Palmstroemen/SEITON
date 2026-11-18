@@ -121,6 +121,9 @@ class ACLView:
         rights = set()
         for role in self.policy.roles_for_user(str(user)):
             rights |= self._rights_for_role(role, rel)
+        # "## Everyone" (with {Self}) as the checks count it (ACLAuthorizer.can_user_access).
+        everyone = self.policy.everyone_rights(str(user), _normalize_path(rel))
+        rights |= ALL_RIGHTS if "*" in everyone else (everyone - {"none"})
         return frozenset(rights)
 
     def principals(self, path) -> List[Principal]:

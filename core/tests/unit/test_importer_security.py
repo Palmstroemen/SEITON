@@ -94,3 +94,35 @@ def test_import_basic_merge():
 
         assert (target / "data" / "note.txt").exists()
         assert result.import_root == target
+
+
+def _package_pointing_at(tmp: Path, reference: Path) -> Path:
+    package = tmp / "package"
+    (package / META_DIR).mkdir(parents=True)
+    (package / META_DIR / "Project.md").write_text(
+        f"# Project\n# Export\nReferencePath: {reference}\nSubtree: /.\nExportedAt: 2026-02-02T00:00:00Z\n")
+    (package / ".config" / "autostart").mkdir(parents=True)
+    (package / ".config" / "autostart" / "x.desktop").write_text("[Desktop Entry]\nExec=evil\n")
+    return package
+
+
+def test_restore_writes_only_into_a_project(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", D2: a package naming the home as its place wrote an
+    autostart entry there."""
+    home = tmp_path / "home"
+    home.mkdir()
+    package = _package_pointing_at(tmp_path, home)
+    with pytest.raises(ValueError):
+        import_package(package, mode="restore")
+    assert not (home / ".config").exists()
+
+
+def test_restore_with_a_target_goes_there(tmp_path):
+    home = tmp_path / "home"
+    home.mkdir()
+    target = tmp_path / "target"
+    target.mkdir()
+    package = _package_pointing_at(tmp_path, home)
+    import_package(package, target_root=target, mode="restore")
+    assert not (home / ".config").exists()
+    assert (target / ".config" / "autostart" / "x.desktop").exists()

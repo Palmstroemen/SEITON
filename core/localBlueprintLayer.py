@@ -21,13 +21,16 @@ except ImportError:  # the MyOS core service (Docker) has no FUSE: Blueprint wit
         pass
 from core.project import ProjectConfig
 from core.template_place import TEMPLATES_REL, find_templates_dir
-from core.acl import ACLPolicy
+import logging
+from core.acl import ACLPolicy, find_acl_project_root
 from core.acl_enforcement import configured_mode
 from core.identity import person_in
 from core.filing import sorted_folder_for, virtual_groups
 
 import filecmp
 import shutil
+
+logger = logging.getLogger(__name__)
 
 class BirthClinic:
     """Handles the birth process from embryos to physical folders."""
@@ -304,13 +307,21 @@ class Blueprint(Operations):
         self._embryo_cache: Dict[str, bool] = {}
 
         # ACL policy and role resolution
-        self.acl_policy = ACLPolicy.from_project(self.project_root)
-        self.acl_enabled = (self.project_root / META_DIR / "ACLs.md").exists()
+        # The ACLs.md that governs the project: its own, or the parent's it inherits (a
+        # subproject without one), its rule paths relative to that project.
+        acl_root = find_acl_project_root(self.project_root)
+        self.acl_enabled = acl_root is not None
+        if acl_root is not None:
+            self.acl_policy = ACLPolicy.from_project(acl_root).for_context(acl_root, self.project_root)
+            inside = self.project_root.relative_to(acl_root).as_posix()
+            self._acl_prefix = "" if inside in ("", ".") else "/" + inside
+        else:
+            self.acl_policy = ACLPolicy.from_project(self.project_root)
+            self._acl_prefix = ""
         self.acl_roles = self._resolve_acl_roles()
-        
-        print(f"Blueprint: Mounted on {self.project_root}")
-        print(f"Blueprint: Using templates from {self.templates_dir}")
-        print(f"Blueprint: Active templates: {self.template_names}")
+
+        logger.debug("Blueprint at %s, templates from %s: %s", self.project_root, self.templates_dir,
+                     self.template_names)
 
     def _resolve_templates_dir(self) -> Path:
         # Without templates anywhere above, the project's own place (nothing there yet).
@@ -358,7 +369,7 @@ class Blueprint(Operations):
             return True
         if not self.acl_roles:
             return False
-        path = f"/{rel_path.strip('/')}"
+        path = f"{self._acl_prefix}/{rel_path.strip('/')}"
         return any(self.acl_policy.can_access(role, path, "write") for role in self.acl_roles)
 
     def _load_embryo_tree(self) -> Dict[str, Any]:

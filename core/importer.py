@@ -93,12 +93,15 @@ def _resolve_import_root(
     if mode not in {"restore", "adopt"}:
         raise ValueError(f"Invalid mode: {mode}")
 
-    if mode == "restore":
+    if mode == "restore" and target_root is None:
+        # Security: the package names its place itself; it is taken only when it is a project
+        # (else a package could write anywhere, e.g. an autostart entry into the home).
         ref = metadata.get("ReferencePath")
         if ref:
-            ref_path = Path(ref)
-            if ref_path.exists():
+            ref_path = Path(ref).expanduser().resolve()
+            if (ref_path / META_DIR / "Project.md").is_file():
                 return ref_path
+            raise ValueError(f"ReferencePath {ref_path} is no project: give the target with --target")
 
     if target_root is None:
         raise ValueError("target_root is required for adopt mode or missing reference path")

@@ -102,6 +102,8 @@ def _visible_files(folder: Path, limit: int, may_read: Callable[[Path], bool]) -
                     return None
                 stack.append(item)
             else:
+                if not may_read(item):
+                    continue  # Security: x-ray never shows what the user may not read
                 files.append(item)
                 if len(files) > limit:
                     return None

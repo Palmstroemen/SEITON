@@ -121,3 +121,21 @@ def test_a_rebuild_takes_unchanged_files_from_the_shadow_before(tmp_path):
     assert dav.got == [f"/{META_DIR}/ACLs.md"]
     assert (keeper.root / META_DIR / "ACLs.md").read_bytes() == b"# Permissions\nneu\n"
     assert (keeper.root / META_DIR / "Project.md").read_bytes() == b"# MyOS Project\n"
+
+
+def test_the_trash_does_not_come(tmp_path):
+    """Deleted documents stay in the cloud, not in the core ("docs/Prüfung 2026-11-18.md", C3):
+    the trash of a project lies in its settings folder, but it holds documents."""
+    trashed = {f"/{META_DIR}/Trash/files/Urlaub.mp4": b"video",
+               f"/{META_DIR}/Trash/info/Urlaub.mp4.trashinfo": b"[Trash Info]\n",
+               f"/Familie/{META_DIR}/Trash/files/Brief.md": b"brief"}
+    dav = FakeDAV(files={**FILES, **trashed})
+    build_shadow(dav, tmp_path / "s")
+
+    assert (tmp_path / "s" / META_DIR / "ACLs.md").is_file()
+    assert not (tmp_path / "s" / META_DIR / "Trash").exists()
+    assert not (tmp_path / "s" / "Familie" / META_DIR / "Trash").exists()
+    assert not [path for path in dav.got if "/Trash/" in path]
+    assert not matters(f"/{META_DIR}/Trash/files/Urlaub.mp4", False)
+    assert not matters(f"/{META_DIR}/Trash/files", True)
+    assert matters(f"/{META_DIR}/ACLs.md", False)

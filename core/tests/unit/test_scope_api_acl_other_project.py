@@ -71,3 +71,41 @@ def test_write_without_change_does_not_rename_the_rules(tmp_path):
     acls = a / META_DIR / "ACLs.md"
     assert ScopeApi(str(a)).rename_entry(str(acls), "ACLs-alt") is None
     assert acls.exists()
+
+
+def _readers_project(tmp_path):
+    root = tmp_path / "P"
+    (root / META_DIR).mkdir(parents=True)
+    (root / META_DIR / "Project.md").write_text("# Project\n")
+    (root / META_DIR / "ACLs.md").write_text(
+        "# Permissions\n\n## Team\n- /Arbeit/: read\n- /Arbeit/Geheim.md: none\n\n# Users\nKarl: Team\n")
+    (root / "Arbeit").mkdir()
+    (root / "Arbeit" / "Offen.md").write_text("x")
+    (root / "Arbeit" / "Geheim.md").write_text("x")
+    (root / "Privat").mkdir()
+    (root / "Privat.md").write_text("x")
+    return root
+
+
+def test_the_quick_list_hides_what_may_not_be_read(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", API4: names showed until the full list came."""
+    root = _readers_project(tmp_path)
+    api = ScopeApi(str(root))
+    assert [e["name"] for e in api.list_entries_quick(str(root))] == [e["name"] for e in api.list_entries(str(root))]
+    assert [e["name"] for e in api.list_entries_quick(str(root / "Arbeit"))] == ["Offen.md"]
+
+
+def test_x_ray_hides_files_one_may_not_read(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", B5."""
+    root = _readers_project(tmp_path)
+    shown = [e["name"] for e in ScopeApi(str(root)).list_entries_xray(str(root), 50, True)]
+    assert "Offen.md" in shown and "Geheim.md" not in shown
+
+
+def test_folder_tags_need_write(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", API5."""
+    root = _readers_project(tmp_path)
+    api = ScopeApi(str(root))
+    assert api.set_folder_tags(str(root / "Arbeit"), ["wichtig"]) is False
+    assert api.set_folder_tag_color(str(root / "Arbeit"), "wichtig", "#ff0000") is False
+    assert not (root / "Arbeit" / META_DIR).exists() and not (root / "app.json").exists()

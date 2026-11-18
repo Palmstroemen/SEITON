@@ -849,3 +849,20 @@ if __name__ == "__main__":
     # Einfache manuelle Tests
     test_all_security()
     pytest.main([__file__, "-v"])
+
+
+def test_acl_embryos_in_a_subproject_follow_the_parents_rules(monkeypatch):
+    """A subproject without an ACLs.md of its own is governed by its parent's
+    ("docs/Prüfung 2026-11-18.md", P6): its suggested folders follow those rules."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        top = Path(tmpdir) / "Top"
+        _create_test_project(top, "Standard")
+        (top / META_DIR / "ACLs.md").write_text(
+            "# Permissions\n## Info\n- /*: read\n- /info/: read, write\n- /Sub/info/: read, write\n")
+        sub = top / "Sub"
+        _create_test_project(sub, "Standard")
+        monkeypatch.setenv(env_name("ROLES"), "info")
+        monkeypatch.setenv(env_name("ACL_MODE"), "enforce")
+
+        assert Blueprint(top).get_embryos_at("") == ["info"]
+        assert Blueprint(sub).get_embryos_at("") == ["info"]

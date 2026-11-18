@@ -15,13 +15,24 @@ from typing import Dict, List, Optional
 
 from core.nextcloud_dav import NextcloudError
 from core.brand import META_DIR
+from core.trash import TRASH_DIR
 
+TRASH_NAME = TRASH_DIR.name  # "Trash", in a .MyOS folder
+
+
+
+def _in_trash(parts: List[str]) -> bool:
+    """Whether parts lie in a project's trash (.MyOS/Trash, core.trash): it holds documents."""
+    return any(a == META_DIR and b == TRASH_NAME for a, b in zip(parts, parts[1:]))
 
 
 def matters(path: str, is_dir: bool) -> bool:
     """Whether a change at path (in the Team folder) changes the shadow: a folder, or a file of
-    a .MyOS - documents are not in it."""
-    return bool(is_dir) or META_DIR in [p for p in str(path).split("/") if p][:-1]
+    a .MyOS - documents are not in it, nor the trash (deleted documents)."""
+    parts = [p for p in str(path).split("/") if p]
+    if _in_trash(parts):
+        return False
+    return bool(is_dir) or META_DIR in parts[:-1]
 
 
 def build_shadow(dav, target: Path, before: Optional[Path] = None, etags: Optional[Dict[str, str]] = None) -> Dict[str, str]:
@@ -35,6 +46,8 @@ def build_shadow(dav, target: Path, before: Optional[Path] = None, etags: Option
     for path in sorted(tree):
         parts = _parts(path)
         entry = tree[path]
+        if _in_trash(parts):
+            continue  # deleted documents stay in the cloud
         if entry.is_dir:
             target.joinpath(*parts).mkdir(parents=True, exist_ok=True)
         elif META_DIR in parts[:-1]:

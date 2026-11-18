@@ -62,12 +62,12 @@ class PerspectiveDriveFuse(Operations):
         node = self._node(path)
         if node.real is None:
             raise FuseOSError(errno.EACCES)
-        if action == "write":
+        if action in ("write", "delete"):
             # Security: where the lens enters a project (its department folder, or the
             # project folder standing in for it) is not removed, renamed or changed here.
             if node.project is not None and not node.rest:
                 raise FuseOSError(errno.EACCES)
-            if not self.drive.may(node.real, "write"):
+            if not self.drive.may(node.real, action):
                 raise FuseOSError(errno.EACCES)
         return node.real
 
@@ -179,12 +179,12 @@ class PerspectiveDriveFuse(Operations):
         return 0
 
     def unlink(self, path: str) -> int:
-        real = self._real(path, "write")
+        real = self._real(path, "delete")  # a right of its own, not in "write"
         self._call(lambda: os.unlink(real))
         return 0
 
     def rmdir(self, path: str) -> int:
-        real = self._real(path, "write")
+        real = self._real(path, "delete")
         self._call(lambda: os.rmdir(real))
         return 0
 

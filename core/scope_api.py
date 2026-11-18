@@ -1248,7 +1248,8 @@ class ScopeApi:
     def list_entries_quick(
         self, path: str, show_hidden: bool = False
     ) -> List[FileEntryWithOptionalEmbryo]:
-        """Minimal list for immediate display. No tags, no ACL, no embryos."""
+        """Minimal list for immediate display: no tags, no embryos. Security: what may not be
+        read is left out as in list_entries - else its name (and preview) showed meanwhile."""
         try:
             target = Path(path).expanduser().resolve()
         except Exception:
@@ -1261,6 +1262,9 @@ class ScopeApi:
         try:
             for child in sorted(target.iterdir()):
                 if not show_hidden and child.name.startswith("."):
+                    continue
+                acl_child = self._acl_probe("read_dir", child)
+                if acl_child and acl_child.enforced and not acl_child.allowed:
                     continue
                 is_dir = child.is_dir()
                 entry = self._build_file_entry(
@@ -1498,6 +1502,8 @@ class ScopeApi:
         target = self._resolve_path(path)
         if not target.exists() or not target.is_dir():
             return False
+        if not self.acl_allows("write", target):
+            return False  # Security: tags are written into the folder
         cleaned = sorted(
             set(_normalize_tag_value(tag) for tag in (tags or []) if _normalize_tag_value(tag)),
             key=str.lower,
@@ -1553,6 +1559,8 @@ class ScopeApi:
         target = self._resolve_path(path)
         if not target.exists() or not target.is_dir():
             return False
+        if not self.acl_allows("write", target):
+            return False  # Security: the project's tag colours change for everyone
         normalized_tag = _normalize_tag_value(tag)
         if not normalized_tag:
             return False
