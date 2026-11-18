@@ -580,6 +580,7 @@ class ProjectConfig:
         project_marker = target_settings / "Project.md"
         if not project_marker.exists():
             project_marker.write_text(project_heading() + "\n")
+            cls._first_gets_standard(dir_path)
             # A new project gets what its templates' root .MyOS holds (ACLs.md, Desk.md, ...).
             from core.template_seed import seed_from_templates  # late: template_seed imports this module
             try:
@@ -593,6 +594,23 @@ class ProjectConfig:
         project = cls(dir_path)
         project._load_config_data()
         return project
+
+    @staticmethod
+    def _first_gets_standard(dir_path: Path) -> None:
+        """The top project (none above it) names the template "Standard" when it is there and
+        nothing names one yet: else the first project of a new user had no suggested folders,
+        an empty lens, and the clock found no 0_Admin/Zeitaufwand (review 2026-11-18, E1).
+        A subproject inherits its parent's templates."""
+        if any((parent / META_DIR / "Project.md").is_file() for parent in dir_path.parents):
+            return
+        own = dir_path / META_DIR / "Templates.md"
+        if own.exists():
+            return
+        from core.template_place import find_templates_dir  # late: light, but keeps imports as they are
+        templates = find_templates_dir(dir_path)
+        if templates is None or not (templates / "Standard").is_dir():
+            return
+        own.write_text("# Templates\nStandard\n", encoding="utf-8")
 
     @staticmethod
     def _find_parent_settings_dir(dir_path: Path) -> Optional[Path]:

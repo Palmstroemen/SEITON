@@ -378,7 +378,9 @@ def install(places: Places, options: Options, run: Run = run_command, ask: Ask =
         suntree(places, run)
     if options.thumbnailer:
         thumbnailer(places, written)
-    if options.headline:
+    if options.headline or options.clock:
+        # The clock learns the active project from the Headline only (Time.md 4.1): a clock
+        # without it would run and count nothing (review 2026-11-18, O1).
         headline_at_login(places, written)
     if options.clock:
         clock_at_login(places, written)
@@ -420,7 +422,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     suntree_wanted = args.suntree or (not args.yes and ask_user("Also SunTree, the folder fan, at login (Ctrl+Alt+Space)?"))
     previews_wanted = args.thumbnailer or (not args.yes and ask_user("Also Markdown previews in the system's file browsers?"))
     headline_wanted = args.headline or (not args.yes and ask_user("Also the Headline at login (the line at the top edge)?"))
-    clock_wanted = args.clock or (not args.yes and ask_user("Also the time tracking at login (its clock counts the time per project)?"))
+    clock_wanted = args.clock or (not args.yes and ask_user("Also the time tracking at login (its clock counts the time per project; the Headline comes along, it tells the clock the project)?"))
     install(places, Options(suntree=suntree_wanted, thumbnailer=previews_wanted, headline=headline_wanted, clock=clock_wanted,
                             system_packages=not args.no_system_packages), ask=ask)
     return 0

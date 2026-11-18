@@ -158,7 +158,7 @@ the time screen can start the clock (`Time/TimeScreen.py`, `startClock`). Not bu
    Built 2026-11-17: `Headline/widgets.py` and the active project (part 1);
    `core/clock_widget.py`, the clock's view and commands, the time in all beside the projects
    worked on last (part 2); `Time/`, the time screen (part 3); `seiton-clock` without a root
-   takes the first below the home folder, one clock per user (a lock), `./install.sh --clock`
+   takes the first below the home folder (one level, else two: `core.scope_api.roots_below`), one clock per user (a lock), `./install.sh --clock`
    starts it at login (part 4). Not yet tried with FUSE and bubblewrap on the desktop.
 3. **The panel:** the same model as a vertical list, with the perspectives and the buttons;
    opened at the pointer (launcher, shortcut).

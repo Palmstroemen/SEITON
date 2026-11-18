@@ -65,11 +65,16 @@ class PerspectiveSession:
     # --- gestures (Part A, A3) -------------------------------------------------------
 
     def set_cwd(self, path: Union[str, Path]) -> None:
-        """Where one is without a lens. A lens on stays where it is."""
+        """Where one is without a lens. A lens on stays where it is - unless its project is
+        gone (renamed, in the trash): then it moves to the CWD's project, keeping its depth,
+        or onto the shelf when the CWD is in none (review 2026-11-18, X4)."""
         cwd = Path(path).expanduser().resolve()
-        if self._project_of(cwd) is None:
+        place = self._project_of(cwd)
+        if place is None:
             raise ValueError(f"{cwd} is not inside a project below {self.projects_root}")
         self.cwd = cwd
+        if self.active and not self._shelf and not is_project(self.projects_root.joinpath(*self._place)):
+            self._place, self._shelf = place, not place
 
     def put_on(self, lens: Sequence[str]) -> None:
         """Put on (or change) the lens of a department path, in the project looked at."""
@@ -172,6 +177,9 @@ class PerspectiveSession:
         the template are born with their content, as embryos are."""
         if self.project is None:
             raise ValueError("no project to bear the lens in")
+        if not is_project(self.projects_root.joinpath(*self._place)):
+            # gone (renamed, in the trash): never bear the department folder elsewhere
+            raise ValueError(f"no project at {'/'.join(self._place)} any more")
         return bear_folder(self.projects_root.joinpath(*self._place), self.lens)
 
     def desk_file(self) -> Optional[Path]:

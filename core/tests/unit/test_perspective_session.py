@@ -267,3 +267,25 @@ def test_putting_on_the_lens_of_a_real_folder(world):
     for nowhere in (world["studio"], world["studio"] / "Eigenes", world["root"] / "Clipboard"):
         with pytest.raises(ValueError):
             session.look_at(nowhere)  # the project itself, no department, outside projects
+
+
+# --- found in the review of 2026-11-18 (X4) --------------------------------------------------
+
+def test_after_its_project_was_renamed_the_lens_moves_with_the_cwd(world):
+    session = _session(world)
+    session.put_on(LENS)
+    world["studio"].rename(world["root"] / "Studio")
+    session.set_cwd(world["root"] / "Studio")
+    assert session.project == ("Studio",)
+    assert session.lens == LENS  # the depth stays
+    assert session.shown() == (world["root"] / "Studio" / "04_Finanz" / "Ausgangsrechnungen" / "2026", False)
+
+
+def test_a_lens_in_a_project_that_is_gone_bears_nothing(world):
+    session = _session(world)
+    session.put_on(("07_Arbeit",))
+    world["studio"].rename(world["root"] / "Studio")
+    with pytest.raises(ValueError):
+        session.bear()
+    assert not (world["root"] / "07_Arbeit").exists()  # not in the projects root instead
+    assert not (world["root"] / "Musikstudio").exists()

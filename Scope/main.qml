@@ -953,6 +953,7 @@ ApplicationWindow {
             })
             var errors = (batch && batch.errors) ? batch.errors : []
             if (batch && batch.moved && batch.moved.length > 0) {
+                followPlace(PathUtils.placeAfterMove(cwp, batch.moved))
                 refreshAfterStructureChange()
             }
             if (errors.length > 0 || skipped.length > 0) {
@@ -1340,10 +1341,19 @@ ApplicationWindow {
         updateStandardFolders()
     }
 
+    // Standing in a folder that was deleted, moved or renamed: go where it is now (or to the
+    // parent of the deleted one), so the session, the Headline and the clock follow (X3).
+    function followPlace(next) {
+        if (next && next !== PathUtils.trimTrailingSlash(PathUtils.normalizeFsPath(cwp))) {
+            setCwp(next)
+        }
+    }
+
     function performDeleteEntries(paths) {
         var result = backend.deleteEntries(paths || [])
         var deleted = (result && result.deleted) ? result.deleted.length : 0
         var errors = (result && result.errors) ? result.errors.length : 0
+        followPlace(PathUtils.placeAfterRemoval(cwp, (result && result.deleted) ? result.deleted : []))
         // Deleted folders and reabsorbed (emptied) template folders change the folder bars too.
         refreshAfterStructureChange()
         if (errors > 0) {

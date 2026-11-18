@@ -38,6 +38,7 @@ Dialog {
             window.pendingRenameName = ""
             return
         }
+        window.followPlace(PathUtils.placeAfterMove(window.cwp, [{ source: window.pendingRenamePath, destination: renamed }]))
         window.selectedEntryPaths = [renamed]
         window.updateFiles()
         window.pendingRenamePath = ""

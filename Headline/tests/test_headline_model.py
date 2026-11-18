@@ -221,3 +221,53 @@ def test_the_cascade_carries_the_badges(world):
     model = _model(world["studio"])
     entry = {c["name"]: c for c in model.children(str(world["studio"]))}["04_Finanz"]
     assert entry["batchText"] == "€" and entry["batch"] == ""
+
+
+class _LensLink(_FakeLink):
+    """A session where another program puts the lens on or takes it off: the place stays."""
+
+    def __init__(self):
+        super().__init__(went=None)
+        self.lens_state = {"active": False}
+        self.last_state = {}
+
+    def call(self, method, params=None):
+        self.calls.append((method, params))
+        result = dict(self.lens_state, cwd=(params or {}).get("path", ""))
+        if method == "state":
+            self.last_state = result
+        return {"ok": True, "result": result}
+
+    def follow(self):
+        self.call("state")
+        return None
+
+
+def test_it_follows_a_lens_put_on_or_off_elsewhere(world):
+    # H1 (review 2026-11-18): Scope or SunTree changed the lens; the CWD stayed, so the line
+    # kept the old folders and the clock counted on the old project.
+    from core.scope_api import ScopeApi
+    from Headline.model import HeadlineModel
+
+    told = []
+    link = _LensLink()
+    model = HeadlineModel(ScopeApi(str(world["studio"])), link, str(world["studio"]),
+                          report=lambda project, person: told.append(project))
+    assert not model.follow()
+    link.lens_state = {"active": True, "project_dir": str(world["reisen"]),
+                       "target": str(world["reisen"] / "04_Finanz"), "lens": ["04_Finanz"]}
+    assert model.follow()
+    assert told[-1] == str(world["reisen"])
+    states = sum(1 for method, _p in link.calls if method == "state")
+    assert not model.follow()  # seen: nothing new
+    assert sum(1 for method, _p in link.calls if method == "state") - states == 1  # one request a beat
+    link.lens_state = {"active": False}
+    assert model.follow()
+    assert told[-1] == str(world["studio"])
+
+
+def test_the_real_link_keeps_the_state_it_was_told(world):
+    model = _model(world["studio"])
+    model.lens("look_at", {"path": str(world["studio"] / "04_Finanz")})
+    model.follow()
+    assert model._link.last_state["active"] and model._link.last_state["project_dir"] == str(world["studio"])

@@ -64,6 +64,7 @@ class LensLink:
         self._process = None
         self._session = None
         self._place = ""  # the session's CWD as this program last set or saw it
+        self.last_state: Dict[str, Any] = {}  # the lens as the last "state" answered it
         root = api.projects_root()
         self.projects_root: Optional[Path] = Path(root) if root is not None else None
         if self.projects_root is None:
@@ -93,6 +94,8 @@ class LensLink:
         answer = self._session.call(method, **dict(params or {}))
         if answer.get("ok"):
             self._place = str((answer.get("result") or {}).get("cwd") or self._place)
+            if method == "state":
+                self.last_state = dict(answer.get("result") or {})
         if method in self.MOVES and answer.get("ok"):
             # The Desk follows the lens; ✕ in the same project changes no place (A5). Without
             # the lens the project's Desk applies, as for the place, never a department's.

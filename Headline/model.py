@@ -24,6 +24,7 @@ class HeadlineModel:
         self._link = link
         self._report = report
         self._reported: Optional[tuple] = None
+        self._seen_lens: Optional[tuple] = None  # the lens as last seen (follow)
         self._cwd = str(Path(start_path).expanduser().resolve())
         self._link.call("set_cwd", {"path": self._cwd})
         self._link.update_context(self._cwd)
@@ -71,9 +72,25 @@ class HeadlineModel:
             self._report(project, person)
 
     def follow(self) -> bool:
-        """Go where Scope or SunTree went since the Headline last set or saw the place."""
+        """Go where Scope or SunTree went since the Headline last set or saw the place; True
+        too when they put the lens on, took it off or moved it (the place stays then, A3)."""
         place = self._link.follow()
-        return bool(place) and self.go(place)
+        if place and self.go(place):
+            return True
+        # The state follow() just asked; asked again only from a link that does not keep it.
+        state = getattr(self._link, "last_state", None)
+        if state is None:
+            state = self.lens("state")
+        seen = (bool(state.get("active")), str(state.get("project_dir") or ""),
+                str(state.get("target") or ""), tuple(state.get("lens") or ()))
+        if self._seen_lens is None:
+            self._seen_lens = seen
+            return False
+        if seen == self._seen_lens:
+            return False
+        self._seen_lens = seen
+        self._tell_project()
+        return True
 
     def lens(self, method: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """A lens request (LensLink.REQUESTS); the lens' state afterwards, {} when refused."""

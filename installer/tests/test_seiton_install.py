@@ -337,6 +337,12 @@ def test_the_clock_at_login_only_when_asked(places):
     assert not login.exists()
 
 
+def test_the_clock_at_login_brings_the_headline(places):
+    # O1 (review 2026-11-18): the clock learns the active project from the Headline only.
+    _install(places, clock=True)
+    assert (places.config.parent / "autostart" / "seiton-headline.desktop").is_file()
+
+
 def test_uninstall_takes_the_registration_away(places):
     _install(places)
     inst.uninstall(places, run=Runner())

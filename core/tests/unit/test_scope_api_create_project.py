@@ -120,3 +120,36 @@ def test_listed_projects_carry_their_colour(tree):
 
     assert entries["Garten"]["projectColor"].lower() == "#4ea35a"
     assert "projectColor" not in entries["notiz.md"]
+
+
+def _installed_home(tmp_path):
+    """A fresh home as the installer leaves it: the templates in ~/.seiton/Templates."""
+    home = tmp_path / "home"
+    standard = home / META_DIR / "Templates" / "Standard"
+    (standard / META_DIR).mkdir(parents=True)
+    (standard / META_DIR / "ACLs.md").write_text("# Users\n\n# Roles\n")
+    (standard / "0_Admin" / "Zeitaufwand").mkdir(parents=True)
+    (home / "Dokumente").mkdir()
+    return home
+
+
+def test_the_first_project_gets_the_standard_template(tmp_path):
+    # E1 (review 2026-11-18): the top project got no template - no embryos, an empty lens,
+    # and the clock could not start (its folder 0_Admin/Zeitaufwand did not exist).
+    home = _installed_home(tmp_path)
+    first = home / "Dokumente"
+    api = ScopeApi(str(first))
+    assert api.create_project(str(first)) is True
+    assert (first / META_DIR / "Templates.md").read_text().split() == ["#", "Templates", "Standard"]
+    assert (first / META_DIR / "ACLs.md").is_file()  # the template's settings came along
+    from core.project import ProjectConfig
+    assert ProjectConfig(first).get_effective_templates() == ["Standard"]
+
+
+def test_a_subproject_inherits_and_gets_no_templates_file(tmp_path):
+    home = _installed_home(tmp_path)
+    first = home / "Dokumente"
+    ScopeApi(str(first)).create_project(str(first))
+    (first / "Garten").mkdir()
+    assert ScopeApi(str(first)).create_project(str(first / "Garten")) is True
+    assert not (first / "Garten" / META_DIR / "Templates.md").exists()

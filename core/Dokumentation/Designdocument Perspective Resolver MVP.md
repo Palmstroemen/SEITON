@@ -444,7 +444,9 @@ and sees exactly that across all projects and nothing else.
 **Decided (2026-11-16):**
 - **No list of roots.** A root is known by its `.seiton/Project.md`. Inside a root one finds it
   upwards, as today (`find_top_project_root`). Above the roots (started in `~`) Scope and SunTree
-  look downwards for roots; if they find none, one is not in a SEITON metaproject. Whoever opens a
+  look downwards for roots - one level below, and where there is none, one level further
+  (`~/Dokumente/Arbeit`; review 2026-11-18, E5); if they find none, one is not in a SEITON
+  metaproject. Whoever opens a
   root names it (the SunTree autostart gives `~/Dokumente`); its daemon mounts the drive and puts
   its link into `~/Perspektiven`. So `~/Perspektiven` itself shows the roots that run.
 - **Two roots with the same name:** only when the names clash does the link get a part of the path

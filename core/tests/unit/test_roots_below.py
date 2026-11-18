@@ -30,3 +30,15 @@ def test_hidden_folders_are_not_looked_into(tmp_path):
 def test_none_below(tmp_path):
     (tmp_path / "Bilder").mkdir()
     assert roots_below(tmp_path) == []
+
+
+def test_none_one_level_below_it_looks_one_more_level(tmp_path):
+    # E5 (review 2026-11-18): the first project in ~/Dokumente/Arbeit - Headline and clock
+    # started in the home folder without a root.
+    (tmp_path / "Dokumente").mkdir()
+    _project(tmp_path / "Dokumente" / "Arbeit")
+    _project(tmp_path / "Musik" / "Band")
+    (tmp_path / "Musik" / "Band" / "Probe").mkdir()
+    _project(tmp_path / "Musik" / "Band" / "Probe" / "Tief")  # two more levels: not looked at
+    _project(tmp_path / ".local" / "Versteckt")
+    assert roots_below(tmp_path) == [tmp_path / "Dokumente" / "Arbeit", tmp_path / "Musik" / "Band"]
