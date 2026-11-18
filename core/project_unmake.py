@@ -30,12 +30,25 @@ class ProjectHasOwnSettings(Exception):
         self.names = names
 
 
-def record_created(project_root: Path) -> None:
-    """Remember the files creating the project wrote into its .MyOS."""
+def settings_before(folder: Path) -> List[str]:
+    """What the folder's .MyOS holds before it becomes a project (its tags, a sort rule, ...):
+    the folder's, not the project's - turning the project back leaves it."""
+    settings_dir = Path(folder) / META_DIR
+    try:
+        return sorted(item.name for item in settings_dir.iterdir())
+    except OSError:
+        return []
+
+
+def record_created(project_root: Path, before: List[str] = ()) -> None:
+    """Remember the files creating the project wrote into its .MyOS, and what was there
+    before (settings_before), which is not the project's."""
     settings_dir = Path(project_root) / META_DIR
+    kept = set(before)
     files = {item.name: _checksum(item) for item in settings_dir.iterdir()
-             if not item.name.startswith(".") and item.is_file() and not item.is_symlink()}
-    (settings_dir / CREATED).write_text(json.dumps(files, indent=2, sort_keys=True), encoding="utf-8")
+             if not item.name.startswith(".") and item.is_file() and not item.is_symlink() and item.name not in kept}
+    (settings_dir / CREATED).write_text(json.dumps({"created": files, "kept": sorted(kept)}, indent=2, sort_keys=True),
+                                        encoding="utf-8")
 
 
 def can_unmake(path: Path) -> bool:
@@ -52,9 +65,11 @@ def can_unmake(path: Path) -> bool:
 def own_settings(project_root: Path) -> List[str]:
     """Names in the project's .MyOS that creating it did not write (or that changed since)."""
     settings_dir = Path(project_root) / META_DIR
-    created = _created(settings_dir)
+    created, kept = _created(settings_dir), _kept(settings_dir)
     own = []
     for item in sorted(settings_dir.iterdir(), key=lambda p: p.name):
+        if item.name in kept:
+            continue  # the folder's, from before it was a project
         if item.name.startswith("."):
             continue  # caches and drafts (.TagsHere.json, ...)
         if item.is_symlink():
@@ -81,28 +96,51 @@ def unmake_project(project_root: Path, user: str, keep_own: bool = False) -> Non
         raise ValueError(f"{root} cannot become an ordinary folder")
     own = own_settings(root)
     settings_dir = root / META_DIR
+    kept = _kept(settings_dir)
+    if own and not keep_own:
+        raise ProjectHasOwnSettings(own)
+    project_part = [item for item in settings_dir.iterdir() if item.name not in kept]
     if not own:
         # Only what creating it wrote, caches and empty folders: nothing to keep.
-        shutil.rmtree(settings_dir)
-        return
-    if not keep_own:
-        raise ProjectHasOwnSettings(own)
-    # Renamed first, so root is no project any more and its parent project takes it.
-    settings = root / SETTINGS_NAME
-    number = 2
-    while settings.exists():
-        settings = root / f"{SETTINGS_NAME} {number}"
-        number += 1
-    settings_dir.rename(settings)
-    trash.move_to_trash(settings, deleted_by=user)
+        for item in project_part:
+            shutil.rmtree(item) if item.is_dir() and not item.is_symlink() else item.unlink()
+    else:
+        # Moved out first (the marker with it), so root is no project any more and its parent
+        # project takes them into its trash.
+        settings = root / SETTINGS_NAME
+        number = 2
+        while settings.exists():
+            settings = root / f"{SETTINGS_NAME} {number}"
+            number += 1
+        if kept:
+            settings.mkdir()
+            for item in project_part:
+                item.rename(settings / item.name)
+        else:
+            settings_dir.rename(settings)
+        trash.move_to_trash(settings, deleted_by=user)
+    if settings_dir.is_dir() and not any(settings_dir.iterdir()):
+        settings_dir.rmdir()
 
 
-def _created(settings_dir: Path) -> Dict[str, str]:
+def _record(settings_dir: Path) -> dict:
     try:
         data = json.loads((settings_dir / CREATED).read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return {}
-    return data if isinstance(data, dict) else {}
+    if not isinstance(data, dict):
+        return {}
+    # Written before 2026-11-18: only the created files, names to checksums.
+    return data if isinstance(data.get("created"), dict) else {"created": data, "kept": []}
+
+
+def _created(settings_dir: Path) -> Dict[str, str]:
+    return dict(_record(settings_dir).get("created") or {})
+
+
+def _kept(settings_dir: Path) -> set:
+    kept = _record(settings_dir).get("kept") or []
+    return {name for name in kept if isinstance(name, str)}
 
 
 def _checksum(path: Path) -> str:

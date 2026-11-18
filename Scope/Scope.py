@@ -828,10 +828,9 @@ class Backend(QObject):
             raw_path = entry.get("path")
             if not raw_path:
                 raw_path = os.path.join(base_path, entry.get("name", ""))
-            try:
-                entry["path"] = str(Path(raw_path).expanduser().resolve())
-            except OSError:
-                entry["path"] = str(raw_path)
+            # The entry's own path, not its link target: renaming or deleting a link must not
+            # act on what it points to.
+            entry["path"] = os.path.abspath(os.path.expanduser(str(raw_path)))
             raw_path = entry["path"]
             mime = mime_db.mimeTypeForFile(raw_path, QMimeDatabase.MatchExtension)
             entry["mime"] = mime.name()

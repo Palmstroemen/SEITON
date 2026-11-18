@@ -729,6 +729,22 @@ class ScopeApi:
     def _resolve_path(self, path: str) -> Path:
         return Path(path).expanduser().resolve()
 
+    @staticmethod
+    def _entry_path(path: str) -> Path:
+        """path as an entry to rename, delete or move: its folder resolved, its name kept, so
+        a link stays the link (resolving it would act on its target, perhaps in another
+        project)."""
+        if "\x00" in str(path):
+            raise ValueError("embedded NUL")  # Security: as resolve() refuses it
+        entry = Path(path).expanduser()
+        if entry.name in ("", ".", ".."):
+            return entry.resolve()
+        return entry.parent.resolve() / entry.name
+
+    @staticmethod
+    def _entry_exists(entry: Path) -> bool:
+        return entry.exists() or entry.is_symlink()
+
     def _resolve_context_for_target(self, target: Path) -> tuple[Optional[Path], Optional[Any]]:
         root = find_project_root(target)
         if not root:
@@ -2507,13 +2523,13 @@ class ScopeApi:
 
     def rename_entry(self, path: str, new_name: str) -> Optional[str]:
         try:
-            source = self._resolve_path(path)
+            source = self._entry_path(path)
         except Exception:
             return None
         acl_result = self._acl_probe("rename", source)
         if acl_result and acl_result.enforced and not acl_result.allowed:
             return None
-        if not source.exists():
+        if not self._entry_exists(source):
             return None
         return self._rename_one(source, new_name)
 
@@ -2528,7 +2544,7 @@ class ScopeApi:
         target = source.with_name(resolved_target_name)
         if target == source:
             return str(source)
-        if target.exists():
+        if self._entry_exists(target):
             return None
         if self._acl_rules_blocked(source, target):
             return None
@@ -2566,7 +2582,7 @@ class ScopeApi:
             if not source_text:
                 continue
             try:
-                source = Path(source_text).expanduser().resolve()
+                source = self._entry_path(source_text)
             except Exception:
                 # // Security: malformed paths (e.g. embedded NUL) are rejected early.
                 yield None, source_text, False, True
@@ -2579,7 +2595,7 @@ class ScopeApi:
 
     def _prepare_move(self, source: Path, target_dir: Path):
         source_key = str(source)
-        if not source.exists():
+        if not self._entry_exists(source):
             return {"status": "error", "reason": "source_missing", "source": source_key}
         if source == target_dir:
             return {"status": "skip", "reason": "same_as_target", "source": source_key}
@@ -2692,7 +2708,7 @@ class ScopeApi:
             if acl_result and acl_result.enforced and not acl_result.allowed:
                 result["errors"].append({"source": key, "reason": "acl_denied"})
                 continue
-            if not source.exists():
+            if not self._entry_exists(source):
                 result["errors"].append({"source": key, "reason": "missing"})
                 continue
             # Deleting is undoable: into the project's trash (.MyOS/Trash), outside
@@ -2733,7 +2749,7 @@ class ScopeApi:
         if _dbg:
             print(f"[birth] move_entry source={source!r} target_dir={target_dir!r}")
         try:
-            src = self._resolve_path(source)
+            src = self._entry_path(source)
         except Exception:
             return False
         dst_dir, reason = self._resolve_or_materialize_target_dir(target_dir)

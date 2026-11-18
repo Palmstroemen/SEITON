@@ -10,6 +10,7 @@ the lens. Each projects root has its own socket, so a client finds the daemon of
 from __future__ import annotations
 
 import atexit
+import fcntl
 import hashlib
 import os
 import signal
@@ -287,6 +288,20 @@ def _pulse_loop(log_path: Path) -> None:
         _daemon_log("pulse", log_path=log_path)
 
 
+def hold_the_root(socket_path: str):
+    """The lock that one daemon per projects root holds while it runs (next to its socket);
+    None when another daemon holds it. Keep the returned file open as long as the daemon runs."""
+    lock_path = Path(socket_path).with_name(Path(socket_path).name + ".lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    handle = open(lock_path, "a")
+    try:
+        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        handle.close()
+        return None
+    return handle
+
+
 def run_daemon(
     projects_root: str,
     mount_point: str,
@@ -298,6 +313,12 @@ def run_daemon(
     mount_point = str(Path(mount_point).expanduser().resolve())
 
     log_path = _daemon_log_path(socket_path)
+    # One daemon per root: a second one (two programs starting it at once) ends here, before it
+    # touches the socket or the mount point - else the first would be left unreachable.
+    lock = hold_the_root(socket_path)
+    if lock is None:
+        _daemon_log(f"already running for projects_root={projects_root!r}: this one ends", log_path=log_path)
+        return
     _daemon_log(f"started projects_root={projects_root!r} mount_point={mount_point!r} socket_path={socket_path!r}",
                 log_path=log_path)
 
@@ -332,3 +353,4 @@ def run_daemon(
     finally:
         Path(socket_path).unlink(missing_ok=True)
         _daemon_log_close()
+        lock.close()

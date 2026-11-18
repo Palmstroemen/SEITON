@@ -574,19 +574,20 @@ class ProjectConfig:
         # Ensure target directory exists and initialize minimal .MyOS marker.
         dir_path.mkdir(parents=True, exist_ok=True)
         target_settings = dir_path / META_DIR
+        from core.project_unmake import record_created, settings_before  # late: imports this module
+        before = settings_before(dir_path)  # the folder's own settings (tags, a sort rule)
         target_settings.mkdir(parents=True, exist_ok=True)
         project_marker = target_settings / "Project.md"
         if not project_marker.exists():
             project_marker.write_text(project_heading() + "\n")
             # A new project gets what its templates' root .MyOS holds (ACLs.md, Desk.md, ...).
             from core.template_seed import seed_from_templates  # late: template_seed imports this module
-            from core.project_unmake import record_created
             try:
                 seed_from_templates(dir_path)
             except Exception:  # the project exists; a template problem must not undo that
                 logger.exception("could not copy the template settings into %s", dir_path)
             # What creating wrote: turning the project back removes it without asking.
-            record_created(dir_path)
+            record_created(dir_path, before)
 
         # Return fresh ProjectConfig.
         project = cls(dir_path)

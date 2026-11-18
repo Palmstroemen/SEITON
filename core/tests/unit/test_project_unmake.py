@@ -115,3 +115,41 @@ def test_what_cannot_be_turned_back(tree):
     with pytest.raises(ValueError):
         unmake_project(tree["projects"], "oliver")
     assert (tree["projects"] / META_DIR / "Project.md").exists()
+
+
+def _folder_with_settings(projects: Path) -> Path:
+    """A folder that has settings of its own before it becomes a project (tags, a sort rule)."""
+    folder = projects / "Archiv"
+    (folder / META_DIR).mkdir(parents=True)
+    (folder / META_DIR / "myTags.md").write_text("# Tags\nwichtig\n")
+    (folder / META_DIR / "Sort.md").write_text("# Sort\nPattern: {{YYYY}}\n")
+    (folder / "Brief.md").write_text("Brief\n")
+    return folder
+
+
+def test_turning_back_leaves_what_was_there_before(tree):
+    """"docs/Prüfung 2026-11-18.md", P1: the folder's own settings were lost."""
+    folder = _folder_with_settings(tree["projects"])
+    assert ProjectConfig.make_project(folder)
+    assert own_settings(folder) == []  # what was there before is not the project's
+
+    unmake_project(folder, user="oliver")
+
+    assert not (folder / META_DIR / "Project.md").exists()
+    assert sorted(p.name for p in (folder / META_DIR).iterdir()) == ["Sort.md", "myTags.md"]
+    assert (folder / META_DIR / "myTags.md").read_text() == "# Tags\nwichtig\n"
+
+
+def test_with_consent_only_the_projects_own_go_into_the_trash(tree):
+    folder = _folder_with_settings(tree["projects"])
+    assert ProjectConfig.make_project(folder)
+    (folder / META_DIR / "ACLs.md").write_text("# Permissions\n\n## Neu\n- /*: read\n")
+    assert own_settings(folder) == ["ACLs.md"]
+
+    unmake_project(folder, user="oliver", keep_own=True)
+
+    assert sorted(p.name for p in (folder / META_DIR).iterdir()) == ["Sort.md", "myTags.md"]
+    entries = trash.list_trash(tree["projects"])
+    assert [e.original for e in entries] == [f"Archiv/{NAME} settings"]
+    restored = trash.restore(tree["projects"], entries[0].name)
+    assert sorted(p.name for p in restored.iterdir()) == sorted(["ACLs.md", "Project.md", ".created.json", "Desk.md"])
