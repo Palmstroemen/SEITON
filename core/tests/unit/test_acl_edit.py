@@ -158,6 +158,25 @@ def test_paths_in_subprojects_are_written_relative_to_the_acl_project(tmp_path):
     assert _rights(root, "buchhalter", sub / "Ich") == {"read"}
 
 
+def test_a_folder_role_only_a_subproject_knows_can_be_edited_there(tmp_path):
+    # Folder rules hold in subprojects too and can be adapted there (ACL design document
+    # 2.2, 2.4): a subproject of another template brings roles the root does not know.
+    root = _project(tmp_path)
+    sub = root / "Huber"
+    (sub / META_DIR / "Templates" / "Kunde" / "K_Akten").mkdir(parents=True)
+    (sub / META_DIR / "Project.md").write_text("# MyOS Project\n")
+    (sub / META_DIR / "Templates.md").write_text("# Templates\nKunde\n")
+    (sub / "K_Akten").mkdir()
+    assert _rights(root, "k_akten", sub / "K_Akten") == {"read", "write"}  # the folder rule
+
+    set_role_rights(sub / "K_Akten", "K_Akten", {"read"}, editor="anna")
+
+    text = _acls(root)
+    section = text[text.index("## K_Akten"):text.index("# Users")]
+    assert section == "## K_Akten\n- /Huber/K_Akten/: read\n\n"
+    assert _rights(root, "k_akten", sub / "K_Akten") == {"read"}
+
+
 def test_can_edit_and_own_rule(tmp_path):
     from core.acl_edit import can_edit, own_rule
 

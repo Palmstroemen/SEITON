@@ -85,8 +85,11 @@ def set_role_rights(path, role: str, rights: Optional[Set[str]], editor: str) ->
 
     _require_change_right(policy, root, editor)
 
+    # As seen from the (sub)project target lies in: its template folder roles count too,
+    # also those only a subproject of another template brings (ACL design document 2.4).
+    context = _context_policy(policy, root, target)
     role_key = _normalize_role(role)
-    if role_key not in policy.roles:
+    if role_key not in context.roles:
         raise ACLEditError(f"unknown role {role!r}")
     if rights is not None:
         unknown = sorted(set(rights) - set(EDITABLE_RIGHTS))
@@ -95,9 +98,10 @@ def set_role_rights(path, role: str, rights: Optional[Set[str]], editor: str) ->
 
     rule_path = _rule_path_for(root, target)
     original = acl_file.read_text(encoding="utf-8")
-    edited = _edit_text(original, policy, root, role_key, rule_path, rights)
+    edited = _edit_text(original, context, root, role_key, rule_path, rights)
+    seen_from = _context_dir(root, target)
     return _replace_checked(acl_file, original, edited, editor,
-                            lambda draft: _check_draft(root, draft, role_key, rule_path, rights, editor))
+                            lambda draft: _check_draft(root, draft, role_key, rule_path, rights, editor, seen_from))
 
 
 def set_user_roles(path, user: str, roles: Set[str], editor: str) -> Optional[Path]:
@@ -442,13 +446,18 @@ def _insert_section(lines: List[str], policy: ACLPolicy, role_key: str) -> List[
     return lines + section
 
 
-def _context_policy(policy: ACLPolicy, root: Path, target: Path) -> ACLPolicy:
-    """policy as seen from the (sub)project target lies in (its template folder roles)."""
+def _context_dir(root: Path, target: Path) -> Path:
+    """The (sub)project target lies in, root when none is found."""
     try:
         context = ProjectFinder.find_nearest(target)
     except OSError:
         context = None
-    return policy.for_context(root, context.resolve() if context is not None else root)
+    return context.resolve() if context is not None else root
+
+
+def _context_policy(policy: ACLPolicy, root: Path, target: Path) -> ACLPolicy:
+    """policy as seen from the (sub)project target lies in (its template folder roles)."""
+    return policy.for_context(root, _context_dir(root, target))
 
 
 def _user_line_key(line: str) -> Optional[str]:
@@ -687,14 +696,14 @@ def _check_user_draft(root: Path, draft: Path, user_key: str, role_keys: Set[str
 
 
 def _check_draft(root: Path, draft: Path, role_key: str, rule_path: str,
-                 rights: Optional[Set[str]], editor: str) -> None:
+                 rights: Optional[Set[str]], editor: str, seen_from: Optional[Path] = None) -> None:
     try:
         policy = ACLPolicy.from_project(root, acl_file=draft)
     except Exception as exc:
         raise ACLEditError(f"the edited ACLs.md is not valid: {exc}") from exc
     if rights is not None:
         wanted = set(rights) if rights else {"none"}
-        got = policy.rights_for(role_key, _normalize_path(rule_path))
+        got = policy.for_context(root, seen_from).rights_for(role_key, _normalize_path(rule_path))
         if got != wanted and not ("*" in got and set(rights) >= set(EDITABLE_RIGHTS)):
             raise ACLEditError(f"edit did not take effect ({sorted(got)} instead of {sorted(wanted)})")
     # Security: nobody locks themselves out of ACL management by accident (templates have
