@@ -1589,7 +1589,8 @@ ApplicationWindow {
         if (useTagFilter) {
             var matchAll = tagMatchMode === "and"
             if (hasBackend() && typeof backend.listEntriesFiltered === "function") {
-                var coreFiltered = backend.listEntriesFiltered(cwp, selectedTags, matchAll)
+                // The shown folder's entries, as the tag chips are (recomputeTagBuckets).
+                var coreFiltered = backend.listEntriesFiltered(currentFilesPath(), selectedTags, matchAll)
                 filtered = []
                 for (var j = 0; j < coreFiltered.length; j++) {
                     var coreEntry = coreFiltered[j]
@@ -2408,8 +2409,12 @@ ApplicationWindow {
             updateFiles()
         }
         function onEntriesReady(path, entries) {
-            if (path === cwp) {
+            // The full list of the folder the FilesPanel shows (it may not be the CWD: a click
+            // in the rows, the preview, a lens) - else it kept the quick list for good.
+            if (PathUtils.normalizeFsPath(path) === PathUtils.normalizeFsPath(currentFilesPath())) {
                 applyEntries(entries)
+            }
+            if (path === cwp) {
                 hasSettingsInCwp = backend.hasSettingsDir(cwp)
             }
         }
