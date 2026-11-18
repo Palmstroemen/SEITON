@@ -1,5 +1,6 @@
 # cli/tests/test_cli_myfilter.py
 
+import os
 import subprocess
 import sys
 import tempfile
@@ -87,6 +88,8 @@ def test_myfilter_activate_and_clear_manual_state():
         _write_filter(sub / "Filter.md", "Auto")
 
         activated = _run_cmd(["activate", str(manual / "Filter.md")], cwd=tmpdir)
+        # In SEITON's cache, below XDG_CACHE_HOME (the tests' own, see conftest), not ~/.cache/myos.
+        assert (Path(os.environ["XDG_CACHE_HOME"]) / "seiton" / "myfilter_state.json").exists()
         resolved = _run_cmd(["resolve", str(sub)], cwd=tmpdir)
         cleared = _run_cmd(["clear"], cwd=tmpdir)
         resolved_auto = _run_cmd(["resolve", str(sub)], cwd=tmpdir)

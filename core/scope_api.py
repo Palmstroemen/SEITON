@@ -653,7 +653,8 @@ class ScopeApi:
 
     def enable_sorting(self, path: str) -> Dict[str, Any]:
         """Give the folder path a sort rule (.MyOS/Sort.md, years and months by date);
-        {ok, reason, path}: "exists", "no_project" (rules only inside projects)."""
+        {ok, reason, path}: "exists", "no_project" (rules only inside projects), "permission",
+        "failed" (could not be written)."""
         try:
             folder = self._resolve_path(path)
         except Exception:
@@ -666,8 +667,11 @@ class ScopeApi:
         probe = self._acl_probe("write_dir", folder)
         if probe and probe.enforced and not probe.allowed:
             return {"ok": False, "reason": "permission", "path": ""}
-        rule_file.parent.mkdir(exist_ok=True)
-        rule_file.write_text(SORT_RULE_SEED, encoding="utf-8")
+        try:
+            rule_file.parent.mkdir(exist_ok=True)
+            rule_file.write_text(SORT_RULE_SEED, encoding="utf-8")
+        except OSError:  # no write right in the file system, disk full
+            return {"ok": False, "reason": "failed", "path": ""}
         return {"ok": True, "reason": "created", "path": str(rule_file)}
 
     def _file_due(self, folders: List[Path]) -> Dict[str, Any]:

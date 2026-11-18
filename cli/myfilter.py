@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-myfilter - MyOS filters CLI
+myfilter - SEITON filters CLI
 """
 
 import argparse
@@ -11,9 +11,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.perspective import find_filters_layers, resolve_effective_filter
-from core.brand import NAME  # noqa: E402
+from core.brand import CONFIG_DIR, NAME  # noqa: E402
 
-_STATE_FILE = Path("~/.cache/myos/myfilter_state.json").expanduser()
+
+def _state_file() -> Path:
+    """The filter chosen by hand (myfilter activate): ~/.cache/seiton, or below XDG_CACHE_HOME."""
+    import os
+
+    return Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache") / CONFIG_DIR / "myfilter_state.json"
 
 
 def parse_args(args=None) -> argparse.Namespace:
@@ -107,22 +112,22 @@ def _activate_filter(filter_path: str) -> None:
     if not target.exists() or not target.is_file():
         raise ValueError("manual filter path does not exist")
     state = {"manualFilterPath": str(target)}
-    _STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    _STATE_FILE.write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
+    _state_file().parent.mkdir(parents=True, exist_ok=True)
+    _state_file().write_text(json.dumps(state, ensure_ascii=True, indent=2), encoding="utf-8")
     print(f"Activated manual filter: {target}")
 
 
 def _clear_filter() -> None:
-    if _STATE_FILE.exists():
-        _STATE_FILE.unlink()
+    if _state_file().exists():
+        _state_file().unlink()
     print("Manual filter cleared.")
 
 
 def _load_manual_override() -> str | None:
     try:
-        if not _STATE_FILE.exists():
+        if not _state_file().exists():
             return None
-        state = json.loads(_STATE_FILE.read_text(encoding="utf-8"))
+        state = json.loads(_state_file().read_text(encoding="utf-8"))
         value = str(state.get("manualFilterPath") or "").strip()
         return value or None
     except Exception:

@@ -90,6 +90,19 @@ def test_enabling_sorting_puts_a_rule_into_the_folder(project):
     assert api.enable_sorting(str(project.parent))["reason"] == "no_project"
 
 
+def test_a_rule_that_cannot_be_written_is_reported_not_raised(project):
+    import os
+    fotos = project / "Fotos"
+    fotos.mkdir()
+    fotos.chmod(0o555)  # the file system says no (no ACL here)
+    try:
+        if os.access(fotos, os.W_OK):
+            pytest.skip("running as root")
+        assert ScopeApi(str(project)).enable_sorting(str(fotos))["reason"] == "failed"
+    finally:
+        fotos.chmod(0o755)
+
+
 @pytest.fixture
 def few(tmp_path):
     """A sorted folder with few files: they stay loose, shown in virtual folders."""

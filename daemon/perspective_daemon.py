@@ -313,7 +313,6 @@ def run_daemon(
     projects_root: str,
     mount_point: str,
     socket_path: Optional[str] = None,
-    foreground: bool = True,  # kept for callers; the drive always runs in this process
 ) -> None:
     projects_root = str(Path(projects_root).expanduser().resolve())
     socket_path = socket_path or getenv("DAEMON_SOCKET") or socket_path_for(projects_root)

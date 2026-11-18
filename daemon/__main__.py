@@ -24,7 +24,6 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--mount-point", required=True, help="Where the drive appears (e.g. .../Perspektiven)")
     parser.add_argument("--socket-path", default=None,
                         help="Unix socket path (default: one per projects root in XDG_RUNTIME_DIR)")
-    parser.add_argument("--foreground", action="store_true", help="Run in foreground")
     return parser.parse_args()
 
 
@@ -34,7 +33,6 @@ def main() -> None:
         projects_root=args.projects_root,
         mount_point=args.mount_point,
         socket_path=args.socket_path,
-        foreground=args.foreground,
     )
 
 

@@ -119,7 +119,8 @@ decided, the rule goes into the template; from then on new projects file by them
   day, in the background; the listing is refreshed afterwards). After a move the target
   is filed at once; the move preview says where a file will go. Filing moves only where
   the ACLs allow writing; ACL rules follow filed files. `enable_sorting` gives the folder
-  shown a rule ("Enable sorting").
+  shown a rule; no button calls it yet, so for now a rule is written by hand
+  (`.seiton/Sort.md`).
 - Listings show virtual folders (`isVirtual`, faint); one can open them (their content
   comes from `virtual_listing`), not drop into them, rename or delete them. The x-ray view
   sees through small virtual folders: their files then show where they really lie.

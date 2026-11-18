@@ -76,7 +76,7 @@ class KdeDesktopBackend(CommandDesktopBackend):
             return BackendStepResult(ok=True, message="recent policy skipped (none)")
         if not self.enable_recent_policy:
             return BackendStepResult(ok=True, message="recent policy skipped (capability disabled)")
-        return BackendStepResult(ok=True, message=f"recent policy hook acknowledged ({policy})")
+        return BackendStepResult(ok=True, message=f"recent policy not used yet ({policy})")
 
     def rollback(
         self,
