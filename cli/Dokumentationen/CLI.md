@@ -86,7 +86,7 @@ Anna Huber: anna.h       (person in # Users: Nextcloud account; people without o
 ---
 
 ## **myedit**
-Open a config section in your editor.
+Open a config section of the project in `$EDITOR`. myedit writes nothing itself: a file that is not there yet is made when the editor saves it. Until then the project inherits, and myedit says from which file (a file of its own ends the inheritance; an `ACLs.md` of its own gives only the rights written in it).
 
 Examples:
 - `myedit tags .`

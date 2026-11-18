@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-myedit - MyOS config editor helper
+myedit - open a project's config file (Tags.md, Templates.md, ACLs.md, Config.md) in $EDITOR.
+
+myedit writes nothing itself: a file that is not there yet is made by the editor when it is
+saved. A placeholder written here would end the inheritance (an empty ACLs.md in a subproject
+gives no one any right). Where the project still inherits, myedit says from where.
 """
 
 import argparse
@@ -12,7 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.brand import META_DIR, NAME
-from core.project import resolve_cwp
+from core.project import find_config_in_parents, resolve_cwp
 
 
 SECTION_MAP = {
@@ -42,8 +46,18 @@ def parse_args(args=None) -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     try:
+        editor = os.environ.get("EDITOR")
+        if not editor:
+            raise ValueError("EDITOR is not set")
         target = _resolve_target_file(args.section, args.path)
-        _open_in_editor(target)
+        if not target.exists():
+            inherited = find_config_in_parents(target.parent.parent.parent, target.name)
+            if inherited is not None:
+                print(f"{target} is not there yet: this project uses {inherited}. "
+                      "Saving in the editor gives it rules of its own.")
+            else:
+                print(f"{target} is not there yet: saving in the editor makes it.")
+        subprocess.run([editor, str(target)], check=False)
         sys.exit(0)
     except Exception as exc:
         print(f"Error: {exc}", file=sys.stderr)
@@ -58,21 +72,7 @@ def _resolve_target_file(section: str, path: str) -> Path:
     cwp = resolve_cwp(Path(path))
     if not cwp:
         raise ValueError("No project found for path")
-
-    settings_dir = cwp.path / META_DIR
-    settings_dir.mkdir(parents=True, exist_ok=True)
-
-    target = settings_dir / SECTION_MAP[key]
-    if not target.exists():
-        target.write_text(f"# {target.stem}\n")
-    return target
-
-
-def _open_in_editor(path: Path) -> None:
-    editor = os.environ.get("EDITOR")
-    if not editor:
-        raise ValueError("EDITOR is not set")
-    subprocess.run([editor, str(path)], check=False)
+    return cwp.path / META_DIR / SECTION_MAP[key]
 
 
 if __name__ == "__main__":

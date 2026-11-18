@@ -9,6 +9,26 @@ from core.brand import env_name
 # are made and deleted one after another (measured); drawn without a GPU it does not. Set before
 # QtWebEngine starts.
 os.environ.setdefault("QTWEBENGINE_CHROMIUM_FLAGS", "--disable-gpu")
+# No test draws on the real screen (nor moves the real pointer: SunTree's tests set it).
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def one_qt_application():
+    """One Qt application for all tests, and a QApplication: tests that ask for a
+    QGuiApplication get it as well, and widgets (PostFix's editor) still work after them.
+    With a QGuiApplication first, one run over all folders aborted ("Cannot create a QWidget
+    without QApplication")."""
+    try:
+        import PySide6.QtWebEngineWidgets  # noqa: F401  (before the application, as Qt wants)
+    except ImportError:
+        pass
+    try:
+        from PySide6.QtWidgets import QApplication
+    except ImportError:
+        yield None
+        return
+    yield QApplication.instance() or QApplication([])
 
 
 @pytest.fixture(autouse=True)

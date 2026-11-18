@@ -1,5 +1,6 @@
 # test_local_blueprint_layer.py (überarbeitet)
 
+import errno
 import pytest
 import subprocess
 from pathlib import Path
@@ -465,7 +466,8 @@ def test_acl_birth_denied_without_write(monkeypatch):
         with pytest.raises(Exception) as excinfo:
             layer.create("/admin/test.txt", 0o644, None)
 
-        assert "Permission denied" in str(excinfo.value)
+        # The code, not the text: the text follows the system language (Qt sets it).
+        assert getattr(excinfo.value, "errno", None) == errno.EACCES
 
 
 def test_acl_no_roles_no_embryos(monkeypatch):

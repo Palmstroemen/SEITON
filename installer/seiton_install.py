@@ -49,10 +49,11 @@ APP_ID = CONFIG_DIR  # seiton: the menu entry, the icon, the main launcher
 
 # What SEITON needs from the system, per package manager.
 PACKAGES = {
-    "apt": ["python3-venv", "fuse3", "libfuse2", "libxcb-cursor0", "poppler-utils", "xdg-utils"],
-    "dnf": ["python3", "fuse", "fuse-libs", "xcb-util-cursor", "poppler-utils", "xdg-utils"],
-    "zypper": ["python3", "fuse", "libfuse2", "libxcb-cursor0", "poppler-tools", "xdg-utils"],
-    "pacman": ["python", "fuse2", "xcb-util-cursor", "poppler", "xdg-utils"],
+    "apt": ["python3-venv", "fuse3", "libfuse2", "libxcb-cursor0", "poppler-utils", "xdg-utils",
+            "bubblewrap"],
+    "dnf": ["python3", "fuse", "fuse-libs", "xcb-util-cursor", "poppler-utils", "xdg-utils", "bubblewrap"],
+    "zypper": ["python3", "fuse", "libfuse2", "libxcb-cursor0", "poppler-tools", "xdg-utils", "bubblewrap"],
+    "pacman": ["python", "fuse2", "xcb-util-cursor", "poppler", "xdg-utils", "bubblewrap"],
 }
 # The program that tells the manager, the query whether a package is there, the install command.
 FINDS = (("apt-get", "apt"), ("dnf", "dnf"), ("zypper", "zypper"), ("pacman", "pacman"))
@@ -192,7 +193,7 @@ def system_packages(places: Places, options: Options, run: Run, ask: Ask, which:
         return
     manager = package_manager(which)
     if manager is None:
-        print(f"No known package manager. {NAME} needs: libfuse 2, xcb-cursor, poppler (pdftoppm), xdg-utils, python3 venv.")
+        print(f"No known package manager. {NAME} needs: libfuse 2, xcb-cursor, poppler (pdftoppm), xdg-utils, bubblewrap, python3 venv.")
         return
     missing = missing_packages(manager, run)
     if not missing:

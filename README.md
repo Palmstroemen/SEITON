@@ -93,9 +93,9 @@ templates stay).
 python3 Scope/Scope.py
 ```
 
-**Run tests:**
+**Run tests** (every test folder, from the repository root):
 ```bash
-python3 -m pytest core/tests/unit cli/tests PostFix/tests -v
+python3 -m pytest
 ```
 
 **CLI examples:**

@@ -34,8 +34,8 @@ pip3 install -r core/requirements.txt
 ### Run Tests
 
 ```bash
-# All tests
-python3 -m pytest core/tests/unit cli/tests PostFix/tests -v
+# All tests (every test folder, see pytest.ini), from the repository root
+python3 -m pytest
 
 # Core only
 python3 -m pytest core/tests/unit/

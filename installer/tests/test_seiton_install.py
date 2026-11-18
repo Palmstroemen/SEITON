@@ -77,6 +77,16 @@ def test_every_manager_brings_fuse_2_qt_and_pdf_previews():
         assert "fuse" in text, manager  # libfuse 2 for fusepy
         assert "cursor" in text, manager  # Qt's X11 plugin needs xcb-cursor
         assert "poppler" in text, manager  # pdftoppm: Scope's previews of PDFs
+        assert "bubblewrap" in packages, manager  # the clock starts in its sandbox (bwrap)
+
+
+def test_the_venv_gets_what_the_programs_import():
+    """The venv sees no system packages: every library SEITON imports must be listed."""
+    listed = (Path(inst.__file__).parent / "requirements.txt").read_text(encoding="utf-8").lower()
+    for module, package in (("yaml", "pyyaml"), ("markdown_it", "markdown-it-py"), ("casbin", "casbin"),
+                            ("pydantic", "pydantic"), ("PIL", "pillow"), ("fuse", "fusepy"),
+                            ("tabulate", "tabulate"), ("PySide6", "pyside6")):
+        assert package in listed, (module, package)
 
 
 def test_only_missing_packages_are_installed_after_asking(places):
