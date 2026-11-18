@@ -95,3 +95,15 @@ def test_after_a_start_with_search_the_magnifier_still_toggles(place):
         assert browser.property("searchActive") is True
     finally:
         _gone(engine, window, app)
+
+
+def test_from_the_menu_scope_starts_in_the_first_root_below(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", E3: started in the home folder, Scope had no lens."""
+    from Scope.Scope import start_path_from
+
+    home = tmp_path / "home"
+    root = home / "Dokumente"
+    (root / META_DIR).mkdir(parents=True)
+    (root / META_DIR / "Project.md").write_text("# SEITON Project\n")
+    assert start_path_from([str(home)]) == str(root)
+    assert start_path_from(["--search", str(root / "Sub")]) == str(root / "Sub")

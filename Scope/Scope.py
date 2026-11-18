@@ -50,7 +50,7 @@ from core.color_schemes import (
     set_scheme_color,
     shipped_scheme,
 )
-from core.scope_api import ScopeApi
+from core.scope_api import ScopeApi, start_place
 from core.settings import Settings
 from daemon.lens_link import LensLink
 
@@ -1242,13 +1242,19 @@ def load_scope(api: ScopeApi, app: QGuiApplication, action: str = "") -> QQmlApp
     return engine
 
 
+def start_path_from(args: list) -> str:
+    """Where Scope starts: the place given, else where it was started; outside every root (the
+    menu starts it in the home folder) the first root below, as the Headline and SunTree do -
+    else the whole session had no lens and no place shared with them (E3)."""
+    places = [arg for arg in args if not arg.startswith("--")]
+    return start_place(places[0] if places else str(Path.cwd()))
+
+
 def main() -> int:
     # The settings under the former name first: else this start wrote the new folder (D5).
     from core.name_migration import take_over_old_config
     take_over_old_config()
-    places = [arg for arg in sys.argv[1:] if not arg.startswith("--")]
-    start_path = places[0] if places else str(Path.cwd())
-    api = ScopeApi(start_path)
+    api = ScopeApi(start_path_from(sys.argv[1:]))
     app = QGuiApplication(sys.argv)
     app.setDesktopFileName(CONFIG_DIR)  # the menu entry the installer writes (seiton.desktop)
     app.setWindowIcon(seiton_icon())  # SEITON's box, as SunTree
