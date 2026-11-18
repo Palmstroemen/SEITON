@@ -643,7 +643,6 @@ class BottomToolbar(QWidget):
 
     printRequested = Signal(str)
     openInRequested = Signal(str)
-    sendToRequested = Signal(str)
 
     def __init__(self):
         super().__init__()
@@ -697,8 +696,9 @@ class BottomToolbar(QWidget):
         self._primary_buttons = []
         self._primary_button_map = {}
         self.primary_layout.addStretch()
+        # Only what is wired: "Send to" (mail, messengers) and LibreOffice would only open the
+        # note in its default program.
         actions = [
-            ("↗", "send_to", self.tr("Send to")),
             ("⇱", "open_in", self.tr("Open in")),
             ("⎙", "print", self.tr("Print")),
         ]
@@ -760,20 +760,11 @@ class BottomToolbar(QWidget):
         if self._active_flyout == primary_action and self.flyout.isVisible():
             return
         self._ensure_runtime_resources()
-        printer_items = [(p["label"], ["printer"], p["name"]) for p in (self._printers or [])] or [(self.tr("Printer"), ["printer"], self.tr("Printer"))]
+        printer_items = [(p["label"], ["printer"], p["name"]) for p in (self._printers or [])]
         print_items = [("PDF", ["application-pdf", "pdf", "evince", "okular"], "PDF")] + printer_items
         items = {
-            "send_to": [
-                (self.tr("Mail"), ["mail", "thunderbird", "evolution", "kmail", "geary"]),
-                ("WhatsApp", ["whatsapp"]),
-                ("Signal", ["signal"]),
-                ("Telegram", ["telegram"]),
-                ("Chat", ["slack", "discord", "threema"]),
-            ],
             "open_in": [
                 ("Obsidian", ["obsidian"]),
-                (self.tr("LibreOffice Writer"), ["libreoffice-writer", "writer"]),
-                (self.tr("LibreOffice Impress"), ["libreoffice-impress", "impress"]),
             ],
             "print": print_items,
         }
@@ -788,10 +779,7 @@ class BottomToolbar(QWidget):
                 widget = self._make_flyout_item(label, names, lambda _, value=printer_name: self.printRequested.emit(value))
             else:
                 label, names = item
-                if primary_action == "open_in":
-                    widget = self._make_flyout_item(label, names, lambda _, value=label: self.openInRequested.emit(value))
-                else:
-                    widget = self._make_flyout_item(label, names, lambda _, value=label: self.sendToRequested.emit(value))
+                widget = self._make_flyout_item(label, names, lambda _, value=label: self.openInRequested.emit(value))
             self.flyout_layout.addWidget(widget)
 
         self.flyout_layout.invalidate()

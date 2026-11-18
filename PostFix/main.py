@@ -79,6 +79,14 @@ def active_window():
     return _last_active() if _last_active is not None else None
 
 
+def obsidian_uri(path) -> str:
+    """Obsidian's link to open a note: the path encoded (a "&" or "#" in it opened another
+    note or none)."""
+    from urllib.parse import quote
+
+    return "obsidian://open?path=" + quote(str(path), safe="")
+
+
 def editor_enabled() -> bool:
     """The CodeMirror editor (editor_host.py); MYOS_POSTFIX_EDITOR=line brings back the old line
     editor (smart_editor.py) until it goes."""
@@ -155,25 +163,6 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
     def __init__(
         self,
         open_path: Path | None = None,
-        debug: bool = False,
-        embed_obsidian: bool = False,
-        obsidian_path: str | None = None,
-        obsidian_command: str | None = None,
-        obsidian_view: str | None = None,
-        zen_hotkey: str | None = None,
-        zen_delay_ms: int = 2500,
-        obsidian_hotkeys: list[str] | None = None,
-        obsidian_hotkey_gap_ms: int = 300,
-        obsidian_close_hotkey: str | None = "ctrl+shift+w",
-        obsidian_vault: str | None = None,
-        obsidian_file: str | None = None,
-        obsidian_open_delay_ms: int = 1500,
-        obsidian_no_open: bool = False,
-        obsidian_debug_window_search: bool = False,
-        obsidian_open_mode: str | None = None,
-        obsidian_window_title: str | None = None,
-        obsidian_close_other_windows: bool = False,
-        obsidian_vault_path: str | None = None,
         ui_language: str = "de",
     ):
         super().__init__()
@@ -219,33 +208,15 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
         self.left_sidebar = ACLSidebar()
         self.left_sidebar.roleEditRequested.connect(self._open_role_editor)
         self.left_sidebar.personEditRequested.connect(self._open_person_editor)
-        # Obsidian embed is paused for now. Keep the code here for later.
-        # self.editor = ObsidianEmbed(
-        #     open_path=open_path,
-        #     obsidian_path=obsidian_path,
-        #     obsidian_command=obsidian_command,
-        #     obsidian_view=obsidian_view,
-        #     zen_hotkey=zen_hotkey,
-        #     zen_delay_ms=zen_delay_ms,
-        #     hotkeys=obsidian_hotkeys,
-        #     hotkey_gap_ms=obsidian_hotkey_gap_ms,
-        #     close_hotkey=obsidian_close_hotkey,
-        #     obsidian_vault=obsidian_vault,
-        #     obsidian_file=obsidian_file,
-        #     open_delay_ms=obsidian_open_delay_ms,
-        #     no_open=obsidian_no_open,
-        #     debug_window_search=obsidian_debug_window_search,
-        #     open_mode=obsidian_open_mode,
-        #     window_title=obsidian_window_title,
-        #     close_other_windows=obsidian_close_other_windows,
-        #     obsidian_vault_path=obsidian_vault_path,
-        # )
-        self.editor = SmartEditor(show_frontmatter=debug)
+        self.editor = SmartEditor()
         if editor_enabled():
             # Read in the editor's look; the editor itself (a browser page) only once wanted.
             self.editor.set_light_look(True)
             self.editor.editRequested.connect(self._take_editor)
             self.editor.linkRequested.connect(self.follow_link)
+            # Text colour and highlighter colour a selection of the old line editor only.
+            self.btn_text_color.hide()
+            self.btn_highlight.hide()
         # Exercise links of the tutorial (seiton:open?scope=...&files=...): a click opens Scope in
         # the exercise folder, the file browser beside it (exercise_links.py).
         self.exercise_launcher = ExerciseLauncher(self._exercise_base, Path(__file__).resolve().parents[1], parent=self)
@@ -276,11 +247,6 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
             self.editor.tagsChanged.connect(self._on_editor_tags_changed)
         if hasattr(self.editor, "colorDefinitionsChanged"):
             self.editor.colorDefinitionsChanged.connect(self._on_editor_color_definitions_changed)
-        elif embed_obsidian:
-            self.btn_view_mode.setText("Obsidian")
-            self.btn_view_mode.setEnabled(False)
-            for btn in [self.btn_bg_color, self.btn_text_color, self.btn_highlight]:
-                btn.setEnabled(False)
         if hasattr(self.right_sidebar, "tagColorChangeRequested"):
             self.right_sidebar.tagColorChangeRequested.connect(self._on_tag_color_change)
         if hasattr(self.right_sidebar, "tagSearchRequested"):
@@ -331,7 +297,6 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
         self.init_bottombar_fade()
         self.bottom_toolbar.printRequested.connect(self.print_to_printer)
         self.bottom_toolbar.openInRequested.connect(self.open_in_app)
-        self.bottom_toolbar.sendToRequested.connect(self.send_to_app)
 
         # Corner widgets (more transparent)
         self.corner_tl = self.make_corner_widget()
@@ -1173,15 +1138,7 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
 
     def open_in_app(self, app_label: str):
         if app_label.lower().startswith("obsidian") and self.editor.current_path:
-            uri = f"obsidian://open?path={self.editor.current_path}"
-            subprocess.Popen(["xdg-open", uri])
-            return
-        if self.editor.current_path:
-            subprocess.Popen(["xdg-open", str(self.editor.current_path)])
-
-    def send_to_app(self, app_label: str):
-        if self.editor.current_path:
-            subprocess.Popen(["xdg-open", str(self.editor.current_path)])
+            subprocess.Popen(["xdg-open", obsidian_uri(self.editor.current_path)])
 
     def _init_paper_debug(self):
         return

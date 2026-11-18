@@ -203,11 +203,6 @@
 <context>
     <name>BottomToolbar</name>
     <message>
-        <location filename="../ui_panels.py" line="701"/>
-        <source>Send to</source>
-        <translation>Senden an</translation>
-    </message>
-    <message>
         <location filename="../ui_panels.py" line="702"/>
         <source>Open in</source>
         <translation>Öffnen in</translation>
@@ -216,26 +211,6 @@
         <location filename="../ui_panels.py" line="703"/>
         <source>Print</source>
         <translation>Drucken</translation>
-    </message>
-    <message>
-        <location filename="../ui_panels.py" line="763"/>
-        <source>Printer</source>
-        <translation>Drucker</translation>
-    </message>
-    <message>
-        <location filename="../ui_panels.py" line="767"/>
-        <source>Mail</source>
-        <translation>Mail</translation>
-    </message>
-    <message>
-        <location filename="../ui_panels.py" line="775"/>
-        <source>LibreOffice Writer</source>
-        <translation>LibreOffice Writer</translation>
-    </message>
-    <message>
-        <location filename="../ui_panels.py" line="776"/>
-        <source>LibreOffice Impress</source>
-        <translation>LibreOffice Impress</translation>
     </message>
 </context>
 <context>
@@ -256,112 +231,74 @@ Dein Name (freiwillig):</translation>
     </message>
 </context>
 <context>
-    <name>ObsidianEmbed</name>
-    <message>
-        <location filename="../obsidian_embed.py" line="76"/>
-        <source>Starting Obsidian...</source>
-        <translation>Starte Obsidian...</translation>
-    </message>
-    <message>
-        <location filename="../obsidian_embed.py" line="83"/>
-        <source>Obsidian not found in PATH. Install or set --obsidian-path.</source>
-        <translation>Obsidian nicht in PATH gefunden. Installieren oder --obsidian-path setzen.</translation>
-    </message>
-    <message>
-        <location filename="../obsidian_embed.py" line="88"/>
-        <source>Install xdotool, wmctrl, or use xwininfo to embed Obsidian.</source>
-        <translation>Installiere xdotool, wmctrl oder nutze xwininfo, um Obsidian einzubetten.</translation>
-    </message>
-    <message>
-        <location filename="../obsidian_embed.py" line="96"/>
-        <source>Failed to start Obsidian.</source>
-        <translation>Obsidian konnte nicht gestartet werden.</translation>
-    </message>
-    <message>
-        <location filename="../obsidian_embed.py" line="123"/>
-        <source>Obsidian window not found. Install xdotool or wmctrl.</source>
-        <translation>Obsidian-Fenster nicht gefunden. Installiere xdotool oder wmctrl.</translation>
-    </message>
-    <message>
-        <location filename="../obsidian_embed.py" line="326"/>
-        <source>Obsidian window lost. Waiting to re-attach...</source>
-        <translation>Obsidian-Fenster verloren. Warte auf erneutes Einbetten...</translation>
-    </message>
-    <message>
-        <location filename="../obsidian_embed.py" line="374"/>
-        <source>Failed to embed Obsidian window.</source>
-        <translation>Obsidian-Fenster konnte nicht eingebettet werden.</translation>
-    </message>
-</context>
-<context>
     <name>PostFixWindow</name>
     <message>
-        <location filename="../main.py" line="184"/>
-        <location filename="../main.py" line="505"/>
+        <location filename="../main.py" line="173"/>
+        <location filename="../main.py" line="471"/>
         <source>PostFix</source>
         <translation>PostFix</translation>
     </message>
     <message>
-        <location filename="../main.py" line="273"/>
-        <location filename="../main.py" line="526"/>
-        <location filename="../main.py" line="791"/>
+        <location filename="../main.py" line="244"/>
+        <location filename="../main.py" line="492"/>
+        <location filename="../main.py" line="757"/>
         <source>Focus mode</source>
         <translation>Fokusmodus</translation>
     </message>
     <message>
-        <location filename="../main.py" line="489"/>
+        <location filename="../main.py" line="454"/>
         <source>This note is not UTF-8: it is shown, not saved.</source>
         <translation>Diese Notiz ist kein UTF-8: Sie wird gezeigt, aber nicht gespeichert.</translation>
     </message>
     <message>
-        <location filename="../main.py" line="524"/>
+        <location filename="../main.py" line="490"/>
         <source>File name</source>
         <translation>Dateiname</translation>
     </message>
     <message>
-        <location filename="../main.py" line="633"/>
+        <location filename="../main.py" line="599"/>
         <source>You may not change this note.</source>
         <translation>Diese Notiz darfst du nicht ändern.</translation>
     </message>
     <message>
-        <location filename="../main.py" line="645"/>
-        <location filename="../main.py" line="660"/>
-        <location filename="../main.py" line="747"/>
+        <location filename="../main.py" line="611"/>
+        <location filename="../main.py" line="626"/>
+        <location filename="../main.py" line="713"/>
         <source>Could not save: %1</source>
         <translation>Konnte nicht speichern: %1</translation>
     </message>
     <message>
-        <location filename="../main.py" line="669"/>
+        <location filename="../main.py" line="635"/>
         <source>The note was moved or deleted elsewhere. Your text is kept in: %1</source>
         <translation>Die Notiz wurde anderswo verschoben oder gelöscht. Dein Text liegt in: %1</translation>
     </message>
     <message>
-        <location filename="../main.py" line="751"/>
+        <location filename="../main.py" line="717"/>
         <source>Changed elsewhere at the same place. Your version is kept beside it: %1</source>
         <translation>An derselben Stelle anderswo geändert. Deine Fassung liegt daneben: %1</translation>
     </message>
     <message>
-        <location filename="../main.py" line="876"/>
+        <location filename="../main.py" line="842"/>
         <source>You may not rename this note.</source>
         <translation>Diese Notiz darfst du nicht umbenennen.</translation>
     </message>
     <message>
-        <location filename="../main.py" line="882"/>
+        <location filename="../main.py" line="848"/>
         <source>Rules are waiting for this name. Choose another one.</source>
         <translation>Für diesen Namen warten schon Regeln. Wähle einen anderen.</translation>
     </message>
     <message>
-        <location filename="../main.py" line="930"/>
+        <location filename="../main.py" line="896"/>
         <source>Style: Auto</source>
         <translation>Stil: Auto</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1138"/>
+        <location filename="../main.py" line="1104"/>
         <source>Not saved</source>
         <translation>Nicht gespeichert</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1139"/>
+        <location filename="../main.py" line="1105"/>
         <source>This note could not be saved, nor a copy beside it. Close anyway and lose the changes?</source>
         <translation>Diese Notiz ließ sich nicht speichern, auch keine Kopie daneben. Trotzdem schließen und die Änderungen verlieren?</translation>
     </message>

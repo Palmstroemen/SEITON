@@ -291,3 +291,12 @@ def test_typing_goes_on_after_a_click_on_a_tag(setup):
     assert not w.editor.focus_edit.isVisible()
     _type_at_end(app, host, "Danach.\n")
     assert _wait(app, lambda: "Danach." in note.read_text(encoding="utf-8"))
+
+
+def test_colour_buttons_of_the_line_editor_are_not_offered(setup):
+    # Text colour and highlighter work only in the old line editor ("docs/Prüfung
+    # 2026-11-18.md", PF13): with the one editor a click opened the picker and did nothing.
+    app, window, tmp_path, _ = setup
+    w = window(tmp_path / "Erste.md")
+    assert w.btn_text_color.isHidden() and w.btn_highlight.isHidden()
+    assert not w.btn_bg_color.isHidden()  # the note's colour stays
