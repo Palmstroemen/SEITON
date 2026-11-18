@@ -296,52 +296,67 @@ Dein Name (freiwillig):</translation>
 <context>
     <name>PostFixWindow</name>
     <message>
-        <location filename="../main.py" line="181"/>
-        <location filename="../main.py" line="495"/>
+        <location filename="../main.py" line="184"/>
+        <location filename="../main.py" line="498"/>
         <source>PostFix</source>
         <translation>PostFix</translation>
     </message>
     <message>
-        <location filename="../main.py" line="270"/>
-        <location filename="../main.py" line="516"/>
-        <location filename="../main.py" line="764"/>
+        <location filename="../main.py" line="273"/>
+        <location filename="../main.py" line="519"/>
+        <location filename="../main.py" line="773"/>
         <source>Focus mode</source>
         <translation>Fokusmodus</translation>
     </message>
     <message>
-        <location filename="../main.py" line="514"/>
+        <location filename="../main.py" line="517"/>
         <source>File name</source>
         <translation>Dateiname</translation>
     </message>
     <message>
-        <location filename="../main.py" line="620"/>
-        <location filename="../main.py" line="633"/>
-        <location filename="../main.py" line="720"/>
+        <location filename="../main.py" line="616"/>
+        <source>You may not change this note.</source>
+        <translation>Diese Notiz darfst du nicht ändern.</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="627"/>
+        <location filename="../main.py" line="642"/>
+        <location filename="../main.py" line="729"/>
         <source>Could not save: %1</source>
         <translation>Konnte nicht speichern: %1</translation>
     </message>
     <message>
-        <location filename="../main.py" line="642"/>
+        <location filename="../main.py" line="651"/>
         <source>The note was moved or deleted elsewhere. Your text is kept in: %1</source>
         <translation>Die Notiz wurde anderswo verschoben oder gelöscht. Dein Text liegt in: %1</translation>
     </message>
     <message>
-        <location filename="../main.py" line="724"/>
+        <location filename="../main.py" line="733"/>
         <source>Changed elsewhere at the same place. Your version is kept beside it: %1</source>
         <translation>An derselben Stelle anderswo geändert. Deine Fassung liegt daneben: %1</translation>
     </message>
     <message>
-        <location filename="../main.py" line="885"/>
+        <location filename="../main.py" line="858"/>
+        <source>You may not rename this note.</source>
+        <translation>Diese Notiz darfst du nicht umbenennen.</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="864"/>
+        <source>Rules are waiting for this name. Choose another one.</source>
+        <translation>Für diesen Namen warten schon Regeln. Wähle einen anderen.</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="912"/>
         <source>Style: Auto</source>
         <translation>Stil: Auto</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1090"/>
+        <location filename="../main.py" line="1117"/>
         <source>Not saved</source>
         <translation>Nicht gespeichert</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1091"/>
+        <location filename="../main.py" line="1118"/>
         <source>This note could not be saved, nor a copy beside it. Close anyway and lose the changes?</source>
         <translation>Diese Notiz ließ sich nicht speichern, auch keine Kopie daneben. Trotzdem schließen und die Änderungen verlieren?</translation>
     </message>
@@ -382,18 +397,18 @@ Dein Name (freiwillig):</translation>
 <context>
     <name>WindowAclsMixin</name>
     <message>
-        <location filename="../window_acls.py" line="57"/>
-        <location filename="../window_acls.py" line="71"/>
+        <location filename="../window_acls.py" line="62"/>
+        <location filename="../window_acls.py" line="76"/>
         <source>No note is open.</source>
         <translation>Keine Notiz geöffnet.</translation>
     </message>
     <message>
-        <location filename="../window_acls.py" line="79"/>
+        <location filename="../window_acls.py" line="84"/>
         <source>You may not change the rights here.</source>
         <translation>Du darfst die Rechte hier nicht ändern.</translation>
     </message>
     <message>
-        <location filename="../window_acls.py" line="81"/>
+        <location filename="../window_acls.py" line="86"/>
         <source>You would lose your own right to change the rights.</source>
         <translation>Damit würdest du dein eigenes Recht verlieren, Rechte zu ändern.</translation>
     </message>

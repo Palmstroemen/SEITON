@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from core.acl_enforcement import allowed_at
 from core.acl_edit import ACLEditError, ACLSelfLockoutError, can_edit, own_rule, set_role_rights, set_user_roles
 from core.acl_view import RIGHTS_ORDER, ACLView
 from core.identity import acl_user_for
@@ -42,6 +43,10 @@ class WindowAclsMixin:
         # Shown only when ACLs are in use for this note (simple first, power when used).
         self.acl_host.setVisible(bool(principals))
         self.acl_host.setFixedWidth(self.left_sidebar.preferred_width() if principals else 0)
+        # Security: a note one may only read keeps its name (renaming checks it again).
+        field = getattr(self, "file_name_edit", None)
+        if field is not None:
+            field.setReadOnly(bool(path) and not allowed_at(path, "write"))
 
     def _role_has_own_rule(self, role_key: str) -> bool:
         path = getattr(self.editor, "current_path", None)

@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Callable, Dict, Optional
+from pathlib import Path
+from typing import Callable, Dict, Optional, Union
 
-from core.acl import ACLAuthorizer
-from core.brand import getenv
+from core.acl import ACLAuthorizer, find_acl_project_root
+from core.brand import META_DIR, getenv
 
 AuditSink = Callable[[Dict[str, object]], None]
 
@@ -17,6 +18,35 @@ def configured_mode() -> str:
     Scope's checks and the suggested folders both follow it."""
     mode = str(getenv("ACL_MODE") or "off").strip().lower()
     return mode if mode in MODES else "off"
+
+
+def allowed_at(path: Union[str, Path], action: str, user: Optional[str] = None) -> bool:
+    """Whether user (default: the person at path, core.identity) may do action ("read",
+    "write", "delete", ...) at path, by the ACLs.md that governs path: its own project's, or
+    the parent's it inherits - whatever program asks and wherever it stands otherwise.
+    True when the mode is not enforce, and where no ACLs.md governs."""
+    mode = configured_mode()
+    if mode != "enforce":
+        return True
+    target = Path(path).expanduser().resolve()
+    root = find_acl_project_root(target)
+    if root is None:
+        return True
+    from core.identity import acl_user_for  # here: core.identity reads ACLs itself
+
+    project = next((c for c in [target, *target.parents] if (c / META_DIR / "Project.md").is_file()), None)
+    backend = str(getenv("ACL_BACKEND") or "auto").strip().lower()
+    try:
+        # The folder rules apply again to the template folders of the path's own subproject.
+        authorizer = ACLAuthorizer.from_project(root, backend=backend if backend in {"auto", "legacy", "casbin"}
+                                                else "auto", context=project)
+    except Exception:
+        return False  # Security: rules that cannot be read allow nothing
+    rel = str(target.relative_to(root)).replace("\\", "/") if target != root else ""
+    resource = "/" + rel if rel and rel != "." else "/"
+    who = user if user is not None else acl_user_for(target)
+    check = ACLEnforcementService(authorizer, mode=mode).check(ACLCheckRequest(user=who, action=action, resource=resource))
+    return check.allowed
 
 
 @dataclass(frozen=True)

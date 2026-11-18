@@ -15,7 +15,10 @@ from pathlib import Path
 if not __package__:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from core.acl_edit import ACLEditError, check_move_rules, move_rules as move_acl_rules
+from core.acl_enforcement import allowed_at
 from core.brand import getenv
+from core.identity import acl_user_for
 
 try:
     from .markdown_render import render_markdown
@@ -608,6 +611,10 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
             # was, but what was typed is kept beside it.
             self._keep_beside(Path(path))
             return False
+        if not allowed_at(path, "write"):
+            # Security: with enforcement on, a note one may only read is not written.
+            self._notify(self.tr("You may not change this note."))
+            return False
         # Finalize scoped tag list using stable editor state at save time.
         self._sync_scope_tags_from_document()
         try:
@@ -628,6 +635,8 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
         try:
             if not copy.parent.is_dir():
                 raise OSError("the folder is gone")
+            if not allowed_at(copy, "write"):
+                raise OSError("no write right there")  # Security: a copy is a write as well
             copy.write_text(text, encoding="utf-8")
         except OSError:
             self._notify(self.tr("Could not save: %1").replace("%1", gone.name))
@@ -843,12 +852,30 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
         if candidate.exists():
             self._sync_filename_field_from_path(select_all=True)
             return
+        # Security: as in Scope - only who may write renames, and the note's rules go along
+        # (refused where rules wait for the new name: they would add up).
+        if not allowed_at(original, "write"):
+            self._notify(self.tr("You may not rename this note."))
+            self._sync_filename_field_from_path(select_all=True)
+            return
+        try:
+            check_move_rules(original, candidate)
+        except ACLEditError:
+            self._notify(self.tr("Rules are waiting for this name. Choose another one."))
+            self._sync_filename_field_from_path(select_all=True)
+            return
+        except OSError:
+            pass
         old_key = self._editor_key()
         try:
             original.rename(candidate)
         except OSError:
             self._sync_filename_field_from_path(select_all=True)
             return
+        try:
+            move_acl_rules(original, candidate, editor=acl_user_for(original))
+        except (ACLEditError, OSError):
+            pass
         self.editor.set_path(candidate)
         self._reattach_editor(old_key)
         self._watch_current_file()
