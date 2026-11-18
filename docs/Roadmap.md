@@ -63,6 +63,25 @@ Schritt folgt.
 
 - **Plattform-unabhängiger Kern** (1). Methode, Dateiformat und Schema laufen auf jedem System.
   Scope, SunTree und PostFix sind die Linux-Oberfläche dazu, nicht die Voraussetzung.
+- **Kern und Apps trennen** (1, 6). Andere sollen Apps für SEITON bauen können, und unsere
+  eigenen sind die ersten Beispiele dafür. Vorerst bleibt alles in einem Repository, ein
+  Monorepo wie bei Python oder Home Assistant: Wer am Kern etwas ändert, sieht im selben
+  Testlauf, ob eine App bricht. Heute greift jede App außer ClipboardTool tief in `core/`, mit
+  getrennten Repositories bräuchte jede Kernänderung abgestimmte Commits in mehreren davon.
+  Drei Schritte:
+  1. **Ordner:** `apps/` für Scope, Headline und Time, die SEITON selbst sind; `examples/` für
+     PostFix, SunTree und ClipboardTool, Apps, die SEITON nutzen. Am besten, wenn keine andere
+     Sitzung arbeitet, danach `./install.sh` neu.
+  2. **Öffentliche Schnittstelle:** Was eine fremde App von SEITON benutzen darf, wird
+     festgeschrieben und versioniert: die Dateiformate (`.seiton/`, `Project.md`, `ACLs.md`,
+     Tags), die CLI-Werkzeuge, das Laufwerk „Perspektiven“ und eine kleine Python-API
+     (etwa `seiton.api`) statt `core.scope_api` oder `core.acl_edit` direkt. Ein Test prüft, dass
+     `examples/` nur sie importiert. So zeigt jede Beispiel-App, wie eine fremde es machen würde.
+  3. **Eigene Repositories, wenn die Schnittstelle hält:** Eine App, die nur noch sie benutzt,
+     darf mit ihrer Geschichte (`git filter-repo`) in ein eigenes Repository unter einer
+     Organisation `github.com/seiton/` ziehen, wie die Apps von Nextcloud neben
+     `nextcloud/server`. Erste Kandidaten: ClipboardTool (hängt schon heute an nichts) und
+     PostFix (taugt auch ohne SEITON als Markdown-Editor).
 - **Einnisten statt ersetzen** (6). Ein Obsidian-Plugin oder eine Dateimanager-Erweiterung bringt
   Standardordner, Vorschläge und Perspektiven zu den Leuten, ohne Systemwechsel.
 - **Brücken selbst bauen** (1). Nicht auf Hersteller warten, sondern importieren: Mails ins
