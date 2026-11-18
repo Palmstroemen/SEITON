@@ -30,10 +30,12 @@ COMMANDS = ("start", "stop", "yes", "no")
 _WORDS = {
     "de": {"none": "Kein Projekt", "ask": "Arbeitest du noch an {project}?", "yes": "Ja", "no": "Nein",
            "name": "Zeit", "stopped": "gestoppt", "spent": "{project}: heute {time} h",
+           "spentHere": "heute {time} h",
            "stoppedTip": "Von Hand gestoppt: es wird nicht gezählt, bis du Start drückst.",
            "pausedTip": "Pause: die nächste Eingabe zählt weiter."},
     "en": {"none": "No project", "ask": "Still working on {project}?", "yes": "Yes", "no": "No",
            "name": "Time", "stopped": "stopped", "spent": "{project}: {time} h today",
+           "spentHere": "{time} h today",
            "stoppedTip": "Stopped by hand: nothing is counted until you press Start.",
            "pausedTip": "Pause: the next input counts on."},
 }
@@ -172,14 +174,14 @@ def render(clock, ledger: Ledger, now: datetime, *, language: str,
         # Stopped by hand looks other than a pause: else one forgets it and works for hours
         # without counting (review 2026-11-18, Z8).
         said = words["spent"].format(project=Path(project).name, time=_hours(today))
-        view["tooltip"] = said
+        here = words["spentHere"].format(time=_hours(today))  # in the project: named beside it
+        note = {"stopped": words["stoppedTip"], "paused": words["pausedTip"]}.get(clock.state)
+        view["tooltip"] = f"{said}\n{note}" if note else said
+        view["shortTooltip"] = f"{here}\n{note}" if note else here
         if clock.state == "stopped":
             view["text"] += f" · {words['stopped']}"
             view["short"] += f" · {words['stopped']}"
-            view["tooltip"] = f"{said}\n{words['stoppedTip']}"
             view["warn"] = True
-        elif clock.state == "paused":
-            view["tooltip"] = f"{said}\n{words['pausedTip']}"
         if clock.state in ("runs", "asks"):
             # The Headline counts on between views, to the second: from where today's time
             # would be naught (apps/Headline/widgets.py, counter).

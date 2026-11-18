@@ -774,3 +774,21 @@ def test_a_real_click_on_the_icon_reaches_it_not_the_tab(a_clock, started, monke
     _wait(started["app"], 400)  # the tab's single click waits for a double click
     assert opened == ["clock"]
     assert not _find(started, "climbList").property("visible")
+
+
+def test_the_tooltip_is_a_window_of_its_own_below_the_line(a_clock, started):
+    """In the line's window (30 px) the tooltip was cut off at the bottom (2026-11-18)."""
+    _stopwatch_view(a_clock)
+    started["engine"]._backend.checkWidgets()
+    _settle(started["app"])
+    [icon] = _all(started, "widgetIcon")
+    QMetaObject.invokeMethod(icon, "showTip")
+    _wait(started["app"], 600)  # it comes after a short while
+    tip = _find(started, "tipWindow")
+    line = _find(started, "headlineLine")
+    assert isinstance(tip, QWindow) and tip.isVisible()
+    assert tip.property("text") == "Musikstudio: 2:15 h today"
+    assert tip.y() >= line.y() + line.property("lineHeight")  # below the line, whole
+    QMetaObject.invokeMethod(icon, "hideTip")
+    _settle(started["app"])
+    assert not tip.isVisible()

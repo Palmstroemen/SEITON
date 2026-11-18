@@ -279,3 +279,15 @@ def test_stopped_by_hand_it_warns_and_says_why(tmp_path, ledger):
     view = cw.render(clock, ledger, NOW, language="de")
     assert view["warn"] is True
     assert view["tooltip"] == "Küche: heute 0:15 h\n" + cw._words("de")["stoppedTip"]
+
+
+def test_the_short_tooltip_leaves_the_project_out(tmp_path, ledger):
+    # In its project the Headline names it right beside the stopwatch (2026-11-18).
+    clock = _clock(tmp_path, ledger)
+    ledger.add(Path("/p/Küche"), NOW.date(), timedelta(hours=2))
+    clock.set_project(Path("/p/Küche"), "Oliver", NOW - timedelta(minutes=15))
+    assert cw.render(clock, ledger, NOW, language="de")["shortTooltip"] == "heute 2:15 h"
+    assert cw.render(clock, ledger, NOW, language="en")["shortTooltip"] == "2:15 h today"
+    clock.stop(NOW)
+    view = cw.render(clock, ledger, NOW, language="de")
+    assert view["shortTooltip"] == "heute 2:15 h\n" + cw._words("de")["stoppedTip"]

@@ -12,7 +12,7 @@ not the clock. A widget may be missing, or be replaced by another one.
 - A **counter** (optional): `{"prefix", "since"}` - the Headline counts on to the second between
   views (the clock writes its view every 15 s): prefix and the time since, H:MM:SS.
 - Its **project** (optional): `project` (an absolute path) and `short`, its text without the
-  project (and `shortPrefix` for the counter). While the Headline is in that project, which it
+  project (and `shortPrefix` for the counter, `shortTooltip` for the tooltip). While the Headline is in that project, which it
   names already at the left of its line, it shows the short text and names the project in the
   tooltip (2026-11-18).
 - An **icon** (optional): one the Headline knows (ICONS). Such a widget sits as that icon in the
@@ -140,6 +140,7 @@ def view_of(widget: Dict[str, Any], now: Optional[float] = None) -> Optional[Dic
             "counter": _counter(data.get("counter")),
             "project": project if isinstance(project, str) and Path(project).is_absolute() else "",
             "short": _text(data.get("short")) or "",
+            "shortTooltip": _text(data.get("shortTooltip"), 200) or "",
             "icon": data.get("icon") if data.get("icon") in ICONS else "",
             "warn": data.get("warn") is True}
 
@@ -153,7 +154,8 @@ def _in_project(view: Dict[str, Any], here: Optional[str]) -> Dict[str, Any]:
     counter = view["counter"]
     if counter is not None and "shortPrefix" in counter:
         counter = {**counter, "prefix": counter["shortPrefix"]}
-    return {**view, "text": view["short"], "counter": counter, "tooltip": view["tooltip"] or name}
+    return {**view, "text": view["short"], "counter": counter,
+            "tooltip": view["shortTooltip"] or view["tooltip"] or name}
 
 
 def shown(now: Optional[float] = None, here: Optional[str] = None) -> List[Dict[str, Any]]:

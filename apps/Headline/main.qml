@@ -191,6 +191,13 @@ Window {
         theme: line.theme
         baseFont: line.baseFont
     }
+    TipWindow {  // tooltips below the line: inside its window they were cut off
+        id: tipWindow
+        band: line
+        theme: line.theme
+        baseFont: line.baseFont
+    }
+    onShownChanged: if (!shown) tipWindow.hide()
     DropAsk {
         id: dropAsk
         theme: line.theme
@@ -241,6 +248,8 @@ Window {
                         tip: modelData.tooltip || modelData.text
                         color: line.theme.text || "#e6e6e6"
                         onOpened: function(widgetId) { headline.widgetOpen(widgetId) }
+                        onTipWanted: function(anchor, text) { tipWindow.ask(anchor, text) }
+                        onTipGone: tipWindow.hide()
                     }
                 }
             }
@@ -319,8 +328,8 @@ Window {
                         textColor: modelData.state === "calm" ? (line.theme.setupMuted || "#9aa0ad")
                                                               : (line.theme.text || "#e6e6e6")
                         textSize: line.baseFont
-                        ToolTip.visible: hoverActive && modelData.tooltip.length > 0
-                        ToolTip.text: modelData.tooltip
+                        onHoverActiveChanged: hoverActive && modelData.tooltip.length > 0
+                                              ? tipWindow.ask(this, modelData.tooltip) : tipWindow.hide()
                         onActivate: headline.widgetOpen(modelData.id)
                     }
                 }

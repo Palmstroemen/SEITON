@@ -1,5 +1,4 @@
 import QtQuick 2.15
-import QtQuick.Controls 2.15
 
 // A widget as an icon in the CWD's tab (apps/Headline/widgets.py, icon): drawn here, in the
 // line's colours. While the widget is active it beats like a heart - the line is mostly hidden,
@@ -16,12 +15,17 @@ Item {
     property color color: "#e6e6e6"
     readonly property color warnColor: "#e5484d"
     signal opened(string widgetId)
+    // Its tooltip, shown by the line in a window of its own (TipWindow.qml).
+    signal tipWanted(var anchor, string text)
+    signal tipGone()
 
     width: 16
     height: 16
     opacity: beating || warn ? 1.0 : 0.45
 
-    function open() { opened(widgetId) }
+    function open() { tipGone(); opened(widgetId) }
+    function showTip() { tipWanted(icon, tip) }
+    function hideTip() { tipGone() }
 
     Canvas {
         id: face
@@ -78,8 +82,6 @@ Item {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: icon.open()
-        ToolTip.visible: containsMouse && icon.tip.length > 0
-        ToolTip.text: icon.tip
-        ToolTip.delay: 400
+        onContainsMouseChanged: containsMouse ? icon.showTip() : icon.hideTip()
     }
 }

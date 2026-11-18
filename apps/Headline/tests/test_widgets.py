@@ -191,3 +191,10 @@ def test_a_widget_may_warn(clock):
     assert widgets.shown()[0]["warn"] is True
     _view(clock, text="Küche · 0:15", state="calm", icon="stopwatch", warn="yes")
     assert widgets.shown()[0]["warn"] is False
+
+
+def test_in_its_project_the_short_tooltip(clock):
+    _view(clock, text="Küche · 2:15", state="active", project="/p/Küche", short="2:15",
+          tooltip="Küche: heute 2:15 h", shortTooltip="heute 2:15 h")
+    assert widgets.shown(here="/p/Küche")[0]["tooltip"] == "heute 2:15 h"
+    assert widgets.shown(here="/p/Auto")[0]["tooltip"] == "Küche: heute 2:15 h"

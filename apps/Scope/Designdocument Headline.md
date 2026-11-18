@@ -142,8 +142,11 @@ does every 15 s.
   a button at the right: it beats like a heart while active (the line is mostly hidden: one sees
   at once that it counts), is pale while calm, red and struck through with `warn` (the clock
   stopped by hand). Its text is the tooltip - the clock says its time there as a duration
-  ("DesertGreener: heute 2:15 h"), not like a time of day. A click opens its screen. At the right
-  only its question stands, while it asks; so the right stays free and no standard folder hides.
+  ("DesertGreener: heute 2:15 h"), not like a time of day; in its project, named right beside
+  it, only "heute 2:15 h" (`shortTooltip`). A click opens its screen. At the right only its
+  question stands, while it asks; so the right stays free and no standard folder hides.
+  Tooltips are windows of their own below the line (`TipWindow.qml`): inside the line's window,
+  as high as the line, they were cut off.
 - **It is told** what the user did by command files dropped into the same folder (`yes`, `no`,
   `start`, `stop`); the widget looks for them. In the clock's sandbox only this folder is
   writable (`cli/seiton_clock.py`, its binds).
