@@ -245,8 +245,8 @@ ApplicationWindow {
                     // No heading: the beginning stands by the day, the duration apart and bold -
                     // else one took the beginning for an end (2026-11-19).
                     Row {
-                        spacing: 4
-                        Layout.preferredWidth: 140
+                        spacing: 12  // about three spaces (2026-11-19)
+                        Layout.preferredWidth: 150
                         Label2 { objectName: "entryDay"; text: entry.row.day }
                         Label2 { objectName: "entryStart"; text: entry.row.start || "–" }
                     }
