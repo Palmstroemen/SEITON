@@ -29,3 +29,23 @@ def test_a_second_daemon_leaves_the_first_alone(tmp_path):
         first.close()
     assert socket_path.exists() and not mount_point.exists()
     assert "already running" in (tmp_path / "perspective-daemon.log").read_text()
+
+
+def test_a_dead_drive_is_cleared_before_a_new_daemon(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", B4: after a hard end no daemon could mount again."""
+    import errno
+    import os
+
+    from daemon.lens_link import clear_dead_mount
+
+    calls = []
+
+    def dead(path):
+        raise OSError(errno.ENOTCONN, "Transport endpoint is not connected")
+
+    assert clear_dead_mount(tmp_path / "Perspektiven", stat=dead, unmount=lambda argv: calls.append(argv) or 0)
+    assert calls == [["fusermount", "-u", str(tmp_path / "Perspektiven")]]
+    calls.clear()
+    assert not clear_dead_mount(tmp_path, stat=os.stat, unmount=lambda argv: calls.append(argv) or 0)
+    assert not clear_dead_mount(tmp_path / "fehlt", unmount=lambda argv: calls.append(argv) or 0)
+    assert calls == []

@@ -424,3 +424,40 @@ def test_an_entry_from_deeper_down_says_where_from_seen_from_here(tmp_path):
     entries = [{"name": "a.pdf", "path": str(tmp_path / "2024" / "Belege" / "a.pdf")}]
     projected = apply_filter_projection(entries, cwd=tmp_path, filter_state=resolve_effective_filter(tmp_path))
     assert projected[0]["originPath"] == "2024/Belege"
+
+
+def test_names_and_rules_may_have_spaces(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", B6: a filter named "Nur Belege" did nothing, a rule with a
+    space ended its section and dropped the rules after it."""
+    cfg = tmp_path / "Filter.md"
+    cfg.write_text(
+        "# Filter\nName: Nur Belege\nScope: /Kunde Huber/\n\n"
+        "## Include\n- /Kunde Huber/\n- /Alte Rechnungen/2024/\n- /Belege/\n\n"
+        "## Exclude\n/Alte Rechnungen/Entwürfe/\n*.tmp\n\n"
+        "## Filter\n*Rechnung*\n")
+    parsed = FilterConfig.from_file(cfg)
+    assert parsed.name == "Nur Belege" and parsed.scope == "/Kunde Huber/"
+    assert parsed.include == ["/Kunde Huber/", "/Alte Rechnungen/2024/", "/Belege/"]
+    assert parsed.exclude == ["/Alte Rechnungen/Entwürfe/", "*.tmp"]
+    assert parsed.filters == ["*Rechnung*"]
+
+
+def test_a_plain_rule_looks_at_the_name_not_at_where_the_project_lies(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", B7: in a project "Steuer 2024", excluding 2024 hid everything
+    and "## Filter Beleg" let everything through."""
+    cwd = tmp_path / "Steuer 2024" / "Belege"
+    cwd.mkdir(parents=True)
+    files = {}
+    for name in ("Beleg Januar.pdf", "Quittung.pdf", "Plan 2024.pdf"):
+        files[name] = cwd / name
+        files[name].write_text("x", encoding="utf-8")
+    entries = [{"name": n, "path": str(p), "isDir": False, "tags": []} for n, p in files.items()]
+
+    def shown(rules):
+        (cwd / "Filter.md").write_text("# Filter\nName: Test\n\n" + rules, encoding="utf-8")
+        effective = resolve_effective_filter(cwd)
+        return sorted(e["name"] for e in apply_filter_projection(entries, cwd=cwd, filter_state=effective, project_root=cwd))
+
+    assert shown("## Exclude\n2024\n") == ["Beleg Januar.pdf", "Quittung.pdf"]
+    assert shown("## Exclude\n*2024*\n") == ["Beleg Januar.pdf", "Quittung.pdf"]
+    assert shown("## Filter\nBeleg\n") == ["Beleg Januar.pdf"]

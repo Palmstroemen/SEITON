@@ -11,6 +11,7 @@ turned to, a program follows where the other one went (follow).
 
 from __future__ import annotations
 
+import errno
 import os
 import subprocess
 import sys
@@ -23,11 +24,26 @@ from daemon.client import LocalSession, connect as connect_daemon
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
+def clear_dead_mount(mount_point: Path, stat: Callable[[Path], Any] = os.stat,
+                     unmount: Callable[[list], int] = subprocess.call) -> bool:
+    """A drive whose daemon died hard (OOM, kill) is left mounted and answers nothing
+    (ENOTCONN): it is unmounted, else no daemon could ever mount there again ("docs/Prüfung
+    2026-11-18.md", B4). True when one was cleared."""
+    try:
+        stat(mount_point)
+    except OSError as exc:
+        if exc.errno == errno.ENOTCONN:
+            unmount(["fusermount", "-u", str(mount_point)])
+            return True
+    return False
+
+
 def spawn_daemon(projects_root: Path) -> Optional[subprocess.Popen]:
     """Start the daemon of projects_root; its drive appears as "Perspektiven" next to
     "Projekte"."""
     mount_point = projects_root.parent / "Perspektiven"
     try:
+        clear_dead_mount(mount_point)
         mount_point.mkdir(exist_ok=True)
         return subprocess.Popen(
             [sys.executable, "-m", "daemon", "--projects-root", str(projects_root), "--mount-point", str(mount_point)],

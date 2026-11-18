@@ -9,6 +9,7 @@
   nearest folder above it: the clock must never see 0_Admin's other folders.
 """
 
+import shutil
 from pathlib import Path
 
 import pytest
@@ -156,3 +157,14 @@ def test_the_fuse_drive_writes_into_a_missing_folder(world):
     fs.write(path + "/Anna.md", b"| Datum |\n", 0, handle)
     fs.release(path + "/Anna.md", handle)
     assert (world["kitchen"] / "0_Admin" / "Zeitaufwand" / "Anna.md").read_bytes() == b"| Datum |\n"
+
+
+def test_a_parent_without_the_department_still_shows_the_way(world):
+    """"docs/Prüfung 2026-11-18.md", B3: with the fallback, a parent without the department
+    folder stood in with its whole top level, and the way to its subprojects was hidden."""
+    (world["root"].parent / META_DIR / "Templates" / "Standard" / "5_Recht").mkdir()  # a department
+    drive = PerspectiveDrive(world["root"])  # with fallback, as the drive "Perspektiven"
+    assert not (world["firma"] / "5_Recht").exists() and not (world["huber"] / "5_Recht").exists()
+    way = "/5_Recht/Projekte/Firma/7_Arbeit/Kunde Huber/7_Arbeit/Küche"
+    assert drive.listdir(way) == ["Vertrag.pdf"]
+    assert drive.target_for_create(way + "/x.pdf") == world["kitchen"] / "5_Recht" / "x.pdf"

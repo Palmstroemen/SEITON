@@ -350,6 +350,10 @@ def run_daemon(
         # Always in the foreground: the daemon already is the background process, and a
         # FUSE fork would keep only this thread - the socket server would be gone.
         mount_perspective_drive(projects_root=projects_root, mount_point=mount_point, may=may, foreground=True)
+    except Exception as exc:
+        # Said in the log: else a drive that cannot mount ends the daemon without a word (B4).
+        _daemon_log(f"drive failed at {mount_point!r}: {exc!r}", log_path=log_path)
+        raise
     finally:
         Path(socket_path).unlink(missing_ok=True)
         _daemon_log_close()

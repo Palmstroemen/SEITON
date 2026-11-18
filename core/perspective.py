@@ -6,6 +6,7 @@ perspective.py - MyOS filter configuration handling.
 from __future__ import annotations
 
 import os
+import re
 import sys
 from dataclasses import dataclass
 from fnmatch import fnmatch
@@ -38,8 +39,7 @@ class FilterConfig:
 
     @classmethod
     def from_file(cls, path: Union[str, Path]) -> "FilterConfig":
-        data = MarkdownConfigParser.parse_file(path)
-        return cls.from_data(data)
+        return cls.from_data(_read_filter_text(Path(path).read_text(encoding="utf-8", errors="replace")))
 
     @classmethod
     def from_data(cls, data: Dict[str, Any]) -> "FilterConfig":
@@ -376,6 +376,37 @@ def _lens_from_text(text: Any) -> Tuple[str, ...]:
     return parts
 
 
+def _read_filter_text(text: str) -> Dict[str, Any]:
+    """A filter file as from_data takes it: each heading's lines, "Key: Value" lines of the
+    "# Filter" heading as {key: [value]}. Unlike the general config parser, a name or a rule
+    may hold spaces ("Nur Belege", "/Kunde Huber/"), and neither a space nor a blank line ends
+    a section - there a rule dropped all those after it ("docs/Prüfung 2026-11-18.md", B6).
+    Notes in <!-- --> are left out."""
+    text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
+    data: Dict[str, Any] = {}
+    section: Optional[str] = None
+    meta = False
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        if line.startswith("#"):
+            depth = len(line) - len(line.lstrip("#"))
+            section = line.lstrip("#").strip()
+            meta = depth == 1 and section.lower() == "filter"
+            data.setdefault(section, [])
+            continue
+        if section is None:
+            continue
+        item = line[2:].strip() if line.startswith(("- ", "* ")) else line
+        if meta and ": " in item:
+            key, value = item.split(": ", 1)
+            data[section].append({key.strip(): [value.strip()]})
+        elif item:
+            data[section].append(item)
+    return data
+
+
 def _normalize_section_list(section: Any) -> List[str]:
     if section is None:
         return []
@@ -527,6 +558,10 @@ def _matches_rule(rule: str, variants: List[str]) -> bool:
     normalized_rule = current.replace("\\", "/")
     for variant in variants:
         token = variant.replace("\\", "/")
+        if not is_path_rule:
+            # A rule without "/" ("2024", "*.pdf", "*rechnung*") is about the entry's name, not
+            # about where the project lies on the disk (B7: "Steuer 2024" hid everything).
+            token = token.rsplit("/", 1)[-1]
         if has_wildcard:
             if fnmatch(token, normalized_rule):
                 return True

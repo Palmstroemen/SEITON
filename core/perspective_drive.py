@@ -139,8 +139,10 @@ class PerspectiveDrive:
         subproject (a way may go through a project, decided 2026-11-16)."""
         if rest and not rest[0].startswith("."):
             project_dir = self.projects_root.joinpath(*place)
-            shown = self._shown(project_dir, lens)
-            if shown is None or not (shown / rest[0]).exists():
+            # Only the department folder itself goes before the ways: with the fallback, the
+            # folder standing in for a missing one (the project itself) would hide them (B3).
+            department = project_dir.joinpath(*lens)
+            if not (department.is_dir() and (department / rest[0]).exists()):
                 for depth in range(1, len(rest) + 1):
                     candidate = project_dir.joinpath(*rest[:depth])
                     if rest[depth - 1].startswith("."):
@@ -152,17 +154,6 @@ class PerspectiveDrive:
                 else:
                     return DriveNode(is_dir=True, real=None, lens=lens)  # a way, all along
         return self._inside(lens, place, rest)
-
-    def _shown(self, project_dir: Path, lens: Parts) -> Optional[Path]:
-        """The folder a project shows for lens: its department folder, or (with fallback) the
-        nearest folder above it; None without fallback when the department folder is missing."""
-        department = project_dir.joinpath(*lens)
-        if department.is_dir():
-            return department
-        if not self.fallback:
-            return None
-        return next(p for p in [*department.parents] if p == project_dir or p.is_dir()
-                    and project_dir in p.parents)
 
     def _inside(self, lens: Parts, place: Parts, rest: Parts) -> Optional[DriveNode]:
         project_dir = self.projects_root.joinpath(*place)
