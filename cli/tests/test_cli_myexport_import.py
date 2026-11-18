@@ -74,4 +74,5 @@ def test_myimport_imports_package():
 
         assert result.returncode == 0
         assert "Imported into" in result.stdout
-        assert (target / "docs" / "note.txt").exists()
+        assert (target / "Project" / "docs" / "note.txt").exists()  # a project of its own
+        assert (target / "Project" / META_DIR / "Project.md").exists()

@@ -76,7 +76,7 @@ def test_import_rejects_zip_traversal():
             import_package(zip_path, target_root=tmp / "target", mode="adopt")
 
 
-def test_import_basic_merge():
+def test_import_basic_adopt():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
         package = tmp / "package"
@@ -90,10 +90,11 @@ def test_import_basic_merge():
         target = tmp / "target"
         target.mkdir()
 
-        result = import_package(package, target_root=target, mode="adopt", conflict="merge")
+        result = import_package(package, target_root=target, mode="adopt")
 
-        assert (target / "data" / "note.txt").exists()
-        assert result.import_root == target
+        # A project of its own, named as the exported one (D8): here the package's folder.
+        assert (target / "package" / "data" / "note.txt").exists()
+        assert result.import_root == target.resolve() / "package"
 
 
 def _package_pointing_at(tmp: Path, reference: Path) -> Path:
@@ -123,6 +124,6 @@ def test_restore_with_a_target_goes_there(tmp_path):
     target = tmp_path / "target"
     target.mkdir()
     package = _package_pointing_at(tmp_path, home)
-    import_package(package, target_root=target, mode="restore")
+    import_package(package, target_root=target)  # with a target: adopted there, never the home
     assert not (home / ".config").exists()
-    assert (target / ".config" / "autostart" / "x.desktop").exists()
+    assert (target / "home" / ".config" / "autostart" / "x.desktop").exists()

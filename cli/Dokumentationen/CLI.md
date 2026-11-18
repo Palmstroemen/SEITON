@@ -42,13 +42,14 @@ Examples:
 ---
 
 ## **myimport**
-Import a package into a target location.
+Import an export package. Without `--target` it goes back to its place, when that is still a project (restore). With `--target` it comes into that folder as a project of its own, named as the exported project (adopt): with its settings and its ACLs, which always travel with the project - inside another project it is a child with its own rights beside the mother's. It never mixes with a folder of that name already there.
 
 Examples:
-- `myimport /tmp/export/package`
-- `myimport /tmp/export/package --target /path/to/target --mode adopt --conflict merge`
+- `myimport /tmp/export/package` (back to its place)
+- `myimport /tmp/export/package --target ~/Projekte` (as `~/Projekte/<project>`)
+- `myimport /tmp/export/package --conflict overwrite`
 
-`--mode adopt|restore`, `--conflict merge|overwrite|skip`.
+`--mode auto|restore|adopt` (auto: restore without a target, else adopt), `--conflict skip|overwrite` (files already there: kept or replaced; the settings in a `.seiton` there are always kept).
 
 ---
 

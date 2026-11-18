@@ -231,7 +231,7 @@ def test_a_single_file_is_exported_with_its_folders(tmp_path):
     target = tmp_path / "Ziel"
     target.mkdir()
     import_package(package, target_root=target, mode="adopt")
-    assert (target / "Dach" / "a.txt").read_text() == "A"
+    assert (target / "Project" / "Dach" / "a.txt").read_text() == "A"
 
 
 def test_names_with_a_colon_go_there_and_back(tmp_path):
@@ -246,4 +246,4 @@ def test_names_with_a_colon_go_there_and_back(tmp_path):
     target = tmp_path / "Ziel"
     target.mkdir()
     import_package(package, target_root=target, mode="adopt")
-    assert (target / "Dach" / "Besprechung 10:30.md").read_text() == "Notiz"
+    assert (target / "Project" / "Dach" / "Besprechung 10:30.md").read_text() == "Notiz"

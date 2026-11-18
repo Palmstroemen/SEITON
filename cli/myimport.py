@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-myimport - MyOS import CLI
+myimport - import an export package: back to its place when that is still a project, else
+into --target as a project of its own (its rights travel with it).
 """
 
 import argparse
@@ -20,19 +21,19 @@ def parse_args(args=None) -> argparse.Namespace:
     parser.add_argument("package", help="Path to export package (folder or zip)")
     parser.add_argument(
         "--target",
-        help="Target root for adopt mode (or override restore)",
+        help="Folder to adopt it into, as a project of its own (without one: back to its place)",
     )
     parser.add_argument(
         "--mode",
-        choices=["adopt", "restore"],
-        default="adopt",
-        help="Import mode (default: adopt)",
+        choices=["auto", "adopt", "restore"],
+        default="auto",
+        help="auto (default): back to its place, or into --target when one is given",
     )
     parser.add_argument(
         "--conflict",
-        choices=["merge", "overwrite", "skip"],
-        default="merge",
-        help="Conflict strategy (default: merge)",
+        choices=["skip", "overwrite"],
+        default="skip",
+        help="Files already there: kept (skip, default) or replaced; settings are always kept",
     )
     return parser.parse_args(args)
 
