@@ -24,8 +24,9 @@ taskbar can be:
 At the top edge, as with a taskbar, either of two (Setup):
 
 - **Always there:** the line keeps its room; maximised windows stop below it.
-- **Hides itself:** the line comes when the pointer touches the top edge (at once, over the whole
-  width) and goes about 0.5 s after the pointer has left it (ProjectLogbook, E4 step 2).
+- **Hides itself** (the default since 2026-11-18): the line slides in from above when the pointer
+  touches the top edge (at once, over the whole width), over all other windows, and slides out
+  about 0.5 s after the pointer has left it (ProjectLogbook, E4 step 2). It keeps no room.
 
 The panel from the taskbar may later come at the top edge too (a click on the line's SEITON box),
 for whoever prefers the folders as a list.
@@ -161,7 +162,8 @@ the time screen can start the clock (`apps/Time/TimeScreen.py`, `startClock`). N
    (since 2026-11-18; before, a tab in Scope's Setup).
    Built 2026-11-17: `apps/Headline/x11_dock.py` (dock type, strut), the setting `Headline/dock`
    (keep, hide), read anew every second; hiding, the line is a 2 px edge that opens at once and
-   goes 0.5 s after the pointer left, not while a dropdown is open.
+   goes 0.5 s after the pointer left, not while a dropdown is open. Since 2026-11-18 it slides
+   in and out (150 ms, the window see-through meanwhile) and hiding is the default.
 2a. **Widgets:** write_active; registering, view, command files (section 3a); the clock as the
    first widget, with its time screen as its own window, and its start at login.
    Built 2026-11-17: `apps/Headline/widgets.py` and the active project (part 1);

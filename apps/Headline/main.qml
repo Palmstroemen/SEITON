@@ -42,17 +42,33 @@ Window {
     // comes out while it asks (review 2026-11-18, H8).
     readonly property bool asking: (widgets || []).some(function(w) { return w.state === "asking" })
     readonly property bool expanded: dockMode === "keep" || pointerInside || popupOpen || asking
+    // Hiding itself, the line slides in from above and out again (2026-11-18): reveal goes
+    // from 0 to 1, the window is as high as the line until it has slid out (the pointer stays
+    // in it), the line's background slides with its content - the window is see-through.
+    readonly property int slideMs: 150
+    property real reveal: expanded ? 1 : 0
+    Behavior on reveal { NumberAnimation { duration: line.slideMs; easing.type: Easing.OutCubic } }
+    readonly property real slideY: -(1 - reveal) * (lineHeight - edgeHeight)
+    readonly property bool shown: expanded || reveal > 0
 
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
     x: Screen.virtualX
     y: Screen.virtualY
     width: Screen.width
-    height: expanded ? lineHeight : edgeHeight
+    height: shown ? lineHeight : edgeHeight
     // From the taskbar (Setup) there is no line, only the panel.
     property string placeMode: headline.placeMode()
     visible: placeMode === "top"
-    color: theme.bg || "#0f1014"
+    color: dockMode === "hide" ? "transparent" : (theme.bg || "#0f1014")
     title: "Headline"
+
+    Rectangle {  // the line's background; hiding, its last 2 px are the edge
+        objectName: "lineBackground"
+        width: line.width
+        height: line.lineHeight
+        y: line.slideY
+        color: line.theme.bg || "#0f1014"
+    }
 
     function refresh() {
         view = headline.view()
@@ -182,8 +198,8 @@ Window {
 
     Row {
         id: row
-        visible: line.expanded
-        y: (line.lineHeight - height) / 2
+        visible: line.shown
+        y: (line.lineHeight - height) / 2 + line.slideY
         x: 4
         spacing: 4
 
@@ -257,10 +273,10 @@ Window {
 
     Row {  // far right: the widgets, each with its question's answers when it asks
         id: widgetRow
-        visible: line.expanded
+        visible: line.shown
         anchors.right: parent.right
         anchors.rightMargin: 4
-        y: (line.lineHeight - height) / 2
+        y: (line.lineHeight - height) / 2 + line.slideY
         spacing: 4
         Repeater {
             model: line.widgets

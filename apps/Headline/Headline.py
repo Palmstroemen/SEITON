@@ -38,6 +38,7 @@ if __name__ == "__main__":
 from PySide6.QtCore import QObject, QPoint, QRect, QTimer, QTranslator, QUrl, Signal, Slot  # noqa: E402
 from PySide6.QtGui import QCursor, QGuiApplication  # noqa: E402
 from PySide6.QtQml import QQmlApplicationEngine  # noqa: E402
+from PySide6.QtQuick import QQuickWindow  # noqa: E402
 
 from core.brand import getenv  # noqa: E402
 from core.clock_sources import active_file, write_active  # noqa: E402
@@ -309,6 +310,9 @@ def dock(window, backend: HeadlineBackend) -> bool:
 def load_headline(model: HeadlineModel, app: QGuiApplication) -> QQmlApplicationEngine:
     """The Headline's window on the model (no root object when main.qml fails). Shared by main()
     and the tests, so both load it alike."""
+    # Hiding itself, the line's window is see-through while it slides (main.qml); on X11 a
+    # window has an alpha channel only when made with one - also one started always there.
+    QQuickWindow.setDefaultAlphaBuffer(True)
     engine = QQmlApplicationEngine()
     engine.addImageProvider("theme", ThemeIconProvider())
     backend = HeadlineBackend(model)

@@ -55,7 +55,7 @@ SETTINGS: Dict[str, Tuple[type, Any, Any]] = {
     # its room, or hiding itself until the pointer touches the edge.
     # Where it lives: a line at the top edge, or a panel from the taskbar (as the start menu).
     "Headline/place": (str, "top", {"top", "taskbar"}),
-    "Headline/dock": (str, "keep", {"keep", "hide"}),
+    "Headline/dock": (str, "hide", {"keep", "hide"}),  # hide: slides in at the top (2026-11-18)
     # SunTree's crown (examples/SunTree/Designdocument Krone.md, 5); line and radius as shares of R.
     "SunTree/lineT": (float, 0.7, (0.5, 0.85)),
     "SunTree/inner": (float, 0.2, (0.1, 0.35)),

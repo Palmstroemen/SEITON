@@ -88,8 +88,8 @@ def test_all_of_the_display_menu_moved_into_the_settings(config):
 
 def test_the_headline_keeps_its_room_or_hides_itself(config):
     # apps/Scope/Designdocument Headline.md, 1: as a taskbar can - always there, or hiding itself.
-    assert Settings().get("Headline/dock") == "keep"
-    assert Settings().set("Headline/dock", "hide") and Settings().get("Headline/dock") == "hide"
+    assert Settings().get("Headline/dock") == "hide"  # the default since 2026-11-18: slides in at the top
+    assert Settings().set("Headline/dock", "keep") and Settings().get("Headline/dock") == "keep"
     assert not Settings().set("Headline/dock", "sideways")
 
 

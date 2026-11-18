@@ -31,6 +31,8 @@ def world(tmp_path, monkeypatch):
     (root / META_DIR / "Templates.md").write_text("# Templates\nStandard\n")
     studio = _project(root / "Musikstudio")
     (studio / "01_Info").mkdir()
+    from core.settings import Settings
+    assert Settings().set("Headline/dock", "keep")  # most tests look at the open line
     return {"root": root.resolve(), "studio": studio.resolve()}
 
 
@@ -168,8 +170,41 @@ def test_hiding_itself_it_is_a_thin_edge_until_the_pointer_comes(hiding, started
     _call(line, "pointerLeft")
     _wait(app, 200)
     assert line.height() == line.property("lineHeight")  # not yet
-    _wait(app, 500)
-    assert line.height() <= 2  # gone about 0.5 s after the pointer left
+    _wait(app, 700)
+    assert line.height() <= 2  # gone about 0.5 s after the pointer left, slid out
+
+
+def _row_y(started):
+    return _find(started, "cwdButton").mapToItem(None, 0, 0).y()
+
+
+def test_hiding_itself_it_slides_in_and_out(hiding, started):
+    """It slides in from above and out again (2026-11-18), the window as high as the line
+    meanwhile: the pointer stays in it."""
+    app = started["app"]
+    line = _find(started, "headlineLine")
+    _settle(app)
+    _call(line, "pointerEntered")
+    _settle(app)
+    assert line.height() == line.property("lineHeight")
+    assert line.property("reveal") < 1 and _row_y(started) < 0  # still coming in
+    _wait(app, 300)
+    assert line.property("reveal") == 1 and _row_y(started) >= 0
+    _call(line, "pointerLeft")
+    import time
+    seen, end = [], time.monotonic() + 1.2  # 0.5 s, then 150 ms sliding out
+    while time.monotonic() < end:
+        app.processEvents()
+        time.sleep(0.005)
+        seen.append((line.property("reveal"), line.height()))
+    going = [(r, h) for r, h in seen if 0 < r < 1]
+    assert going and all(h == line.property("lineHeight") for _r, h in going)  # slid, the window high
+    assert line.property("reveal") == 0 and line.height() <= 2
+
+
+def test_always_there_it_does_not_slide(started):
+    line = _find(started, "headlineLine")
+    assert line.property("reveal") == 1 and _row_y(started) >= 0
 
 
 def test_while_a_dropdown_is_open_it_stays(hiding, started):
