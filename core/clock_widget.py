@@ -29,11 +29,11 @@ COMMANDS = ("start", "stop", "yes", "no")
 
 _WORDS = {
     "de": {"none": "Kein Projekt", "ask": "Arbeitest du noch an {project}?", "yes": "Ja", "no": "Nein",
-           "name": "Zeit", "stopped": "gestoppt",
+           "name": "Zeit", "stopped": "gestoppt", "spent": "{project}: heute {time} h",
            "stoppedTip": "Von Hand gestoppt: es wird nicht gezählt, bis du Start drückst.",
            "pausedTip": "Pause: die nächste Eingabe zählt weiter."},
     "en": {"none": "No project", "ask": "Still working on {project}?", "yes": "Yes", "no": "No",
-           "name": "Time", "stopped": "stopped",
+           "name": "Time", "stopped": "stopped", "spent": "{project}: {time} h today",
            "stoppedTip": "Stopped by hand: nothing is counted until you press Start.",
            "pausedTip": "Pause: the next input counts on."},
 }
@@ -155,7 +155,9 @@ def render(clock, ledger: Ledger, now: datetime, *, language: str,
     worked on last the time `shows` from their time files (spent); without, what the ledger
     counted today."""
     words = _words(language)
-    view: Dict[str, Any] = {"clock": clock.state}  # for the time screen (Stop also in a pause)
+    # A stopwatch in the Headline's CWD tab (2026-11-18): it beats while it counts, warns when
+    # stopped by hand; the time is in the tooltip, said as a duration (not a time of day).
+    view: Dict[str, Any] = {"clock": clock.state, "icon": "stopwatch"}  # clock: for the time screen
     project = clock.project
     if project is None:
         view.update(text=words["none"], state="calm")
@@ -169,12 +171,15 @@ def render(clock, ledger: Ledger, now: datetime, *, language: str,
                     project=str(project), short=_hours(today))
         # Stopped by hand looks other than a pause: else one forgets it and works for hours
         # without counting (review 2026-11-18, Z8).
+        said = words["spent"].format(project=Path(project).name, time=_hours(today))
+        view["tooltip"] = said
         if clock.state == "stopped":
             view["text"] += f" · {words['stopped']}"
             view["short"] += f" · {words['stopped']}"
-            view["tooltip"] = words["stoppedTip"]
+            view["tooltip"] = f"{said}\n{words['stoppedTip']}"
+            view["warn"] = True
         elif clock.state == "paused":
-            view["tooltip"] = words["pausedTip"]
+            view["tooltip"] = f"{said}\n{words['pausedTip']}"
         if clock.state in ("runs", "asks"):
             # The Headline counts on between views, to the second: from where today's time
             # would be naught (apps/Headline/widgets.py, counter).

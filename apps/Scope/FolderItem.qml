@@ -111,6 +111,9 @@ Rectangle {
     /// Small icon: the name in the middle beside the icon (the Headline, where it stands beside
     /// text buttons). Off, it stands at the top of the row, as Scope's rows lay it out.
     property bool centerName: false
+    /// Room after the name for what the user of the item puts in (the Headline: a widget's
+    /// icon in the CWD's tab).
+    property int trailingSpace: 0
     readonly property int smallIconBox: edgeIcon ? compactHeight : iconSmall
     property bool tabHoverDropEnabled: false
     property int tabHoverDropPx: 7
@@ -336,7 +339,8 @@ Rectangle {
     Drag.mimeData: (dragEnabled && dragPayload.length > 0) ? { "text/plain": dragPayload } : {}
     Drag.supportedActions: Qt.MoveAction
 
-    implicitWidth: {
+    implicitWidth: naturalWidth() + trailingSpace
+    function naturalWidth() {
         if (edgeIcon && style !== "largeIcon") {
             var tight = style === "smallIcon" ? smallIconBox + 4 + textMeasure.width + 8 : textMeasure.width + 16
             return Math.max(2 * compactHeight, tight)

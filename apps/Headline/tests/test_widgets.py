@@ -157,11 +157,11 @@ def test_elsewhere_it_names_its_project(clock):
     assert shown["text"] == "Küche · 2:15"
 
 
-def test_its_own_tooltip_comes_after_the_project(clock):
+def test_its_own_tooltip_stays_as_it_is(clock):
     _view(clock, text="Küche · 0:15 · gestoppt", state="calm", project="/p/Küche", short="0:15 · gestoppt",
-          tooltip="Stopped by hand.")
+          tooltip="Küche: stopped by hand.")
     [shown] = widgets.shown(here="/p/Küche")
-    assert shown["text"] == "0:15 · gestoppt" and shown["tooltip"] == "Küche: Stopped by hand."
+    assert shown["text"] == "0:15 · gestoppt" and shown["tooltip"] == "Küche: stopped by hand."
 
 
 @pytest.mark.parametrize("project", ["Küche", 5, None])
@@ -169,3 +169,25 @@ def test_a_project_that_is_no_path_keeps_the_long_text(clock, project):
     _view(clock, text="Küche · 2:15", state="active", project=project, short="2:15")
     [shown] = widgets.shown(here="Küche")
     assert shown["text"] == "Küche · 2:15"
+
+
+# --- an icon in the CWD's tab instead of a button (2026-11-18) ---------------------------------
+
+def test_a_widget_may_show_as_a_known_icon(clock):
+    _view(clock, text="Küche · 2:15", state="active", icon="stopwatch")
+    [shown] = widgets.shown()
+    assert shown["icon"] == "stopwatch" and shown["warn"] is False
+
+
+@pytest.mark.parametrize("icon", ["rocket", "../x", 5, None])
+def test_an_unknown_icon_is_none(clock, icon):
+    _view(clock, text="Küche · 2:15", state="active", icon=icon)
+    [shown] = widgets.shown()
+    assert shown["icon"] == ""
+
+
+def test_a_widget_may_warn(clock):
+    _view(clock, text="Küche · 0:15", state="calm", icon="stopwatch", warn=True)
+    assert widgets.shown()[0]["warn"] is True
+    _view(clock, text="Küche · 0:15", state="calm", icon="stopwatch", warn="yes")
+    assert widgets.shown()[0]["warn"] is False

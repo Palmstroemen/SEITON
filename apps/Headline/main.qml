@@ -12,6 +12,8 @@ Window {
     property var view: headline.view()
     // What other programs put in (apps/Headline/widgets.py): the time tracking first.
     property var widgets: headline.widgets()
+    // Widgets with an icon sit in the CWD's tab (WidgetIcon.qml), the others at the right.
+    readonly property var iconWidgets: (widgets || []).filter(function(w) { return !!w.icon })
     // A widget's counter counts on to the second (apps/Headline/widgets.py, counter).
     property real nowSeconds: Date.now() / 1000
     Timer {
@@ -219,8 +221,29 @@ Window {
             textColor: line.theme.text || "#e6e6e6"
             textSize: line.baseFont
             textBold: true
+            trailingSpace: line.iconWidgets.length > 0 ? tabIcons.implicitWidth + 4 : 0
             allowDrops: true
             onDropReceived: function(payload) { line.dropped(payload, line.view.cwd) }
+
+            Row {  // the widgets with an icon (the clock's stopwatch), at the end of the tab
+                id: tabIcons
+                anchors.right: parent.right
+                anchors.rightMargin: 8
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 6
+                Repeater {
+                    model: line.iconWidgets
+                    delegate: WidgetIcon {
+                        kind: modelData.icon
+                        widgetId: modelData.id
+                        beating: modelData.state === "active"
+                        warn: !!modelData.warn
+                        tip: modelData.tooltip || modelData.text
+                        color: line.theme.text || "#e6e6e6"
+                        onOpened: function(widgetId) { headline.widgetOpen(widgetId) }
+                    }
+                }
+            }
             onActivate: {
                 if (climbList.visible) { climbList.close(); cascade.close(); return }
                 climbList.entries = headline.climb()
@@ -282,21 +305,24 @@ Window {
             model: line.widgets
             delegate: Row {
                 spacing: 2
-                FolderItem {
-                    objectName: "widget"
-                    label: modelData.counter ? line.counted(modelData.counter) : modelData.text
-                    style: "text"
-                    compactHeight: line.lineHeight - 4
-                    fillColor: modelData.state === "active" ? (line.theme.smallButtonActiveBg || "#2c3a55")
-                                                            : (line.theme.pill || "#2c3040")
-                    strokeColor: modelData.state === "asking" ? (line.theme.lensFrame || "#d97706")
-                                                              : (line.theme.pillBorder || "#3a3f52")
-                    textColor: modelData.state === "calm" ? (line.theme.setupMuted || "#9aa0ad")
-                                                          : (line.theme.text || "#e6e6e6")
-                    textSize: line.baseFont
-                    ToolTip.visible: hoverActive && modelData.tooltip.length > 0
-                    ToolTip.text: modelData.tooltip
-                    onActivate: headline.widgetOpen(modelData.id)
+                Repeater {  // its button - not for a widget in the CWD's tab (an icon): only its question
+                    model: modelData.icon ? [] : [modelData]
+                    delegate: FolderItem {
+                        objectName: "widget"
+                        label: modelData.counter ? line.counted(modelData.counter) : modelData.text
+                        style: "text"
+                        compactHeight: line.lineHeight - 4
+                        fillColor: modelData.state === "active" ? (line.theme.smallButtonActiveBg || "#2c3a55")
+                                                                : (line.theme.pill || "#2c3040")
+                        strokeColor: modelData.state === "asking" ? (line.theme.lensFrame || "#d97706")
+                                                                  : (line.theme.pillBorder || "#3a3f52")
+                        textColor: modelData.state === "calm" ? (line.theme.setupMuted || "#9aa0ad")
+                                                              : (line.theme.text || "#e6e6e6")
+                        textSize: line.baseFont
+                        ToolTip.visible: hoverActive && modelData.tooltip.length > 0
+                        ToolTip.text: modelData.tooltip
+                        onActivate: headline.widgetOpen(modelData.id)
+                    }
                 }
                 Text {  // what it asks, before the answers
                     objectName: "widgetQuestion"

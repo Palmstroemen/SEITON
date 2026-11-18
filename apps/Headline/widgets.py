@@ -15,6 +15,10 @@ not the clock. A widget may be missing, or be replaced by another one.
   project (and `shortPrefix` for the counter). While the Headline is in that project, which it
   names already at the left of its line, it shows the short text and names the project in the
   tooltip (2026-11-18).
+- An **icon** (optional): one the Headline knows (ICONS). Such a widget sits as that icon in the
+  CWD's tab instead of a button at the right; it beats while active, is pale while calm, and
+  `warn` (true) marks it (the clock stopped by hand). Its text is then only in the tooltip; at
+  the right only its question, while it asks (2026-11-18).
 - It **is told** by command files dropped into `<folder>/commands/`: an answer to its question,
   or one of the commands it declared.
 - Its **screen is its own**: a click runs its `open` command.
@@ -36,6 +40,7 @@ WORD = re.compile(r"^[a-z][a-z0-9_]{0,23}$")  # widget ids, answer ids, commands
 MAX_TEXT = 80
 MAX_ITEMS = 10
 DEFAULT_STALE = 60
+ICONS = ("stopwatch",)  # drawn by the Headline itself (WidgetIcon.qml)
 
 
 def widgets_dir() -> Path:
@@ -134,7 +139,9 @@ def view_of(widget: Dict[str, Any], now: Optional[float] = None) -> Optional[Dic
             "question": _question(data.get("question")), "items": _items(data.get("items")),
             "counter": _counter(data.get("counter")),
             "project": project if isinstance(project, str) and Path(project).is_absolute() else "",
-            "short": _text(data.get("short")) or ""}
+            "short": _text(data.get("short")) or "",
+            "icon": data.get("icon") if data.get("icon") in ICONS else "",
+            "warn": data.get("warn") is True}
 
 
 def _in_project(view: Dict[str, Any], here: Optional[str]) -> Dict[str, Any]:
@@ -146,8 +153,7 @@ def _in_project(view: Dict[str, Any], here: Optional[str]) -> Dict[str, Any]:
     counter = view["counter"]
     if counter is not None and "shortPrefix" in counter:
         counter = {**counter, "prefix": counter["shortPrefix"]}
-    return {**view, "text": view["short"], "counter": counter,
-            "tooltip": f"{name}: {view['tooltip']}" if view["tooltip"] else name}
+    return {**view, "text": view["short"], "counter": counter, "tooltip": view["tooltip"] or name}
 
 
 def shown(now: Optional[float] = None, here: Optional[str] = None) -> List[Dict[str, Any]]:

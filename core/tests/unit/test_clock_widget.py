@@ -255,3 +255,27 @@ def test_the_short_text_keeps_stopped(tmp_path, ledger):
 def test_without_a_project_no_short_text(tmp_path, ledger):
     view = cw.render(_clock(tmp_path, ledger), ledger, NOW, language="en")
     assert "project" not in view and "short" not in view
+
+
+# --- a stopwatch in the CWD's tab (2026-11-18): the time only in the tooltip, as a duration -----
+
+def test_the_clock_shows_as_a_stopwatch(tmp_path, ledger):
+    view = cw.render(_clock(tmp_path, ledger), ledger, NOW, language="de")
+    assert view["icon"] == "stopwatch" and "warn" not in view
+
+
+def test_while_it_runs_the_tooltip_says_the_time_as_a_duration(tmp_path, ledger):
+    clock = _clock(tmp_path, ledger)
+    ledger.add(Path("/p/Küche"), NOW.date(), timedelta(hours=2))
+    clock.set_project(Path("/p/Küche"), "Oliver", NOW - timedelta(minutes=15))
+    assert cw.render(clock, ledger, NOW, language="de")["tooltip"] == "Küche: heute 2:15 h"
+    assert cw.render(clock, ledger, NOW, language="en")["tooltip"] == "Küche: 2:15 h today"
+
+
+def test_stopped_by_hand_it_warns_and_says_why(tmp_path, ledger):
+    clock = _clock(tmp_path, ledger)
+    clock.set_project(Path("/p/Küche"), "Oliver", NOW - timedelta(minutes=15))
+    clock.stop(NOW)
+    view = cw.render(clock, ledger, NOW, language="de")
+    assert view["warn"] is True
+    assert view["tooltip"] == "Küche: heute 0:15 h\n" + cw._words("de")["stoppedTip"]

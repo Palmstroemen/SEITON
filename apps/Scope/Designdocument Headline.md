@@ -137,6 +137,13 @@ does every 15 s.
   and gives its text without it (`short`, `2:15`). While the Headline is in that project, which
   stands already at the left of the line, it shows the short text and names the project in the
   tooltip; elsewhere the full text.
+- **As an icon in the CWD's tab** (2026-11-18): a widget may name an icon the Headline draws
+  (`icon`, so far `stopwatch`). It then sits as that icon at the end of the CWD's tab instead of
+  a button at the right: it beats like a heart while active (the line is mostly hidden: one sees
+  at once that it counts), is pale while calm, red and struck through with `warn` (the clock
+  stopped by hand). Its text is the tooltip - the clock says its time there as a duration
+  ("DesertGreener: heute 2:15 h"), not like a time of day. A click opens its screen. At the right
+  only its question stands, while it asks; so the right stays free and no standard folder hides.
 - **It is told** what the user did by command files dropped into the same folder (`yes`, `no`,
   `start`, `stop`); the widget looks for them. In the clock's sandbox only this folder is
   writable (`cli/seiton_clock.py`, its binds).

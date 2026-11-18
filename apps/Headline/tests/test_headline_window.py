@@ -691,3 +691,86 @@ def test_the_cwd_s_name_stands_on_the_line_of_the_folders(started):
     cwd = _find(started, "cwdButton")
     folder = _all(started, "standardFolder")[0]
     assert abs(_text_middle(cwd, "Musikstudio") - _text_middle(folder, "01_Info")) <= 1
+
+
+# --- the clock as a stopwatch in the CWD's tab (2026-11-18) ------------------------------------
+
+def _stopwatch_view(folder, **view):
+    import json
+    base = {"text": "Musikstudio · 2:15", "state": "active", "icon": "stopwatch",
+            "tooltip": "Musikstudio: 2:15 h today"}
+    base.update(view)
+    (folder / "view.json").write_text(json.dumps(base))
+
+
+def test_a_widget_with_an_icon_sits_in_the_cwd_s_tab(a_clock, started):
+    _stopwatch_view(a_clock)
+    started["engine"]._backend.checkWidgets()
+    _settle(started["app"])
+    assert _all(started, "widget") == []  # nothing at the right
+    [icon] = _all(started, "widgetIcon")
+    cwd = _find(started, "cwdButton")
+    x = icon.mapToItem(cwd, 0, 0).x()
+    assert 0 < x and x + icon.property("width") <= cwd.property("width")  # inside the tab
+    assert icon.property("tip") == "Musikstudio: 2:15 h today"
+
+
+def test_while_it_counts_it_beats_else_not(a_clock, started):
+    _stopwatch_view(a_clock)
+    started["engine"]._backend.checkWidgets()
+    _settle(started["app"])
+    [icon] = _all(started, "widgetIcon")
+    assert icon.property("beating") is True and icon.property("warn") is False
+    _stopwatch_view(a_clock, state="calm")
+    started["engine"]._backend.checkWidgets()
+    _settle(started["app"])
+    [icon] = _all(started, "widgetIcon")
+    assert icon.property("beating") is False and icon.property("opacity") < 1
+    _stopwatch_view(a_clock, state="calm", warn=True)
+    started["engine"]._backend.checkWidgets()
+    _settle(started["app"])
+    [icon] = _all(started, "widgetIcon")
+    assert icon.property("warn") is True and icon.property("opacity") == 1
+
+
+def test_a_click_on_the_icon_opens_its_screen_not_the_cwd(a_clock, started, monkeypatch):
+    from apps.Headline import widgets
+    opened = []
+    monkeypatch.setattr(widgets, "open_screen", lambda widget_id, *a, **k: opened.append(widget_id) or True)
+    _stopwatch_view(a_clock)
+    started["engine"]._backend.checkWidgets()
+    _settle(started["app"])
+    [icon] = _all(started, "widgetIcon")
+    QMetaObject.invokeMethod(icon, "open")
+    _settle(started["app"])
+    assert opened == ["clock"]
+    assert not _find(started, "climbList").property("visible")
+
+
+def test_asking_its_question_stands_at_the_right_without_a_button(a_clock, started):
+    _stopwatch_view(a_clock, state="asking", question={
+        "text": "Still working on Musikstudio?",
+        "answers": [{"id": "yes", "label": "Yes"}, {"id": "no", "label": "No"}]})
+    started["engine"]._backend.checkWidgets()
+    _settle(started["app"])
+    assert _all(started, "widget") == []
+    [question] = _all(started, "widgetQuestion")
+    assert question.property("visible") and question.property("text") == "Still working on Musikstudio?"
+    assert [o.property("label") for o in _all(started, "widgetAnswer")] == ["Yes", "No"]
+
+
+def test_a_real_click_on_the_icon_reaches_it_not_the_tab(a_clock, started, monkeypatch):
+    from PySide6.QtCore import QPoint, Qt
+    from PySide6.QtTest import QTest
+    from apps.Headline import widgets
+    opened = []
+    monkeypatch.setattr(widgets, "open_screen", lambda widget_id, *a, **k: opened.append(widget_id) or True)
+    _stopwatch_view(a_clock)
+    started["engine"]._backend.checkWidgets()
+    _settle(started["app"])
+    [icon] = _all(started, "widgetIcon")
+    middle = icon.mapToItem(None, icon.property("width") / 2, icon.property("height") / 2)
+    QTest.mouseClick(started["window"], Qt.LeftButton, Qt.NoModifier, QPoint(int(middle.x()), int(middle.y())))
+    _wait(started["app"], 400)  # the tab's single click waits for a double click
+    assert opened == ["clock"]
+    assert not _find(started, "climbList").property("visible")
