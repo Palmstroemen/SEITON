@@ -11,7 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.brand import META_DIR, NAME, env_name, getenv
-from core.acl import ACLPolicy
+from core.acl import ACLPolicy, rules_apart
 from core.acl_enforcement import configured_mode
 from core.acl_nextcloud import BITS, FULL_MASK, NEXTCLOUD_PERMISSIONS, local_tree, plan, read_nextcloud_md, rights_files
 from core.acl_view import RIGHTS_ORDER, ACLView
@@ -204,7 +204,7 @@ def _sync(path: str, plan_only: bool, dry_run: bool, yes: bool, as_json: bool) -
         exists, children = with_embryos(*local_tree(view.project_root), embryos)
         result = plan(ACLPolicy.for_tree(view.project_root), accounts, exists, children,
                       base_groups=team_groups(settings), readable=readable_paths(embryos),
-                      protected=rights_files(all_paths(children)))
+                      protected=rights_files(all_paths(children)), apart=rules_apart(view.project_root))
         return _show_plan(view.project_root, result, as_json)
 
     missing = [key for key in ("url", "folder", "group") if not settings.get(key)]

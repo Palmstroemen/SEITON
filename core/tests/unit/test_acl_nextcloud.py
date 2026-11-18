@@ -278,3 +278,31 @@ def test_rights_files_finds_them_in_every_settings_folder():
 
     assert rights_files(paths) == [f"/{META_DIR}/ACLs.md", f"/Haus/{META_DIR}/ACLs-history", f"/Haus/{META_DIR}/Embryos",
                                    f"/Haus/{META_DIR}/Nextcloud.md", f"/x/{META_DIR}/Embryos.json"]
+
+
+def test_a_subproject_with_rules_of_its_own_is_ruled_by_them_in_the_cloud(project):
+    """As at home ("docs/Prüfung 2026-11-18.md", C1): in a subproject with an ACLs.md of its
+    own, that file decides - the parent's people have nothing there unless it names them."""
+    from core.acl import rules_apart
+
+    kunde = project / "Job" / "Kunde"
+    (kunde / META_DIR).mkdir(parents=True)
+    (kunde / META_DIR / "Project.md").write_text("# Kunde\n")
+    (kunde / META_DIR / "ACLs.md").write_text(
+        "# Permissions\n\n## Kunde\n- /*: read, write\n\n## Prüfer\n- /Berichte/: read\n\n"
+        "# Users\nTom: Kunde\nOliver: Prüfer\n")
+    (kunde / "Berichte").mkdir()
+    exists, children = local_tree(project)
+    apart = rules_apart(project)
+    assert [prefix for prefix, _policy in apart] == ["/Job/Kunde"]
+    result = plan(ACLPolicy.for_tree(project), ACCOUNTS, exists, children, apart=apart)
+    rules = {(r.kind, r.account, r.path): set(r.allowed) for r in result.rules}
+
+    anna, tom, oliver = _of(rules, "anna"), _of(rules, "tom"), _of(rules, "oliver")
+    assert _effective(anna, "/Job") == {"read", "write", "create"}
+    assert _effective(anna, "/Job/Kunde") == set()  # Team at home, not named in Kunde
+    assert _effective(tom, "/Job/Kunde") == {"read", "write", "create"}
+    assert _effective(tom, "/Job") == {"read"}  # only on the way there
+    assert _effective(oliver, "/Job/Kunde") == {"read"}  # on the way to Berichte
+    assert _effective(oliver, "/Job/Kunde/Berichte") == {"read"}
+    assert _effective(oliver, "/Familie") == {"read", "write", "create"}  # Admin at home

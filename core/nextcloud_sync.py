@@ -1,7 +1,7 @@
 # nextcloud_sync.py - bring a project's ACLs.md and embryos into its Nextcloud Team folder
 #
 # What `myacl sync` does, as one piece the CLI and the MyOS core service share
-# ("cloud/nextcloud/Designdocument MyOS Core Service.md", 8, step 2): compare the Team folder
+# ("cloud/nextcloud/Designdocument SEITON Core Service.md", 8, step 2): compare the Team folder
 # with what MyOS says - the rules of ACLs.md (core/acl_nextcloud.py), the embryos of the
 # templates (core/cloud_embryos.py) and the tags of Tags.md (as the instance's collaborative
 # tags; never removed: others on the instance may use them) - and send what differs. The project may be a local copy
@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Dict, List, Tuple
 
-from core.acl import ACLPolicy
+from core.acl import ACLPolicy, rules_apart
 from core.acl_edit import may_change_acls
 from core.acl_nextcloud import Change, Plan, diff, plan, read_nextcloud_md, rights_files, updates
 from core.cloud_embryos import EmbryoChange, EmbryoSet, cloud_paths, compare as compare_embryos, embryo_sets, readable_paths
@@ -81,7 +81,8 @@ class NextcloudSync:
         there = [e for e, c in zip(self.embryos, embryo_changes) if not c.missing]
         exists, children = with_embryos(*tree_functions(tree), there)
         result = plan(self.policy, self.accounts, exists, children, base_groups=self.groups,
-                      readable=readable_paths(there), protected=rights_files(all_paths(children)))
+                      readable=readable_paths(there), protected=rights_files(all_paths(children)),
+                      apart=rules_apart(self.project_root))
         missing = set(all_project_tags(self.project_root)) - set(self.dav.system_tags())
         return Comparison(result, diff(result.rules, tree), embryo_changes, sorted(missing, key=str.lower))
 

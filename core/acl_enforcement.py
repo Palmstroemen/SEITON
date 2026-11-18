@@ -14,10 +14,11 @@ MODES = ("off", "monitor", "enforce")
 
 
 def configured_mode() -> str:
-    """The ACL mode set for this run (MYOS_ACL_MODE): off (default), monitor or enforce.
-    Scope's checks and the suggested folders both follow it."""
+    """The ACL mode set for this run (SEITON_ACL_MODE): off (default, also when it is not set
+    or empty), monitor or enforce. Scope's checks and the suggested folders both follow it.
+    Security: a value it does not know (a typo) enforces - it fails closed, never open."""
     mode = str(getenv("ACL_MODE") or "off").strip().lower()
-    return mode if mode in MODES else "off"
+    return mode if mode in MODES else "enforce"
 
 
 def allowed_at(path: Union[str, Path], action: str, user: Optional[str] = None) -> bool:

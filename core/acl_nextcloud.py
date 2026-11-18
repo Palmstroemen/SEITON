@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Dict, FrozenSet, Iterable, List, Optional, Set, Tuple
 
-from core.acl import ACLPolicy, _nearest_rules, _normalize_path, _rule_base
+from core.acl import RIGHTS_FILES, ACLPolicy, _nearest_rules, _normalize_path, _rule_base
 from core.brand import META_DIR
 
 # MyOS right -> Nextcloud permissions. execute and change have none; share is never given
@@ -98,6 +98,7 @@ def plan(
     base_groups: Iterable[str] = (),
     readable: Iterable[Tuple[str, Optional[str]]] = (),
     protected: Iterable[str] = (),
+    apart: Iterable[Tuple[str, ACLPolicy]] = (),
 ) -> Plan:
     """
     The Nextcloud rules for policy (ACLPolicy.for_tree of the project, whose root is the
@@ -109,21 +110,29 @@ def plan(
     each for who may read where it is born (core/cloud_embryos.readable_paths); those not
     there yet are skipped. protected: the rights and sync
     files of .MyOS folders (rights_files): only who may change the rights there (change on that
-    .MyOS/ACLs.md) may write them, everyone else keeps at most read.
+    .MyOS/ACLs.md) may write them, everyone else keeps at most read. apart: the subprojects
+    with an ACLs.md of their own (core.acl.rules_apart): there their rules decide, not policy's.
     """
     result = Plan()
-    rules = _mappable_rules(policy, result.notes)
-    if any("change" in r.rights or "*" in r.rights for role_rules in rules.values() for r in role_rules):
+    # Each part of the tree with the rules that govern it: the project, and every subproject
+    # with an ACLs.md of its own (its rule paths relative to it).
+    scopes = [("/", policy, _mappable_rules(policy, result.notes))]
+    scopes += [(prefix, sub, _mappable_rules(sub, result.notes)) for prefix, sub in apart]
+    if any("change" in r.rights or "*" in r.rights
+           for _prefix, _policy, rules in scopes for role_rules in rules.values() for r in role_rules):
         result.notes.append("change is not copied: who may manage the rules is set for the whole Team folder")
     missing: Set[str] = set()
     for group in base_groups:
         result.rules.append(PlannedRule("/", "group", group, frozenset()))
-    for person, roles in sorted(policy.users.items()):
+    people = sorted({person for _prefix, scope, _rules in scopes for person in scope.users})
+    for person in people:
         account = accounts.get(person)
         if not account:
-            result.notes.append(f"{policy.display_name(person)} has no Nextcloud account in # Accounts: no rules")
+            named = next(scope for _prefix, scope, _rules in scopes if person in scope.users)
+            result.notes.append(f"{named.display_name(person)} has no Nextcloud account in # Accounts: no rules")
             continue
-        for path, allowed, way in _person_rules([rules.get(role, []) for role in roles], exists, children, missing, list(readable), list(protected)):
+        mine = [(prefix, [rules.get(role, []) for role in scope.users.get(person, ())]) for prefix, scope, rules in scopes]
+        for path, allowed, way in _person_rules(mine, exists, children, missing, list(readable), list(protected)):
             result.rules.append(PlannedRule(path, "user", account, allowed, traverse=way))
     for path in sorted(missing):
         result.notes.append(f"{path} is not there yet: its rules follow when it exists")
@@ -132,7 +141,6 @@ def plan(
 
 # In a .MyOS folder: what manages the rights and the sync (ACLs.md as in MyOS, where change
 # grants writing it; its history, the cloud settings, the embryos myacl sync uploads).
-RIGHTS_FILES = ("ACLs.md", "ACLs-history", "Nextcloud.md", "Embryos.json", "Embryos")
 
 
 def rights_files(paths: Iterable[str]) -> List[str]:
@@ -180,14 +188,25 @@ def _below(path: str, top: str) -> bool:
     return path == top or path.startswith(top + "/")
 
 
+def _within(prefix: str, path: str) -> str:
+    """path ("/" for the root) as seen from prefix, the root of a part of the tree."""
+    if prefix == "/":
+        return path
+    rest = path[len(prefix):]
+    return rest if rest else "/"
+
+
 def _person_rules(
-    role_rules: List[list], exists, children, missing: Set[str], readable: List[Tuple[str, Optional[str]]] = (),
-    protected: List[str] = (),
+    scopes: List[Tuple[str, List[list]]], exists, children, missing: Set[str],
+    readable: List[Tuple[str, Optional[str]]] = (), protected: List[str] = (),
 ) -> List[Tuple[str, FrozenSet[str], bool]]:
+    """scopes: (prefix, the rules of each of the person's roles there) - "/" the project, then
+    the subprojects with rules of their own; the deepest prefix above a path decides it."""
     opened: Dict[str, bool] = {}  # readable path -> read for this person, once they have rights at all
 
     def own_rights(path: str) -> Set[str]:
-        key = _normalize_path(path)
+        prefix, role_rules = max(((p, r) for p, r in scopes if _below(path, p) or p == "/"), key=lambda s: len(s[0]))
+        key = _normalize_path(_within(prefix, path))
         found: Set[str] = set()
         for rules in role_rules:
             for rule in _nearest_rules(rules, key):
@@ -212,13 +231,17 @@ def _person_rules(
         return allowed
 
     bases = {"/"}
-    for rules in role_rules:
-        for rule in rules:
-            base = _rule_base(rule.path) or "/"
-            if exists(base):
-                bases.add(base)
-            else:
-                missing.add(base)
+    for prefix, role_rules in scopes:
+        if prefix != "/" and exists(prefix):
+            bases.add(prefix)  # where other rules begin
+        for rules in role_rules:
+            for rule in rules:
+                base = _rule_base(rule.path) or "/"
+                base = base if prefix == "/" else (prefix if base == "/" else prefix + base)
+                if exists(base):
+                    bases.add(base)
+                else:
+                    missing.add(base)
     if any(rights(base) for base in bases):
         for path, reader in readable:
             if exists(path):

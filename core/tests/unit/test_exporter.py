@@ -192,3 +192,27 @@ def test_export_subproject_uses_runtime_inherited_templates():
         package_root = result.package_path
         assert (package_root / "finanz" / "note.txt").exists()
         assert (package_root / META_DIR / "Templates" / "Standard" / "admin").exists()
+
+
+def test_export_leaves_out_the_trash_and_the_audit_log(tmp_path):
+    """What was deleted and who did what stays home ("docs/Prüfung 2026-11-18.md", D1): neither
+    the project's trash nor its ACL audit log go into a package, nor those of a subproject."""
+    project_root = tmp_path / "Project"
+    _create_project(project_root)
+    (project_root / META_DIR / "Trash" / "files").mkdir(parents=True)
+    (project_root / META_DIR / "Trash" / "files" / "Gelöscht.md").write_text("weg")
+    (project_root / META_DIR / "audit.log").write_text("anna write /x\n")
+    sub = project_root / "Bereich" / "Kunde"  # a subproject inside the exported folder
+    _create_project(sub)
+    (sub / META_DIR / "Trash").mkdir()
+    (sub / META_DIR / "Trash" / "alt.txt").write_text("weg")
+    (sub / META_DIR / "audit.log").write_text("karl read /y\n")
+    (sub / "Brief.md").write_text("Brief")
+
+    package = export_subtree(project_root / "Bereich", tmp_path / "exports").package_path
+
+    assert (package / "Bereich" / "Kunde" / "Brief.md").exists()
+    assert (package / "Bereich" / "Kunde" / META_DIR / "Project.md").exists()
+    assert (package / META_DIR / "Project.md").exists()
+    found = [p.relative_to(package) for p in package.rglob("*")]
+    assert not [p for p in found if p.name in ("Trash", "audit.log")], found

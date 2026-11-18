@@ -63,3 +63,11 @@ def test_a_changed_acls_md_counts_at_once(tmp_path):
     acls = a / META_DIR / "ACLs.md"
     acls.write_text(acls.read_text().replace("/*: *", "/*: read"))
     assert not api.acl_allows("write", a / "Inbox")
+
+
+def test_write_without_change_does_not_rename_the_rules(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", A2: renaming ACLs.md away would remove the rules."""
+    a = _project(tmp_path / "A", "read, write, delete")
+    acls = a / META_DIR / "ACLs.md"
+    assert ScopeApi(str(a)).rename_entry(str(acls), "ACLs-alt") is None
+    assert acls.exists()

@@ -126,8 +126,18 @@ def _copy_templates(export_root: Path, package_path: Path) -> None:
         _copy_tree_no_symlinks(source, target_root / template_name)
 
 
+# What stays home in every settings folder: the trash (what was deleted) and the ACL audit log
+# (who did what). Security: a package passed on must not carry them.
+PRIVATE = ("Trash", "audit.log")
+
+
+def _private(path: Path) -> bool:
+    return path.name in PRIVATE and path.parent.name == META_DIR
+
+
 def _copy_tree_no_symlinks(src: Path, dst: Path, skip: Iterable[str] = ()) -> None:
-    """Copy src to dst without symlinks; skip: names of folders directly in src left out."""
+    """Copy src to dst without symlinks and without PRIVATE entries of a settings folder;
+    skip: names of folders directly in src left out."""
     if not src.exists():
         raise FileNotFoundError(f"Source path not found: {src}")
 
@@ -139,11 +149,11 @@ def _copy_tree_no_symlinks(src: Path, dst: Path, skip: Iterable[str] = ()) -> No
 
         # Filter out symlink dirs
         dirs[:] = [d for d in dirs if not (root_path / d).is_symlink()
-                   and not (root_path == src and d in skip)]
+                   and not (root_path == src and d in skip) and not _private(root_path / d)]
 
         for name in files:
             src_file = root_path / name
-            if src_file.is_symlink():
+            if src_file.is_symlink() or _private(src_file):
                 continue
             target_file = target_root / name
             shutil.copy2(src_file, target_file)

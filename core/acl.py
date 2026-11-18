@@ -22,6 +22,18 @@ def _normalize_role(name: str) -> str:
     return name.strip().lower()
 
 
+# What manages rights and the sync in a settings folder: only who has "change" writes, moves or
+# deletes it (the Nextcloud adapter holds it so too, core/acl_nextcloud.py).
+RIGHTS_FILES = ("ACLs.md", "ACLs-history", "Nextcloud.md", "Embryos.json", "Embryos")
+
+
+def manages_rights(path_key: str) -> bool:
+    """Whether path (as written in ACLs.md) is a settings folder or a RIGHTS_FILES entry right
+    inside one: writing, moving or deleting it changes who may do what."""
+    parent, _, name = str(path_key or "").rstrip("/").rpartition("/")
+    return name == META_DIR or (name in RIGHTS_FILES and parent.rpartition("/")[2] == META_DIR)
+
+
 def _normalize_path(path: str) -> str:
     normalized = path.strip()
     if normalized == "/*":
@@ -261,12 +273,22 @@ class ACLAuthorizer:
         user_key = str(username or "").strip().lower()
         path_key = _normalize_path(path)
         right_key = str(right or "read").strip().lower()
+        # Security: rights are changed with "change" only, also by moving or deleting ACLs.md.
+        if right_key in {"write", "delete"} and manages_rights(path_key):
+            if not self._user_may(user_key, path_key, "change"):
+                return False
+        return self._user_may(user_key, path_key, right_key)
+
+    def _user_may(self, user_key: str, path_key: str, right_key: str) -> bool:
         # "## Everyone" only gives rights, the same for both backends.
         everyone = self.policy.everyone_rights(user_key, path_key)
         if "*" in everyone or right_key in everyone:
             return True
         if self.backend == "casbin" and self._enforcer is not None:
-            return bool(self._enforcer.enforce(user_key, path_key, right_key))
+            # Security: asked per role of the person, never with the person's name as a
+            # subject - a name like a role's would get that role's rights.
+            return any(bool(self._enforcer.enforce(role, path_key, right_key))
+                       for role in self.policy.roles_for_user(user_key))
         for role in self.policy.roles_for_user(user_key):
             if self.policy.can_access(role, path_key, right_key):
                 return True
@@ -292,6 +314,20 @@ def find_acl_project_root(path) -> Optional[Path]:
                 return candidate
     except OSError:
         return None
+    return found
+
+
+def rules_apart(root) -> List[Tuple[str, "ACLPolicy"]]:
+    """The subprojects below root governed by an ACLs.md of their own (also those below them),
+    each as (its path from root, "/Job/Kunde"; its rules for its tree, ACLPolicy.for_tree) -
+    for tools that copy root's rules elsewhere and must not let root's rules reach in there."""
+    root = Path(root).resolve()
+    found: List[Tuple[str, ACLPolicy]] = []
+    for folder, dirs, _files in os.walk(root):
+        current = Path(folder)
+        if current != root and (current / META_DIR / "ACLs.md").is_file() and (current / META_DIR / "Project.md").is_file():
+            found.append(("/" + current.relative_to(root).as_posix(), ACLPolicy.for_tree(current)))
+        dirs[:] = sorted(d for d in dirs if not d.startswith("."))
     return found
 
 
@@ -393,9 +429,8 @@ m = g(r.sub, p.sub) && pathMatch(r.obj, p.obj) && nearestRule(r.obj, p.obj, p.su
             for right in rights:
                 enforcer.add_policy(role, rule.path, right)
 
-    for user, roles in policy.users.items():
-        for role in roles:
-            enforcer.add_grouping_policy(user, role)
+    # No grouping policies: people and roles share no names here (can_user_access asks per
+    # role), so g() only says a role is itself.
     return enforcer
 
 

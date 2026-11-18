@@ -69,3 +69,15 @@ def test_without_rules_or_enforcement_everything_is_allowed(tmp_path, monkeypatc
     for mode in ("off", "monitor"):
         monkeypatch.setenv(env_name("ACL_MODE"), mode)
         assert allowed_at(root / "Arbeit" / "Geheim" / "x.md", "write")
+
+
+def test_an_unknown_mode_enforces(monkeypatch):
+    """A typo must not switch the checks off ("docs/Prüfung 2026-11-18.md", A6; ACL_ROLLOUT 1)."""
+    from core.acl_enforcement import configured_mode
+
+    for value, mode in (("enforec", "enforce"), ("ENFORCE", "enforce"), ("monitor", "monitor"),
+                        ("off", "off"), ("", "off")):
+        monkeypatch.setenv(env_name("ACL_MODE"), value)
+        assert configured_mode() == mode, value
+    monkeypatch.delenv(env_name("ACL_MODE"))
+    assert configured_mode() == "off"

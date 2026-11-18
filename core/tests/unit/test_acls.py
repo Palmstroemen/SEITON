@@ -163,6 +163,55 @@ def _build_authorizer_fixture(backend: str):
     return ACLAuthorizer(policy, backend=backend)
 
 
+@pytest.mark.parametrize("backend", ["legacy", "casbin"])
+def test_a_name_like_a_role_gives_no_rights(backend):
+    """People and roles are apart ("docs/Prüfung 2026-11-18.md", A1): someone not in # Users
+    whose name is a role's gets nothing; a person named like a group passes no groups on."""
+    import core.acl as acl_module
+    from core.acl import ACLAuthorizer, ACLPolicy, PermissionRule
+
+    if backend == "casbin" and acl_module._casbin is None:
+        pytest.skip("casbin not installed in test environment")
+    policy = ACLPolicy(
+        roles={"admin", "team"},
+        permissions={"admin": [PermissionRule(path="/*", rights={"*"})],
+                     "team": [PermissionRule(path="/0_Admin/**", rights={"read"})]},
+        users={"anna": {"team"}, "team": {"admin"}},
+    )
+    auth = ACLAuthorizer(policy, backend=backend)
+    assert auth.backend == backend
+    assert not auth.can_user_access("admin", "/4_Finanz", "read")  # not listed
+    assert not auth.can_user_access("anna", "/4_Finanz", "read")  # Team, not Admin
+    assert auth.can_user_access("anna", "/0_Admin/x", "read")
+    assert auth.can_user_access("team", "/4_Finanz", "write")  # the person Team is Admin
+    assert not auth.can_access("team", "/4_Finanz", "write")  # the role Team is not
+
+
+@pytest.mark.parametrize("backend", ["legacy", "casbin"])
+def test_the_rights_files_need_change_also_to_be_moved_or_deleted(backend):
+    """write or delete on ACLs.md (and the other files that manage rights) right in a settings
+    folder, or on that folder itself, needs "change" ("docs/Prüfung 2026-11-18.md", A2)."""
+    import core.acl as acl_module
+    from core.acl import ACLAuthorizer, ACLPolicy, PermissionRule
+
+    if backend == "casbin" and acl_module._casbin is None:
+        pytest.skip("casbin not installed in test environment")
+    policy = ACLPolicy(
+        roles={"admin", "prokura"},
+        permissions={"admin": [PermissionRule(path="/*", rights={"*"})],
+                     "prokura": [PermissionRule(path="/*", rights={"read", "write", "delete"})]},
+        users={"anna": {"admin"}, "paul": {"prokura"}},
+    )
+    auth = ACLAuthorizer(policy, backend=backend)
+    for path in (f"/{META_DIR}/ACLs.md", f"/Kunde/{META_DIR}/ACLs.md", f"/{META_DIR}/Nextcloud.md", f"/{META_DIR}"):
+        for right in ("write", "delete"):
+            assert not auth.can_user_access("paul", path, right), (path, right)
+            assert auth.can_user_access("anna", path, right), (path, right)
+    assert auth.can_user_access("paul", f"/{META_DIR}/ACLs.md", "read")
+    assert auth.can_user_access("paul", f"/{META_DIR}/Tags.md", "write")  # not a rights file
+    assert auth.can_user_access("paul", "/Notizen/ACLs.md", "write")  # not in a settings folder
+
+
 def test_acl_authorizer_auto_backend_available():
     authorizer = _build_authorizer_fixture("auto")
     assert authorizer.backend in {"legacy", "casbin"}
