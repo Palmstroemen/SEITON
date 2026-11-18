@@ -188,11 +188,14 @@ Rectangle {
         return false
     }
 
+    // Tiles of files drop the extension; folders keep their whole name ("Steuer 2024.final").
+    property bool stripExtension: false
+
     function twoLineLabel(text, maxChars) {
         if (!text) return ""
         var clean = String(text)
         var dotIndex = clean.lastIndexOf(".")
-        if (dotIndex > 0 && dotIndex < clean.length - 1) {
+        if (stripExtension && dotIndex > 0 && dotIndex < clean.length - 1) {
             clean = clean.slice(0, dotIndex)
         }
         if (clean.length <= maxChars) {
@@ -571,7 +574,7 @@ Rectangle {
                 selectAll()
             }
         }
-        Keys.onReturnPressed: renameAccepted(root._renameEditText)
+        onAccepted: renameAccepted(root._renameEditText)  // Return and the keypad's Enter
         Keys.onEscapePressed: renameCanceled()
     }
 
@@ -603,7 +606,7 @@ Rectangle {
                 selectAll()
             }
         }
-        Keys.onReturnPressed: renameAccepted(root._renameEditText)
+        onAccepted: renameAccepted(root._renameEditText)  // Return and the keypad's Enter
         Keys.onEscapePressed: renameCanceled()
     }
 
@@ -638,7 +641,7 @@ Rectangle {
                 selectAll()
             }
         }
-        Keys.onReturnPressed: renameAccepted(root._renameEditText)
+        onAccepted: renameAccepted(root._renameEditText)  // Return and the keypad's Enter
         Keys.onEscapePressed: renameCanceled()
     }
 

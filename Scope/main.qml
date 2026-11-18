@@ -1074,7 +1074,7 @@ ApplicationWindow {
         }
         var targetDir = filesCreateTarget(currentFilesPath())
         if (targetDir.length === 0) return
-        var createdPath = backend.createNote(targetDir, "New Note")
+        var createdPath = backend.createNote(targetDir, qsTr("New Note"))
         if (!createdPath || createdPath.length === 0) {
             moveReportMessage = qsTr("Could not create a note in this folder.")
             moveReportDialog.open()
@@ -2241,21 +2241,9 @@ ApplicationWindow {
         cancelRename()
     }
 
-    function warnIfMissing(target, propName, label) {
-        if (!target || !(propName in target)) {
-        }
-    }
-
-    function warnIfMissingAny(target, propNames, label) {
-        for (var i = 0; i < propNames.length; i++) {
-            warnIfMissing(target, propNames[i], label)
-        }
-    }
-
     Component.onCompleted: {
         if (typeof scopeStartAction !== "undefined" && scopeStartAction)
             Qt.callLater(window.startAction, scopeStartAction)
-        Qt.application.windowIcon = Qt.resolvedUrl(iconFolder)
         window.contentItem.transform = [setupFlip]
         if (hasBackend() && typeof backend.setting === "function") {
             darkTheme = backend.setting("General/darkTheme") === true
@@ -2317,23 +2305,6 @@ ApplicationWindow {
             updateStandardFolders()
         }
         updateBrowserLayout()
-        warnIfMissingAny(templatesBrowser, [
-            "projectTint",
-            "projectTintBorder",
-            "showEmbryos",
-            "showSearchToggle"
-        ], "templatesBrowser")
-        warnIfMissingAny(projectsBrowser, [
-            "projectTint",
-            "projectTintBorder",
-            "showEmbryos",
-            "showSearchToggle"
-        ], "projectsBrowser")
-        warnIfMissingAny(filesPane, [
-            "projectTint",
-            "projectTintBorder",
-            "showCreateProject"
-        ], "filesPane")
     }
     
     property bool newSubprojectEditing: false

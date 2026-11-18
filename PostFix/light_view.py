@@ -69,9 +69,6 @@ def _px(font: QFont) -> float:
     return font.pointSizeF() * _dpi() / 72
 
 
-import math
-import math
-import math
 _NATURAL: dict = {}
 
 

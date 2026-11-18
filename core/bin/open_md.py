@@ -9,7 +9,6 @@ import os
 import shlex
 import subprocess
 import sys
-import time
 from pathlib import Path
 from urllib.parse import quote
 
@@ -201,16 +200,6 @@ def main() -> int:
         if args.uri_mode:
             uri_mode = args.uri_mode
         debug = getenv("MD_DEBUG", "").strip().lower() in {"1", "true", "yes"}
-        marker_path = vault_root / VAULT_MARKER / "myos-open.json"
-        try:
-            marker_path.write_text(
-                json.dumps(
-                    {"path": file_path.relative_to(vault_root).as_posix(), "ts": int(time.time())}
-                ),
-                encoding="utf-8",
-            )
-        except OSError:
-            pass
         if uri_mode == "advanced":
             uri = build_advanced_uri(vault_root, file_path, args.openmode, vault_name_override)
         else:

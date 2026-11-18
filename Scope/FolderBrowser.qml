@@ -4367,7 +4367,8 @@ Item { // ROOT
                                                 root.cwdCascadeHoverOutzoneHits += 1
                                             root.openCwdCascadePanel(0, fullPath, parent)
                                             root.cwdHoverChildPanelPath = fullPath
-                                            root.cwdHoverChildEntries = root.listPreviewChildren(fullPath)
+                                            // The child panel stays hidden (visible: ... && false):
+                                            // its folders are not listed at every move (F11).
                                             root.cwdHoverChildPanelOpen = true
                                             root.cwdHoverGrandchildPanelOpen = false
                                             root.cwdHoverGrandchildPanelPath = ""

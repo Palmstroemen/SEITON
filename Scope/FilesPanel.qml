@@ -1720,6 +1720,7 @@ Rectangle { // Files panel
                 readonly property string itemPath: (model.path && model.path.length > 0) ? model.path : ""
                 readonly property bool isFolder: !!(model.isDir)
                 readonly property bool isVirtual: !!(model.isVirtual)
+                stripExtension: !model.isDir
                 readonly property bool selected: root.selectedPaths && itemPath.length > 0 && root.selectedPaths.indexOf(itemPath) !== -1
                 width: filesGrid.cellWidth - root.gridSpacing
                 height: filesGrid.cellHeight - (root.itemStyle === "largeIcon" ? root.gridSpacing : 4)

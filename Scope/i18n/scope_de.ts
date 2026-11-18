@@ -429,7 +429,7 @@ Fehlgeschlagen: %3</translation>
     </message>
     <message>
         <location filename="../FilesPanel.qml" line="508"/>
-        <location filename="../FilesPanel.qml" line="2105"/>
+        <location filename="../FilesPanel.qml" line="2106"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
@@ -490,13 +490,13 @@ Fehlgeschlagen: %3</translation>
     </message>
     <message>
         <location filename="../FilesPanel.qml" line="890"/>
-        <location filename="../FilesPanel.qml" line="2076"/>
+        <location filename="../FilesPanel.qml" line="2077"/>
         <source>Make “%1” a project</source>
         <translation>„%1“ zum Projekt machen</translation>
     </message>
     <message>
         <location filename="../FilesPanel.qml" line="892"/>
-        <location filename="../FilesPanel.qml" line="2074"/>
+        <location filename="../FilesPanel.qml" line="2075"/>
         <source>Make “%1” an ordinary folder again</source>
         <translation>„%1“ wieder zu einem gewöhnlichen Ordner machen</translation>
     </message>
@@ -556,83 +556,83 @@ Fehlgeschlagen: %3</translation>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2040"/>
+        <location filename="../FilesPanel.qml" line="2041"/>
         <source>Create Note</source>
         <translation>Notiz erstellen</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2044"/>
+        <location filename="../FilesPanel.qml" line="2045"/>
         <source>New Folder</source>
         <translation>Neuer Ordner</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2050"/>
-        <location filename="../FilesPanel.qml" line="2112"/>
+        <location filename="../FilesPanel.qml" line="2051"/>
+        <location filename="../FilesPanel.qml" line="2113"/>
         <source>Move into New Folder</source>
         <translation>In neuen Ordner verschieben</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2060"/>
+        <location filename="../FilesPanel.qml" line="2061"/>
         <source>Open</source>
         <translation>Öffnen</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2065"/>
+        <location filename="../FilesPanel.qml" line="2066"/>
         <source>Open with ...</source>
         <translation>Öffnen mit ...</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2077"/>
+        <location filename="../FilesPanel.qml" line="2078"/>
         <source>Make a project</source>
         <translation>Zum Projekt machen</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2086"/>
+        <location filename="../FilesPanel.qml" line="2087"/>
         <source>Select all</source>
         <translation>Alle markieren</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2092"/>
+        <location filename="../FilesPanel.qml" line="2093"/>
         <source>Rename</source>
         <translation>Umbenennen</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2128"/>
+        <location filename="../FilesPanel.qml" line="2129"/>
         <source>Color: Red</source>
         <translation>Farbe: Rot</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2129"/>
+        <location filename="../FilesPanel.qml" line="2130"/>
         <source>Color: Orange</source>
         <translation>Farbe: Orange</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2130"/>
+        <location filename="../FilesPanel.qml" line="2131"/>
         <source>Color: Yellow</source>
         <translation>Farbe: Gelb</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2131"/>
+        <location filename="../FilesPanel.qml" line="2132"/>
         <source>Color: Green</source>
         <translation>Farbe: Grün</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2132"/>
+        <location filename="../FilesPanel.qml" line="2133"/>
         <source>Color: Cyan</source>
         <translation>Farbe: Cyan</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2133"/>
+        <location filename="../FilesPanel.qml" line="2134"/>
         <source>Color: Blue</source>
         <translation>Farbe: Blau</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2134"/>
+        <location filename="../FilesPanel.qml" line="2135"/>
         <source>Color: Violet</source>
         <translation>Farbe: Violett</translation>
     </message>
     <message>
-        <location filename="../FilesPanel.qml" line="2135"/>
+        <location filename="../FilesPanel.qml" line="2136"/>
         <source>Color: Gray</source>
         <translation>Farbe: Grau</translation>
     </message>
@@ -687,8 +687,8 @@ Fehlgeschlagen: %3</translation>
     <name>MoveReportDialog</name>
     <message>
         <location filename="../Dialogs/MoveReportDialog.qml" line="7"/>
-        <source>Move Report</source>
-        <translation>Verschiebebericht</translation>
+        <source>Notice</source>
+        <translation>Hinweis</translation>
     </message>
     <message>
         <location filename="../Dialogs/MoveReportDialog.qml" line="20"/>
@@ -1346,6 +1346,11 @@ Fehlgeschlagen: %3</translation>
 %1</translation>
     </message>
     <message>
+        <location filename="../main.qml" line="1077"/>
+        <source>New Note</source>
+        <translation>Neue Notiz</translation>
+    </message>
+    <message>
         <location filename="../main.qml" line="1079"/>
         <source>Could not create a note in this folder.</source>
         <translation>Konnte in diesem Ordner keine Notiz erstellen.</translation>
@@ -1373,32 +1378,32 @@ Not deleted: %2 file(s)</source>
 Nicht gelöscht: %2 Datei(en)</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="2612"/>
+        <location filename="../main.qml" line="2583"/>
         <source>Search      + deep    # all</source>
         <translation>Suchen      + tief    # alle</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="2746"/>
+        <location filename="../main.qml" line="2717"/>
         <source>Scope ▼</source>
         <translation>Scope ▼</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="2746"/>
+        <location filename="../main.qml" line="2717"/>
         <source>Scope ▲</source>
         <translation>Scope ▲</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="2806"/>
+        <location filename="../main.qml" line="2777"/>
         <source>Minimal view: the current folder top left, the path above it on hover</source>
         <translation>Minimalansicht: der aktuelle Ordner oben links, der Pfad darüber beim Darüberfahren</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="2918"/>
+        <location filename="../main.qml" line="2889"/>
         <source>Rename</source>
         <translation>Umbenennen</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="2922"/>
+        <location filename="../main.qml" line="2893"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>

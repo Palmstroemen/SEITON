@@ -5,6 +5,9 @@ import os
 import pytest
 from core.brand import env_name
 
+# core/archive is old code kept to look at, not to run: its tests no longer even collect.
+collect_ignore_glob = ["core/archive/*"]
+
 # Browser pages (PostFix's editor) without a screen: Chromium's GPU emulation crashes when pages
 # are made and deleted one after another (measured); drawn without a GPU it does not. Set before
 # QtWebEngine starts.

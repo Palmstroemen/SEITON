@@ -4,7 +4,7 @@ import QtQuick.Controls 2.15
 Dialog {
     id: root
     required property var window
-    title: qsTr("Move Report")
+    title: qsTr("Notice")
     modal: true
     focus: true
     standardButtons: Dialog.Ok

@@ -283,7 +283,6 @@ class BirthClinic:
 
 
 class Blueprint(Operations):
-    DEFAULT_TEMPLATES_DIR = Path("~/.myos/templates").expanduser()
 
     def __init__(self, project_root: Optional[Path] = None):
         if project_root is None:

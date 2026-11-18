@@ -491,7 +491,8 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
             if hasattr(self.editor, "set_path"):
                 self.editor.set_path(open_path)
             self._watch_current_file()
-        auto_rename = bool(open_path and open_path.stem.lower().startswith("new note"))
+        # A note just made by Scope ("New Note", in German "Neue Notiz"): its name is to be given.
+        auto_rename = bool(open_path and open_path.stem.lower().startswith(("new note", "neue notiz")))
         self.set_language(ui_language)
         if auto_rename:
             self._center_window_on_screen()
