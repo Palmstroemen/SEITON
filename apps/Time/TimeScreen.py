@@ -27,6 +27,7 @@ from PySide6.QtQml import QQmlApplicationEngine  # noqa: E402
 from core.color_schemes import load_scheme  # noqa: E402
 from core.settings import SETTINGS, Settings  # noqa: E402
 from apps.Scope.window_icon import seiton_icon  # noqa: E402
+from apps.Time import instance  # noqa: E402
 from apps.Time.model import TimeModel  # noqa: E402
 
 REFRESH_MS = 5000  # how often Now is read anew (the clock writes every 15 s)
@@ -154,16 +155,36 @@ def install_translator(app: QGuiApplication, code: str) -> Optional[QTranslator]
 
 
 def main() -> int:
+    # One time screen per user (2026-11-18: two could be opened): a later start brings the one
+    # open to the front and ends.
+    name = instance.server_name()
+    if instance.hand_over(name):
+        return 0
     app = QGuiApplication(sys.argv)
     app.setApplicationName("SEITON Time")
-    app.setWindowIcon(seiton_icon())
+    app.setWindowIcon(seiton_icon("time.svg"))  # its own: a stopwatch, not SEITON's box
+    server = instance.InstanceServer(name)
+    if not server.listen():
+        instance.hand_over(name)  # another came up meanwhile
+        return 0
     language = str(Settings().get("General/language"))
     install_translator(app, language)
     engine = load_time_screen(TimeModel(language=language), app)
     if not engine.rootObjects():
         return 1
+    window = engine.rootObjects()[0]
+    server.showRequested.connect(lambda: _to_front(window))
     engine._backend.start_refreshing()
-    return app.exec()
+    code = app.exec()
+    server.close()
+    return code
+
+
+def _to_front(window) -> None:
+    """Asked by a later start: the window open, in front, minimised or not."""
+    window.showNormal()
+    window.raise_()
+    window.requestActivate()
 
 
 if __name__ == "__main__":

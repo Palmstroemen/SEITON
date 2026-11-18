@@ -906,3 +906,24 @@ def test_without_a_clock_the_stopwatch_is_greyed_and_opens_the_time_screen(a_clo
     QMetaObject.invokeMethod(icon, "open")
     _settle(started["app"])
     assert opened == ["clock"]
+
+
+def test_the_small_p_sits_at_the_bottom_right_of_the_folder(started):
+    """As elsewhere: the P at the folder's bottom right (2026-11-18), not at its top."""
+    _settle(started["app"])
+    cwd = _find(started, "cwdButton")
+    [p] = _visible_items(cwd, "projectP")
+    box = p.parentItem()
+    bottom = p.property("y") + p.property("height")
+    assert bottom >= box.property("height") - 1 and p.property("y") > 0
+    assert p.property("x") + p.property("width") >= box.property("width") - 1
+
+
+def test_a_row_without_folders_below_has_a_line_at_its_right(world, started):
+    (world["studio"] / "01_Info" / "Archiv").mkdir()
+    (world["studio"] / "02_Leer").mkdir()
+    _open_cascade(started, 1, world["studio"])
+    cascade = _find(started, "cascade")
+    rows = {o.property("label"): o for o in _all(started, "dropRow", cascade)}
+    assert len(_visible_items(rows["02_Leer"], "leafMark")) == 1
+    assert _visible_items(rows["01_Info"], "leafMark") == []

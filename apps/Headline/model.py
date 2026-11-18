@@ -8,6 +8,7 @@ the path to climb from the projects root. No Qt: the top line and the panel only
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 from typing import Any, Callable, Dict, List, Optional
@@ -44,6 +45,16 @@ def sources_of(payload: str) -> List[str]:
         values = [line for line in text.splitlines() if line.strip() and not line.startswith("#")]
     return [path for path in (_path_of(v) for v in values) if path]
 
+
+
+def _has_folders(folder: Path) -> bool:
+    """Whether folder holds a folder one would go into (not hidden ones): else the dropdowns
+    mark it as the end of the tree (2026-11-18)."""
+    try:
+        with os.scandir(folder) as entries:
+            return any(e.is_dir() and not e.name.startswith(".") for e in entries)
+    except OSError:
+        return False
 
 class HeadlineModel:
     def __init__(self, api, link, start_path: str,
@@ -189,7 +200,8 @@ class HeadlineModel:
         """How a folder is drawn in the dropdowns: project (its P), its colour, its badge."""
         project = (folder / META_DIR / "Project.md").is_file()
         colour = getattr(self._api, "_resolve_effective_project_color", lambda _f: None)
-        return {"project": project, "color": (colour(folder) or "") if project else "", **self._badge(folder)}
+        return {"project": project, "color": (colour(folder) or "") if project else "",
+                "leaf": not _has_folders(folder), **self._badge(folder)}
 
     def _badge(self, folder: Path) -> Dict[str, str]:
         """A folder's own badge (its .seiton/batch.*), as Scope's rows show it."""
@@ -249,6 +261,7 @@ class HeadlineModel:
             "color": entry.get("color") or "",
             "batch": entry.get("batch") or "",
             "batchText": entry.get("batchText") or "",
+            "leaf": not _has_folders(Path(path) / entry["name"]),
         } for entry in self._api.list_children(path, False)]
         return sorted(result, key=lambda f: f["name"].lower())
 

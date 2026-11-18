@@ -334,3 +334,17 @@ def test_what_could_not_be_moved_is_named(world):
     model = _model(world["studio"])
     result = model.move([str(world["studio"] / "gibt es nicht.pdf")], str(world["studio"] / "01_Info"))
     assert result == {"moved": 0, "failed": ["gibt es nicht.pdf"]}
+
+
+def test_rows_say_whether_folders_lie_below(world):
+    """In the dropdowns one sees where the tree ends (2026-11-18)."""
+    (world["studio"] / "01_Info" / "Archiv").mkdir()
+    (world["studio"] / "02_Leer").mkdir()
+    (world["studio"] / "02_Leer" / ".versteckt").mkdir()  # hidden folders do not count
+    (world["studio"] / "02_Leer" / "notiz.md").write_text("x")  # nor files
+    model = _model(world["studio"])
+    rows = {r["name"]: r for r in model.children(str(world["studio"]))}
+    assert rows["01_Info"]["leaf"] is False and rows["02_Leer"]["leaf"] is True
+    model.go(str(world["studio"] / "02_Leer"))
+    steps = {s["name"]: s for s in model.climb()}
+    assert steps["02_Leer"]["leaf"] is True and steps["Musikstudio"]["leaf"] is False

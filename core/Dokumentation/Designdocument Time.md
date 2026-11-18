@@ -175,7 +175,9 @@ Opened by a click on the widget in the Headline; a small window of the time trac
 (`apps/Time/TimeScreen.py`, `apps/Time/main.qml`, `apps/Time/model.py`), with the person's own rights, not the
 sandboxed clock's (decided 2026-11-17; first planned as a page like Setup in Scope's top bar).
 It talks to the running clock as the Headline does: it reads the clock's view and drops
-commands.
+commands. One per user (2026-11-18, `apps/Time/instance.py`): a later start - the stopwatch in
+the Headline, the launcher - brings the one open to the front. Its own icon, a stopwatch
+(`assets/brand/seiton-time.svg`), so it is told apart from SEITON's box in the taskbar.
 
 - **Now**: the active project, today's time in it, Start/Stop.
 - **Entries**: one's own rows of the active project, newest first; edit, delete, **Add**.

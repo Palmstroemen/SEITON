@@ -11,7 +11,9 @@ Rectangle {
         objectName: "projectP"
         visible: root.projectBadge && (root.batchSource !== "" || root.shownSmallP)
         anchors.right: parent.right
-        anchors.top: parent.top
+        // Scope: top right; the small P on the folder alone at the bottom right, as elsewhere.
+        anchors.top: root.shownSmallP ? undefined : parent.top
+        anchors.bottom: root.shownSmallP ? parent.bottom : undefined
         text: "P"
         color: "#000000"
         font.bold: true

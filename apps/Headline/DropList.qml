@@ -105,6 +105,19 @@ Window {
                     onDropReceived: function(payload) { list.dropped(payload, modelData.path) }
                     onActivate: list.chosen(modelData.path)
                     onHoverActiveChanged: if (hoverActive) list.hovered(this, modelData)
+
+                    Rectangle {  // no folders below: the tree ends here (2026-11-18)
+                        objectName: "leafMark"
+                        visible: !!modelData.leaf
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        anchors.margins: 3
+                        width: 4
+                        radius: 2
+                        color: list.theme.text || "#e6e6e6"
+                        opacity: 0.22
+                    }
                 }
             }
         }
