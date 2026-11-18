@@ -284,3 +284,34 @@ def test_opened_standing_a_start_begins_at_the_top(started):
           counter={"prefix": "", "shortPrefix": "", "since": clock_time.time() - (15 * 60 + 57)})  # the clock obeyed
     _wait(app, 300)
     assert dial.property("wedgeAngle") < 8
+
+
+def test_a_row_sets_the_beginning_by_the_day_and_the_duration_bold(started):
+    """Without a heading one could take the beginning for an end (2026-11-19): it stands by
+    the day, the duration apart and bold - that is what it is about."""
+    from PySide6.QtQuick import QQuickItem
+    backend = started["engine"]._backend
+    assert backend.add({"day": "2026-11-17", "start": "09:30", "minutes": 90, "note": "Baumarkt"}, "")
+    window = started["window"]
+    from PySide6.QtCore import QMetaObject
+    QMetaObject.invokeMethod(window.findChild(QQuickItem, "tabEntries"), "click")  # its list makes rows when shown
+    _wait(started["app"], 300)
+
+    def found(item, name):  # a list's rows are no QObject children: through the visual items
+        for child in item.childItems():
+            if child.objectName() == name:
+                return child
+            deeper = found(child, name)
+            if deeper is not None:
+                return deeper
+        return None
+    day, begin, duration = (found(window.contentItem(), name) for name in ("entryDay", "entryStart", "entryDuration"))
+
+    def left(item):
+        return item.mapToScene(item.boundingRect().topLeft()).x()
+
+    def right(item):
+        return item.mapToScene(item.boundingRect().topRight()).x()
+    assert left(begin) - right(day) < left(duration) - right(begin)
+    assert duration.property("font").bold() and not begin.property("font").bold()
+    assert duration.property("text") == "1:30" and begin.property("text") == "09:30"

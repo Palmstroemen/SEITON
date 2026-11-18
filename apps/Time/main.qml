@@ -242,12 +242,22 @@ ApplicationWindow {
                     spacing: 8
                     property bool editing: false
                     readonly property var row: modelData
-                    Label2 { text: entry.row.day; Layout.preferredWidth: 90 }
-                    Label2 { text: entry.row.start || "–"; Layout.preferredWidth: 45 }
+                    // No heading: the beginning stands by the day, the duration apart and bold -
+                    // else one took the beginning for an end (2026-11-19).
+                    Row {
+                        spacing: 4
+                        Layout.preferredWidth: 140
+                        Label2 { objectName: "entryDay"; text: entry.row.day }
+                        Label2 { objectName: "entryStart"; text: entry.row.start || "–" }
+                    }
                     Label2 {
+                        objectName: "entryDuration"
                         visible: !entry.editing
                         text: Math.floor(entry.row.minutes / 60) + ":" + ("0" + entry.row.minutes % 60).slice(-2)
+                        font.bold: true
+                        horizontalAlignment: Text.AlignRight
                         Layout.preferredWidth: 45
+                        Layout.leftMargin: 12
                     }
                     TextField {
                         id: editDuration
