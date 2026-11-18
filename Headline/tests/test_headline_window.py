@@ -489,3 +489,47 @@ def test_the_panel_counts_the_seconds_too(a_clock, started):
     _wait(started["app"], 1200)
     label = _all(started, "panelWidget", panel)[0].property("label")
     assert re.fullmatch(r"Musikstudio · 1:02:0\d", label), label
+
+
+# --- dropping onto a folder (H9) ---------------------------------------------------------------
+
+def _drop(item, payload):
+    QMetaObject.invokeMethod(item, "dropReceived", Q_ARG(str, payload))
+
+
+def test_a_file_dropped_onto_a_pale_folder_in_the_line_bears_it(world, started):
+    _settle(started["app"])
+    note = world["studio"] / "Rechnung.pdf"
+    note.write_text("r")
+    [finanz] = [o for o in _all(started, "standardFolder") if o.property("label") == "04_Finanz"]
+    _drop(finanz, f"file://{note}")
+    _settle(started["app"])
+    assert (world["studio"] / "04_Finanz" / "Rechnung.pdf").is_file() and not note.exists()
+    [finanz] = [o for o in _all(started, "standardFolder") if o.property("label") == "04_Finanz"]
+    assert finanz.property("opacity") == 1.0  # born now
+
+
+def test_a_folder_dropped_is_asked_about_first(world, started):
+    _settle(started["app"])
+    folder = world["studio"] / "Alte Sachen"
+    folder.mkdir()
+    [info] = [o for o in _all(started, "standardFolder") if o.property("label") == "01_Info"]
+    _drop(info, str(folder))
+    _settle(started["app"])
+    ask = _find(started, "dropAsk")
+    assert ask.isVisible() and folder.exists()  # not yet
+    [ok] = _all(started, "dropAskOk", ask)
+    _activate(ok)
+    _settle(started["app"])
+    assert not ask.isVisible()
+    assert (world["studio"] / "01_Info" / "Alte Sachen").is_dir() and not folder.exists()
+
+
+def test_a_drop_into_the_panel_moves_too(world, started):
+    note = world["studio"] / "Plan.pdf"
+    note.write_text("p")
+    panel = _open_panel(started, None)
+    [planung] = [o for o in _all(started, "panelFolder", panel) if o.property("label") == "02_Planung"]
+    _drop(planung, str(note))
+    _settle(started["app"])
+    assert (world["studio"] / "02_Planung" / "Plan.pdf").is_file()

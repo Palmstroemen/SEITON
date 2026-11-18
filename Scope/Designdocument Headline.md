@@ -85,7 +85,10 @@ Both show the same: one model, two ways of drawing it.
   and embryo look, the lens' frame) is split out of FolderBrowser into shared files, so Scope and
   the Headline look alike.
 - **Dragging onto a folder** (to file something there) works in the line and in the panel, as in
-  Scope and SunTree. Not built yet (step 4a).
+  Scope and SunTree: what is dropped is moved there through `ScopeApi.move_entries` (the ACLs,
+  filing by date), a suggested folder is born by it, folders are asked about first. Built
+  2026-11-18 (review H9): the CWD button, the standard folders, the rows of the dropdowns and the
+  panel's path and folders take drops (`HeadlineModel.plan_drop/move`, `Headline/DropAsk.qml`).
 - **A click alone bears no embryo** (decided 2026-11-17, for Scope, SunTree and the Headline
   alike): a suggested folder comes into being only by a drop onto it, or by making something in
   it (right click: new note, new folder). Going there, looking at it, putting the lens on it
@@ -182,9 +185,9 @@ the time screen can start the clock (`Time/TimeScreen.py`, `startClock`). Not bu
    folders with », the widgets (the question with its answers; hiding itself, the line comes
    out while a widget asks - review 2026-11-18, H8). The buttons
    lie for now on top of the CWD dropdown (`Headline/Tools.qml`, as M's tools). Still open in the
-   line: SEITON's box, the perspectives, the person. Suggested folders (embryos) show pale but
-   do nothing on a click, and dragging onto a folder (section 3) is not built, neither in the
-   line nor in the panel.
+   line: SEITON's box, the perspectives, the person. Suggested folders (embryos) show pale and
+   do nothing on a click; a drop onto them bears them (section 3). Not yet tried on the real
+   desktop: a drag from Nemo onto the dock line, and onto the panel (a popup).
 5. Later: KDE's plasmoid; Wayland.
 
 ## 5. Open

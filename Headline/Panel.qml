@@ -17,6 +17,7 @@ Window {
     property real embryoOpacity: 0.4
     // The line's counting (main.qml): a widget's counter to the second, as in the line.
     property var counted: null
+    signal dropped(string payload, string path)  // something dropped onto one of its folders (H9)
     property int baseFont: 13
     readonly property int rowHeight: 28
     readonly property int panelWidth: 300
@@ -104,6 +105,8 @@ Window {
                         textColor: panel.theme.text || "#e6e6e6"
                         textSize: panel.baseFont
                         textBold: modelData.path === panel.view.cwd
+                        allowDrops: true
+                        onDropReceived: function(payload) { panel.dropped(payload, modelData.path) }
                         onActivate: headline.go(modelData.path)
                     }
                 }
@@ -128,7 +131,9 @@ Window {
                     strokeColor: panel.theme.pillBorder || "#3a3f52"
                     textColor: panel.theme.text || "#e6e6e6"
                     textSize: panel.baseFont
-                    // A click alone bears no embryo (Designdocument Headline.md, 3).
+                    // A click alone bears no embryo (Designdocument Headline.md, 3); a drop does.
+                    allowDrops: true
+                    onDropReceived: function(payload) { panel.dropped(payload, modelData.path) }
                     onActivate: if (!modelData.embryo) headline.go(modelData.path)
                 }
             }

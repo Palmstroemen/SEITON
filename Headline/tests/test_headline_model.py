@@ -271,3 +271,44 @@ def test_the_real_link_keeps_the_state_it_was_told(world):
     model.lens("look_at", {"path": str(world["studio"] / "04_Finanz")})
     model.follow()
     assert model._link.last_state["active"] and model._link.last_state["project_dir"] == str(world["studio"])
+
+
+# --- dropping onto a folder (review 2026-11-18, H9) ------------------------------------------
+
+@pytest.mark.parametrize("payload, paths", [
+    ("/p/a.pdf", ["/p/a.pdf"]),
+    ("file:///p/Neue%20Rechnung.pdf", ["/p/Neue Rechnung.pdf"]),                # one URL from Nemo
+    ("file:///p/a.pdf\r\nfile:///p/b.pdf\r\n", ["/p/a.pdf", "/p/b.pdf"]),       # text/uri-list
+    ("# comment\nfile:///p/a.pdf", ["/p/a.pdf"]),
+    ('__SCOPE_PATHS__["/p/a.pdf", "file:///p/b%C3%BC.pdf"]', ["/p/a.pdf", "/p/bü.pdf"]),  # Scope's
+    ("", []), ("__SCOPE_PATHS__[broken", []), ("relative/path", []), ("http://x/a.pdf", []),
+])
+def test_what_a_drop_brings(payload, paths):
+    from Headline.model import sources_of
+    assert sources_of(payload) == paths
+
+
+def test_a_file_dropped_onto_a_suggested_folder_bears_it(world):
+    note = world["studio"] / "Rechnung.pdf"
+    note.write_text("r")
+    model = _model(world["studio"])
+    target = world["studio"] / "04_Finanz"  # an embryo
+    plan = model.plan_drop(f"file://{note}", str(target))
+    assert plan == {"sources": [str(note)], "folders": 0, "target": str(target)}
+    result = model.move(plan["sources"], plan["target"])
+    assert result == {"moved": 1, "failed": []}
+    assert (target / "Rechnung.pdf").is_file() and not note.exists()
+    assert {f["name"]: f["embryo"] for f in model.view()["folders"]}["04_Finanz"] is False  # born
+
+
+def test_folders_in_a_drop_are_counted_to_be_asked_about(world):
+    folder = world["studio"] / "Alte Sachen"
+    folder.mkdir()
+    plan = _model(world["studio"]).plan_drop(str(folder), str(world["studio"] / "01_Info"))
+    assert plan["folders"] == 1
+
+
+def test_what_could_not_be_moved_is_named(world):
+    model = _model(world["studio"])
+    result = model.move([str(world["studio"] / "gibt es nicht.pdf")], str(world["studio"] / "01_Info"))
+    assert result == {"moved": 0, "failed": ["gibt es nicht.pdf"]}

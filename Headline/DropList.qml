@@ -13,6 +13,7 @@ Window {
     property string currentPath: ""   // marked in the list
     property bool showTools: false    // the Headline's tools on top (the way up, as M's tools)
     signal chosen(string path)
+    signal dropped(string payload, string path)  // something dropped onto a row's folder (H9)
     signal hovered(Item item, var entry)
 
     // Not a popup: on X11 a second popup (the cascade) takes every click, and one could never
@@ -91,6 +92,8 @@ Window {
                                                                      : (list.theme.pillBorder || "#3a3f52")
                     textColor: list.theme.text || "#e6e6e6"
                     textSize: list.baseFont
+                    allowDrops: true
+                    onDropReceived: function(payload) { list.dropped(payload, modelData.path) }
                     onActivate: list.chosen(modelData.path)
                     onHoverActiveChanged: if (hoverActive) list.hovered(this, modelData)
                 }

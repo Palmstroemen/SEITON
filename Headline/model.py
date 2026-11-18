@@ -7,12 +7,42 @@ the path to climb from the projects root. No Qt: the top line and the panel only
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 from typing import Any, Callable, Dict, List, Optional
 
 from core.brand import META_DIR
 from core.identity import person_for
 from core.scope_api import find_project_root
+
+
+SCOPE_PATHS = "__SCOPE_PATHS__"  # Scope's own drag of several entries (Scope/js/DropUtils.js)
+
+
+def _path_of(value: str) -> Optional[str]:
+    value = str(value or "").strip()
+    if value.startswith("file://"):
+        parsed = urlparse(value)
+        if parsed.netloc not in ("", "localhost"):
+            return None
+        value = unquote(parsed.path)
+    # Security: only absolute local paths; a URL of another kind or a relative path is no file.
+    return value if value.startswith("/") else None
+
+
+def sources_of(payload: str) -> List[str]:
+    """The paths a drop brings: Scope's own list, a uri-list (Nemo, Nautilus), one URL or path."""
+    text = str(payload or "").strip()
+    if text.startswith(SCOPE_PATHS):
+        try:
+            values = json.loads(text[len(SCOPE_PATHS):])
+        except ValueError:
+            return []
+        values = values if isinstance(values, list) else []
+    else:
+        values = [line for line in text.splitlines() if line.strip() and not line.startswith("#")]
+    return [path for path in (_path_of(v) for v in values) if path]
 
 
 class HeadlineModel:
@@ -98,6 +128,23 @@ class HeadlineModel:
         if method != "state" and answer.get("ok"):
             self._tell_project()  # a lens on another project changes the active one
         return dict(answer.get("result") or {}) if answer.get("ok") else {}
+
+    # --- dropping onto a folder (Designdocument Headline.md, 3; review 2026-11-18, H9) ----------
+
+    def plan_drop(self, payload: str, target: str) -> Dict[str, Any]:
+        """What a drop onto target would move; folders among it are asked about first (as in
+        Scope). A suggested folder is born only when something is moved into it."""
+        sources = sources_of(payload)
+        folders = sum(1 for source in sources if Path(source).is_dir())
+        return {"sources": sources, "folders": folders, "target": str(target)}
+
+    def move(self, sources: List[str], target: str) -> Dict[str, Any]:
+        """Move sources into target as Scope does (ScopeApi.move_entries: the ACLs, filing by
+        date, an embryo born on the way); how many moved, the names of those that did not."""
+        result = self._api.move_entries([str(s) for s in sources], str(target))
+        failed = [Path(str(item.get("source") or item.get("target") or "")).name
+                  for item in result.get("errors", [])]
+        return {"moved": len(result.get("moved", [])), "failed": failed}
 
     # --- what it shows ------------------------------------------------------------------------
 

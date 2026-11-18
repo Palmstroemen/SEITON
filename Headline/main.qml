@@ -142,6 +142,26 @@ Window {
         headline.go(path)
     }
 
+    // Something dropped onto a folder (H9): moved there as in Scope - an embryo is born by it;
+    // folders are asked about first.
+    function dropped(payload, path) {
+        var plan = headline.dropPlan(payload, path)
+        if (!plan.sources || plan.sources.length === 0) return
+        if (plan.folders > 0) dropAsk.askAbout(plan)
+        else move(plan)
+    }
+    function move(plan) {
+        var result = headline.dropMove(plan.sources, plan.target)
+        if (result.failed && result.failed.length > 0)
+            dropAsk.tell(qsTr("Could not move: %1").arg(result.failed.join(", ")))
+    }
+    DropAsk {
+        id: dropAsk
+        theme: line.theme
+        baseFont: line.baseFont
+        onConfirmed: function(plan) { line.move(plan) }
+    }
+
     Row {
         id: row
         visible: line.expanded
@@ -161,6 +181,8 @@ Window {
             textColor: line.theme.text || "#e6e6e6"
             textSize: line.baseFont
             textBold: true
+            allowDrops: true
+            onDropReceived: function(payload) { line.dropped(payload, line.view.cwd) }
             onActivate: {
                 if (climbList.visible) { climbList.close(); cascade.close(); return }
                 climbList.entries = headline.climb()
@@ -185,6 +207,9 @@ Window {
                 strokeColor: line.theme.pillBorder || "#3a3f52"
                 textColor: line.theme.text || "#e6e6e6"
                 textSize: line.baseFont
+                // A click alone bears no embryo (Designdocument Headline.md, 3); a drop does.
+                allowDrops: true
+                onDropReceived: function(payload) { line.dropped(payload, modelData.path) }
                 onActivate: if (!modelData.embryo) line.go(modelData.path)
             }
         }
@@ -268,6 +293,7 @@ Window {
     Panel {
         id: panelWindow
         counted: line.counted
+        onDropped: function(payload, path) { line.dropped(payload, path) }
         theme: line.theme
         embryoOpacity: line.embryoOpacity
         baseFont: line.baseFont
@@ -275,6 +301,7 @@ Window {
 
     DropList {  // the way up: from the projects root down to where one is
         id: climbList
+        onDropped: function(payload, path) { line.dropped(payload, path) }
         objectName: "climbList"
         showTools: true
         theme: line.theme
@@ -289,6 +316,7 @@ Window {
     }
     DropList {  // beside a step: its folders
         id: cascade
+        onDropped: function(payload, path) { line.dropped(payload, path) }
         objectName: "cascade"
         theme: line.theme
         baseFont: line.baseFont
@@ -296,6 +324,7 @@ Window {
     }
     DropList {
         id: moreList
+        onDropped: function(payload, path) { line.dropped(payload, path) }
         objectName: "moreList"
         theme: line.theme
         baseFont: line.baseFont

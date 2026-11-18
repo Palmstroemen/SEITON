@@ -184,6 +184,18 @@ class HeadlineBackend(QObject):
             self.changed.emit()
         return ok
 
+    @Slot(str, str, result="QVariantMap")
+    def dropPlan(self, payload: str, target: str) -> dict:
+        """What a drop onto the folder target would move (H9); folders are asked about first."""
+        return self._model.plan_drop(payload, target)
+
+    @Slot("QVariantList", str, result="QVariantMap")
+    def dropMove(self, sources, target: str) -> dict:
+        result = self._model.move([str(source) for source in sources], target)
+        if result["moved"]:
+            self.changed.emit()  # an embryo born, the folders as they are now
+        return result
+
     @Slot(result="QVariantMap")
     def pointerRect(self) -> dict:
         pos = QCursor.pos()

@@ -2,19 +2,45 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="de_DE">
 <context>
+    <name>DropAsk</name>
+    <message numerus="yes">
+        <location filename="../DropAsk.qml" line="32"/>
+        <source>Really move %n folder(s) to “%1”?</source>
+        <translation>
+            <numerusform>Wirklich %n Ordner nach „%1“ verschieben?</numerusform>
+            <numerusform>Wirklich %n Ordner nach „%1“ verschieben?</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../DropAsk.qml" line="61"/>
+        <source>Cancel</source>
+        <translation>Abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../DropAsk.qml" line="72"/>
+        <source>Move</source>
+        <translation>Verschieben</translation>
+    </message>
+    <message>
+        <location filename="../DropAsk.qml" line="72"/>
+        <source>OK</source>
+        <translation>OK</translation>
+    </message>
+</context>
+<context>
     <name>Panel</name>
     <message>
-        <location filename="../Panel.qml" line="98"/>
+        <location filename="../Panel.qml" line="115"/>
         <source>Folders</source>
         <translation>Ordner</translation>
     </message>
     <message>
-        <location filename="../Panel.qml" line="123"/>
+        <location filename="../Panel.qml" line="142"/>
         <source>Perspectives</source>
         <translation>Perspektiven</translation>
     </message>
     <message>
-        <location filename="../Panel.qml" line="213"/>
+        <location filename="../Panel.qml" line="233"/>
         <source>More</source>
         <translation>Weitere</translation>
     </message>
@@ -50,6 +76,14 @@
         <location filename="../Tools.qml" line="76"/>
         <source>Light / dark</source>
         <translation>Hell / Dunkel</translation>
+    </message>
+</context>
+<context>
+    <name>main</name>
+    <message>
+        <location filename="../main.qml" line="156"/>
+        <source>Could not move: %1</source>
+        <translation>Nicht verschoben: %1</translation>
     </message>
 </context>
 </TS>
