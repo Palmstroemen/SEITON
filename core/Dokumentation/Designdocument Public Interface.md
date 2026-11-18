@@ -58,7 +58,7 @@ Measured on 2026-11-18 (imports outside the tests).
 | `core.project.notify_config_changed` | a changed `.seiton/` file takes effect | `seiton.context.config_changed(path)` |
 | `core.brand`: `getenv`, `file_name`, `META_DIR`, `URL_SCHEME`, `LEGACY_URL_SCHEMES`, `env_name` | names, links | `seiton.brand` |
 | `core.name_migration.take_over_old_config` | settings under the old name | not public: the migration is SEITON's job, not each app's (5.4) |
-| `Theme.tag_chips` | tag colours | `seiton.look.tag_style()`, or Theme becomes a public part of its own |
+| `core.tag_chips` (was `Theme.tag_chips`) | tag colours | `seiton.look.tag_style()` |
 
 **ClipboardTool:** nothing. Layer 1 only.
 
@@ -95,8 +95,8 @@ does this the same way Scope does.
    tab on Scope's back stay, or does SunTree get its own settings window?
 4. **Name migration.** One place for it, in SEITON's start, not in each app. Then PostFix no
    longer needs `core.name_migration`.
-5. **Theme/.** Either a public part of `seiton.look`, or the tag styles move into `core/` and
-   `seiton.look` re-exports them; the icons go to `assets/icons/`.
+5. **Theme/.** Done with step 1 (2026-11-18): the tag styles moved to `core/` (`core.tag_chips`,
+   `core.tag_styles`), the icons to `assets/icons/`; `seiton.look` is to re-export the styles.
 6. **CLI with `--json`.** Which tools give machine-readable output first: probably `myls` and
    `myproject`.
 7. **The daemon's protocol.** Today only `LensLink` knows it. To be documented with a version
@@ -106,7 +106,7 @@ does this the same way Scope does.
 
 A test reads every Python file under the example apps with `ast` and collects its imports.
 Allowed: the standard library, third-party packages, the app's own modules and `seiton`.
-Forbidden: `core`, `daemon`, `cli`, `Scope`, `Headline`, `Time`, `Theme`.
+Forbidden: `core`, `daemon`, `cli`, `apps` (Scope, Headline, Time).
 
 At first it starts with a list of today's exceptions (section 3) that may only shrink. Once
 the list is empty, it is strict.
@@ -117,5 +117,4 @@ the list is empty, it is strict.
 2. Guard test with today's exceptions.
 3. SunTree to `seiton` (fewest uses), then PostFix. ClipboardTool already holds.
 4. Decide 5.3 to 5.5 on the way.
-5. The folders `apps/` and `examples/` (Roadmap step 1) can come before or after; they do not
-   depend on this.
+5. The folders `apps/` and `examples/` (Roadmap step 1): done 2026-11-18.

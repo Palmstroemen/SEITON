@@ -1,4 +1,4 @@
-"""The colour schemes of MyOS's programs (Scope/Designdocument Setup.md, step 2).
+"""The colour schemes of MyOS's programs (apps/Scope/Designdocument Setup.md, step 2).
 
 A scheme is a file in core/schemes, one colour per name; the programs say where each name is used.
 Colours one sets oneself are kept beside the settings, per scheme (~/.config/MyOS/schemes), and lie

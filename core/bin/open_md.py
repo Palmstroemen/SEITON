@@ -20,7 +20,7 @@ if str(REPO_ROOT) not in sys.path:
 from core.brand import env_name, getenv  # noqa: E402
 
 VAULT_MARKER = ".obsidian"
-POSTFIX_PATH = REPO_ROOT / "PostFix" / "main.py"
+POSTFIX_PATH = REPO_ROOT / "examples" / "PostFix" / "main.py"
 OBSIDIAN_CONFIG_PATHS = [
     Path("~/.var/app/md.obsidian.Obsidian/config/obsidian/obsidian.json"),
     Path("~/.config/obsidian/obsidian.json"),
@@ -122,7 +122,7 @@ def open_with_postfix(file_path: Path) -> int:
             existing = env.get("PYTHONPATH", "")
             env["PYTHONPATH"] = repo if not existing else (repo + os.pathsep + existing)
             subprocess.Popen(
-                [sys.executable, "-m", "PostFix.main", str(file_path)],
+                [sys.executable, "-m", "examples.PostFix.main", str(file_path)],
                 cwd=repo,
                 env=env,
             )

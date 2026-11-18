@@ -5,7 +5,7 @@
 # here. A new name is a change in this file; what exists under the old one is still read
 # (LEGACY_ENV_PREFIXES) or moved over by a migration.
 #
-# QML has its copy in Scope/js/Brand.js (core/tests/unit/test_brand.py compares them).
+# QML has its copy in apps/Scope/js/Brand.js (core/tests/unit/test_brand.py compares them).
 #
 # Not reachable from here, and to be changed by hand with a new name: the Nextcloud app
 # (cloud/nextcloud/myos_acl: its id cannot change, a new id is a new app), the Dockerfile's
@@ -24,7 +24,7 @@ CONFIG_DIR = "seiton"  # the user's settings, below XDG_CONFIG_HOME
 ENV_PREFIX = "SEITON_"
 XATTR_PREFIX = "user.seiton."
 HTTP_HEADER_PREFIX = "X-Seiton-"  # between the platform's bridge and the core service
-URL_SCHEME = "seiton"  # links in notes: seiton:open?scope=... (PostFix/exercise_links.py)
+URL_SCHEME = "seiton"  # links in notes: seiton:open?scope=... (examples/PostFix/exercise_links.py)
 TUTORIAL_DIR = f"Learning {NAME}"  # the tutorial in the repo (scripts/testrun.py copies it)
 
 # Former names, newest first (MyOS until 2026-11-14): environment variables under them are

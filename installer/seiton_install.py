@@ -64,7 +64,7 @@ INSTALL = {
     "zypper": ["sudo", "zypper", "--non-interactive", "install"],
     "pacman": ["sudo", "pacman", "-S", "--needed", "--noconfirm"],
 }
-# The Headline (Scope/Designdocument Headline.md): its launcher, and its applet in Cinnamon.
+# The Headline (apps/Scope/Designdocument Headline.md): its launcher, and its applet in Cinnamon.
 HEADLINE = file_name("headline")
 HEADLINE_APPLET = "seiton-headline@seiton"
 # The CLI tools that get a launcher of the same name (cli/<name>.py).
@@ -228,19 +228,19 @@ def python_packages(places: Places, run: Run) -> None:
 
 
 def launchers(places: Places, written: Written) -> None:
-    written.text(places.bin / APP_ID, _launcher(places, places.repo / "Scope" / "Scope.py"), executable=True)
+    written.text(places.bin / APP_ID, _launcher(places, places.repo / "apps" / "Scope" / "Scope.py"), executable=True)
     for tool in CLI_TOOLS:
         script = places.repo / "cli" / f"{tool}.py"
         if script.is_file():
             written.text(places.bin / tool, _launcher(places, script), executable=True)
-    written.text(places.bin / HEADLINE, _launcher(places, places.repo / "Headline" / "Headline.py"),
+    written.text(places.bin / HEADLINE, _launcher(places, places.repo / "apps" / "Headline" / "Headline.py"),
                  executable=True)
     # The time tracking: its screen, and the clock (started in its sandbox, cli/seiton_clock.py).
-    written.text(places.bin / file_name("time"), _launcher(places, places.repo / "Time" / "TimeScreen.py"),
+    written.text(places.bin / file_name("time"), _launcher(places, places.repo / "apps" / "Time" / "TimeScreen.py"),
                  executable=True)
     written.text(places.bin / file_name("clock"), _launcher(places, places.repo / "cli" / "seiton_clock.py"),
                  executable=True)
-    postfix = places.repo / "PostFix" / "cli.py"
+    postfix = places.repo / "examples" / "PostFix" / "cli.py"
     if postfix.is_file():  # "postfix" alone is a mail server's command
         written.text(places.bin / file_name("postfix"), _launcher(places, postfix), executable=True)
 
@@ -289,7 +289,7 @@ def cinnamon_applet(places: Places, written: Written, which: Which) -> None:
     The user adds it to the panel (right click on the panel, Applets)."""
     if not which("cinnamon"):
         return
-    source = places.repo / "Headline" / "cinnamon" / HEADLINE_APPLET
+    source = places.repo / "apps" / "Headline" / "cinnamon" / HEADLINE_APPLET
     target = places.data / "cinnamon" / "applets" / HEADLINE_APPLET
     script = (source / "applet.js").read_text(encoding="utf-8")
     written.text(target / "applet.js", script.replace("__LAUNCHER__", str(places.bin / HEADLINE)))
@@ -343,7 +343,7 @@ def templates(places: Places) -> None:
 
 
 def suntree(places: Places, run: Run) -> None:
-    run([str(places.python), str(places.repo / "SunTree" / "install_autostart.py"), str(places.home)])
+    run([str(places.python), str(places.repo / "examples" / "SunTree" / "install_autostart.py"), str(places.home)])
 
 
 def thumbnailer(places: Places, written: Written) -> None:
@@ -426,7 +426,7 @@ def uninstall(places: Places, run: Run = run_command) -> None:
         if path.is_file() or path.is_symlink():
             path.unlink()
     if places.python.exists():
-        run([str(places.python), str(places.repo / "SunTree" / "install_autostart.py"), "--remove"], quiet=True)
+        run([str(places.python), str(places.repo / "examples" / "SunTree" / "install_autostart.py"), "--remove"], quiet=True)
     shutil.rmtree(places.venv, ignore_errors=True)
     places.manifest.unlink(missing_ok=True)
     print(f"{NAME} is uninstalled. Settings ({places.config}) and templates ({places.templates}) stay.")

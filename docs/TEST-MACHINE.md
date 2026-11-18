@@ -24,7 +24,7 @@ and lesson 1 opens for the next tester.
    Ctrl+Alt+Space:
    ```
    $PY scripts/testrun.py install
-   $PY SunTree/install_autostart.py ~/SEITON-Tutorial/DE
+   $PY examples/SunTree/install_autostart.py ~/SEITON-Tutorial/DE
    ```
 5. Make the first copy and open lesson 1: `$PY scripts/testrun.py start`.
 6. Check: lesson 1 shows in PostFix; in lesson 7, "▶ Übung öffnen" opens Scope and the file

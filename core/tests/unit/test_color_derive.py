@@ -1,5 +1,5 @@
-"""Colours worked out from a few base values (core/color_derive.py; Scope/Colour inventory.md,
-Scope/Designdocument Setup.md, 5): a clean ladder instead of 79 colours set by hand."""
+"""Colours worked out from a few base values (core/color_derive.py; apps/Scope/Colour inventory.md,
+apps/Scope/Designdocument Setup.md, 5): a clean ladder instead of 79 colours set by hand."""
 
 import re
 

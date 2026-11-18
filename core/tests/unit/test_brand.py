@@ -71,15 +71,15 @@ def test_url_scheme_is_lowercase_and_differs_from_former_ones():
 
 
 def test_qml_has_the_same_name():
-    """Scope/js/Brand.js mirrors core/brand.py for QML."""
-    js = (REPO / "Scope" / "js" / "Brand.js").read_text(encoding="utf-8")
+    """apps/Scope/js/Brand.js mirrors core/brand.py for QML."""
+    js = (REPO / "apps" / "Scope" / "js" / "Brand.js").read_text(encoding="utf-8")
     values = dict(re.findall(r'^var (\w+) = "([^"]*)"$', js, re.M))
     assert values == {"NAME": brand.NAME, "META_DIR": brand.META_DIR, "CONFIG_DIR": brand.CONFIG_DIR}
 
 
 def test_qml_takes_the_name_from_brand_js():
     for name in ("main.qml", "FolderBrowser.qml"):
-        qml = (REPO / "Scope" / name).read_text(encoding="utf-8")
+        qml = (REPO / "apps" / "Scope" / name).read_text(encoding="utf-8")
         code = "\n".join(line.split("//", 1)[0] for line in qml.splitlines())
         for value in (brand.NAME, brand.META_DIR, "MyOS", ".MyOS"):
             assert f'"{value}"' not in code, (name, value)
@@ -88,8 +88,8 @@ def test_qml_takes_the_name_from_brand_js():
 # Security: To avoid a rename that leaves parts behind, code outside core/brand.py must not
 # spell the settings folder or an environment variable itself (comments and docstrings may).
 # ClipboardTool stands alone (started by CopyQ, see core/brand.py).
-_CODE_DIRS = ("core", "cli", "cloud/service", "Scope", "PostFix", "SunTree", "Headline", "Time", "daemon",
-              "scripts", "installer")
+_CODE_DIRS = ("core", "cli", "cloud/service", "apps/Scope", "examples/PostFix", "examples/SunTree", "apps/Headline",
+              "apps/Time", "daemon", "scripts", "installer")
 _DIRS = (brand.META_DIR, *brand.LEGACY_META_DIRS)
 _PREFIXES = (brand.ENV_PREFIX, *brand.LEGACY_ENV_PREFIXES)
 _LITERAL = re.compile(

@@ -8,7 +8,7 @@ import pytest
 
 QtCore = pytest.importorskip("PySide6.QtCore")
 
-TOOL = Path(__file__).resolve().parents[3] / "ClipboardTool"
+TOOL = Path(__file__).resolve().parents[3] / "examples" / "ClipboardTool"
 
 
 def _command(name: str) -> dict:

@@ -120,7 +120,7 @@ Examples:
 The time tracking (see "Designdocument Time.md").
 
 - `seiton-clock` starts the clock with its role: it mounts the drive of its role and runs the clock in bubblewrap. `--projects-root PATH`: the folder holding the projects (else the first root below the home folder). `--no-sandbox`: without bubblewrap and role drive (development). A second start does nothing while a clock runs. `./install.sh --clock` starts it at login.
-- `seiton-time` opens the time screen (`Time/TimeScreen.py`).
+- `seiton-time` opens the time screen (`apps/Time/TimeScreen.py`).
 
 ---
 

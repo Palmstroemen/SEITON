@@ -12,8 +12,8 @@ under `.MyOS` and `~/.config/MyOS` move over with `python3 cli/migrate_name.py -
 
 SEITON has moved beyond early prototyping. Core components are implemented and iteratively hardened:
 
-- **Scope** — QML file browser: Templates + Projects rows, path bar, CWD/CTD navigation, tag filtering, DnD, multi-selection, context menu; settings on its back (General, Scope, SunTree; `Scope/Designdocument Setup.md`)
-- **Headline** — the line at the top edge of the screen: where one is, the project's standard folders, the perspectives, the clock; docked, as a panel like a start menu, or as a Cinnamon applet (`Scope/Designdocument Headline.md`)
+- **Scope** — QML file browser: Templates + Projects rows, path bar, CWD/CTD navigation, tag filtering, DnD, multi-selection, context menu; settings on its back (General, Scope, SunTree; `apps/Scope/Designdocument Setup.md`)
+- **Headline** — the line at the top edge of the screen: where one is, the project's standard folders, the perspectives, the clock; docked, as a panel like a start menu, or as a Cinnamon applet (`apps/Scope/Designdocument Headline.md`)
 - **Time tracking** — a clock counts the time per project, writes it into the project, and parent projects collect their children's time; the clock has a role of its own in the sandbox (`core/Dokumentation/Designdocument Time.md`)
 - **CLI tools** — myls, myproject, mytag, myacl, myedit, myimport, myexport, myfilter
 - **Blueprint layer** — Embryo materialization one level at a time (including nested embryos); unused born folders turn back into embryos
@@ -59,7 +59,7 @@ Besides: fixing what the review of 2026-11-18 found (`docs/Prüfung 2026-11-18.m
 ## Known Open Points
 
 - The review of 2026-11-18 lists what is still wrong or unfinished: `docs/Prüfung 2026-11-18.md`
-- Legacy and duplicate-logic candidates in Scope: `Scope/.Legacy-Code-Kandidaten.md`, `Scope/.FolderBrowser-DoppelKandidaten.md`
+- Legacy and duplicate-logic candidates in Scope: `apps/Scope/.Legacy-Code-Kandidaten.md`, `apps/Scope/.FolderBrowser-DoppelKandidaten.md`
 - `main.qml` (~3500 lines) and `FolderBrowser.qml` (~4800 lines) are large; further splitting pending
 
 ## Operational Details

@@ -105,7 +105,7 @@ def test_the_projects_worked_on_last_with_their_time_today(tmp_path, ledger):
 
 
 def test_the_view_file_is_what_the_headline_reads(tmp_path, ledger, monkeypatch):
-    from Headline import widgets
+    from apps.Headline import widgets
 
     folder = tmp_path / "seiton-clock"
     cw.write_view(folder, cw.render(_clock(tmp_path, ledger), ledger, NOW, language="en"))

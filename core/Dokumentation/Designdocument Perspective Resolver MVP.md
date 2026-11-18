@@ -255,13 +255,13 @@ Built (2026-10-22):
   beside the folders; no display menu. The path line keeps no room when it is empty. The
   dropdown and V's preview columns have no hover drop (it joins a tab to H's preview row).
 - M's tools (2026-10-26): no menu - what would hide behind one lies as buttons in a row at
-  the top of the CWD dropdown (`Scope/CwdTools.qml`, `FolderBrowser.cwdHoverTools`): Clipboard
+  the top of the CWD dropdown (`apps/Scope/CwdTools.qml`, `FolderBrowser.cwdHoverTools`): Clipboard
   (click: the Clipboard becomes the CWD; drop: into it; pale while empty), search (the field
   opens in the line beside the CWD), light/dark, language, hidden folders. Search and Clipboard
   left the SEITON-folder row. No H and no E (2026-10-26): M is becoming a tool of its own,
   docked at the top of the screen; one does not switch it to the full view, at most one opens
   a normal Scope beside it (that tool is the Headline, started 2026-11-17,
-  "Scope/Designdocument Headline.md"; M stays in Scope until it replaces it). Next: a Setup button opening a
+  "apps/Scope/Designdocument Headline.md"; M stays in Scope until it replaces it). Next: a Setup button opening a
   configuration page (colour scheme, SunTree's values such as Enter/Leave); it needs a
   settings file shared by Scope and SunTree. Later perhaps signing in / switching user and
   switching off. The top bar is unchanged in M for now: its other switches (filter, Projekte/
@@ -398,7 +398,7 @@ the invoice from FirmaX from two weeks ago? In which project was it?"
 ## A11. Several Roots, Several Perspectives (Concept, 2026-11-16)
 
 Partly decided (below, 2026-11-16). Built: the named perspectives as favourites in the Headline's
-panel (2026-11-17, `Headline/model.py` reads `.seiton/Perspectives.md`; Scope/Designdocument
+panel (2026-11-17, `apps/Headline/model.py` reads `.seiton/Perspectives.md`; Scope/Designdocument
 Headline.md, step 3). Not built: the drive showing only the list, the drives in one place
 (`~/Perspektiven/<root>`), finding roots downwards. Came up when SEITON was rolled out on the Dell: `~/Dokumente` became a
 projects root, and a second root `~/Projekte` was planned beside it (left out for now).

@@ -1,7 +1,7 @@
-"""The clock as the Headline's first widget (Scope/Designdocument Headline.md, 3a).
+"""The clock as the Headline's first widget (apps/Scope/Designdocument Headline.md, 3a).
 
 The time tracking is a program of its own; it puts itself into the Headline by the widget
-protocol (Headline/widgets.py): it writes `view.json` into a folder of its own in the runtime
+protocol (apps/Headline/widgets.py): it writes `view.json` into a folder of its own in the runtime
 folder - "Küche · 2:15", calm when it stands, its question when it asks, the projects worked on
 last - and takes the command files the Headline drops into `commands/` there.
 
@@ -151,7 +151,7 @@ def spent_from(path_of: Callable[[Path, str], Path]) -> Callable[[Path, str, str
 def render(clock, ledger: Ledger, now: datetime, *, language: str,
            spent: Optional[Callable[[Path, str, str, date], timedelta]] = None,
            shows: str = "total") -> Dict[str, Any]:
-    """The widget's view (Headline/widgets.py) for the clock as it is now. Beside the projects
+    """The widget's view (apps/Headline/widgets.py) for the clock as it is now. Beside the projects
     worked on last the time `shows` from their time files (spent); without, what the ledger
     counted today."""
     words = _words(language)
@@ -173,7 +173,7 @@ def render(clock, ledger: Ledger, now: datetime, *, language: str,
             view["tooltip"] = words["pausedTip"]
         if clock.state in ("runs", "asks"):
             # The Headline counts on between views, to the second: from where today's time
-            # would be naught (Headline/widgets.py, counter).
+            # would be naught (apps/Headline/widgets.py, counter).
             view["counter"] = {"prefix": f"{Path(project).name} · ",
                                "since": now.timestamp() - today.total_seconds()}
         if clock.state == "asks":

@@ -1,4 +1,4 @@
-"""Colours worked out from a few base values (Scope/Colour inventory.md; Scope/Designdocument
+"""Colours worked out from a few base values (apps/Scope/Colour inventory.md; Scope/Designdocument
 Setup.md, 5).
 
 Base values: background, text, content background, accent, and for a scheme of one's own a tint.

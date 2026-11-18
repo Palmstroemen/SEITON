@@ -19,11 +19,11 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 # app -> (source files relative to the repo, languages translated to)
 APPS = {
-    "scope": (["Scope/*.qml", "Scope/Dialogs/*.qml", "Scope/js/*.js"], ["de"]),
-    "postfix": (["PostFix/*.py"], ["de"]),
-    "suntree": (["SunTree/*.qml", "SunTree/js/*.js"], ["de"]),
-    "headline": (["Headline/*.qml"], ["de"]),
-    "time": (["Time/*.qml"], ["de"]),
+    "scope": (["apps/Scope/*.qml", "apps/Scope/Dialogs/*.qml", "apps/Scope/js/*.js"], ["de"]),
+    "postfix": (["examples/PostFix/*.py"], ["de"]),
+    "suntree": (["examples/SunTree/*.qml", "examples/SunTree/js/*.js"], ["de"]),
+    "headline": (["apps/Headline/*.qml"], ["de"]),
+    "time": (["apps/Time/*.qml"], ["de"]),
 }
 
 
@@ -45,7 +45,8 @@ def update(app: str) -> None:
 
 
 def app_dir(app: str) -> str:
-    return {"scope": "Scope", "postfix": "PostFix", "suntree": "SunTree", "headline": "Headline", "time": "Time"}[app]
+    return {"scope": "apps/Scope", "postfix": "examples/PostFix", "suntree": "examples/SunTree",
+            "headline": "apps/Headline", "time": "apps/Time"}[app]
 
 
 def main(argv) -> int:

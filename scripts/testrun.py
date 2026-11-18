@@ -301,14 +301,14 @@ def finish(places: Places, name: str = "", ismount=os.path.ismount, unmount=_fus
 def is_ours(argv: List[str], cwd: Path, repo: Path, copy: Path) -> bool:
     """Whether a process is Scope, PostFix or the lens drive of this repository working on
     the tutorial copy (by its command line) - other windows on the computer are left alone."""
-    programs = {(repo / "Scope" / "Scope.py").resolve(), (repo / "PostFix" / "cli.py").resolve()}
+    programs = {(repo / "apps" / "Scope" / "Scope.py").resolve(), (repo / "examples" / "PostFix" / "cli.py").resolve()}
 
     def path_of(arg):
         return (Path(arg) if Path(arg).is_absolute() else Path(cwd) / arg).resolve()
 
     program = any(arg.endswith(("Scope.py", "cli.py")) and path_of(arg) in programs for arg in argv[:3])
-    # Scope starts PostFix as a module (python3 -m PostFix.main) in the repository.
-    program = program or (argv[1:3] == ["-m", "PostFix.main"] and Path(cwd).resolve() == Path(repo).resolve())
+    # Scope starts PostFix as a module (python3 -m examples.PostFix.main) in the repository.
+    program = program or (argv[1:3] == ["-m", "examples.PostFix.main"] and Path(cwd).resolve() == Path(repo).resolve())
     # The lens drive's process (python3 -m daemon, started by Scope in the repository).
     program = program or (argv[1:3] == ["-m", "daemon"] and Path(cwd).resolve() == Path(repo).resolve())
     copy = Path(copy).resolve()
@@ -337,7 +337,7 @@ def close_programs(places: Places) -> None:
 
 
 def open_lesson(places: Places, note: Optional[Path] = None) -> None:
-    subprocess.Popen([sys.executable, str(places.repo / "PostFix" / "cli.py"), str(note or first_lesson(places))],
+    subprocess.Popen([sys.executable, str(places.repo / "examples" / "PostFix" / "cli.py"), str(note or first_lesson(places))],
                      cwd=str(places.repo), start_new_session=True)
 
 
@@ -386,7 +386,7 @@ def install_postfix_for_markdown(places: Places, data_home: Optional[Path] = Non
     entry = _desktop_entry(data_home / "applications", "postfix.desktop")
     entry.write_text(
         f"[Desktop Entry]\nType=Application\nName=PostFix\nComment={NAME} notes\n"
-        f"Exec={sys.executable} \"{places.repo / 'PostFix' / 'cli.py'}\" %f\n"
+        f"Exec={sys.executable} \"{places.repo / 'examples' / 'PostFix' / 'cli.py'}\" %f\n"
         "Icon=accessories-text-editor\nTerminal=false\nCategories=Office;\n"
         "MimeType=text/markdown;text/x-markdown;\n", encoding="utf-8")
     for mime in ("text/markdown", "text/x-markdown"):

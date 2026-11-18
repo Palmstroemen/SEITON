@@ -154,7 +154,7 @@ def test_the_launcher_starts_scope_with_the_venv(places):
     _install(places)
     launcher = places.bin / "seiton"
     text = launcher.read_text(encoding="utf-8")
-    assert str(places.venv / "bin" / "python") in text and str(REPO / "Scope" / "Scope.py") in text
+    assert str(places.venv / "bin" / "python") in text and str(REPO / "apps" / "Scope" / "Scope.py") in text
     assert launcher.stat().st_mode & stat.S_IXUSR
 
 
@@ -163,7 +163,7 @@ def test_the_cli_tools_and_postfix_get_launchers(places):
     for name in ("myls", "myproject", "mytag", "myacl"):
         assert str(REPO / "cli" / f"{name}.py") in (places.bin / name).read_text(encoding="utf-8")
     # "postfix" is a mail server's command: ours carries the name
-    assert str(REPO / "PostFix" / "cli.py") in (places.bin / "seiton-postfix").read_text(encoding="utf-8")
+    assert str(REPO / "examples" / "PostFix" / "cli.py") in (places.bin / "seiton-postfix").read_text(encoding="utf-8")
     assert not (places.bin / "postfix").exists()
 
 
@@ -183,7 +183,7 @@ def test_the_menu_entry(places):
 
 def test_scope_names_its_menu_entry():
     # So the taskbar finds the entry and its icon (Wayland asks the app for it).
-    assert "app.setDesktopFileName(CONFIG_DIR)" in (REPO / "Scope" / "Scope.py").read_text(encoding="utf-8")
+    assert "app.setDesktopFileName(CONFIG_DIR)" in (REPO / "apps" / "Scope" / "Scope.py").read_text(encoding="utf-8")
     assert inst.APP_ID == "seiton"
 
 
@@ -236,7 +236,7 @@ def test_no_extras_unless_asked(places):
 def test_suntree_at_login(places):
     runner = _install(places, suntree=True)
     python = str(places.venv / "bin" / "python")
-    assert [python, str(REPO / "SunTree" / "install_autostart.py"), str(places.home)] in runner.commands
+    assert [python, str(REPO / "examples" / "SunTree" / "install_autostart.py"), str(places.home)] in runner.commands
 
 
 def test_markdown_previews_in_the_file_browsers(places):
@@ -252,7 +252,7 @@ def test_markdown_previews_in_the_file_browsers(places):
     assert not former.exists()
 
 
-# --- the Headline (Scope/Designdocument Headline.md) ---------------------------------------
+# --- the Headline (apps/Scope/Designdocument Headline.md) ---------------------------------------
 
 def _install_on_cinnamon(places, **options):
     runner = Runner(installed=inst.PACKAGES["apt"])
@@ -266,7 +266,7 @@ def test_the_headline_gets_a_launcher(places):
     _install(places)
     launcher = places.bin / "seiton-headline"
     assert launcher.is_file() and os.access(launcher, os.X_OK)
-    assert str(REPO / "Headline" / "Headline.py") in launcher.read_text(encoding="utf-8")
+    assert str(REPO / "apps" / "Headline" / "Headline.py") in launcher.read_text(encoding="utf-8")
 
 
 def test_a_menu_entry_opens_the_panel_to_pin_to_any_taskbar(places):
@@ -310,7 +310,7 @@ def test_the_applet_is_valid_javascript():
     node = shutil.which("node")
     if not node:
         pytest.skip("no node to check the syntax")
-    script = REPO / "Headline" / "cinnamon" / "seiton-headline@seiton" / "applet.js"
+    script = REPO / "apps" / "Headline" / "cinnamon" / "seiton-headline@seiton" / "applet.js"
     assert subprocess.run([node, "--check", str(script)], capture_output=True).returncode == 0
 
 
@@ -318,7 +318,7 @@ def test_the_applet_is_valid_javascript():
 
 def test_the_time_screen_and_the_clock_get_launchers(places):
     _install(places)
-    for name, script in (("seiton-time", "Time/TimeScreen.py"), ("seiton-clock", "cli/seiton_clock.py")):
+    for name, script in (("seiton-time", "apps/Time/TimeScreen.py"), ("seiton-clock", "cli/seiton_clock.py")):
         launcher = places.bin / name
         assert launcher.is_file() and os.access(launcher, os.X_OK)
         assert str(REPO / script) in launcher.read_text(encoding="utf-8")

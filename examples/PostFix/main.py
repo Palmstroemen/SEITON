@@ -1,0 +1,1159 @@
+#!/usr/bin/env python3
+"""
+PostFix - Main Application Entry Point
+Builds UI directly in Python without .ui files for full control.
+"""
+import subprocess
+import weakref
+import sys
+import tempfile
+import re
+from pathlib import Path
+
+# Started as a script (python3 examples/PostFix/cli.py): make the repo root importable for
+# `core`, as apps/Scope/Scope.py does. As a module (python3 -m examples.PostFix.main) it already is.
+if not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from core.acl_edit import ACLEditError, check_move_rules, move_rules as move_acl_rules
+from core.acl_enforcement import allowed_at
+from core.brand import getenv
+from core.identity import acl_user_for
+
+try:
+    from .markdown_render import render_markdown
+    from .ui_panels import TagSidebar, ACLSidebar, BottomToolbar
+    from .smart_editor import SmartEditor
+    from .window_layout import WindowLayoutMixin
+    from .window_tags import WindowTagsMixin
+    from .window_acls import WindowAclsMixin
+    from .window_theme import WindowThemeMixin
+    from .exercise_links import SCHEMES as EXERCISE_SCHEMES, ExerciseLauncher, is_exercise_link
+    from .live_file import conflict_copy_path, merge3
+    from . import editor_host
+except ImportError:
+    from markdown_render import render_markdown
+    from ui_panels import TagSidebar, ACLSidebar, BottomToolbar
+    from smart_editor import SmartEditor
+    from window_layout import WindowLayoutMixin
+    from window_tags import WindowTagsMixin
+    from window_acls import WindowAclsMixin
+    from window_theme import WindowThemeMixin
+    from exercise_links import SCHEMES as EXERCISE_SCHEMES, ExerciseLauncher, is_exercise_link
+    from live_file import conflict_copy_path, merge3
+    import editor_host
+from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout,
+                               QHBoxLayout, QGridLayout, QPushButton, QLabel,
+                               QSpacerItem, QSizePolicy, QFrame,
+                               QGraphicsOpacityEffect, QStackedLayout, QLineEdit, QComboBox, QApplication, QMenu, QMessageBox)
+from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QPoint, QEvent, QRect, QTimer, QTranslator, QUrl, QLibraryInfo, QFileSystemWatcher, QObject, Slot
+from PySide6.QtGui import QColor, QDesktopServices, QGuiApplication, QTextDocument, QCursor
+from PySide6.QtPrintSupport import QPrinter
+
+class _ExerciseRouter(QObject):
+    """The one handler of exercise links for all notes of this PostFix: a click goes to the
+    window it was clicked in (the active one), whose note the lesson folder belongs to."""
+
+    @Slot(QUrl)
+    def open(self, url):
+        window = active_window()
+        if window is not None:
+            window.exercise_launcher.open(url)
+
+
+EXERCISE_ROUTER = _ExerciseRouter()
+_last_active = None
+
+
+def remember_active(window):
+    global _last_active
+    _last_active = weakref.ref(window)
+
+
+def active_window():
+    """The note window the user is in: Qt's active window, else the one activated last."""
+    app = QApplication.instance()
+    current = app.activeWindow() if app is not None else None
+    if current is not None and hasattr(current, "exercise_launcher"):
+        return current
+    return _last_active() if _last_active is not None else None
+
+
+def obsidian_uri(path) -> str:
+    """Obsidian's link to open a note: the path encoded (a "&" or "#" in it opened another
+    note or none)."""
+    from urllib.parse import quote
+
+    return "obsidian://open?path=" + quote(str(path), safe="")
+
+
+def editor_enabled() -> bool:
+    """The CodeMirror editor (editor_host.py); MYOS_POSTFIX_EDITOR=line brings back the old line
+    editor (smart_editor.py) until it goes."""
+    return getenv("POSTFIX_EDITOR", "").strip().lower() != "line"
+
+
+def _window_for_note(note: str):
+    for widget in QApplication.topLevelWidgets():
+        if isinstance(widget, PostFixWindow) and widget._editor_key() == note:
+            return widget
+    return None
+
+
+def _editor_changed(note: str, body: str):
+    window = _window_for_note(note)
+    if window is not None:
+        window.editor.set_body(body)  # saved, merged, tagged as any edit
+
+
+def _editor_link(note: str, href: str):
+    window = _window_for_note(note)
+    if window is not None:
+        window.follow_link(href)
+
+
+_editor_hooked = None  # the editor whose signals reach the windows
+
+
+def _editor():
+    global _editor_hooked
+    host = editor_host.shared()
+    if _editor_hooked is not host:
+        host.changed.connect(_editor_changed)
+        host.linkClicked.connect(_editor_link)
+        _editor_hooked = host
+    return host
+
+
+class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowThemeMixin, QMainWindow):
+    """Main application window."""
+    NOTE_STYLE_ALIASES = {
+        "postit": "postit",
+        "kurznotiz": "postit",
+        "sticky": "postit",
+        "sheet": "sheet",
+        "a4": "sheet",
+        "blatt": "sheet",
+        "mitschrift": "sheet",
+        "notebook": "notebook",
+        "heft": "notebook",
+        "konzept": "notebook",
+        "cloud": "cloud",
+        "gedankenskizze": "cloud",
+        "chat": "chat",
+        "aichat": "chat",
+        "aichatbubble": "chat",
+        "sprechblase": "chat",
+        "config": "config",
+        "konfig": "config",
+        "konfiguration": "config",
+        "settings": "config",
+    }
+    
+    def _exercise_base(self):
+        """Folder exercise links are relative to: the note shown (lesson links move the
+        preview on to other notes in this window), else the note opened."""
+        preview = getattr(self.editor, "preview", None)
+        source = preview.source() if preview is not None else None
+        if source is not None and source.isLocalFile():
+            return Path(source.toLocalFile()).parent
+        path = getattr(self.editor, "current_path", None)
+        return Path(path).parent if path else None
+
+    def __init__(
+        self,
+        open_path: Path | None = None,
+        ui_language: str = "de",
+    ):
+        super().__init__()
+        self._translator: QTranslator | None = None
+        self._qt_translator: QTranslator | None = None  # Qt's own texts (dialog buttons)
+        self._language = "de"
+        self._i18n_dir = Path(__file__).with_name("i18n")
+        self.setWindowTitle(self.tr("PostFix"))
+        self.setGeometry(100, 100, 900, 650)
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
+        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
+        self.setWindowOpacity(1.0)
+        
+        # Set application styles
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: transparent;
+            }
+            QPushButton {
+                font-size: 12px;
+            }
+        """)
+        
+        # Create central widget
+        central_widget = QWidget()
+        central_widget.setStyleSheet("QWidget { background: transparent; }")
+        central_widget.setMouseTracking(True)
+        central_widget.setAttribute(Qt.WA_Hover, True)
+        central_widget.installEventFilter(self)
+        self.setCentralWidget(central_widget)
+        
+        # Main layout (3x3 grid)
+        main_layout = QGridLayout(central_widget)
+        main_layout.setSpacing(0)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Create and add top toolbar
+        self.create_top_toolbar()
+        self.top_toolbar.setFixedHeight(40)
+        self.init_topbar_fade()
+
+        # Center area (editor + sidebars)
+        self.left_sidebar = ACLSidebar()
+        self.left_sidebar.roleEditRequested.connect(self._open_role_editor)
+        self.left_sidebar.personEditRequested.connect(self._open_person_editor)
+        self.editor = SmartEditor()
+        if editor_enabled():
+            # Read in the editor's look; the editor itself (a browser page) only once wanted.
+            self.editor.set_light_look(True)
+            self.editor.editRequested.connect(self._take_editor)
+            self.editor.linkRequested.connect(self.follow_link)
+            # Text colour and highlighter colour a selection of the old line editor only.
+            self.btn_text_color.hide()
+            self.btn_highlight.hide()
+        # Exercise links of the tutorial (seiton:open?scope=...&files=...): a click opens Scope in
+        # the exercise folder, the file browser beside it (exercise_links.py).
+        self.exercise_launcher = ExerciseLauncher(self._exercise_base, Path(__file__).resolve().parents[2], parent=self)
+        # One handler for all windows of this PostFix: the router hands each click on.
+        for scheme in EXERCISE_SCHEMES:
+            QDesktopServices.setUrlHandler(scheme, EXERCISE_ROUTER, "open")
+        remember_active(self)
+        self.right_sidebar = TagSidebar()
+        self._doc_tags = []
+        self._doc_color_defs = []
+        self._scope_tags = []
+        self._scope_tags_path = None
+        self._tag_color_map = {}
+        self._vault_root = None
+        self._app_json_path = None
+        self._app_json_data = {}
+        self._desk_service = None
+        self._last_desk_result = {}
+        # Always wire editor->window theme callback; dynamic attribute on SmartEditor.
+        self.editor.on_theme_color_changed = self.apply_theme_color_hex
+        self.editor.on_source_text_replaced = self._on_source_text_replaced
+        self.editor.on_frontmatter_changed = self._on_editor_text_changed
+        if hasattr(self.editor, "MODE_FOCUS"):
+            self.editor.set_view_mode(self.editor.MODE_FOCUS)
+            self.btn_view_mode.setText(self.tr("Focus mode"))
+            self.btn_view_mode.setEnabled(False)
+        if hasattr(self.editor, "tagsChanged"):
+            self.editor.tagsChanged.connect(self._on_editor_tags_changed)
+        if hasattr(self.editor, "colorDefinitionsChanged"):
+            self.editor.colorDefinitionsChanged.connect(self._on_editor_color_definitions_changed)
+        if hasattr(self.right_sidebar, "tagColorChangeRequested"):
+            self.right_sidebar.tagColorChangeRequested.connect(self._on_tag_color_change)
+        if hasattr(self.right_sidebar, "tagSearchRequested"):
+            self.right_sidebar.tagSearchRequested.connect(self._on_tag_search)
+        if hasattr(self.right_sidebar, "colorDefinitionChangeRequested"):
+            self.right_sidebar.colorDefinitionChangeRequested.connect(self._on_color_definition_change)
+        if hasattr(self.right_sidebar, "colorDefinitionSearchRequested"):
+            self.right_sidebar.colorDefinitionSearchRequested.connect(self._on_color_definition_search)
+        self._theme_anim = None
+        self._syncing_note_style_combo = False
+        self._current_note_style = ""
+        self._current_theme_color = self.editor.current_bg
+        self._track_local_changes = False
+        self._has_local_changes = False
+        self._meta_timer = QTimer(self)
+        self._meta_timer.setSingleShot(True)
+        self._meta_timer.timeout.connect(self._flush_window_metadata)
+        self._save_timer = QTimer(self)
+        self._save_timer.setSingleShot(True)
+        self._save_timer.timeout.connect(self._save_current_document)
+        # The note as it was last read from or written to disk; a change from outside shows at
+        # once and is merged with unsaved edits, never written over (live_file.py).
+        self._disk_text = None
+        self._file_watcher = QFileSystemWatcher(self)
+        self._file_watcher.fileChanged.connect(lambda _path: self._reload_timer.start())
+        self._file_watcher.directoryChanged.connect(lambda _path: self._reload_timer.start())
+        self._reload_timer = QTimer(self)
+        self._reload_timer.setSingleShot(True)
+        self._reload_timer.setInterval(150)  # a program writing in several steps settles first
+        self._reload_timer.timeout.connect(self._reconcile_with_disk)
+        self._scope_sync_timer = QTimer(self)
+        self._scope_sync_timer.setSingleShot(True)
+        self._scope_sync_timer.timeout.connect(self._sync_scope_tags_from_document)
+        if hasattr(self.editor, "source_edit"):
+            self.editor.source_edit.textChanged.connect(self._on_editor_text_changed)
+
+        # ACL sidebar: hidden until the open note is governed by an ACLs.md
+        # (see WindowAclsMixin._reload_acl_context).
+        self.acl_host = QFrame()
+        self.acl_host.setFixedWidth(0)
+        acl_layout = QVBoxLayout(self.acl_host)
+        acl_layout.setContentsMargins(0, 0, 0, 0)
+        acl_layout.addWidget(self.left_sidebar)
+        self.acl_host.setVisible(False)
+
+        # Bottom toolbar
+        self.bottom_toolbar = BottomToolbar()
+        self.init_bottombar_fade()
+        self.bottom_toolbar.printRequested.connect(self.print_to_printer)
+        self.bottom_toolbar.openInRequested.connect(self.open_in_app)
+
+        # Corner widgets (more transparent)
+        self.corner_tl = self.make_corner_widget()
+        self.corner_tr = self.make_corner_widget()
+        self.corner_bl = self.make_corner_widget()
+        self.corner_br = self.make_corner_widget()
+
+        # Inner side strips (theme-colored)
+        self.strip_left_top_host, self.strip_left_top = self.make_strip_host(align_right=True)
+        self.strip_left_mid_host, self.strip_left_mid = self.make_strip_host(align_right=True)
+        self.strip_left_bot_host, self.strip_left_bot = self.make_strip_host(align_right=True)
+        self.strip_right_top_host, self.strip_right_top = self.make_strip_host(align_right=False)
+        self.strip_right_mid_host, self.strip_right_mid = self.make_strip_host(align_right=False)
+        self.strip_right_bot_host, self.strip_right_bot = self.make_strip_host(align_right=False)
+
+        self.topbar_bg = QFrame()
+        self.topbar_bg.setStyleSheet("QFrame { background-color: #ffffff; }")
+        self.bottombar_bg = QFrame()
+        self.bottombar_bg.setStyleSheet("QFrame { background-color: #ffffff; }")
+        self.bottom_shadow = QFrame()
+        self.bottom_shadow.setFixedHeight(60)
+        self.bottom_shadow.setStyleSheet(
+            "QFrame { "
+            "background: qlineargradient(x1:0,y1:0,x2:0,y2:1, "
+            "stop:0 rgba(0,0,0,80), stop:1 rgba(0,0,0,0)); "
+            "}"
+        )
+        self.bottom_shadow.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+        self.right_shadow = QFrame()
+        self.right_shadow.setFixedWidth(60)
+        self.right_shadow.setStyleSheet(
+            "QFrame { "
+            "background: qlineargradient(x1:0,y1:0,x2:1,y2:0, "
+            "stop:0 rgba(0,0,0,80), stop:1 rgba(0,0,0,0)); "
+            "}"
+        )
+        self.right_shadow.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+        self.corner_shadow = QFrame()
+        self.corner_shadow.setFixedSize(60, 60)
+        self.corner_shadow.setStyleSheet(
+            "QFrame { "
+            "background: qradialgradient(cx:0,cy:0, radius:1, "
+            "fx:0, fy:0, stop:0 rgba(0,0,0,80), stop:1 rgba(0,0,0,0)); "
+            "}"
+        )
+        self.corner_shadow.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+        self.right_shadow_bot = QFrame()
+        self.right_shadow_bot.setFixedWidth(60)
+        self.right_shadow_bot.setStyleSheet(
+            "QFrame { "
+            "background: qlineargradient(x1:0,y1:0,x2:1,y2:0, "
+            "stop:0 rgba(0,0,0,80), stop:1 rgba(0,0,0,0)); "
+            "}"
+        )
+        self.right_shadow_bot.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+        self.right_shadow_down = QFrame()
+        self.right_shadow_down.setFixedWidth(60)
+        self.right_shadow_down.setStyleSheet(
+            "QFrame { "
+            "background: qlineargradient(x1:0,y1:0,x2:1,y2:0, "
+            "stop:0 rgba(0,0,0,60), stop:1 rgba(0,0,0,0)); "
+            "}"
+        )
+        self.right_shadow_down.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+
+        # Debug overlay disabled for production look.
+        self._resize_targets = [
+            self.centralWidget(),
+            self.top_toolbar,
+            self.topbar_bg,
+            self.bottom_toolbar,
+            self.bottombar_bg,
+            self.editor,
+        ]
+        for target in self._resize_targets:
+            target.setMouseTracking(True)
+            target.setAttribute(Qt.WA_Hover, True)
+            target.installEventFilter(self)
+
+        self.left_mid_host = QFrame()
+        left_mid_stack = QStackedLayout(self.left_mid_host)
+        left_mid_stack.setStackingMode(QStackedLayout.StackAll)
+        left_mid_stack.addWidget(self.acl_host)
+        left_mid_stack.addWidget(self.strip_left_mid_host)
+        left_mid_stack.setAlignment(self.acl_host, Qt.AlignRight | Qt.AlignVCenter)
+        left_mid_stack.setAlignment(self.strip_left_mid_host, Qt.AlignRight | Qt.AlignVCenter)
+
+        self.right_mid_host = QFrame()
+        right_mid_stack = QStackedLayout(self.right_mid_host)
+        right_mid_stack.setStackingMode(QStackedLayout.StackAll)
+        right_mid_stack.addWidget(self.strip_right_mid_host)
+        right_mid_stack.addWidget(self.right_shadow)
+        right_mid_stack.addWidget(self.right_sidebar)
+        right_mid_stack.setAlignment(self.right_shadow, Qt.AlignRight | Qt.AlignVCenter)
+        self.strip_right_mid_host.lower()
+        self.right_shadow.lower()
+        self.right_sidebar.raise_()
+
+        self.right_bot_host = QFrame()
+        right_bot_stack = QStackedLayout(self.right_bot_host)
+        right_bot_stack.setStackingMode(QStackedLayout.StackAll)
+        right_bot_stack.addWidget(self.strip_right_bot_host)
+        right_bot_stack.addWidget(self.right_shadow_bot)
+        right_bot_stack.setAlignment(self.right_shadow_bot, Qt.AlignRight | Qt.AlignVCenter)
+        self.strip_right_bot_host.lower()
+        self.right_shadow_bot.lower()
+
+        self.corner_tl.setStyleSheet("QFrame { background-color: rgba(30, 30, 30, 128); }")
+        self.strip_left_top.setStyleSheet("QFrame { background-color: #ffffff; }")
+        self.topbar_bg.setStyleSheet("QFrame { background-color: #ffffff; }")
+
+        # Layout: 3x3 grid (no outer columns)
+        main_layout.addWidget(self.strip_left_top_host, 0, 0)
+        main_layout.addWidget(self.topbar_bg, 0, 1)
+        main_layout.addWidget(self.top_toolbar, 0, 1)
+        main_layout.addWidget(self.strip_right_top_host, 0, 2)
+        self.close_corner_host = QWidget()
+        close_corner_layout = QHBoxLayout(self.close_corner_host)
+        close_corner_layout.setContentsMargins(5, 5, 0, 0)
+        close_corner_layout.setSpacing(0)
+        close_corner_layout.addWidget(self.btn_close, 0, Qt.AlignLeft | Qt.AlignTop)
+        close_corner_layout.addStretch(1)
+        main_layout.addWidget(self.close_corner_host, 0, 2)
+        self._init_close_corner_fade()
+
+        main_layout.addWidget(self.left_mid_host, 1, 0)
+        main_layout.addWidget(self.editor, 1, 1)
+        main_layout.addWidget(self.right_mid_host, 1, 2)
+
+        main_layout.addWidget(self.strip_left_bot_host, 2, 0)
+        main_layout.addWidget(self.bottombar_bg, 2, 1)
+        main_layout.addWidget(self.bottom_toolbar, 2, 1)
+        main_layout.addWidget(self.right_bot_host, 2, 2)
+        main_layout.addWidget(self.bottom_shadow, 3, 1)
+        main_layout.addWidget(self.right_shadow_down, 3, 2, Qt.AlignLeft | Qt.AlignVCenter)
+        main_layout.addWidget(self.corner_shadow, 3, 2, Qt.AlignLeft | Qt.AlignVCenter)
+
+        main_layout.setRowStretch(1, 1)
+        main_layout.setRowStretch(3, 0)
+        main_layout.setColumnStretch(1, 1)
+        main_layout.setColumnMinimumWidth(0, 40)
+        main_layout.setColumnMinimumWidth(2, 40)
+        main_layout.setRowMinimumHeight(3, 60)
+        
+        # Connect signals
+        self.connect_signals()
+        self._not_utf8 = False
+        if open_path and open_path.exists() and hasattr(self.editor, "load_markdown"):
+            try:
+                self._disk_text = open_path.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                # Shown to be read, never written over: saving would change its bytes.
+                self._not_utf8 = True
+                self._disk_text = open_path.read_text(encoding="utf-8", errors="replace")
+                QTimer.singleShot(0, lambda: self._notify(self.tr("This note is not UTF-8: it is shown, not saved.")))
+            self.editor.load_markdown(self._disk_text)
+            if hasattr(self.editor, "set_path"):
+                self.editor.set_path(open_path)
+            self._watch_current_file()
+        # A note just made by Scope ("New Note", in German "Neue Notiz"): its name is to be given.
+        auto_rename = bool(open_path and open_path.stem.lower().startswith(("new note", "neue notiz")))
+        self.set_language(ui_language)
+        if auto_rename:
+            self._center_window_on_screen()
+        self._sync_filename_field_from_path(select_all=auto_rename)
+        self._sync_note_style_selector_from_document()
+        self._set_clean_document_state()
+        self._track_local_changes = True
+        self._defer_noncritical_startup()
+
+    def _window_title_for_path(self, path: Path | None) -> str:
+        base = self.tr("PostFix")
+        if path:
+            return f"{base} - {Path(path).name}"
+        return base
+
+    def _center_window_on_screen(self):
+        screen = QGuiApplication.screenAt(QCursor.pos()) or QGuiApplication.primaryScreen()
+        if screen is None:
+            return
+        available = screen.availableGeometry()
+        w = self.width() or 900
+        h = self.height() or 650
+        x = available.x() + max(0, (available.width() - w) // 2)
+        y = available.y() + max(0, (available.height() - h) // 2)
+        self.move(x, y)
+
+    def retranslate_ui(self):
+        self._populate_note_style_combo()
+        if hasattr(self, "file_name_edit"):
+            self.file_name_edit.setPlaceholderText(self.tr("File name"))
+        if hasattr(self, "btn_view_mode"):
+            self.btn_view_mode.setText(self.tr("Focus mode"))
+        if hasattr(self, "btn_language"):
+            self.btn_language.setText(self._language.upper())
+        if hasattr(self, "left_sidebar") and hasattr(self.left_sidebar, "retranslate_ui"):
+            self.left_sidebar.retranslate_ui()
+        if hasattr(self, "right_sidebar") and hasattr(self.right_sidebar, "retranslate_ui"):
+            self.right_sidebar.retranslate_ui()
+        if hasattr(self, "bottom_toolbar") and hasattr(self.bottom_toolbar, "retranslate_ui"):
+            self.bottom_toolbar.retranslate_ui()
+        if hasattr(self, "editor") and hasattr(self.editor, "retranslate_ui"):
+            self.editor.retranslate_ui()
+        self._sync_filename_field_from_path(select_all=False)
+
+    def set_language(self, language_code: str) -> bool:
+        code = str(language_code or "de").strip().lower()
+        if "-" in code:
+            code = code.split("-", 1)[0]
+        if code not in {"de", "en"}:
+            code = "de"
+
+        app = QApplication.instance()
+        if app is None:
+            return False
+
+        for attr in ("_translator", "_qt_translator"):
+            if getattr(self, attr, None) is not None:
+                app.removeTranslator(getattr(self, attr))
+                setattr(self, attr, None)
+
+        # Source strings are English; other languages load i18n/postfix_<code>.qm.
+        if code != "en":
+            translator = QTranslator(self)
+            qm_path = self._i18n_dir / f"postfix_{code}.qm"
+            if translator.load(str(qm_path)):
+                app.installTranslator(translator)
+                self._translator = translator
+                # Qt's own texts too, e.g. the buttons of the dialogs PostFix opens.
+                qt_translator = QTranslator(self)
+                if qt_translator.load(f"qtbase_{code}", QLibraryInfo.path(QLibraryInfo.TranslationsPath)):
+                    app.installTranslator(qt_translator)
+                    self._qt_translator = qt_translator
+            else:
+                code = "en"
+
+        self._language = code
+        self.retranslate_ui()
+        return True
+
+    def toggle_language(self):
+        next_lang = "en" if self._language == "de" else "de"
+        self.set_language(next_lang)
+
+    def _defer_noncritical_startup(self):
+        # First paint: show markdown quickly, then warm up non-critical UI.
+        QTimer.singleShot(0, self._finish_noncritical_startup)
+
+    def _finish_noncritical_startup(self):
+        self.apply_theme_color_hex(self.editor.current_bg)
+        self._reload_acl_context()
+        if getattr(self.editor, "current_path", None):
+            self._reload_tag_context()
+        elif hasattr(self.editor, "tagsChanged"):
+            self.right_sidebar.set_tags([])
+        
+    def _schedule_save(self):
+        if self._track_local_changes:
+            self._has_local_changes = True
+        self._save_timer.start(250)
+
+    def _on_editor_text_changed(self):
+        if not self._track_local_changes:
+            return
+        self._has_local_changes = True
+        self._schedule_save()
+
+    def _on_source_text_replaced(self):
+        """The text was changed on the Python side (a colour chip, the title, a tag): as typed,
+        and into the editor page when it shows this note - else its next report set it back."""
+        self._on_editor_text_changed()
+        host = editor_host._shared
+        if host is not None and host.owner() is self.editor:
+            host.set_doc(self._editor_key(), self.editor.body())
+
+    def _set_clean_document_state(self):
+        self._has_local_changes = False
+
+    def _save_current_document(self) -> bool:
+        if not hasattr(self, "editor"):
+            return False
+        path = getattr(self.editor, "current_path", None)
+        if not path:
+            return False
+        if not self._has_local_changes:
+            return False
+        # Never write over a change from outside: merge it in first (or keep both on a conflict).
+        self._reconcile_with_disk()
+        if not self._has_local_changes:
+            return False  # merged away
+        if getattr(self, "_not_utf8", False):
+            return False  # read only (see __init__); closing keeps the changes beside it
+        if not Path(path).exists():
+            # Moved (filing by date, Scope) or deleted elsewhere: not written back to where it
+            # was, but what was typed is kept beside it.
+            self._keep_beside(Path(path))
+            return False
+        if not allowed_at(path, "write"):
+            # Security: with enforcement on, a note one may only read is not written.
+            self._notify(self.tr("You may not change this note."))
+            return False
+        # The project's tag list (Tags.md) is not touched here: saving runs while one types, and
+        # a tag half typed would stay there. It follows when the note is left (closeEvent,
+        # open_note_in_place) or after a pause (_scope_sync_timer).
+        try:
+            content = self.editor.get_markdown()
+            path.write_text(content, encoding="utf-8")
+            self._disk_text = content
+            self._set_clean_document_state()
+            return True
+        except OSError:
+            self._notify(self.tr("Could not save: %1").replace("%1", Path(path).name))
+            return False
+
+    def _keep_beside(self, gone: Path):
+        """The text that cannot go into its note: into a copy beside it (never over a file),
+        and the window goes on with the copy. The copy, or None when there is no place."""
+        copy = conflict_copy_path(gone)
+        text = self.editor.get_markdown()
+        try:
+            if not copy.parent.is_dir():
+                raise OSError("the folder is gone")
+            if not allowed_at(copy, "write"):
+                raise OSError("no write right there")  # Security: a copy is a write as well
+            copy.write_text(text, encoding="utf-8")
+        except OSError:
+            self._notify(self.tr("Could not save: %1").replace("%1", gone.name))
+            return None
+        old_key = self._editor_key()
+        self.editor.set_path(copy)
+        self._disk_text = text
+        self._set_clean_document_state()
+        self._reattach_editor(old_key)
+        self._watch_current_file()
+        self._sync_filename_field_from_path(select_all=False)
+        self._notify(self.tr("The note was moved or deleted elsewhere. Your text is kept in: %1").replace("%1", copy.name))
+        return copy
+
+    def _reattach_editor(self, old_key: str):
+        """The note has a new path (renamed, kept beside): the editor shows it under its new
+        key, else what is typed next is reported for the old one, and lost."""
+        host = editor_host._shared
+        if host is None or host.owner() is not self.editor:
+            return
+        host.drop(old_key)
+        host.attach(self.editor, self._editor_key(), self.editor.body(), Path(self.editor.current_path).parent,
+                    on_leave=self._editor_left, background=self.editor.current_bg)
+
+    def _watch_current_file(self):
+        """Watch the open note (and its folder: many programs replace a file instead of
+        writing it, and the watch on the old file ends with it)."""
+        watcher = getattr(self, "_file_watcher", None)
+        path = getattr(self.editor, "current_path", None)
+        if watcher is None or not path:
+            return
+        old = watcher.files() + watcher.directories()
+        if old:
+            watcher.removePaths(old)
+        for target in (Path(path), Path(path).parent):
+            if target.exists():
+                watcher.addPath(str(target))
+
+    def _load_from_disk(self, text: str):
+        """Show text as the note's content without counting it as a change of the user's."""
+        tracking = self._track_local_changes
+        self._track_local_changes = False
+        try:
+            self.editor.load_markdown(text)
+        finally:
+            self._track_local_changes = tracking
+        self._after_reload()
+
+    def _after_reload(self):
+        host = editor_host._shared
+        if host is not None and host.owner() is self.editor:
+            host.set_doc(self._editor_key(), self.editor.body())
+        self._watch_current_file()
+        self._sync_note_style_selector_from_document()
+        self._reload_tag_context()
+
+    def _notify(self, text: str):
+        print(f"[PostFix] {text}", file=sys.stderr)
+        from PySide6.QtWidgets import QToolTip
+
+        QToolTip.showText(self.mapToGlobal(self.rect().center()), text, self)
+
+    def _reconcile_with_disk(self) -> bool:
+        """Take in a change from outside: shown at once without local edits, merged with
+        them otherwise; on a conflict the file keeps the change from outside and the local
+        version is kept beside it. True when the note changed from outside."""
+        path = getattr(self.editor, "current_path", None)
+        if not path or self._disk_text is None:
+            return False
+        try:
+            disk = Path(path).read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            return False  # gone or unreadable: nothing to take in (and nothing written back)
+        if disk == self._disk_text:
+            return False  # nothing new, or our own save
+        mine = self.editor.get_markdown()
+        if not self._has_local_changes or mine == self._disk_text:
+            self._disk_text = disk
+            self._load_from_disk(disk)
+            self._set_clean_document_state()
+            return True
+        merged, conflict = merge3(self._disk_text, mine, disk)
+        self._disk_text = disk
+        if conflict:
+            copy = conflict_copy_path(Path(path))
+            try:
+                copy.write_text(mine, encoding="utf-8")
+            except OSError:
+                # No place for the own version: it stays in the editor, not thrown away.
+                self._notify(self.tr("Could not save: %1").replace("%1", Path(path).name))
+                return True
+            self._load_from_disk(disk)
+            self._set_clean_document_state()
+            self._notify(self.tr("Changed elsewhere at the same place. Your version is kept beside it: %1").replace("%1", copy.name))
+            return True
+        self._load_from_disk(merged)
+        self._has_local_changes = merged != disk  # what is merged in still has to be saved
+        return True
+        
+    def toggle_maximize(self):
+        """Toggle between normal and maximized window state."""
+        if self.isMaximized():
+            self.showNormal()
+            self.btn_maximize.setText("□")
+        else:
+            self.showMaximized()
+            self.btn_maximize.setText("❐")
+            
+    def pick_background_color(self):
+        """Open color dialog to pick background color."""
+        self.open_palette(self.editor.current_bg, self.on_background_color_selected, self.btn_bg_color)
+
+    def on_background_color_selected(self, color: QColor):
+        self.apply_round_button_style(
+            self.btn_bg_color, color.name(), color.darker(120).name()
+        )
+        self.editor.apply_background(color.name())
+        self._schedule_save()
+
+    def pick_text_color(self):
+        self.open_palette(QColor("#1f2433").name(), self.on_text_color_selected, self.btn_text_color)
+
+    def on_text_color_selected(self, color: QColor):
+        self.editor.wrap_selection(f"color: {color.name()};")
+
+    def pick_highlight_color(self):
+        self.open_palette(QColor("#fff59d").name(), self.on_highlight_color_selected, self.btn_highlight)
+
+    def on_highlight_color_selected(self, color: QColor):
+        self.editor.wrap_selection(f"background-color: {color.name()};")
+            
+    def toggle_view_mode(self):
+        """Single-mode editor: keep focus mode active."""
+        self.btn_view_mode.setText(self.tr("Focus mode"))
+        self.editor.set_view_mode(SmartEditor.MODE_FOCUS)
+        
+    def show_menu(self):
+        """Open style picker as burger menu."""
+        combo = getattr(self, "note_style_combo", None)
+        btn = getattr(self, "btn_menu", None)
+        if combo is None or btn is None:
+            return
+        menu = QMenu(self)
+        current_idx = combo.currentIndex()
+        for idx in range(combo.count()):
+            text = combo.itemText(idx)
+            action = menu.addAction(text)
+            action.setCheckable(True)
+            action.setChecked(idx == current_idx)
+            action.triggered.connect(lambda checked=False, i=idx: combo.setCurrentIndex(i))
+        menu.exec(btn.mapToGlobal(btn.rect().bottomLeft()))
+
+    def _normalize_note_style(self, raw) -> str:
+        text = str(raw or "").strip().lower()
+        if not text:
+            return ""
+        key = re.sub(r"[^a-z0-9]+", "", text)
+        return self.NOTE_STYLE_ALIASES.get(key, "")
+
+    def _sync_note_style_selector_from_document(self):
+        combo = getattr(self, "note_style_combo", None)
+        editor = getattr(self, "editor", None)
+        if combo is None or editor is None:
+            return
+        raw = editor.get_frontmatter_field("note_style")
+        if raw in (None, ""):
+            raw = editor.get_frontmatter_field("myos_note_style")  # its key until 2026-11 (MyOS)
+        normalized = self._normalize_note_style(raw)
+        idx = combo.findData(normalized)
+        if idx < 0:
+            idx = combo.findData("")
+        self._syncing_note_style_combo = True
+        combo.setCurrentIndex(max(0, idx))
+        self._syncing_note_style_combo = False
+        self.set_note_style_visual(normalized)
+        self._update_style_menu_tooltip()
+
+    def _sync_filename_field_from_path(self, select_all: bool = False):
+        field = getattr(self, "file_name_edit", None)
+        path = getattr(self.editor, "current_path", None)
+        if field is None:
+            return
+        if path:
+            field.setText(Path(path).stem)
+            self.setWindowTitle(self._window_title_for_path(Path(path)))
+            field.setEnabled(True)
+        else:
+            field.setText("")
+            self.setWindowTitle(self._window_title_for_path(None))
+            field.setEnabled(False)
+        if select_all:
+            QTimer.singleShot(0, field.setFocus)
+            QTimer.singleShot(0, field.selectAll)
+
+    def on_filename_edit_finished(self):
+        field = getattr(self, "file_name_edit", None)
+        current_path = getattr(self.editor, "current_path", None)
+        if field is None or not current_path:
+            return
+        original = Path(current_path)
+        new_base = field.text().strip()
+        if not new_base:
+            self._sync_filename_field_from_path(select_all=True)
+            return
+        if "/" in new_base or "\\" in new_base or new_base in {".", ".."}:
+            self._sync_filename_field_from_path(select_all=True)
+            return
+        candidate = original.with_name(f"{new_base}{original.suffix}")
+        if candidate == original:
+            # The name as it was (the field only lost focus): the note stays as it is.
+            self._sync_filename_field_from_path(select_all=False)
+            return
+        if candidate.exists():
+            self._sync_filename_field_from_path(select_all=True)
+            return
+        # Security: as in Scope - only who may write renames, and the note's rules go along
+        # (refused where rules wait for the new name: they would add up).
+        if not allowed_at(original, "write"):
+            self._notify(self.tr("You may not rename this note."))
+            self._sync_filename_field_from_path(select_all=True)
+            return
+        try:
+            check_move_rules(original, candidate)
+        except ACLEditError:
+            self._notify(self.tr("Rules are waiting for this name. Choose another one."))
+            self._sync_filename_field_from_path(select_all=True)
+            return
+        except OSError:
+            pass
+        old_key = self._editor_key()
+        try:
+            original.rename(candidate)
+        except OSError:
+            self._sync_filename_field_from_path(select_all=True)
+            return
+        try:
+            move_acl_rules(original, candidate, editor=acl_user_for(original))
+        except (ACLEditError, OSError):
+            pass
+        self.editor.set_path(candidate)
+        self._reattach_editor(old_key)
+        self._watch_current_file()
+        if hasattr(self.editor, "sync_title_from_filename"):
+            self.editor.sync_title_from_filename(new_base)
+        self._schedule_save()
+        self._reload_tag_context()
+        self._reload_acl_context()
+        self._sync_filename_field_from_path(select_all=False)
+
+    def on_note_style_selected(self, _index: int):
+        if self._syncing_note_style_combo:
+            return
+        combo = getattr(self, "note_style_combo", None)
+        if combo is None:
+            return
+        normalized = self._normalize_note_style(combo.currentData())
+        self.set_note_style_visual(normalized)
+        if normalized:
+            self.editor.set_frontmatter_field("note_style", normalized)
+            # Keep a single canonical key in frontmatter.
+            self.editor.set_frontmatter_field("myos_note_style", None)
+        else:
+            self.editor.set_frontmatter_field("note_style", None)
+            self.editor.set_frontmatter_field("myos_note_style", None)
+        self._schedule_save()
+        self._update_style_menu_tooltip()
+
+    def _update_style_menu_tooltip(self):
+        combo = getattr(self, "note_style_combo", None)
+        btn = getattr(self, "btn_menu", None)
+        if combo is None or btn is None:
+            return
+        label = combo.currentText() or self.tr("Style: Auto")
+        btn.setToolTip(label)
+
+    def eventFilter(self, obj, event):
+        if obj in (getattr(self, "top_toolbar", None), getattr(self, "close_corner_host", None)):
+            if event.type() == QEvent.Enter:
+                self.fade_topbar(1.0)
+            elif event.type() == QEvent.Leave:
+                self.fade_topbar(0.0)
+            elif event.type() == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
+                if self._try_start_window_move(obj, event):
+                    return True
+        if obj is getattr(self, "bottom_toolbar", None):
+            if event.type() == QEvent.Enter:
+                self.fade_bottombar(1.0)
+            elif event.type() == QEvent.Leave:
+                self._schedule_bottombar_hide()
+        if obj in getattr(self, "_resize_targets", []):
+            if event.type() in (QEvent.MouseMove, QEvent.HoverMove, QEvent.HoverEnter):
+                pos = obj.mapTo(self.centralWidget(), event.position().toPoint())
+                edges = self._paper_edges_at(pos)
+                self._update_paper_cursor(edges)
+                self._update_paper_debug(self._paper_rect())
+            if event.type() == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
+                pos = obj.mapTo(self.centralWidget(), event.position().toPoint())
+                edges = self._paper_edges_at(pos)
+                handle = self.windowHandle()
+                if handle and edges:
+                    handle.startSystemResize(edges)
+                    return True
+        return super().eventFilter(obj, event)
+
+    def _try_start_window_move(self, obj, event) -> bool:
+        """Allow dragging the frameless window from free top-panel space."""
+        handle = self.windowHandle()
+        if handle is None:
+            return False
+        local_pos = event.position().toPoint() if hasattr(event, "position") else event.pos()
+        child = obj.childAt(local_pos) if hasattr(obj, "childAt") else None
+        if isinstance(child, (QPushButton, QLineEdit, QComboBox)):
+            return False
+        if child is not None and child is not obj:
+            return False
+        return bool(handle.startSystemMove())
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._meta_timer.start(200)
+        self._update_paper_debug(self._paper_rect())
+
+    def moveEvent(self, event):
+        super().moveEvent(event)
+        self._meta_timer.start(200)
+
+    def _paper_rect(self) -> QRect:
+        top_left = self.topbar_bg.mapTo(self.centralWidget(), QPoint(0, 0))
+        bottom_right = self.bottombar_bg.mapTo(
+            self.centralWidget(), QPoint(self.bottombar_bg.width(), self.bottombar_bg.height())
+        )
+        rect = QRect(top_left, bottom_right)
+        rect.adjust(-40, 0, 40, 0)
+        return rect
+
+    def _paper_edges_at(self, pos: QPoint) -> Qt.Edges:
+        rect = self._paper_rect()
+        edges = Qt.Edges()
+        if not rect.contains(pos):
+            return edges
+        if abs(pos.x() - rect.left()) <= 8:
+            edges |= Qt.LeftEdge
+        if abs(pos.x() - rect.right()) <= 8:
+            edges |= Qt.RightEdge
+        if abs(pos.y() - rect.top()) <= 8:
+            edges |= Qt.TopEdge
+        if abs(pos.y() - rect.bottom()) <= 8:
+            edges |= Qt.BottomEdge
+        return edges
+
+    def _update_paper_cursor(self, edges: Qt.Edges):
+        if (edges & Qt.LeftEdge) and (edges & Qt.TopEdge):
+            self.centralWidget().setCursor(Qt.SizeFDiagCursor)
+        elif (edges & Qt.RightEdge) and (edges & Qt.BottomEdge):
+            self.centralWidget().setCursor(Qt.SizeFDiagCursor)
+        elif (edges & Qt.RightEdge) and (edges & Qt.TopEdge):
+            self.centralWidget().setCursor(Qt.SizeBDiagCursor)
+        elif (edges & Qt.LeftEdge) and (edges & Qt.BottomEdge):
+            self.centralWidget().setCursor(Qt.SizeBDiagCursor)
+        elif (edges & Qt.LeftEdge) or (edges & Qt.RightEdge):
+            self.centralWidget().setCursor(Qt.SizeHorCursor)
+        elif (edges & Qt.TopEdge) or (edges & Qt.BottomEdge):
+            self.centralWidget().setCursor(Qt.SizeVerCursor)
+        else:
+            self.centralWidget().unsetCursor()
+
+    def _flush_window_metadata(self):
+        geom = self.frameGeometry()
+        screen = QGuiApplication.screenAt(geom.center()) or QGuiApplication.primaryScreen()
+        if not screen:
+            return
+        available = screen.availableGeometry()
+        x_permille = int(((geom.x() - available.x()) / max(1, available.width())) * 1000)
+        y_permille = int(((geom.y() - available.y()) / max(1, available.height())) * 1000)
+        self.editor.update_window_metadata(geom.width(), geom.height(), x_permille, y_permille)
+        self._save_current_document()
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.ActivationChange and self.isActiveWindow():
+            remember_active(self)  # exercise links go to the note clicked last
+            if editor_host._shared is not None:
+                # Loaded once: the editor follows the note being edited - after this event:
+                # moved while Qt activates the window, QtWebEngine crashes (measured in X).
+                QTimer.singleShot(0, self._take_editor_if_active)
+        super().changeEvent(event)
+
+    def _editor_key(self) -> str:
+        path = getattr(self.editor, "current_path", None)
+        return str(Path(path).resolve()) if path else f"unsaved-{id(self)}"
+
+    def _take_editor(self, place: dict = None):
+        """The one editor moves into this note - where its rendering was (place: the first line
+        in view, a click, what was typed; see SmartEditor.edit_place); the note it leaves shows
+        its rendering again."""
+        if not editor_enabled():
+            return
+        host = _editor()
+        if host.owner() is self.editor:
+            return
+        path = getattr(self.editor, "current_path", None)
+        if place is None:
+            place = self.editor.edit_place()
+        self.editor.suspend_preview()
+        host.attach(self.editor, self._editor_key(), self.editor.body(),
+                    Path(path).parent if path else Path.home(),
+                    on_leave=self._editor_left, background=self.editor.current_bg, place=place)
+
+    def _take_editor_if_active(self):
+        if self.isActiveWindow():
+            self._take_editor()
+
+    def _editor_left(self):
+        """The editor moved on: the rendering again, scrolled as the editor was."""
+        host = editor_host._shared
+        self.editor.resume_preview(host.top_of(self._editor_key()) if host is not None else None)
+
+    def follow_link(self, href: str):
+        """A link clicked in the editor: notes open here, exercise links and web pages as usual."""
+        href = str(href or "").strip()
+        if not href or href.startswith("#"):
+            return
+        if is_exercise_link(href):
+            self.exercise_launcher.open(QUrl(href))
+            return
+        if "://" in href or href.startswith("mailto:"):
+            QDesktopServices.openUrl(QUrl(href))
+            return
+        current = getattr(self.editor, "current_path", None)
+        base = Path(current).parent if current else Path.cwd()
+        target = (base / QUrl.fromPercentEncoding(href.split("#")[0].encode("utf-8"))).resolve()
+        if target.suffix.lower() == ".md" and target.is_file():
+            self.open_note_in_place(target)
+        elif target.exists():
+            QDesktopServices.openUrl(QUrl.fromLocalFile(str(target)))
+
+    def open_note_in_place(self, path: Path):
+        """Another note in this window (a link followed), saved and watched as the first."""
+        self._save_current_document()
+        self._sync_scope_tags_from_document()  # the note is left: its tags are final
+        path = Path(path)
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            return
+        tracking = self._track_local_changes
+        self._track_local_changes = False
+        try:
+            self._disk_text = text
+            self.editor.load_markdown(text)
+            self.editor.set_path(path)
+        finally:
+            self._track_local_changes = tracking
+        self._set_clean_document_state()
+        self._watch_current_file()
+        self._sync_filename_field_from_path(select_all=False)
+        self._sync_note_style_selector_from_document()
+        self._reload_tag_context()
+        self._reload_acl_context()
+        host = editor_host._shared
+        if host is not None and host.owner() is self.editor:
+            host.attach(self.editor, self._editor_key(), self.editor.body(), path.parent,
+                        on_leave=self._editor_left, background=self.editor.current_bg)
+
+    def closeEvent(self, event):
+        self._save_current_document()
+        self._scope_sync_timer.stop()
+        self._sync_scope_tags_from_document()  # the note is left: its tags are final
+        if self._has_local_changes and getattr(self.editor, "current_path", None):
+            # Not saved (no write right, the folder gone): beside it, or ask before it is lost.
+            if self._keep_beside(Path(self.editor.current_path)) is None and not self._may_close_unsaved():
+                event.ignore()
+                return
+        host = editor_host._shared
+        if host is not None:
+            host.release(self.editor)  # the editor lives on for the other notes
+            host.drop(self._editor_key())
+        super().closeEvent(event)
+
+    def _may_close_unsaved(self) -> bool:
+        answer = QMessageBox.question(
+            self, self.tr("Not saved"),
+            self.tr("This note could not be saved, nor a copy beside it. Close anyway and lose the changes?"),
+            QMessageBox.Close | QMessageBox.Cancel, QMessageBox.Cancel)
+        return answer == QMessageBox.Close
+
+    def _printable_html(self) -> str:
+        """The note as printed: its body, without the front matter (window place, colour)."""
+        body = self.editor.body() if hasattr(self.editor, "body") else self.editor.get_markdown()
+        return render_markdown(body)
+
+    def print_to_printer(self, printer_name: str):
+        html = self._printable_html()
+        doc = QTextDocument()
+        if getattr(self.editor, "current_path", None):
+            base_dir = Path(self.editor.current_path).parent
+            doc.setBaseUrl(QUrl.fromLocalFile(f"{base_dir.resolve()}/"))
+        doc.setHtml(html)
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+        tmp.close()
+        printer = QPrinter(QPrinter.HighResolution)
+        printer.setOutputFormat(QPrinter.PdfFormat)
+        printer.setOutputFileName(tmp.name)
+        doc.print_(printer)
+        try:
+            if printer_name == "PDF":
+                subprocess.Popen(["xdg-open", tmp.name])
+                return
+            subprocess.run(["lp", "-d", printer_name, tmp.name], check=False)
+        finally:
+            if printer_name != "PDF":
+                try:
+                    Path(tmp.name).unlink()
+                except OSError:
+                    pass
+
+    def open_in_app(self, app_label: str):
+        if app_label.lower().startswith("obsidian") and self.editor.current_path:
+            subprocess.Popen(["xdg-open", obsidian_uri(self.editor.current_path)])
+
+    def _init_paper_debug(self):
+        return
+
+    def _update_paper_debug(self, rect: QRect):
+        return
+
+
+def main():
+    try:
+        from .cli import main as cli_main
+    except ImportError:
+        from cli import main as cli_main
+    return cli_main()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

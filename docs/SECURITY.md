@@ -8,7 +8,7 @@
 - **ACL system:** Three modes — `off` (default), `monitor`, `enforce`, set with `SEITON_ACL_MODE` (the former `MYOS_ACL_MODE` is still read; see [ACL_ROLLOUT.md](../core/Dokumentation/ACL_ROLLOUT.md))
 - **Audit logging:** ACL decisions logged in monitor/enforce modes (the project's `.seiton/audit.log`)
 - **Sandbox:** the time tracking's clock runs in bubblewrap with a drive of its own role (`core/sandbox.py`, `core/role_drive.py`; [Designdocument Time](../core/Dokumentation/Designdocument%20Time.md), 7)
-- **Security tests:** Scope API, PostFix, importer, Desk and the sandbox have dedicated security tests (e.g. `core/tests/unit/test_scope_api_security.py`, `PostFix/tests/test_postfix_security.py`, `core/tests/unit/test_importer_security.py`, `core/tests/unit/test_sandbox.py`)
+- **Security tests:** Scope API, PostFix, importer, Desk and the sandbox have dedicated security tests (e.g. `core/tests/unit/test_scope_api_security.py`, `examples/PostFix/tests/test_postfix_security.py`, `core/tests/unit/test_importer_security.py`, `core/tests/unit/test_sandbox.py`)
 
 ## ACL Rollout
 

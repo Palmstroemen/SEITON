@@ -44,12 +44,12 @@ einiges nicht, was SEITON unter X11 benutzt.
 
 | Was | Wo | Unter Wayland |
 |---|---|---|
-| SunTree zieht den Mauszeiger | `QCursor.setPos` (SunTree, auch `Scope/Scope.py`) | verboten: Programme dürfen den Zeiger nicht versetzen |
+| SunTree zieht den Mauszeiger | `QCursor.setPos` (SunTree, auch `apps/Scope/Scope.py`) | verboten: Programme dürfen den Zeiger nicht versetzen |
 | Globales Tastenkürzel Strg+Alt+Space | `pynput` | geht nicht; nur über den Desktop selbst oder das XDG-Portal „GlobalShortcuts“ |
 | Fenster finden und platzieren | `wmctrl`, `xdotool` (Obsidian-Einbettung in PostFix, Tutorial) | nur unter X11 |
 
 Das ist kein Portieren mehr, sondern eine Designfrage, vor allem bei SunTree: Die weiche Krone
-(SunTree/Designdocument Krone.md) muss ohne gezogenen Zeiger auskommen. Je nach Lösung rechne ich
+(examples/SunTree/Designdocument Krone.md) muss ohne gezogenen Zeiger auskommen. Je nach Lösung rechne ich
 ein bis zwei Wochen.
 
 Übergang: „Unter Wayland bitte die X11-Sitzung wählen“. Das bieten die meisten Desktops beim

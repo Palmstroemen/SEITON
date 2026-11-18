@@ -1,4 +1,4 @@
-"""The colour schemes (core/color_schemes.py; Scope/Designdocument Setup.md, step 2): each a file,
+"""The colour schemes (core/color_schemes.py; apps/Scope/Designdocument Setup.md, step 2): each a file,
 each naming the same colours."""
 
 import re

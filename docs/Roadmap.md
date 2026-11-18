@@ -70,8 +70,9 @@ Schritt folgt.
   getrennten Repositories bräuchte jede Kernänderung abgestimmte Commits in mehreren davon.
   Drei Schritte:
   1. **Ordner:** `apps/` für Scope, Headline und Time, die SEITON selbst sind; `examples/` für
-     PostFix, SunTree und ClipboardTool, Apps, die SEITON nutzen. Am besten, wenn keine andere
-     Sitzung arbeitet, danach `./install.sh` neu.
+     PostFix, SunTree und ClipboardTool, Apps, die SEITON nutzen. Erledigt (2026-11-18), dazu
+     `Theme/` aufgeteilt (Tag-Stile nach `core/`, Icons nach `assets/icons/`); danach
+     `./install.sh` neu.
   2. **Öffentliche Schnittstelle:** Was eine fremde App von SEITON benutzen darf, wird
      festgeschrieben und versioniert: die Dateiformate (`.seiton/`, `Project.md`, `ACLs.md`,
      Tags), die CLI-Werkzeuge, das Laufwerk „Perspektiven“ und eine kleine Python-API

@@ -8,9 +8,9 @@
 - [Designdocument Tags](../core/Dokumentation/Designdocument%20Tags.md)
 - [Designdocument Export-Import](../core/Dokumentation/Designdocument%20Export-Import.md)
 - [Designdocument Time](../core/Dokumentation/Designdocument%20Time.md) (time tracking)
-- [Designdocument Headline](../Scope/Designdocument%20Headline.md)
-- [Designdocument Setup](../Scope/Designdocument%20Setup.md)
-- [Designdocument Krone](../SunTree/Designdocument%20Krone.md) (SunTree)
+- [Designdocument Headline](../apps/Scope/Designdocument%20Headline.md)
+- [Designdocument Setup](../apps/Scope/Designdocument%20Setup.md)
+- [Designdocument Krone](../examples/SunTree/Designdocument%20Krone.md) (SunTree)
 
 ## Repository Structure
 
@@ -18,11 +18,15 @@
 SEITON/
 ├── core/                 # API, FUSE layer, project config, ACLs
 ├── core/Dokumentation/   # Design documents
-├── Scope/                # QML GUI file browser
-├── Headline/             # the line at the top edge (replaces Scope's minimal view M)
-├── Time/                 # the time tracking's screen
-├── SunTree/              # the crown, for dropping into folders
-├── PostFix/              # Markdown editor
+├── apps/                 # SEITON itself
+│   ├── Scope/            # QML GUI file browser
+│   ├── Headline/         # the line at the top edge (replaces Scope's minimal view M)
+│   └── Time/             # the time tracking's screen
+├── examples/             # apps that use SEITON, from the workshop
+│   ├── PostFix/          # Markdown editor
+│   ├── SunTree/          # the crown, for dropping into folders
+│   └── ClipboardTool/    # CopyQ commands: clips as Markdown files
+├── assets/               # icons and brand images
 ├── cli/                  # CLI tools (myls, myproject, mytag, etc.), see cli/Dokumentationen/CLI.md
 ├── daemon/               # the lens drive's daemon, the clock
 ├── cloud/                # Nextcloud app and the core service
@@ -63,7 +67,7 @@ python3 -m pytest core/tests/unit/
 python3 -m pytest cli/tests/
 
 # PostFix only
-python3 -m pytest PostFix/tests/
+python3 -m pytest examples/PostFix/tests/
 
 # Benchmarks (timing, depends on the machine; not in the normal run)
 python3 -m pytest core/tests/unit -m benchmark
@@ -76,10 +80,10 @@ the venv first. Qt runs offscreen in the tests (`conftest.py`). The Nextcloud te
 ### Launch Applications
 
 ```bash
-python3 Scope/Scope.py
-python3 PostFix/cli.py path/to/file.md
-python3 Headline/Headline.py
-python3 SunTree/SunTree.py SEITON_Test/Projekte/
+python3 apps/Scope/Scope.py
+python3 examples/PostFix/cli.py path/to/file.md
+python3 apps/Headline/Headline.py
+python3 examples/SunTree/SunTree.py SEITON_Test/Projekte/
 python3 cli/myls.py SEITON_Test/Projekte/ --extended
 ```
 
@@ -91,8 +95,8 @@ After `./install.sh` the same as launchers in `~/.local/bin`: `seiton`, `seiton-
 UI strings in the code are **English** (`qsTr("…")` in QML/JS, `self.tr("…")` in Python);
 every other language is a translation:
 
-- `Scope/i18n/scope_de.ts`, `PostFix/i18n/postfix_de.ts`, `SunTree/i18n/suntree_de.ts`,
-  `Headline/i18n/headline_de.ts`, `Time/i18n/time_de.ts` — German translations
+- `apps/Scope/i18n/scope_de.ts`, `examples/PostFix/i18n/postfix_de.ts`, `examples/SunTree/i18n/suntree_de.ts`,
+  `apps/Headline/i18n/headline_de.ts`, `apps/Time/i18n/time_de.ts` — German translations
   (source), compiled to the `.qm` files the apps load.
 - After adding or changing strings run `python3 scripts/update_translations.py`: it
   extracts the strings (new ones arrive as "unfinished"), keeps existing translations and

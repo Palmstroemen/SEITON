@@ -54,17 +54,17 @@
 
 | Document | Purpose |
 |----------|---------|
-| [../Scope/README.md](../Scope/README.md) | Scope: the file browser |
-| [../Scope/Designdocument Setup.md](../Scope/Designdocument%20Setup.md) | Scope's settings on its back, colours following the system |
-| [../Scope/Colour inventory.md](../Scope/Colour%20inventory.md) | Today's colours: base values, rules, fixed |
-| [../Scope/Designdocument Headline.md](../Scope/Designdocument%20Headline.md) | The Headline at the top edge of the screen |
+| [../apps/Scope/README.md](../apps/Scope/README.md) | Scope: the file browser |
+| [../apps/Scope/Designdocument Setup.md](../apps/Scope/Designdocument%20Setup.md) | Scope's settings on its back, colours following the system |
+| [../apps/Scope/Colour inventory.md](../apps/Scope/Colour%20inventory.md) | Today's colours: base values, rules, fixed |
+| [../apps/Scope/Designdocument Headline.md](../apps/Scope/Designdocument%20Headline.md) | The Headline at the top edge of the screen |
 | [../cli/Dokumentationen/CLI.md](../cli/Dokumentationen/CLI.md) | The CLI tools |
 | [../cloud/nextcloud/README.md](../cloud/nextcloud/README.md) | Nextcloud: installing the app and the core service |
 | [../cloud/nextcloud/Designdocument SEITON Core Service.md](../cloud/nextcloud/Designdocument%20SEITON%20Core%20Service.md) | The core as a service beside Nextcloud |
 | [../installer/thumbnailer.md](../installer/thumbnailer.md) | The Markdown thumbnailer for file browsers |
-| [../PostFix/Designdokument.md](../PostFix/Designdokument.md) | PostFix (workshop): the Markdown editor |
-| [../SunTree/Designdocument Krone.md](../SunTree/Designdocument%20Krone.md) | SunTree (workshop): the folder fan |
-| [../ClipboardTool/README.md](../ClipboardTool/README.md) | ClipboardTool (workshop): CopyQ clips as Markdown |
+| [../examples/PostFix/Designdokument.md](../examples/PostFix/Designdokument.md) | PostFix (workshop): the Markdown editor |
+| [../examples/SunTree/Designdocument Krone.md](../examples/SunTree/Designdocument%20Krone.md) | SunTree (workshop): the folder fan |
+| [../examples/ClipboardTool/README.md](../examples/ClipboardTool/README.md) | ClipboardTool (workshop): CopyQ clips as Markdown |
 
 ## Vision (German)
 

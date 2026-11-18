@@ -35,9 +35,9 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
     Regel im Ordner selbst, flach → virtuell → echt ab NewLevelFrom, Ablage durch Nachholen statt Beobachter, echtes EXIF
     [ ] Regel bequem einrichten (der Knopf "Enable sorting" ist mit der oberen Leiste weg, 2026-10-26: vorerst von Hand); myls zeigt virtuelle Ebenen noch nicht
 [ ] SunTree: nur zum Ablegen - zeigt Ordner, keine Dateien, keine Suche (entschieden 2026-10-25)
-    [ ] Weiche Krone (SunTree/Designdocument Krone.md, Skizze SunTree/prototype/Krone.html): Feld wächst nach außen,
+    [ ] Weiche Krone (examples/SunTree/Designdocument Krone.md, Skizze examples/SunTree/prototype/Krone.html): Feld wächst nach außen,
         ab der Linie T (0,7 R) in den Stamm gesaugt, Zeiger nach innen gezogen; Rückweg ebenso weich
-        [x] Schritt 1: Designdokument und Skizze  [x] Schritt 2: Rechnung SunTree/js/Crown.js mit Tests
+        [x] Schritt 1: Designdokument und Skizze  [x] Schritt 2: Rechnung examples/SunTree/js/Crown.js mit Tests
         [~] Schritt 3: QML mit echten Ordnern (2026-10-25): Krone in einer Canvas, Zeiger gezogen (QCursor.setPos, auch
             beim Drag unter X11 erprobt), Stamm gezeichnet mit Clipboard oben, Klick und Ablegen; offen:
             Feinabstimmung am echten Bildschirm
@@ -49,7 +49,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
             [x] Scope: CWD ebenso leuchtend markiert (2026-10-26): Pfadleiste der Projekte und CWD-Knopf; helles Theme: kräftigerer Rahmen
             [x] Übergang im Stamm (2026-10-26): die Vorschau kommt von oben, das CTD rutscht nach unten, nichts überlappt
             [x] Grenze überholt den Zeiger (2026-10-26): Einsaugen ab 75 % des Feldes bis 25 % in den äußeren Ring
-            [x] Immer bereit (2026-10-26): kein X mehr (Strg+Q beendet), Autostart per SunTree/install_autostart.py;
+            [x] Immer bereit (2026-10-26): kein X mehr (Strg+Q beendet), Autostart per examples/SunTree/install_autostart.py;
                 CWD außerhalb des Projektbaums: an der Projekte-Wurzel
             [x] Hänger beim Tauchen (2026-10-26): Bewegungen von vor dem Setzen des Zeigers warfen die Krone; jetzt bis
                 zum Echo des Setzens als Schritte der Hand gezählt
@@ -70,7 +70,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
             erscheint SunTree; beim Verschwinden fährt der Zeiger zurück, wo er abgeholt wurde
         [x] Sanft weg (2026-10-26): Momentaufnahme zerläuft in Unschärfe, blendet aus und zieht sich zum Stamm
             zusammen (300 ms); ruckelte, weil die Krone den zurückfahrenden Zeiger wieder einfing
-        [x] SunTree übersetzt (2026-10-26): SunTree/i18n/suntree_de.ts wie bei Scope, scripts/update_translations.py suntree
+        [x] SunTree übersetzt (2026-10-26): examples/SunTree/i18n/suntree_de.ts wie bei Scope, scripts/update_translations.py suntree
         [x] Shortcut während eines Drags kommt an (Xephyr, GTK 3 wie Nemo; Root-Grab und XRecord) - unter Cinnamon noch nicht erprobt
         [x] Globaler Shortcut repariert (2026-10-26): pynput installiert, Vorgabe "<ctrl>+<alt>+<space>" (vorher ungültig, Dienst schlug still fehl)
 [ ] Perspektiven (Brille): Verhalten festgelegt (Designdocument Perspective Resolver MVP.md, Teil A, 2026-10-22);
@@ -83,9 +83,9 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
             [x] Schritt 1: Knopf M, eine Zeile, Dropdown bis "Projekte", Kaskade nach rechts; schmale Knöpfe, 1x Suche und Clipboard
             [x] Clipboard (Multiclipboard, wandert in alle Projekte mit) als kleiner Icon-Knopf: in den Werkzeugen von M
             [x] Werkzeuge von M (2026-10-26): Knopfzeile oben im CWD-Dropdown statt Menü - Clipboard, Suche, Hell/Dunkel,
-                Sprache, versteckte Ordner (Scope/CwdTools.qml); M wird ein eigenes, oben angedocktes Werkzeug (kein H, kein E)
+                Sprache, versteckte Ordner (apps/Scope/CwdTools.qml); M wird ein eigenes, oben angedocktes Werkzeug (kein H, kein E)
             [x] M bleibt eine Zeile (2026-10-26): MyOS-Ordner brechen nicht mehr in eine zweite Zeile um; Mausrad schiebt
-            [ ] Setup auf der Rückseite von Scope (Scope/Designdocument Setup.md): ⚙ dreht Scope um; Tabs Allgemein, Scope,
+            [ ] Setup auf der Rückseite von Scope (apps/Scope/Designdocument Setup.md): ⚙ dreht Scope um; Tabs Allgemein, Scope,
                 Headline, SunTree; eine Einstellungsdatei für alle (core/settings.py, ~/.config/seiton/seiton.conf)
                 [x] Schritt 1 (2026-10-26): Umdrehen, Hell/Dunkel und Sprache (bleiben jetzt gespeichert), SunTree-Werte
                 [x] Kleine Krone im SunTree-Tab (2026-10-26): leuchtende Grenzlinien, Tauchgang bei jeder Änderung
@@ -120,7 +120,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
                     Filter im Tab Scope; bleiben: ⚙ ganz links und M (eine Zeile per Vorgabe aus: vorerst nicht)
                 Später: Anmelden/Ummelden, Abschalten
             [x] Schritt 2: Auftauchen am oberen Bildschirmrand (Edge-Dock) - gebaut als eigenes Werkzeug, die Headline
-                (2026-11-17, Scope/Designdocument Headline.md, 4.2). Ursprünglich zurückgestellt (2026-10-25): im Prototyp reicht
+                (2026-11-17, apps/Scope/Designdocument Headline.md, 4.2). Ursprünglich zurückgestellt (2026-10-25): im Prototyp reicht
                 das CWD links oben im Scope-Fenster. Später voraussichtlich: volle Bildschirmbreite, Kante über die ganze
                 Breite klappt sofort auf, zu nach ca. 0,5 s ohne Maus im Fenster; Verhältnis zum alten Edge-Dock offen
             [x] Ein Badge (z. B. das € von 04_Finanz) nimmt Klicks an wie das Ordner-Icon (2026-10-25)
@@ -189,7 +189,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
     [ ] Quellen unter Wayland (Leerlauf, Inhibitors; 9, Schritt 3)
     [ ] Export als CSV (5)
     [ ] Das Telefon (8)
-[ ] Headline (2026-11-17, Scope/Designdocument Headline.md): eigene Zeile an der oberen Kante, Panel wie ein
+[ ] Headline (2026-11-17, apps/Scope/Designdocument Headline.md): eigene Zeile an der oberen Kante, Panel wie ein
     Startmenü, Cinnamon-Applet, Widgets (die Uhr als erstes); sie löst M in Scope ab
     [ ] Mit FUSE und bubblewrap am Desktop ausprobieren (4, 2a)
     [ ] Tab Headline im Setup fertig (Schritt 4 oben)
@@ -200,7 +200,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
         rechnen ihre Breite aus der Breite der eigenen Zeile (`horizontalPathHostMaxWidth()` liest `topRow.width` /
         `mainColumn.width`, `FolderBrowser.qml`), Qt bricht nach zwei Runden ab ("Detected recursive rearrange").
         Harmlos, aber echt, auch beim normalen Start. Die Zeile soll die Breite selbst verteilen (fillWidth, Minimum/
-        Maximum), dazu die Umbruchlogik (`flowOnSecondLine`) anfassen. Test: `Scope/tests/test_scope_smoke.py`
+        Maximum), dazu die Umbruchlogik (`flowOnSecondLine`) anfassen. Test: `apps/Scope/tests/test_scope_smoke.py`
         (`test_the_top_row_has_no_layout_loop`, xfail strict - meldet sich, sobald die Schleife weg ist)
     [x] Röntgenblick (X-Ray): kleine Ordner durchsichtig, solange die Liste ohne Scrollbalken passt; Standard an; auch `myls --roentgen`
     [x] Röntgenblick: eigenes Icon (2026-10-26, Theme/icons/xray.svg: Film mit Brustkorb statt Ordner)
@@ -481,7 +481,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
 ## 📐 DESIGN DOCS
 
 - `docs/Designdokument.md`
-- `PostFix/Designdokument.md`
+- `examples/PostFix/Designdokument.md`
 - `docs/INDEX.md` — zentrale Doku-Übersicht
 - `core/Dokumentation/Designdocument Projects.md`
 - `core/Dokumentation/Designdocument BlueprintLayer.md`
@@ -513,7 +513,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
 
 ## 📌 Nächste konkrete Slices
 
-- Scope-Legacy-/Doppel-Kandidaten abarbeiten (`Scope/.Legacy-Code-Kandidaten.md`, `Scope/.FolderBrowser-DoppelKandidaten.md`).
+- Scope-Legacy-/Doppel-Kandidaten abarbeiten (`apps/Scope/.Legacy-Code-Kandidaten.md`, `apps/Scope/.FolderBrowser-DoppelKandidaten.md`).
 - Entscheiden: `.TagsHere.json` versionieren oder ignorieren.
 - ACL-MVP Scope festlegen (Datenmodell + 1 sichtbarer Flow).
 - Perspektiven-MVP als minimalen nutzbaren Loop implementieren.

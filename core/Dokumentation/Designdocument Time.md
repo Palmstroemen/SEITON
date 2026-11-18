@@ -4,7 +4,7 @@ Draft of 16 November 2026. Time tracking per project: a small clock counts the t
 in a project, writes it into the project, and a parent project collects the time of its
 children. It is part of SEITON, not of the workshop. It first was to sit in the top bar of Scope;
 since 17 November 2026 it is a program of its own that shows in the Headline as a widget
-(Scope/Designdocument Headline.md, 3a), where one switches projects.
+(apps/Scope/Designdocument Headline.md, 3a), where one switches projects.
 
 It is also the first program with a role of its own ("Ein Zaun um die Arbeit", point 2): it
 may write one folder in every project and nothing else (section 7).
@@ -172,7 +172,7 @@ and the cloud does not sync a file that keeps changing.
 ## 5. The Time Screen
 
 Opened by a click on the widget in the Headline; a small window of the time tracking itself
-(`Time/TimeScreen.py`, `Time/main.qml`, `Time/model.py`), with the person's own rights, not the
+(`apps/Time/TimeScreen.py`, `apps/Time/main.qml`, `apps/Time/model.py`), with the person's own rights, not the
 sandboxed clock's (decided 2026-11-17; first planned as a page like Setup in Scope's top bar).
 It talks to the running clock as the Headline does: it reads the clock's view and drops
 commands.
@@ -204,8 +204,8 @@ Setup (Scope) has no "Time" part: the settings are on the time screen.
 | Sources | `core/clock_sources.py` | `IdleSource` (X11, Wayland, fake), inhibitors, the active project |
 | The program | `daemon/clock_daemon.py` (`seiton-clock`) | runs the clock every 15 s, writes its widget's view |
 | The launcher | `cli/seiton_clock.py` | mounts the role's drive, starts the clock in its sandbox (section 7.2); one clock per user |
-| The widget | `core/clock_widget.py`; shown by the Headline (Scope/Designdocument Headline.md, 3a) | its view (`view.json`) and command files, a small ledger of the projects worked on last |
-| The screen | `Time/` | the time screen as its own window with its settings (section 5) |
+| The widget | `core/clock_widget.py`; shown by the Headline (apps/Scope/Designdocument Headline.md, 3a) | its view (`view.json`) and command files, a small ledger of the projects worked on last |
+| The screen | `apps/Time/` | the time screen as its own window with its settings (section 5) |
 
 The clock is a program of its own rather than a part of Scope: it has to run when no Scope
 window is open, and it gets a role of its own (section 7).
@@ -347,7 +347,7 @@ Each step with its tests first (fake clock, fake idle source, tmp projects).
 5. **The widget and the time screen** (decided 2026-11-17): the time tracking is a program of its
    own that puts itself into the Headline as a widget, and may be missing or replaced; the
    Headline writes the active project; the time screen is the time tracking's own window, with
-   the person's rights, and holds its settings (Scope/Designdocument Headline.md, 3a). The last
+   the person's rights, and holds its settings (apps/Scope/Designdocument Headline.md, 3a). The last
    three projects worked on with their time, and "More", in the Headline's panel.
 6. Later: the phone (section 8).
 

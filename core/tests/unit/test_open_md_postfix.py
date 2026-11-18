@@ -43,7 +43,7 @@ def test_the_environment_overrides_the_switch(open_md, monkeypatch):
 
 
 def test_without_postfix_in_the_repository_never(open_md, tmp_path, monkeypatch):
-    monkeypatch.setattr(open_md, "POSTFIX_PATH", tmp_path / "PostFix" / "main.py")
+    monkeypatch.setattr(open_md, "POSTFIX_PATH", tmp_path / "examples" / "PostFix" / "main.py")
     assert not open_md.postfix_wanted()
 
 
@@ -62,5 +62,5 @@ def test_switched_off_a_note_without_a_vault_goes_to_the_system(open_md, tmp_pat
 
 def test_scope_and_suntree_leave_it_to_the_switch():
     repo = OPEN_MD.parents[2]
-    for script in (repo / "Scope" / "Scope.py", repo / "SunTree" / "SunTree.py"):
+    for script in (repo / "apps" / "Scope" / "Scope.py", repo / "examples" / "SunTree" / "SunTree.py"):
         assert "MD_USE_POSTFIX" not in script.read_text(encoding="utf-8"), script

@@ -80,13 +80,13 @@ its own design document; this one only shows how they fit together.
 | `core/` | the logic: projects, templates and embryos, ACLs, tags, filters, perspectives, trash, export/import, time tracking, colours; no Qt | `core/Dokumentation/` (one `Designdocument X.md` per topic) |
 | `cli/` | the CLI tools (myls, myproject, mytag, myacl, myedit, myimport, myexport, myfilter) on the core | `cli/Dokumentationen/CLI.md` |
 | `daemon/` | the session daemon: the lens shared by the programs, the FUSE drive "Perspektiven", the clock | `core/Dokumentation/Designdocument Perspectives.md`, `… Perspective Resolver MVP.md`, `… Time.md` |
-| `Scope/` | the file browser (QML) with its settings on the back | `Scope/README.md`, `Scope/Designdocument Setup.md`, `Scope/Colour inventory.md` |
-| `Headline/` | the line at the top edge of the screen; the minimal view M of Scope as a tool of its own | `Scope/Designdocument Headline.md` |
-| `Time/` | the screen of the time tracking | `core/Dokumentation/Designdocument Time.md` |
+| `apps/Scope/` | the file browser (QML) with its settings on the back | `apps/Scope/README.md`, `apps/Scope/Designdocument Setup.md`, `apps/Scope/Colour inventory.md` |
+| `apps/Headline/` | the line at the top edge of the screen; the minimal view M of Scope as a tool of its own | `apps/Scope/Designdocument Headline.md` |
+| `apps/Time/` | the screen of the time tracking | `core/Dokumentation/Designdocument Time.md` |
 | `cloud/` | Nextcloud: the app `seiton`, the core as a service beside it | `cloud/nextcloud/Designdocument SEITON Core Service.md`, `cloud/nextcloud/README.md` |
 | `installer/` | installing for one user (`install.sh`) | `installer/thumbnailer.md` (Markdown previews) |
-| `PostFix/` (workshop) | the Markdown editor, editing like Obsidian | `PostFix/Designdokument.md` |
-| `SunTree/` (workshop) | the folder fan for quick dropping | `SunTree/Designdocument Krone.md` |
+| `examples/PostFix/` (workshop) | the Markdown editor, editing like Obsidian | `examples/PostFix/Designdokument.md` |
+| `examples/SunTree/` (workshop) | the folder fan for quick dropping | `examples/SunTree/Designdocument Krone.md` |
 
 The rule between them: logic goes into `core/` (testable without a screen), the programs only
 show it and hand on what the user does. The programs talk to each other through the session
@@ -113,13 +113,13 @@ daemon (`daemon/`), never directly.
 
 ### Document-Level, Vault-Level
 - Front matter, colour definitions and the Obsidian-compatible tag colour registry are PostFix's:
-  `PostFix/Designdokument.md`.
+  `examples/PostFix/Designdokument.md`.
 
 ## Contributor Guidance
 
 ### Where to Put New Logic
 - Rules, file formats, anything that decides: `core/`, with a test in `core/tests/unit`.
-- What the user sees: the program's QML and its backend (`Scope/Scope.py`, `Headline/`, …), which
+- What the user sees: the program's QML and its backend (`apps/Scope/Scope.py`, `apps/Headline/`, …), which
   only call the core.
 - Between programs: the session daemon (`daemon/`).
 - Inside PostFix: see its own design document.

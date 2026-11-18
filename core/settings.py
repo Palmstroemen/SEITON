@@ -1,4 +1,4 @@
-"""The settings of MyOS's programs in one file (Scope/Designdocument Setup.md).
+"""The settings of MyOS's programs in one file (apps/Scope/Designdocument Setup.md).
 
 Scope writes them on its back; SunTree reads them each time it appears. Every setting has a
 kind, a default and its allowed values in one place; anything else - a value out of range, of
@@ -51,12 +51,12 @@ SETTINGS: Dict[str, Tuple[type, Any, Any]] = {
     "Scope/projectsStyle": (str, "text", {"text", "smallIcon", "largeIcon"}),
     "Scope/instantReopen": (bool, True, None),
     "Scope/previewTuning": (str, "balanced", {"soft", "balanced", "aggressive"}),
-    # The Headline at the top edge (Scope/Designdocument Headline.md, 1): always there, keeping
+    # The Headline at the top edge (apps/Scope/Designdocument Headline.md, 1): always there, keeping
     # its room, or hiding itself until the pointer touches the edge.
     # Where it lives: a line at the top edge, or a panel from the taskbar (as the start menu).
     "Headline/place": (str, "top", {"top", "taskbar"}),
     "Headline/dock": (str, "keep", {"keep", "hide"}),
-    # SunTree's crown (SunTree/Designdocument Krone.md, 5); line and radius as shares of R.
+    # SunTree's crown (examples/SunTree/Designdocument Krone.md, 5); line and radius as shares of R.
     "SunTree/lineT": (float, 0.7, (0.5, 0.85)),
     "SunTree/inner": (float, 0.2, (0.1, 0.35)),
     "SunTree/enter": (float, 0.75, (0.6, 0.95)),

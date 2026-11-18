@@ -39,13 +39,17 @@ The building blocks exist but are fragmented. SEITON aims to unify them into one
 | Path | Description |
 |------|--------------|
 | **core/** | API, FUSE/blueprint layer, project config, ACLs, tagging, design docs |
-| **Scope/** | QML file browser (Templates + Projects rows, tags, CWD/CTD) |
-| **Headline/** | The line at the top edge of the screen: project, standard folders, perspectives |
-| **Time/** | Time tracking per project (the clock and its screen) |
+| **apps/** | SEITON itself: |
+| **apps/Scope/** | QML file browser (Templates + Projects rows, tags, CWD/CTD) |
+| **apps/Headline/** | The line at the top edge of the screen: project, standard folders, perspectives |
+| **apps/Time/** | Time tracking per project (the clock and its screen) |
 | **daemon/** | The session daemon: the perspectives drive, the shared lens, the clock |
 | **cloud/** | Nextcloud: the app `seiton` and the core as a service |
-| **PostFix/** | From the workshop: Markdown editor with tag sidebar, Obsidian-compatible |
-| **SunTree/** | From the workshop: the folder fan for quick dropping |
+| **examples/** | Apps that use SEITON, from the workshop: |
+| **examples/PostFix/** | Markdown editor with tag sidebar, Obsidian-compatible |
+| **examples/SunTree/** | The folder fan for quick dropping |
+| **examples/ClipboardTool/** | CopyQ commands that save clips as Markdown files |
+| **assets/** | SEITON's icons and brand images |
 | **templates/** | The templates SEITON ships (Standard, Person, Firma, Development) |
 | **installer/** | The installer (`install.sh` starts it) and its requirements |
 | **cli/** | CLI tools (myls, myproject, mytag, myedit, myfilter, etc.) |
@@ -95,7 +99,7 @@ templates stay).
 
 **Run Scope from the repository without installing (needs the packages of `installer/requirements.txt`):**
 ```bash
-python3 Scope/Scope.py
+python3 apps/Scope/Scope.py
 ```
 
 **Run tests** (every test folder, from the repository root):
@@ -106,7 +110,7 @@ python3 -m pytest
 **CLI examples:**
 ```bash
 python3 cli/myls.py "Learning SEITON/DE/Lektion10" --extended
-python3 PostFix/cli.py path/to/file.md
+python3 examples/PostFix/cli.py path/to/file.md
 ```
 
 Setup, dependencies, and contribution guidelines: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).

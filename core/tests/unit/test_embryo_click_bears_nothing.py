@@ -69,7 +69,7 @@ def test_putting_the_lens_on_bears_nothing(world, place):
 
 
 def test_the_headline_going_to_an_embryo_bears_nothing(world):
-    from Headline.model import HeadlineModel
+    from apps.Headline.model import HeadlineModel
 
     api, link = _session(world)
     model = HeadlineModel(api, link, str(world["studio"]))

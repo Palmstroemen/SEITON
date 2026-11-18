@@ -1,0 +1,994 @@
+"""Sidebar and bottom toolbar widgets for PostFix."""
+
+import glob
+import subprocess
+from pathlib import Path
+
+from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QPoint, QEvent, QRect, QTimer, Signal, QSize
+from PySide6.QtGui import QColor, QIcon, QCursor, QFont, QFontMetrics
+from PySide6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QPushButton,
+    QLabel,
+    QFrame,
+    QColorDialog,
+    QGraphicsOpacityEffect,
+)
+
+try:
+    from core.tag_chips import build_tag_chip_stylesheet
+except Exception:  # pragma: no cover - runtime fallback
+    def build_tag_chip_stylesheet(background: str, foreground: str) -> str:
+        return f"""
+            QPushButton {{
+                background-color: {background};
+                color: {foreground};
+                border: 1px solid rgba(0, 0, 0, 60);
+                border-top-left-radius: 2px;
+                border-bottom-left-radius: 2px;
+                border-top-right-radius: 12px;
+                border-bottom-right-radius: 12px;
+                text-align: right;
+                padding: 4px 8px;
+                margin: 3px;
+            }}
+            QPushButton:hover {{
+                border: 2px solid rgba(0, 0, 0, 95);
+            }}
+        """
+
+
+class SidebarWidget(QWidget):
+    """Base class for sidebars with fade-in/fade-out on hover."""
+
+    def __init__(self, title="Sidebar", bg_color="rgba(200, 220, 240, 60)"):
+        super().__init__()
+        self._title_text = title
+        self.bg_color = bg_color
+        self.base_opacity = 1.0
+        self.hover_opacity = 1.0
+        self.update_background_style(bg_color)
+        layout = QVBoxLayout(self)
+        layout.setSpacing(10)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.title_label = QLabel(title)
+        self.title_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.title_label)
+        layout.addStretch()
+        self.set_opacity(self.base_opacity)
+
+    def set_title_text(self, text: str):
+        self._title_text = str(text or "")
+        if hasattr(self, "title_label"):
+            self.title_label.setText(self._title_text)
+
+    def set_opacity(self, opacity):
+        self.setWindowOpacity(opacity)
+
+    def update_background_style(self, bg_color: str):
+        self.bg_color = bg_color
+        self.setStyleSheet(
+            f"""
+            QWidget {{
+                background-color: {bg_color};
+                border-radius: 5px;
+                border: 1px dashed #aaa;
+            }}
+            QLabel {{
+                color: #333333;
+                font-weight: bold;
+            }}
+        """
+        )
+
+    def enterEvent(self, event):
+        self.animate_opacity(self.base_opacity, self.hover_opacity)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.animate_opacity(self.hover_opacity, self.base_opacity)
+        super().leaveEvent(event)
+
+    def animate_opacity(self, start, end):
+        self.animation = QPropertyAnimation(self, b"windowOpacity")
+        self.animation.setDuration(300)
+        self.animation.setStartValue(start)
+        self.animation.setEndValue(end)
+        self.animation.setEasingCurve(QEasingCurve.InOutQuad)
+        self.animation.start()
+
+
+class ChipButton(QPushButton):
+    """Button with distinct single- and double-click signals."""
+
+    singleClicked = Signal()
+    doubleClicked = Signal()
+
+    def __init__(self, text: str = "", parent=None):
+        super().__init__(text, parent)
+        self._single_timer = QTimer(self)
+        self._single_timer.setSingleShot(True)
+        self._single_timer.setInterval(220)
+        self._single_timer.timeout.connect(self.singleClicked.emit)
+        self.clicked.connect(self._on_clicked)
+
+    def _on_clicked(self):
+        self._single_timer.start()
+
+    def mouseDoubleClickEvent(self, event):
+        if self._single_timer.isActive():
+            self._single_timer.stop()
+        self.doubleClicked.emit()
+        event.accept()
+
+
+class TagSidebar(SidebarWidget):
+    """Right sidebar for tags with interactive tag buttons."""
+
+    tagSearchRequested = Signal(str)
+    tagColorChangeRequested = Signal(str, str)
+    colorDefinitionChangeRequested = Signal(str, str, str)
+    colorDefinitionSearchRequested = Signal(str, str)
+
+    def __init__(self):
+        super().__init__("Tags", "rgba(220, 240, 200, 60)")
+        self.tags = []
+        self.color_entries = []
+        self._tag_colors = {}
+        self.setup_ui()
+        self.retranslate_ui()
+
+    def setup_ui(self):
+        self._rebuild()
+
+    def set_tags(self, tags):
+        cleaned = []
+        seen = set()
+        for raw in tags or []:
+            tag = str(raw).strip()
+            if not tag or tag in seen:
+                continue
+            seen.add(tag)
+            cleaned.append(tag)
+        self.tags = cleaned
+        self._rebuild()
+
+    def set_color_entries(self, entries):
+        normalized = []
+        for item in entries or []:
+            if isinstance(item, dict):
+                key = str(item.get("key", "")).strip()
+                value = str(item.get("hex", "")).strip()
+            elif isinstance(item, (list, tuple)) and len(item) >= 2:
+                key = str(item[0]).strip()
+                value = str(item[1]).strip()
+            else:
+                continue
+            if key and value:
+                normalized.append({"key": key, "hex": value})
+        self.color_entries = normalized
+        self._rebuild()
+
+    def set_tag_colors(self, tag_colors: dict[str, str] | None):
+        self._tag_colors = dict(tag_colors or {})
+        self._rebuild()
+
+    def _rebuild(self):
+        layout = self.layout()
+        layout.setContentsMargins(0, 8, 0, 8)
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        for item in self.color_entries:
+            key = item["key"]
+            value = item["hex"]
+            chip_bg = value if QColor(value).isValid() else "#777777"
+            chip_fg = self._text_color_for_bg(chip_bg)
+            btn = ChipButton(f"{key}: {value}")
+            btn.setCursor(Qt.PointingHandCursor)
+            btn.singleClicked.connect(lambda k=key, v=value: self.colorDefinitionSearchRequested.emit(k, v))
+            btn.doubleClicked.connect(lambda k=key, v=value: self._pick_color_definition(k, v))
+            btn.setToolTip(self.tr("Click: next match | Double-click: change color"))
+            btn.setStyleSheet(build_tag_chip_stylesheet(chip_bg, chip_fg))
+            layout.addWidget(btn)
+
+        for tag in self.tags:
+            chip_bg = self._tag_colors.get(tag, "#ffd54f")
+            chip_fg = self._text_color_for_bg(chip_bg)
+            btn = ChipButton(f"#{tag}")
+            btn.setStyleSheet(build_tag_chip_stylesheet(chip_bg, chip_fg))
+            btn.singleClicked.connect(lambda t=tag: self.tagSearchRequested.emit(t))
+            btn.doubleClicked.connect(lambda t=tag: self._pick_tag_color(t))
+            btn.setCursor(Qt.PointingHandCursor)
+            btn.setToolTip(self.tr("Click: next match | Double-click: change color"))
+            layout.addWidget(btn)
+
+        layout.addStretch()
+
+    def _text_color_for_bg(self, color_hex: str) -> str:
+        color = QColor(color_hex)
+        if not color.isValid():
+            return "#1f1f1f"
+        luminance = (0.2126 * color.redF()) + (0.7152 * color.greenF()) + (0.0722 * color.blueF())
+        return "#ffffff" if luminance < 0.45 else "#1f1f1f"
+
+    def _pick_tag_color(self, tag: str):
+        initial = QColor(self._tag_colors.get(tag, "#ffd54f"))
+        chosen = QColorDialog.getColor(initial, self, self.tr("Color for #%1").replace("%1", tag))
+        if not chosen.isValid():
+            return
+        self.tagColorChangeRequested.emit(tag, chosen.name())
+
+    def _pick_color_definition(self, key: str, old_hex: str):
+        chosen = QColorDialog.getColor(QColor(old_hex), self, self.tr("Color for %1").replace("%1", key))
+        if not chosen.isValid():
+            return
+        self.colorDefinitionChangeRequested.emit(key, old_hex, chosen.name())
+
+    def retranslate_ui(self):
+        self.set_title_text(self.tr("Tags"))
+        self._rebuild()
+
+
+class ACLSidebar(SidebarWidget):
+    """
+    Left sidebar: roles and people with rights on the open note (from its ACLs.md).
+    Rights are drawn around the name: read is an arrow out of the document ("◂" left
+    of the name), write an arrow into it ("▸" right of it); execute and change stay
+    "x", "c" and "d" (delete) on the left. People in a lighter grey than groups, as in Scope.
+    """
+
+    # Rights without an arrow, shown as letters on the left (system side).
+    RIGHT_LETTERS = {"execute": "x", "change": "c", "delete": "d"}
+    CHIP_COLORS = {"user": "#d6d6d6", "role": "#b5b5b5"}
+
+    # A group chip was clicked while editable: (role key, display name, rights, chip).
+    roleEditRequested = Signal(str, str, list, object)
+    # A person chip was clicked while editable: (user key, display name, chip).
+    personEditRequested = Signal(str, str, object)
+
+    def __init__(self):
+        super().__init__("ACLs", "rgba(200, 220, 240, 60)")
+        self.principals = []
+        self.editable = False
+        self.setup_ui()
+        self.retranslate_ui()
+
+    def set_editable(self, editable: bool):
+        """Group chips open the rights editor, person chips the groups editor (only for
+        users with "change" on ACLs.md)."""
+        editable = bool(editable)
+        if editable != self.editable:
+            self.editable = editable
+            self._rebuild()
+
+    def setup_ui(self):
+        self._rebuild()
+
+    def set_principals(self, principals):
+        self.principals = [dict(p) for p in principals or []]
+        self._rebuild()
+
+    def _right_names(self, rights) -> str:
+        names = {
+            "read": self.tr("Read"),
+            "write": self.tr("Write"),
+            "execute": self.tr("Execute"),
+            "change": self.tr("Change rights"),
+            "delete": self.tr("Delete"),
+        }
+        return ", ".join(names.get(r, r) for r in rights)
+
+    # Space between the name and each arrow (equal on both sides).
+    ARROW_GAP_PX = 4
+
+    def _chip_text(self, principal) -> tuple[str, str, str, str]:
+        """(letters, read arrow, name, write arrow) of a chip."""
+        rights = principal.get("rights", [])
+        letters = " ".join(self.RIGHT_LETTERS[r] for r in rights if r in self.RIGHT_LETTERS)
+        read = "◂" if "read" in rights else ""
+        write = "▸" if "write" in rights else ""
+        return letters, read, str(principal.get("name", "")), write
+
+    def preferred_width(self) -> int:
+        """Width that fits the widest chip (letters, name, write arrow, margins)."""
+        metrics = self.fontMetrics()
+        widest = 0
+        for principal in self.principals:
+            letters, _, name, _ = self._chip_text(principal)
+            widest = max(widest, metrics.horizontalAdvance(letters) + metrics.horizontalAdvance(name))
+        arrows = metrics.horizontalAdvance("◂") + metrics.horizontalAdvance("▸") + 2 * self.ARROW_GAP_PX
+        return widest + arrows + 48 if self.principals else 0
+
+    def _rebuild(self):
+        layout = self.layout()
+        layout.setContentsMargins(0, 8, 0, 8)
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        for principal in self.principals:
+            bg = self.CHIP_COLORS.get(principal.get("kind"), self.CHIP_COLORS["role"])
+            letters, read, name, write = self._chip_text(principal)
+            btn = QPushButton()
+            btn.setProperty("aclName", principal.get("name", ""))
+            btn.setStyleSheet(
+                f"""
+                QPushButton {{
+                    background-color: {bg};
+                    border: 1px solid rgba(0, 0, 0, 60);
+                    border-top-left-radius: 2px;
+                    border-bottom-left-radius: 2px;
+                    border-top-right-radius: 12px;
+                    border-bottom-right-radius: 12px;
+                    padding: 4px 8px;
+                    margin: 3px;
+                }}
+                QPushButton:hover {{
+                    background-color: {bg};
+                    border: 2px solid rgba(0, 0, 0, 95);
+                }}
+                QLabel {{ background: transparent; border: none; font-weight: normal; }}
+            """
+            )
+            row = QHBoxLayout(btn)
+            row.setContentsMargins(8, 0, 8, 0)
+            row.setSpacing(0)
+            letters_label = QLabel(letters)
+            letters_label.setStyleSheet("color: #555555;")
+            # Arrows sit in slots of their own glyph's width, ARROW_GAP_PX from the name on
+            # both sides; the write slot stays when empty, so names line up.
+            read_label = QLabel(read)
+            read_label.setStyleSheet("color: #333333;")
+            read_label.setFixedWidth(self.fontMetrics().horizontalAdvance("◂"))
+            name_label = QLabel(name)
+            name_label.setStyleSheet("color: #333333;")
+            name_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            write_label = QLabel(write)
+            write_label.setStyleSheet("color: #333333;")
+            write_label.setFixedWidth(self.fontMetrics().horizontalAdvance("▸"))
+            row.addWidget(letters_label)
+            row.addStretch(1)
+            row.addWidget(read_label)
+            row.addSpacing(self.ARROW_GAP_PX)
+            row.addWidget(name_label)
+            row.addSpacing(self.ARROW_GAP_PX)
+            row.addWidget(write_label)
+            kind = self.tr("Person") if principal.get("kind") == "user" else self.tr("Group")
+            tip = f"{kind}: {self._right_names(principal.get('rights', []))}"
+            if self.editable and principal.get("kind") == "role":
+                tip += "\n" + self.tr("Click: change the rights for this note")
+                btn.setCursor(Qt.PointingHandCursor)
+                btn.clicked.connect(
+                    lambda _checked=False, p=principal, b=btn: self.roleEditRequested.emit(
+                        str(p.get("key", "")), str(p.get("name", "")), list(p.get("rights", [])), b
+                    )
+                )
+            elif self.editable and principal.get("kind") == "user":
+                # A person's rights come from their groups: the click edits those.
+                tip += "\n" + self.tr("Click: change the groups of this person")
+                btn.setCursor(Qt.PointingHandCursor)
+                btn.clicked.connect(
+                    lambda _checked=False, p=principal, b=btn: self.personEditRequested.emit(
+                        str(p.get("key", "")), str(p.get("name", "")), b
+                    )
+                )
+            btn.setToolTip(tip)
+            btn.setMinimumHeight(row.sizeHint().height() + 8)
+            layout.addWidget(btn)
+        layout.addStretch()
+
+    def retranslate_ui(self):
+        self.set_title_text(self.tr("ACLs"))
+        self._rebuild()
+
+
+class ACLRoleEditor(QFrame):
+    """
+    Small popup to set one group's rights on the open note: one switch per right in the
+    chip pictogram (◂ read, ▸ write, x, c, d), plus "back to inherited" when the group
+    has a rule of its own here (see ACL design document 5.3).
+    """
+
+    applyRequested = Signal(object)  # set of rights
+    resetRequested = Signal()
+
+    RIGHTS = (
+        ("read", "◂"),
+        ("write", "▸"),
+        ("execute", "x"),
+        ("change", "c"),
+        ("delete", "d"),
+    )
+
+    def __init__(self, role_name: str, rights, own_rule: bool, parent=None):
+        super().__init__(parent, Qt.Popup)
+        self.setObjectName("aclRoleEditor")
+        # The greys of the ACL chips: switches are chips (square left edge, rounded right
+        # edge), switched on in the darker group grey.
+        self.setStyleSheet(
+            """
+            QFrame#aclRoleEditor { background: #cfcfcf; border: 1px solid #9a9a9a; border-radius: 6px; }
+            QLabel { color: #333333; background: transparent; border: none; }
+            QPushButton {
+                color: #333333;
+                background: #e4e4e4;
+                border: 1px solid rgba(0, 0, 0, 60);
+                border-radius: 4px;
+                padding: 3px 8px;
+            }
+            QPushButton:hover { border: 1px solid rgba(0, 0, 0, 110); }
+            QPushButton:disabled { color: #8a8a8a; background: #d8d8d8; }
+            QPushButton[aclSwitch="true"] {
+                border-top-left-radius: 2px;
+                border-bottom-left-radius: 2px;
+                /* Qt drops radii whose sum exceeds the height (~22 px here). */
+                border-top-right-radius: 9px;
+                border-bottom-right-radius: 9px;
+            }
+            QPushButton[aclSwitch="true"]:checked { background: #b5b5b5; font-weight: bold; }
+        """
+        )
+        # What each right allows, as "darf …" / "darf nicht …" next to its switch.
+        self.verbs = {
+            "read": self.tr("read"),
+            "write": self.tr("write"),
+            "execute": self.tr("execute"),
+            "change": self.tr("change rights"),
+            "delete": self.tr("delete"),
+        }
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 10, 12, 10)
+        layout.setSpacing(6)
+        title = QLabel(self.tr("Rights of %1 for this note").replace("%1", role_name))
+        title.setStyleSheet("font-weight: bold;")
+        layout.addWidget(title)
+        self.intro = QLabel(self.tr("Control exactly what this group may do with this note."))
+        self.intro.setWordWrap(True)
+        layout.addWidget(self.intro)
+        self.switches = {}
+        self.meaning = {}
+        for right, symbol in self.RIGHTS:
+            row = QHBoxLayout()
+            row.setSpacing(8)
+            switch = QPushButton(symbol)
+            switch.setCheckable(True)
+            switch.setChecked(right in set(rights or []))
+            switch.setProperty("aclSwitch", True)
+            switch.setFixedWidth(40)
+            meaning = QLabel()
+            switch.toggled.connect(lambda _on, r=right: self._update_meaning(r))
+            row.addWidget(switch)
+            row.addWidget(meaning, 1)
+            layout.addLayout(row)
+            self.switches[right] = switch
+            self.meaning[right] = meaning
+            self._update_meaning(right)
+        self.origin = QLabel(
+            self.tr("This note has a rule of its own.") if own_rule
+            else self.tr("These rights are inherited from the parent folder.")
+        )
+        self.origin.setWordWrap(True)
+        self.origin.setStyleSheet("color: #555555;")
+        layout.addWidget(self.origin)
+        self.error_label = QLabel("")
+        self.error_label.setStyleSheet("color: #b00020;")
+        self.error_label.setWordWrap(True)
+        self.error_label.hide()
+        layout.addWidget(self.error_label)
+        buttons = QHBoxLayout()
+        self.apply_button = QPushButton(self.tr("Apply"))
+        self.reset_button = QPushButton(self.tr("Back to inherited"))
+        self.reset_button.setEnabled(bool(own_rule))
+        cancel = QPushButton(self.tr("Cancel"))
+        for button in (self.apply_button, self.reset_button, cancel):
+            buttons.addWidget(button)
+        layout.addLayout(buttons)
+        self.apply_button.clicked.connect(lambda: self.applyRequested.emit(self.chosen_rights()))
+        self.reset_button.clicked.connect(self.resetRequested.emit)
+        cancel.clicked.connect(self.close)
+
+    def _update_meaning(self, right: str):
+        verb = self.verbs[right]
+        if self.switches[right].isChecked():
+            self.meaning[right].setText("✓ " + self.tr("may %1").replace("%1", verb))
+            self.meaning[right].setStyleSheet("color: #333333;")
+        else:
+            self.meaning[right].setText("✗ " + self.tr("may not %1").replace("%1", verb))
+            self.meaning[right].setStyleSheet("color: #777777;")
+
+    def chosen_rights(self) -> set:
+        return {right for right, switch in self.switches.items() if switch.isChecked()}
+
+    def toggle(self, right: str):
+        switch = self.switches[right]
+        switch.setChecked(not switch.isChecked())
+
+    def show_error(self, message: str):
+        self.error_label.setText(message)
+        self.error_label.setVisible(bool(message))
+        self.adjustSize()
+
+
+class ACLPersonEditor(QFrame):
+    """
+    Small popup to set the groups of one person: one chip switch per group, and next to it
+    what the group may do with the open note. Groups apply in the whole project (they are
+    written in "# Users" of ACLs.md, see ACL design document 5.3).
+    """
+
+    applyRequested = Signal(object)  # set of group keys
+
+    def __init__(self, person_name: str, groups, parent=None):
+        super().__init__(parent, Qt.Popup)
+        self.setObjectName("aclPersonEditor")
+        # Same greys and chip switches as ACLRoleEditor.
+        self.setStyleSheet(
+            """
+            QFrame#aclPersonEditor { background: #cfcfcf; border: 1px solid #9a9a9a; border-radius: 6px; }
+            QLabel { color: #333333; background: transparent; border: none; }
+            QPushButton {
+                color: #333333;
+                background: #e4e4e4;
+                border: 1px solid rgba(0, 0, 0, 60);
+                border-radius: 4px;
+                padding: 3px 8px;
+            }
+            QPushButton:hover { border: 1px solid rgba(0, 0, 0, 110); }
+            QPushButton[aclSwitch="true"] {
+                border-top-left-radius: 2px;
+                border-bottom-left-radius: 2px;
+                /* Qt drops radii whose sum exceeds the height (~22 px here). */
+                border-top-right-radius: 9px;
+                border-bottom-right-radius: 9px;
+            }
+            QPushButton[aclSwitch="true"]:checked { background: #b5b5b5; font-weight: bold; }
+        """
+        )
+        self.right_words = {
+            "read": self.tr("read"),
+            "write": self.tr("write"),
+            "execute": self.tr("execute"),
+            "change": self.tr("change rights"),
+            "delete": self.tr("delete"),
+        }
+        self.groups = [dict(g) for g in groups or []]
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 10, 12, 10)
+        layout.setSpacing(6)
+        title = QLabel(self.tr("Groups of %1").replace("%1", person_name))
+        title.setStyleSheet("font-weight: bold;")
+        layout.addWidget(title)
+        self.intro = QLabel(self.tr(
+            "People get their rights through their groups. "
+            "Groups apply in the whole project, not only for this note."
+        ))
+        self.intro.setWordWrap(True)
+        layout.addWidget(self.intro)
+        self.switches = {}
+        self.meaning = {}
+        # All switches as wide as the longest name in bold (a switched-on group is drawn
+        # bold), so the explanations line up.
+        bold = QFont(self.font())
+        bold.setBold(True)
+        switch_width = max([90] + [QFontMetrics(bold).horizontalAdvance(g["name"]) + 28 for g in self.groups])
+        for group in self.groups:
+            row = QHBoxLayout()
+            row.setSpacing(8)
+            switch = QPushButton(group["name"])
+            switch.setCheckable(True)
+            switch.setChecked(bool(group.get("member")))
+            switch.setProperty("aclSwitch", True)
+            switch.setFixedWidth(switch_width)
+            meaning = QLabel()
+            switch.toggled.connect(lambda _on, k=group["key"]: self._update(k))
+            row.addWidget(switch)
+            row.addWidget(meaning, 1)
+            layout.addLayout(row)
+            self.switches[group["key"]] = switch
+            self.meaning[group["key"]] = meaning
+        self.empty_note = QLabel(self.tr("Without groups %1 has no rights and is removed from the list.")
+                                 .replace("%1", person_name))
+        self.empty_note.setWordWrap(True)
+        self.empty_note.setStyleSheet("color: #555555;")
+        layout.addWidget(self.empty_note)
+        self.error_label = QLabel("")
+        self.error_label.setStyleSheet("color: #b00020;")
+        self.error_label.setWordWrap(True)
+        self.error_label.hide()
+        layout.addWidget(self.error_label)
+        buttons = QHBoxLayout()
+        self.apply_button = QPushButton(self.tr("Apply"))
+        cancel = QPushButton(self.tr("Cancel"))
+        buttons.addWidget(self.apply_button)
+        buttons.addWidget(cancel)
+        layout.addLayout(buttons)
+        self.apply_button.clicked.connect(lambda: self.applyRequested.emit(self.chosen_groups()))
+        cancel.clicked.connect(self.close)
+        for group in self.groups:
+            self._update(group["key"])
+
+    def _here_text(self, rights) -> str:
+        if not rights:
+            return self.tr("here: no access")
+        return self.tr("here: %1").replace("%1", ", ".join(self.right_words.get(r, r) for r in rights))
+
+    def _update(self, key: str):
+        group = next(g for g in self.groups if g["key"] == key)
+        on = self.switches[key].isChecked()
+        member = "✓ " + self.tr("member") if on else "✗ " + self.tr("not a member")
+        self.meaning[key].setText(f"{member} · {self._here_text(group.get('rights', []))}")
+        self.meaning[key].setStyleSheet("color: #333333;" if on else "color: #777777;")
+        self.empty_note.setVisible(not self.chosen_groups())
+
+    def chosen_groups(self) -> set:
+        return {key for key, switch in self.switches.items() if switch.isChecked()}
+
+    def toggle(self, key: str):
+        switch = self.switches[key]
+        switch.setChecked(not switch.isChecked())
+
+    def show_error(self, message: str):
+        self.error_label.setText(message)
+        self.error_label.setVisible(bool(message))
+        self.adjustSize()
+
+
+class BottomToolbar(QWidget):
+    """Two-level bottom toolbar with hover effect."""
+
+    printRequested = Signal(str)
+    openInRequested = Signal(str)
+
+    def __init__(self):
+        super().__init__()
+        self.setMinimumHeight(60)
+        self.setMaximumHeight(60)
+        self.theme_color = "#ffffff"
+        self.theme_border = "#cfcfcf"
+        self.bg_layer = QFrame(self)
+        self.bg_layer.lower()
+        self.bg_layer.setStyleSheet("QFrame { background-color: #ffffff; }")
+        self._hide_timer = QTimer(self)
+        self._hide_timer.setSingleShot(True)
+        self._hide_timer.timeout.connect(self.hide_flyout)
+        self._desktop_index = None
+        self._printers = None
+        self._runtime_resources_loaded = False
+        self._active_flyout = None
+        self._primary_buttons = []
+        self._flyout_anim = None
+        self._primary_button_map = {}
+        self._flyout_height = 40
+        self.setMouseTracking(True)
+        self.setAttribute(Qt.WA_Hover, True)
+        self.main_layout = QVBoxLayout(self)
+        self.main_layout.setSpacing(0)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.primary_toolbar = QWidget()
+        self.primary_toolbar.setStyleSheet(
+            "QWidget { background-color: transparent; border-top: 1px solid transparent; }"
+        )
+        self.primary_layout = QHBoxLayout(self.primary_toolbar)
+        self.primary_layout.setSpacing(15)
+        self.primary_layout.setContentsMargins(6, 3, 6, 3)
+        self.primary_layout.addStretch()
+        self.main_layout.addWidget(self.primary_toolbar)
+        self.setup_primary_toolbar()
+        self.setup_flyout()
+
+    def _ensure_runtime_resources(self):
+        if self._runtime_resources_loaded:
+            return
+        self._desktop_index = self._load_desktop_index()
+        self._printers = self._load_printers()
+        self._runtime_resources_loaded = True
+
+    def setup_primary_toolbar(self):
+        while self.primary_layout.count():
+            item = self.primary_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        self._primary_buttons = []
+        self._primary_button_map = {}
+        self.primary_layout.addStretch()
+        # Only what is wired: "Send to" (mail, messengers) and LibreOffice would only open the
+        # note in its default program.
+        actions = [
+            ("⇱", "open_in", self.tr("Open in")),
+            ("⎙", "print", self.tr("Print")),
+        ]
+        for icon, action_key, label in actions:
+            btn = QPushButton(icon)
+            btn.setToolTip(label)
+            btn.setStyleSheet(
+                """
+                QPushButton {
+                    background-color: rgba(0, 0, 0, 0);
+                    color: #333333;
+                    border: 1px solid rgba(0, 0, 0, 60);
+                    border-radius: 15px;
+                    padding: 0;
+                    font-size: 14px;
+                    min-width: 30px;
+                    min-height: 30px;
+                }
+                QPushButton:hover {
+                    background-color: rgba(0, 0, 0, 25);
+                }
+            """
+            )
+            btn.setCursor(Qt.PointingHandCursor)
+            btn.setFixedSize(30, 30)
+            btn.setMouseTracking(True)
+            btn._flyout_label = action_key
+            self.primary_layout.addWidget(btn)
+            self._primary_buttons.append(btn)
+            self._primary_button_map[btn] = action_key
+        self.primary_layout.addStretch()
+
+    def setup_flyout(self):
+        parent = self.window()
+        self.flyout = QFrame(parent)
+        self.flyout.setWindowFlags(Qt.ToolTip | Qt.FramelessWindowHint)
+        self.flyout.setAttribute(Qt.WA_ShowWithoutActivating, True)
+        self.flyout.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+        self.flyout.setAttribute(Qt.WA_TranslucentBackground, True)
+        self.flyout.setMouseTracking(True)
+        self.flyout.setAttribute(Qt.WA_Hover, True)
+        self.flyout.setStyleSheet("QFrame { background-color: transparent; border: none; }")
+        self.flyout_layout = QHBoxLayout(self.flyout)
+        self.flyout_layout.setContentsMargins(12, 8, 12, 8)
+        self.flyout_layout.setSpacing(12)
+        self.flyout_layout.setAlignment(Qt.AlignHCenter)
+        self.flyout.hide()
+        self._flyout_effect = QGraphicsOpacityEffect(self.flyout)
+        self._flyout_effect.setOpacity(1.0)
+        self.flyout.setGraphicsEffect(self._flyout_effect)
+        self._flyout_anim = QPropertyAnimation(self._flyout_effect, b"opacity", self)
+        self._flyout_anim.setDuration(250)
+        self._flyout_anim.setEasingCurve(QEasingCurve.InOutQuad)
+        self._flyout_anim.finished.connect(self._on_flyout_fade_finished)
+
+    def show_flyout(self, primary_action, anchor_btn: QPushButton):
+        if not hasattr(self, "flyout"):
+            return
+        if self._active_flyout == primary_action and self.flyout.isVisible():
+            return
+        self._ensure_runtime_resources()
+        printer_items = [(p["label"], ["printer"], p["name"]) for p in (self._printers or [])]
+        print_items = [("PDF", ["application-pdf", "pdf", "evince", "okular"], "PDF")] + printer_items
+        items = {
+            "open_in": [
+                ("Obsidian", ["obsidian"]),
+            ],
+            "print": print_items,
+        }
+        for i in reversed(range(self.flyout_layout.count())):
+            item = self.flyout_layout.takeAt(i)
+            if item.widget():
+                item.widget().deleteLater()
+
+        for item in items.get(primary_action, []):
+            if primary_action == "print":
+                label, names, printer_name = item
+                widget = self._make_flyout_item(label, names, lambda _, value=printer_name: self.printRequested.emit(value))
+            else:
+                label, names = item
+                widget = self._make_flyout_item(label, names, lambda _, value=label: self.openInRequested.emit(value))
+            self.flyout_layout.addWidget(widget)
+
+        self.flyout_layout.invalidate()
+        self.flyout_layout.activate()
+        self.flyout.adjustSize()
+        width = self.primary_toolbar.width()
+        height = max(self._flyout_height, self.flyout.sizeHint().height())
+        self._flyout_height = height
+        bar_pos = self.primary_toolbar.mapToGlobal(QPoint(0, 0))
+        x = bar_pos.x()
+        y = bar_pos.y() - height - 6
+        if y < 0:
+            y = 0
+        self.flyout.setGeometry(x, y, width, height)
+        if self._flyout_anim.state() == QPropertyAnimation.Running:
+            self._flyout_anim.stop()
+        self._flyout_effect.setOpacity(1.0)
+        self.flyout.show()
+        self.flyout.raise_()
+        self._active_flyout = primary_action
+
+    def schedule_hide(self):
+        QTimer.singleShot(1000, self._hide_if_not_over_area)
+
+    def cancel_hide(self):
+        if self._hide_timer.isActive():
+            self._hide_timer.stop()
+
+    def hide_flyout(self):
+        if not hasattr(self, "flyout"):
+            return
+        if self._flyout_anim.state() == QPropertyAnimation.Running:
+            self._flyout_anim.stop()
+        self._flyout_anim.setStartValue(self._flyout_effect.opacity())
+        self._flyout_anim.setEndValue(0.0)
+        self._flyout_anim.start()
+        self._active_flyout = None
+
+    def _on_flyout_fade_finished(self):
+        if hasattr(self, "flyout"):
+            self.flyout.hide()
+
+    def _hide_if_not_over_area(self):
+        cursor_pos = QCursor.pos()
+        toolbar_rect = QRect(self.mapToGlobal(QPoint(0, 0)), self.size())
+        if toolbar_rect.contains(cursor_pos):
+            QTimer.singleShot(200, self._hide_if_not_over_area)
+            return
+        if hasattr(self, "flyout") and self.flyout.isVisible():
+            flyout_rect = QRect(self.flyout.mapToGlobal(QPoint(0, 0)), self.flyout.size())
+            if flyout_rect.contains(cursor_pos):
+                QTimer.singleShot(200, self._hide_if_not_over_area)
+                return
+        self.hide_flyout()
+
+    def _button_from_widget(self, widget):
+        while widget and widget is not self:
+            if widget in self._primary_button_map:
+                return widget
+            widget = widget.parentWidget()
+        return None
+
+    def event(self, event):
+        if event.type() in (QEvent.MouseMove, QEvent.HoverMove):
+            pos = event.position().toPoint() if hasattr(event, "position") else event.pos()
+            child = self.childAt(pos)
+            if child is self.flyout or (hasattr(self, "flyout") and self.flyout.isAncestorOf(child)):
+                return super().event(event)
+            btn = self._button_from_widget(child)
+            if btn:
+                label = self._primary_button_map.get(btn)
+                if label:
+                    self.show_flyout(label, btn)
+        elif event.type() == QEvent.Leave:
+            self.schedule_hide()
+        return super().event(event)
+
+    def set_theme_color(self, color_hex: str):
+        self.theme_color = color_hex
+        self.theme_border = QColor(color_hex).darker(120).name()
+        self.bg_layer.setStyleSheet(f"QFrame {{ background-color: {self.theme_color}; }}")
+        self.primary_toolbar.setStyleSheet(
+            "QWidget { background-color: transparent; border-top: 1px solid transparent; }"
+        )
+        self.update()
+
+    def _load_desktop_index(self):
+        index = {}
+        paths = ["/usr/share/applications", str(Path.home() / ".local/share/applications")]
+        for folder in paths:
+            for file_path in glob.glob(str(Path(folder) / "*.desktop")):
+                name = ""
+                icon = ""
+                try:
+                    with open(file_path, "r", encoding="utf-8", errors="ignore") as fh:
+                        for line in fh:
+                            if line.startswith("Name=") and not name:
+                                name = line.strip().split("=", 1)[1]
+                            elif line.startswith("Icon=") and not icon:
+                                icon = line.strip().split("=", 1)[1]
+                            if name and icon:
+                                break
+                except OSError:
+                    continue
+                if name and icon:
+                    index[name.lower()] = icon
+        return index
+
+    def _find_icon(self, names):
+        for name in names:
+            icon = QIcon.fromTheme(name)
+            if not icon.isNull():
+                return icon
+            for key, value in (self._desktop_index or {}).items():
+                if name in key:
+                    themed = QIcon.fromTheme(value)
+                    if not themed.isNull():
+                        return themed
+        return None
+
+    def _load_printers(self):
+        try:
+            result = subprocess.run(
+                ["lpstat", "-p"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                check=False,
+            )
+        except OSError:
+            return []
+        printers = []
+        current = None
+        for line in result.stdout.splitlines():
+            parts = line.split()
+            if parts and parts[0].lower() in ("printer", "drucker") and len(parts) > 1:
+                if current:
+                    printers.append(current)
+                current = {"name": parts[1], "label": parts[1]}
+            if current and line.strip().startswith(("Location:", "Ort:")):
+                current["label"] = line.split(":", 1)[1].strip()
+        if current:
+            printers.append(current)
+        return printers
+
+    def _make_flyout_item(self, label: str, names: list, on_click):
+        display_label = label.replace("_", " ")
+        wrapper = QFrame()
+        wrapper.setObjectName("flyoutItemCard")
+        wrapper.setStyleSheet(
+            """
+            QFrame#flyoutItemCard {
+                background-color: rgba(255, 255, 255, 212);
+                border: 1px solid rgba(0, 0, 0, 30);
+                border-radius: 20px;
+            }
+            QFrame#flyoutItemCard:hover {
+                background-color: rgba(255, 255, 255, 235);
+            }
+            """
+        )
+        layout = QVBoxLayout(wrapper)
+        layout.setContentsMargins(8, 6, 8, 6)
+        layout.setSpacing(4)
+
+        btn = QPushButton()
+        btn.setToolTip(display_label)
+        btn.setFixedSize(44, 44)
+        btn.setStyleSheet(
+            """
+            QPushButton {
+                background-color: rgba(0, 0, 0, 0);
+                color: #333333;
+                border: none;
+                border-radius: 20px;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: rgba(0, 0, 0, 18);
+            }
+            """
+        )
+        icon = self._find_icon(names)
+        if icon:
+            btn.setIcon(icon)
+            btn.setIconSize(QSize(28, 28))
+        else:
+            btn.setText(display_label[:2].upper())
+
+        def _handle_click():
+            on_click(None)
+            self.hide_flyout()
+
+        btn.clicked.connect(_handle_click)
+
+        text = QLabel(display_label)
+        text.setWordWrap(True)
+        text.setAlignment(Qt.AlignHCenter)
+        text.setStyleSheet("QLabel { font-size: 10px; color: #333333; background: transparent; }")
+        text.setFixedWidth(90)
+
+        layout.addWidget(btn, alignment=Qt.AlignHCenter)
+        layout.addWidget(text, alignment=Qt.AlignHCenter)
+        return wrapper
+
+    def retranslate_ui(self):
+        self.setup_primary_toolbar()
+        self.hide_flyout()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.bg_layer.setGeometry(0, 0, self.width(), self.height())
