@@ -7,7 +7,7 @@ import QtQuick.Layouts 1.15
 ApplicationWindow {
     id: root
     objectName: "timeScreen"
-    title: qsTr("Time")
+    title: qsTr("Time tracking")  // the title bar and the taskbar (2026-11-19)
     width: 640
     height: 520
     visible: true

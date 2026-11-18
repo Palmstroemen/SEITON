@@ -1,13 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <title>SEITON Time</title>
   <!-- The time screen's icon (2026-11-18): a stopwatch in the colours of SEITON's box
-       (seiton-icon.svg); the green wedge is the time counted, as on the screen's dial. -->
+       (seiton-icon.svg); the green wedge as on the screen's dial, without a hand (2026-11-19). -->
   <rect width="64" height="64" rx="10" fill="#16130f"/>
   <rect x="27" y="5" width="10" height="6" rx="2" fill="#e2402b"/>
   <rect x="30" y="10" width="4" height="5" fill="#ebd19c"/>
   <circle cx="32" cy="37" r="21" fill="#ebd19c"/>
   <circle cx="32" cy="37" r="17" fill="#16130f"/>
   <path d="M32 37 L32 20 A17 17 0 0 1 46.7 45.5 Z" fill="#b2e3bb"/>
-  <line x1="32" y1="37" x2="46.7" y2="45.5" stroke="#e2402b" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="32" cy="37" r="3" fill="#e2402b"/>
 </svg>

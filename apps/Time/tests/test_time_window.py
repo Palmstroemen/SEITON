@@ -315,3 +315,16 @@ def test_a_row_sets_the_beginning_by_the_day_and_the_duration_bold(started):
     assert left(begin) - right(day) < left(duration) - right(begin)
     assert duration.property("font").bold() and not begin.property("font").bold()
     assert duration.property("text") == "1:30" and begin.property("text") == "09:30"
+
+
+def test_its_title_says_time_tracking(started):
+    # 2026-11-19: "Zeit" alone said little in the title bar and the taskbar.
+    assert started["window"].property("title") == "Time tracking"
+
+
+def test_in_german_it_is_zeiterfassung():
+    import xml.etree.ElementTree as ET
+    from pathlib import Path
+    ts = Path(__file__).resolve().parents[1] / "i18n" / "time_de.ts"
+    found = {m.findtext("source"): m.findtext("translation") for m in ET.parse(ts).iter("message")}
+    assert found["Time tracking"] == "Zeiterfassung"
