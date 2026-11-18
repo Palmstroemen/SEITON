@@ -912,10 +912,6 @@ class Backend(QObject):
     def openWith(self, path: str, command: str) -> bool:
         return self._api.open_with(path, command)
 
-    @Slot(str, result=bool)
-    def notifyConfigChanged(self, path: str) -> bool:
-        return self._api.notify_config_changed(path)
-
     @Slot(result=str)
     def getStartPath(self) -> str:
         return self._api.get_start_path()

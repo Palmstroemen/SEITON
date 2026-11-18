@@ -97,9 +97,6 @@ Built for the sections `ProjectConfig` resolves (today `Templates`). `ACLs.md`, 
   Separate from this, `myproject tidy` turns unused born template folders back into embryos
   (see "Designdocument BlueprintLayer.md", 3.2).
 
-- **`propagate_config(section, dry_run)`**  
-  Materializes a section into child projects when explicitly requested.
-
 - **`find_config_in_parents(start_path, config_name)`**  
   Generic file resolver for `/.seiton/<config_name>` using nearest-ancestor lookup.
 
@@ -139,7 +136,6 @@ Planned:
 - Add/remove templates
 - Show project status and templates
 - Edit config and show inheritance chain
-- Propagate config/template changes to subprojects (the core has `propagate_config`, no CLI)
 
 ## **9. Testing Strategy**
 
@@ -170,8 +166,7 @@ test_lab/
 2. **Missing Templates.md** - Templates list is empty
 3. **Missing local Templates.md** - Inherits nearest ancestor templates at runtime
 4. **inherit:not** - Stops runtime inheritance for that section
-5. **propagate_config(dry_run)** - Reports materialization targets
-6. **Malformed Markdown** - Parser falls back safely
+5. **Malformed Markdown** - Parser falls back safely
 
 ## **10. Error Handling & Validation**
 

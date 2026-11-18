@@ -89,29 +89,24 @@ def test_on_editor_tags_changed_normalizes_and_debounces():
     assert w.refreshed == 1
 
 
-def test_sync_scope_tags_from_document_writes_and_propagates(tmp_path: Path):
+def test_sync_scope_tags_from_document_writes(tmp_path: Path):
     w = _DummyWindow()
     w._scope_tags_path = tmp_path / META_DIR / "Tags.md"
     w._scope_tags = ["important"]
     w._doc_tags = ["important", "todo"]
-    called = {"write": None, "propagate": 0}
+    called = {"write": None}
 
     def _write(path, tags):
         called["write"] = (path, list(tags))
         return True
 
-    def _propagate():
-        called["propagate"] += 1
-
     w._write_scope_tags = _write
-    w._propagate_scope_tags_update = _propagate
     w._sync_scope_tags_from_document()
 
     assert called["write"] is not None
     assert called["write"][0] == w._scope_tags_path
     assert called["write"][1] == ["important", "todo"]
     assert w._scope_tags == ["important", "todo"]
-    assert called["propagate"] == 1
 
 
 def test_refresh_tag_ui_updates_sidebar_and_editor_map():
@@ -149,20 +144,6 @@ def test_on_tag_color_change_reloads_when_vault_missing_and_saves():
     assert w.saved == 1
     assert w._tag_color_map == {"important": "#ffaa00"}
     assert w.refreshed >= 1
-
-
-def test_propagate_scope_tags_update_calls_notify(monkeypatch, tmp_path: Path):
-    calls = []
-
-    def fake_notify(path, dry_run=False):
-        calls.append((path, dry_run))
-
-    monkeypatch.setattr(wt, "notify_config_changed", fake_notify)
-    w = _DummyWindow()
-    w._scope_tags_path = tmp_path / META_DIR / "Tags.md"
-
-    wt.WindowTagsMixin._propagate_scope_tags_update(w)
-    assert calls == [(w._scope_tags_path, False)]
 
 
 def test_reload_tag_context_discovers_scope_and_sets_registry_path(tmp_path: Path):

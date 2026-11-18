@@ -229,26 +229,3 @@ class MarkdownConfigParser:
                 if isinstance(item, dict) and "inherit" in item:
                     return item["inherit"]
         return None
-
-
-if __name__ == "__main__":
-    # Quick self-test
-    test_content = """# Templates
-Standard
-Website
-    
-#### inherit: dynamic
-#### version: 2.0"""
-    
-    result = MarkdownConfigParser.parse(test_content)
-    print("✅ Parser self-test:")
-    print(f"   Result: {result}")
-    
-    inherit = MarkdownConfigParser.find_inherit(result["Templates"])
-    print(f"   Inherit found: {inherit}")
-    
-    assert "Templates" in result
-    assert result["Templates"]["inherit"] == ["dynamic"]
-    assert inherit == ["dynamic"]
-    
-    print("\n✅ All parser tests passed!")

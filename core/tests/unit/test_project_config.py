@@ -145,71 +145,6 @@ Priority: High
             assert config.metadata["priority"] == "High"
             print(f"✓ Manifest loaded: {config.metadata}")
     
-    def test_save_creates_files(self):
-        """Test that save() creates correct .md files."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            project_path = Path(tmpdir) / "test_project"
-            project_path.mkdir()
-            
-            config = ProjectConfig(project_path)
-            config.templates = ["Standard", "Person"]
-            config.version = "MyOS v1.0"
-            config.metadata = {"owner": "TestUser", "created": "2025-01-27"}
-            
-            # Save should create .MyOS/ directory
-            result = config.save()
-            assert result
-            
-            settings_dir = project_path / META_DIR
-            assert settings_dir.exists()
-            assert (settings_dir / "Project.md").exists()
-            assert (settings_dir / "Templates.md").exists()
-            assert (settings_dir / "Manifest.md").exists()
-            
-            # Verify Templates.md content
-            templates_content = (settings_dir / "Templates.md").read_text()
-            assert "Standard" in templates_content
-            assert "Person" in templates_content
-            
-            # Verify Manifest.md content  
-            manifest_content = (settings_dir / "Manifest.md").read_text()
-            assert "MyOS v1.0" in manifest_content
-            assert "TestUser" in manifest_content
-            
-            print(f"✓ Save created: {list(settings_dir.iterdir())}")
-    
-    def test_save_updates_existing_files(self):
-        """Test that save() updates existing .md files."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            project_path = Path(tmpdir) / "test_project"
-            project_path.mkdir()
-            
-            # Create initial structure
-            settings_dir = project_path / META_DIR
-            settings_dir.mkdir()
-            (settings_dir / "Project.md").write_text("# Old Project\n")
-            (settings_dir / "Templates.md").write_text("# Old\n- OldTemplate\n")
-            (settings_dir / "Manifest.md").write_text("Old: yes\n")
-            
-            config = ProjectConfig(project_path)
-            config.templates = ["NewTemplate"]
-            config.version = "MyOS v2.0"
-            
-            # Save updates
-            result = config.save()
-            assert result
-            
-            # Check files were updated
-            templates_content = (settings_dir / "Templates.md").read_text()
-            assert "NewTemplate" in templates_content
-            assert "OldTemplate" not in templates_content
-            
-            manifest_content = (settings_dir / "Manifest.md").read_text()
-            assert "MyOS v2.0" in manifest_content
-            assert "Old: yes" not in manifest_content
-            
-            print(f"✓ Save updated existing files")
-    
     def test_missing_project_md_is_invalid(self):
         """Test that project without Project.md is invalid."""
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -325,22 +260,7 @@ class TestProjectInheritance:
         child_cfg = ProjectConfig(child_dir)
         assert child_cfg.get_effective_templates() == []
     
-    def test_config_propagation_dry_run(self):
-        """Test propagating config changes to children with dry run."""
-        # Create child project
-        child_dir = self.root / "ChildProject"
-        child_dir.mkdir()
-        child_config = ProjectConfig.create(child_dir)
-        
-        # Create parent config object
-        parent_config = ProjectConfig(self.root)
-        
-        # Test propagation with dry run
-        results = parent_config.propagate_config("Templates", dry_run=True)
-        
-        # Should find child and plan update
-        assert str(child_dir) in results
-        print(f"✓ Config propagation dry run works")
+
 
 
 class TestProjectFinder:
@@ -466,21 +386,6 @@ class TestProjectConfigEdgeCases:
             assert config.templates == []
             
             print(f"✓ Handles malformed markdown gracefully")
-
-
-# Test der CLI-Funktionalität
-class TestProjectCLI:
-    """Tests for CLI functionality."""
-    
-    def test_propagate_command_structure(self):
-        """Test that propagate_command() has correct structure."""
-        # Import and check the function exists
-        from core.project import ProjectConfig
-        
-        # Check it's a static method
-        assert hasattr(ProjectConfig, 'propagate_command')
-        
-        print(f"✓ CLI command structure exists")
 
 
 def test_find_projects_orders_by_specificity():

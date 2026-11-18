@@ -48,10 +48,9 @@ from core.brand import META_DIR, getenv
 
 try:
     from core.localBlueprintLayer import Blueprint
-    from core.project import ProjectConfig, notify_config_changed as notify_project_config_changed
+    from core.project import ProjectConfig
 except Exception:  # pragma: no cover - optional for non-MyOS paths
     Blueprint = None
-    notify_project_config_changed = None
 
 
 def _move_to_system_trash(path: Path) -> None:
@@ -2944,15 +2943,5 @@ class ScopeApi:
         try:
             subprocess.Popen(argv + [str(target)])
             return True
-        except Exception:
-            return False
-
-    def notify_config_changed(self, path: str) -> bool:
-        target = Path(path).expanduser().resolve()
-        if notify_project_config_changed is None:
-            return False
-        try:
-            result = notify_project_config_changed(target, dry_run=False)
-            return bool(result.get("ok"))
         except Exception:
             return False

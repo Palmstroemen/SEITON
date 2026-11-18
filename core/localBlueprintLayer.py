@@ -267,21 +267,6 @@ class BirthClinic:
         
         return current
     
-    def _copy_template(self, source: Path, target: Path):
-        """Copy template directory with ALL contents."""
-        if source.is_dir():
-            shutil.copytree(
-                source, 
-                target, 
-                dirs_exist_ok=True,
-                symlinks=True,
-                ignore=None
-            )
-            shutil.copystat(source, target)
-        else:
-            shutil.copy2(source, target)
-
-
 class Blueprint(Operations):
 
     def __init__(self, project_root: Optional[Path] = None):

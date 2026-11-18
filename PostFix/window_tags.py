@@ -6,11 +6,6 @@ from core.desk_service import DeskService
 from core.brand import META_DIR
 
 try:
-    from core.project import notify_config_changed
-except Exception:
-    notify_config_changed = None
-
-try:
     from .tag_registry import (
         find_vault_root,
         parse_scope_tags,
@@ -141,15 +136,6 @@ class WindowTagsMixin:
         merged = self._scope_tags + missing
         if self._write_scope_tags(self._scope_tags_path, merged):
             self._scope_tags = merged
-            self._propagate_scope_tags_update()
-
-    def _propagate_scope_tags_update(self):
-        if notify_config_changed is None or not self._scope_tags_path:
-            return
-        try:
-            notify_config_changed(self._scope_tags_path, dry_run=False)
-        except Exception:
-            pass
 
     def _refresh_tag_ui(self):
         visible_tags = list(self._doc_tags)
