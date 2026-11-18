@@ -91,10 +91,10 @@ def test_lesson_11_has_a_company_whose_rights_are_as_the_exercises_say(made):
     from core.acl import ACLPolicy
 
     for lesson, sheet, company, work, secret, finance, info in (
-            ("DE/Lektion11", "Übungen zu Zugriffsrechten.md", "Musterfirma", "/07_Arbeit/", "/07_Arbeit/Vertraulich/",
-             "/04_Finanz/", "/01_Info/"),
-            ("EN/Lesson11", "Access rights exercises.md", "Sample Company", "/07_Work/", "/07_Work/Confidential/",
-             "/04_Finance/", "/01_Info/")):
+            ("DE/Lektion11", "Übungen zu Zugriffsrechten.md", "Musterfirma", "/7_Arbeit/", "/7_Arbeit/Vertraulich/",
+             "/4_Finanz/", "/1_Info/"),
+            ("EN/Lesson11", "Access rights exercises.md", "Sample Company", "/7_Arbeit/", "/7_Arbeit/Confidential/",
+             "/4_Finanz/", "/1_Info/")):
         assert (made / lesson / sheet).is_file()
         root = made / lesson / company
         for folder in (work, secret, finance, info):
@@ -108,3 +108,8 @@ def test_lesson_11_has_a_company_whose_rights_are_as_the_exercises_say(made):
         assert can("mia novak", info, "read") and not can("mia novak", work, "read")
         changers = [p for p in policy.users if can(p, f"/{META_DIR}/ACLs.md", "change")]
         assert changers == []  # nobody yet: the learner writes themselves in as admin
+        # The company's folders are the template's ("docs/Prüfung 2026-11-18.md", L1): else Scope
+        # showed pale suggestions beside them under nearly the same names.
+        standard = {p.name for p in (Path(__file__).resolve().parents[2] / "templates" / "Standard").iterdir()}
+        own = {p.name for p in root.iterdir() if p.is_dir() and p.name != META_DIR}
+        assert own <= standard, own - standard

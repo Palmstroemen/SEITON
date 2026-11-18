@@ -1,4 +1,4 @@
-Dank der Berechtigungen sieht deine Finanzabteilung also nur die /04_Finanz/-Ordner mit allem, was darin liegt. Wäre es nicht schön, wenn auch du einen gebündelten Blick auf deine Finanzen hättest? Oder auf deine rechtlichen Angelegenheiten? Auf deine Entwicklung oder deine Kommunikation?
+Dank der Berechtigungen sieht deine Finanzabteilung also nur die /4_Finanz/-Ordner mit allem, was darin liegt. Wäre es nicht schön, wenn auch du einen gebündelten Blick auf deine Finanzen hättest? Oder auf deine rechtlichen Angelegenheiten? Auf deine Entwicklung oder deine Kommunikation?
 
 Du darfst vielleicht alle deine Daten sehen, willst dich aber auf einen bestimmten Teil davon konzentrieren. Dafür gibt es Filter. Bau sie dir ganz einfach selbst! Bau verschiedene Filter für verschiedene Projekte, oder nutze manche Filter für alle.
 

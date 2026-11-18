@@ -8,6 +8,6 @@ Select this folder. At the top right of the file area, the **P** button lights u
 
 Now you should see "standard folders" inside your vacation folder – similar to "Music" or "Videos" in old operating systems. You have turned an ordinary folder into a project folder with a predefined set of standard folders.
 
-Now try again to sort your files into these folders. If you wonder where your photos belong: think of your vacation in a more abstract way. What are your photos if not the **documentation** of what you experienced? So they belong in /08_Documentation/.
+Now try again to sort your files into these folders. If you wonder where your photos belong: think of your vacation in a more abstract way. What are your photos if not the **documentation** of what you experienced? So they belong in /9_Dokumentation/.
 
 After you're done, proceed to [the next lesson](<../Lesson06/Readme.md>).

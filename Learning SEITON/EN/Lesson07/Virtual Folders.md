@@ -21,7 +21,7 @@ Now that you know the difference, let's look inside the two folders. Start with 
 
 Now look at the left file browser. It looks almost the same, with one difference: **Do you see the standard folders on top?** In the right file browser they don't exist yet. They are only virtually there – pale, as suggestions, unborn folders.
 
-Now, in the left file browser, drag a file into one of these suggested folders. Maybe an invoice into /04_Finance/. **It's a kind of magic!**
+Now, in the left file browser, drag a file into one of these suggested folders. Maybe an invoice into /4_Finanz/. **It's a kind of magic!**
 All of a sudden, this folder is real. It's not pale anymore. It came to life. Look at the right side! Your new folder is there, with the file inside.
 ##### Your advantage:
 * You didn't have to create a single folder by hand,

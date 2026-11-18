@@ -3,7 +3,7 @@ Now that you understand the principle of **suggested standard folders**, let's a
 So you create a project named "*Flux Capacitor*". **[▶ Open the exercise](<seiton:open?scope=.>)**
 As your startup grows, your standard folders fill up, and you'd like to organize things in more detail inside them. Maybe you want to separate internal and external communication, or income and expenses.
 
-Open one of your suggested folders, say /03_Communication/. You will see that there are **more standard folders** inside (/internal/ and /external/), and in other folders even deeper ones. A whole folder structure is at your disposal: a **virtual structure of standard folders** that you can use for each of your projects, but don't have to.
+Open one of your suggested folders, say /3_Kommunikation/. You will see that there are **more standard folders** inside (from /31_Intern/ to /37_Öffentlichkeit/), and in other folders even deeper ones. A whole folder structure is at your disposal: a **virtual structure of standard folders** that you can use for each of your projects, but don't have to.
 
 We call such a deep structure of standard folders a *template*. What you have just seen is our **Standard template**.
 

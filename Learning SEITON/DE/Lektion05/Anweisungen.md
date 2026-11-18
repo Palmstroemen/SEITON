@@ -8,7 +8,7 @@ Wähle diesen Ordner aus. Rechts oben im Dateibereich leuchtet jetzt der Knopf *
 
 Jetzt solltest du in deinem Urlaubsordner „Standardordner" sehen – ähnlich wie „Musik" oder „Videos" in alten Betriebssystemen. Du hast einen gewöhnlichen Ordner in einen Projektordner mit einem vordefinierten Satz an Standardordnern verwandelt.
 
-Versuche jetzt noch einmal, deine Dateien in diese Ordner zu sortieren. Wenn du dich fragst, wohin deine Fotos gehören: Denk etwas abstrakter an deinen Urlaub. Was sind deine Fotos anderes als die **Dokumentation** dessen, was du erlebt hast? Sie gehören also nach /08_Dokumentation/.
+Versuche jetzt noch einmal, deine Dateien in diese Ordner zu sortieren. Wenn du dich fragst, wohin deine Fotos gehören: Denk etwas abstrakter an deinen Urlaub. Was sind deine Fotos anderes als die **Dokumentation** dessen, was du erlebt hast? Sie gehören also nach /9_Dokumentation/.
 
 Wenn du fertig bist, geh weiter [zur nächsten Lektion](<../Lektion06/Lies mich.md>).
 

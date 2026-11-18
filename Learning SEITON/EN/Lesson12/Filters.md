@@ -1,4 +1,4 @@
-Thanks to permissions, your finance department only sees the /04_Finance/ folders with everything inside them. Wouldn't it be nice if you, too, had a focused view of your finances? Or of your legal matters? Of your development or your communication?
+Thanks to permissions, your finance department only sees the /4_Finanz/ folders with everything inside them. Wouldn't it be nice if you, too, had a focused view of your finances? Or of your legal matters? Of your development or your communication?
 
 You might be allowed to see all your data, but you want to focus on a specific part of it. That's what filters are for. Build them yourself, easily! Build different filters for different projects, or use some filters for all of them.
 

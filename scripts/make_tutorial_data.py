@@ -377,19 +377,19 @@ TAGS = {
 ACLS = {
     "de": ("# Permissions\n\n"
            f"## Admin\n- /*: read, write, execute, delete\n- /{META_DIR}/ACLs.md: read, write, change\n\n"
-           "## Geschäftsleitung\n- /*: read\n- /07_Arbeit/Vertraulich/: read, write\n\n"
-           "## Buchhaltung\n- /01_Info/: read\n- /04_Finanz/: read, write\n- /05_Rechtliches/: read\n\n"
-           "## Team\n- /01_Info/: read\n- /07_Arbeit/: read, write\n- /07_Arbeit/Vertraulich/: none\n"
-           "- /08_Dokumentation/: read\n\n"
-           "## Gast\n- /01_Info/: read\n\n"
+           "## Geschäftsleitung\n- /*: read\n- /7_Arbeit/Vertraulich/: read, write\n\n"
+           "## Buchhaltung\n- /1_Info/: read\n- /4_Finanz/: read, write\n- /5_Recht/: read\n\n"
+           "## Team\n- /1_Info/: read\n- /7_Arbeit/: read, write\n- /7_Arbeit/Vertraulich/: none\n"
+           "- /9_Dokumentation/: read\n\n"
+           "## Gast\n- /1_Info/: read\n\n"
            "# Users\nEva Muster: Geschäftsleitung\nAnna Huber: Buchhaltung\nKarl Berger: Team\nMia Novak: Gast\n"),
     "en": ("# Permissions\n\n"
            f"## Admin\n- /*: read, write, execute, delete\n- /{META_DIR}/ACLs.md: read, write, change\n\n"
-           "## Management\n- /*: read\n- /07_Work/Confidential/: read, write\n\n"
-           "## Accounting\n- /01_Info/: read\n- /04_Finance/: read, write\n- /05_Legal/: read\n\n"
-           "## Team\n- /01_Info/: read\n- /07_Work/: read, write\n- /07_Work/Confidential/: none\n"
-           "- /08_Documentation/: read\n\n"
-           "## Guest\n- /01_Info/: read\n\n"
+           "## Management\n- /*: read\n- /7_Arbeit/Confidential/: read, write\n\n"
+           "## Accounting\n- /1_Info/: read\n- /4_Finanz/: read, write\n- /5_Recht/: read\n\n"
+           "## Team\n- /1_Info/: read\n- /7_Arbeit/: read, write\n- /7_Arbeit/Confidential/: none\n"
+           "- /9_Dokumentation/: read\n\n"
+           "## Guest\n- /1_Info/: read\n\n"
            "# Users\nEva Muster: Management\nAnna Huber: Accounting\nKarl Berger: Team\nMia Novak: Guest\n"),
 }
 
@@ -402,8 +402,8 @@ COMPANY = {
          f"einzigen Notiz: *{META_DIR}/ACLs.md*.\n\n"
          "## 1. Wer darf hier hinein?\n"
          f"Öffne die Musterfirma in Scope: **[▶ Musterfirma öffnen](<{URL_SCHEME}:open?scope=Musterfirma>)**. Links unter **Zugriff** siehst du, wer auf den angezeigten Ordner "
-         "zugreifen darf – Gruppen und Menschen, mit kleinen Pfeilen: ◂ lesen, ▸ schreiben. Geh in *04_Finanz*: "
-         "Jetzt steht dort die Buchhaltung. Geh in *07_Arbeit/Vertraulich*: Hier darf das Team nicht hinein, "
+         "zugreifen darf – Gruppen und Menschen, mit kleinen Pfeilen: ◂ lesen, ▸ schreiben. Geh in *4_Finanz*: "
+         "Jetzt steht dort die Buchhaltung. Geh in *7_Arbeit/Vertraulich*: Hier darf das Team nicht hinein, "
          "nur die Geschäftsleitung.\n"
          "Scope sagt dir vielleicht: „Du bist in diesem Projekt nicht eingetragen. Wer bist du?\" – das lässt "
          "du für den Moment; in Übung 4 trägst du dich selbst ein.\n\n"
@@ -412,14 +412,14 @@ COMPANY = {
          "zeigt wieder alles.\n\n"
          "## 3. Eine einzige Zeile\n"
          f"Öffne *{META_DIR}/ACLs.md*. *{META_DIR}* ist ein versteckter Ordner – in Scope zeigst du ihn mit ⚙ → Scope → "
-         "Versteckte Ordner. Unter **## Gast** steht `- /01_Info/: read`. Diese eine Zeile sagt: Gäste dürfen "
-         "/01_Info/ lesen – und sonst nichts.\n\n"
+         "Versteckte Ordner. Unter **## Gast** steht `- /1_Info/: read`. Diese eine Zeile sagt: Gäste dürfen "
+         "/1_Info/ lesen – und sonst nichts.\n\n"
          "## 4. Selbst Admin werden (für Fortgeschrittene)\n"
          "Rechte ändern darf nur, wer Admin ist – und in der Musterfirma ist das noch niemand. Schreib in der "
          "ACLs.md unter **# Users** eine neue Zeile: deinen Benutzernamen auf diesem Computer (so heißt dein "
          "persönlicher Ordner unter /home), einen Doppelpunkt und *Admin*, zum Beispiel `maria: Admin`.\n"
          "Zurück in Scope änderst du jetzt mit einem **Rechtsklick** auf eine Gruppe ihre Rechte für den "
-         "angezeigten Ordner. Gib zum Beispiel dem Team in *04_Finanz* Leserechte. Schau danach in die "
+         "angezeigten Ordner. Gib zum Beispiel dem Team in *4_Finanz* Leserechte. Schau danach in die "
          f"ACLs.md: Genau eine Zeile ist dazugekommen. Die vorige Fassung bewahrt {NAME} in "
          f"*{META_DIR}/ACLs-history* auf.\n\n"
          "## 5. Eine neue Kollegin\n"
@@ -431,32 +431,32 @@ COMPANY = {
          "[Zurück zur Lektion](<Zugriffsrechte.md>)\n"),
         _project("Musterfirma", "#4c72d9"),
         (f"Musterfirma/{META_DIR}/ACLs.md", "note", ACLS["de"]),
-        ("Musterfirma/00_Admin/Firmenbuchauszug.pdf", "pdf",
+        ("Musterfirma/0_Admin/Firmenbuchauszug.pdf", "pdf",
          ("Firmenbuch", "Auszug FN 512344 k", ["Musterfirma GmbH, Hauptstraße 1, 1010 Wien",
                                                  "Geschäftsführerin: Eva Muster"], None)),
-        ("Musterfirma/01_Info/Willkommen im Team.md", "note",
+        ("Musterfirma/1_Info/Willkommen im Team.md", "note",
          "# Willkommen im Team!\n\nSchön, dass du da bist. Hier findest du alles für deine ersten Tage: "
          "Schlüssel bei Anna, WLAN-Passwort am Empfang, Mittagessen meistens um 12.\n"),
-        ("Musterfirma/02_Team/Mitarbeiter/Anna Huber.md", "note",
+        ("Musterfirma/2_Team/22_Mitarbeiter/Anna Huber.md", "note",
          "# Anna Huber\n\nBuchhaltung, seit 2019. Durchwahl 12.\n"),
-        ("Musterfirma/02_Team/Mitarbeiter/Karl Berger.md", "note",
+        ("Musterfirma/2_Team/22_Mitarbeiter/Karl Berger.md", "note",
          "# Karl Berger\n\nEntwicklung, seit 2022. Durchwahl 15.\n"),
-        ("Musterfirma/04_Finanz/Ausgaben/Rechnung Büromaterial.pdf", "pdf",
+        ("Musterfirma/4_Finanz/44_Rechnungen/Eingang/Rechnung Büromaterial.pdf", "pdf",
          ("Papier & Co", "Rechnung Nr. 7781", ["Lieferung an Musterfirma GmbH, 3. März 2026"],
           [("Druckerpapier, 10 Packungen", "54,90"), ("Ordner, 20 Stück", "39,80"), ("Kugelschreiber, 50 Stück", "24,50")])),
-        ("Musterfirma/04_Finanz/Einnahmen/Rechnung an Bäckerei Sonne.pdf", "pdf",
+        ("Musterfirma/4_Finanz/44_Rechnungen/Ausgang/Rechnung an Bäckerei Sonne.pdf", "pdf",
          ("Musterfirma GmbH", "Rechnung Nr. 2026-031", ["An: Bäckerei Sonne, Neubaugasse 7, 1070 Wien"],
           [("Neue Website, Pauschale", "2.400,00"), ("Hosting 2026", "180,00")])),
-        ("Musterfirma/05_Rechtliches/Mietvertrag Büro.md", "note",
+        ("Musterfirma/5_Recht/Mietvertrag Büro.md", "note",
          "# Mietvertrag Büro\n\nHauptstraße 1, 2. Stock, 140 m². Miete 2.300 € im Monat, "
          "Kündigungsfrist drei Monate.\n"),
-        ("Musterfirma/07_Arbeit/Projektplan Website Bäckerei Sonne.md", "note",
+        ("Musterfirma/7_Arbeit/Projektplan Website Bäckerei Sonne.md", "note",
          "# Projektplan Website Bäckerei Sonne\n\n1. Entwurf bis 15. März\n2. Texte und Fotos bis 31. März\n"
          "3. Online am 15. April\n"),
-        ("Musterfirma/07_Arbeit/Vertraulich/Gehälter 2026.md", "note",
+        ("Musterfirma/7_Arbeit/Vertraulich/Gehälter 2026.md", "note",
          "# Gehälter 2026\n\nNur für die Geschäftsleitung.\n\n| Name | Monat (€) |\n| --- | ---: |\n"
          "| Anna Huber | 3.400 |\n| Karl Berger | 3.900 |\n"),
-        ("Musterfirma/08_Dokumentation/Firmenfeier.jpg", "photo", "dinner"),
+        ("Musterfirma/9_Dokumentation/Firmenfeier.jpg", "photo", "dinner"),
     ],
     "en": [
         ("Access rights exercises.md", "note",
@@ -466,8 +466,8 @@ COMPANY = {
          f"single note: *{META_DIR}/ACLs.md*.\n\n"
          "## 1. Who may enter here?\n"
          f"Open the Sample Company in Scope: **[▶ Open the Sample Company](<{URL_SCHEME}:open?scope=Sample Company>)**. On the left, under **Access**, you see who may access the folder "
-         "shown – groups and people, with small arrows: ◂ read, ▸ write. Go into *04_Finance*: now accounting "
-         "is listed there. Go into *07_Work/Confidential*: the team may not enter here, only the management.\n"
+         "shown – groups and people, with small arrows: ◂ read, ▸ write. Go into *4_Finanz*: now accounting "
+         "is listed there. Go into *7_Arbeit/Confidential*: the team may not enter here, only the management.\n"
          "Scope may tell you: \"You are not listed in this project. Who are you?\" – leave that for now; in "
          "exercise 4 you add yourself.\n\n"
          "## 2. Through the eyes of a group\n"
@@ -475,14 +475,14 @@ COMPANY = {
          "everything again.\n\n"
          "## 3. One single line\n"
          f"Open *{META_DIR}/ACLs.md*. *{META_DIR}* is a hidden folder – in Scope you show it with ⚙ → Scope → Hidden "
-         "folders. Under **## Guest** it says `- /01_Info/: read`. This one line says: guests may read "
-         "/01_Info/ – and nothing else.\n\n"
+         "folders. Under **## Guest** it says `- /1_Info/: read`. This one line says: guests may read "
+         "/1_Info/ – and nothing else.\n\n"
          "## 4. Become admin yourself (advanced)\n"
          "Only an admin may change rights – and in the Sample Company nobody is one yet. In ACLs.md, under "
          "**# Users**, write a new line: your user name on this computer (the name of your personal folder "
          "under /home), a colon, and *Admin*, for example `maria: Admin`.\n"
          "Back in Scope, you can now **right-click** a group to change its rights for the folder shown. "
-         "For example, give the team read access in *04_Finance*. Then look into ACLs.md: exactly one line "
+         "For example, give the team read access in *4_Finanz*. Then look into ACLs.md: exactly one line "
          f"has been added. {NAME} keeps the previous version in *{META_DIR}/ACLs-history*.\n\n"
          "## 5. A new colleague\n"
          "At the bottom left you now find **+ Person**. Add Lea Wagner and give her the group Team. "
@@ -493,31 +493,31 @@ COMPANY = {
          "[Back to the lesson](<Access Rights.md>)\n"),
         _project("Sample Company", "#4c72d9"),
         (f"Sample Company/{META_DIR}/ACLs.md", "note", ACLS["en"]),
-        ("Sample Company/00_Admin/Company register extract.pdf", "pdf",
+        ("Sample Company/0_Admin/Company register extract.pdf", "pdf",
          ("Company Register", "Extract FN 512344 k", ["Sample Company Ltd., Main Street 1, Vienna",
                                                        "Managing director: Eva Muster"], None)),
-        ("Sample Company/01_Info/Welcome to the team.md", "note",
+        ("Sample Company/1_Info/Welcome to the team.md", "note",
          "# Welcome to the team!\n\nGood to have you here. Everything for your first days: keys from Anna, "
          "Wi-Fi password at the reception, lunch mostly at noon.\n"),
-        ("Sample Company/02_Team/Staff/Anna Huber.md", "note",
+        ("Sample Company/2_Team/22_Mitarbeiter/Anna Huber.md", "note",
          "# Anna Huber\n\nAccounting, since 2019. Extension 12.\n"),
-        ("Sample Company/02_Team/Staff/Karl Berger.md", "note",
+        ("Sample Company/2_Team/22_Mitarbeiter/Karl Berger.md", "note",
          "# Karl Berger\n\nDevelopment, since 2022. Extension 15.\n"),
-        ("Sample Company/04_Finance/Expenses/Invoice office supplies.pdf", "pdf",
+        ("Sample Company/4_Finanz/44_Rechnungen/Eingang/Invoice office supplies.pdf", "pdf",
          ("Paper & Co", "Invoice no. 7781", ["Delivery to Sample Company Ltd., March 3, 2026"],
           [("Printer paper, 10 packs", "54.90"), ("Binders, 20 pieces", "39.80"), ("Pens, 50 pieces", "24.50")])),
-        ("Sample Company/04_Finance/Income/Invoice to Sunshine Bakery.pdf", "pdf",
+        ("Sample Company/4_Finanz/44_Rechnungen/Ausgang/Invoice to Sunshine Bakery.pdf", "pdf",
          ("Sample Company Ltd.", "Invoice no. 2026-031", ["To: Sunshine Bakery, New Street 7, Vienna"],
           [("New website, flat rate", "2,400.00"), ("Hosting 2026", "180.00")])),
-        ("Sample Company/05_Legal/Office lease.md", "note",
+        ("Sample Company/5_Recht/Office lease.md", "note",
          "# Office lease\n\nMain Street 1, 2nd floor, 140 m². Rent 2,300 € per month, three months' notice.\n"),
-        ("Sample Company/07_Work/Project plan Sunshine Bakery website.md", "note",
+        ("Sample Company/7_Arbeit/Project plan Sunshine Bakery website.md", "note",
          "# Project plan Sunshine Bakery website\n\n1. Design by March 15\n2. Texts and photos by March 31\n"
          "3. Online on April 15\n"),
-        ("Sample Company/07_Work/Confidential/Salaries 2026.md", "note",
+        ("Sample Company/7_Arbeit/Confidential/Salaries 2026.md", "note",
          "# Salaries 2026\n\nManagement only.\n\n| Name | Month (€) |\n| --- | ---: |\n"
          "| Anna Huber | 3,400 |\n| Karl Berger | 3,900 |\n"),
-        ("Sample Company/08_Documentation/Company party.jpg", "photo", "dinner"),
+        ("Sample Company/9_Dokumentation/Company party.jpg", "photo", "dinner"),
     ],
 }
 

@@ -6,21 +6,21 @@
 
 ## Geschäftsleitung
 - /*: read
-- /07_Arbeit/Vertraulich/: read, write
+- /7_Arbeit/Vertraulich/: read, write
 
 ## Buchhaltung
-- /01_Info/: read
-- /04_Finanz/: read, write
-- /05_Rechtliches/: read
+- /1_Info/: read
+- /4_Finanz/: read, write
+- /5_Recht/: read
 
 ## Team
-- /01_Info/: read
-- /07_Arbeit/: read, write
-- /07_Arbeit/Vertraulich/: none
-- /08_Dokumentation/: read
+- /1_Info/: read
+- /7_Arbeit/: read, write
+- /7_Arbeit/Vertraulich/: none
+- /9_Dokumentation/: read
 
 ## Gast
-- /01_Info/: read
+- /1_Info/: read
 
 # Users
 Eva Muster: Geschäftsleitung

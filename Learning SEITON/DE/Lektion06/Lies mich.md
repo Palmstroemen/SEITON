@@ -18,12 +18,12 @@ Da ist deine Familie: deine Eltern, dein Partner oder deine Partnerin, deine Kin
 Beachte: Deine Projekte sind keine Standardordner, die wir dir vorgeben. Deine Projekte sind fast ganz normale Ordner, die du selbst anlegst und benennst. Unsere Standardordner stecken aber als Vorschläge in jedem davon.
 
 Prüfe jetzt, ob die Standardordner passen. Vermutlich brauchst du immer:
-* 00_Admin – die Verwaltung
-* 01_Info – gesammelte Informationen
-* 03_Kommunikation
-* 04_Finanz – Geldangelegenheiten
-* 05_Rechtliches – Verträge, Versicherungen, Rechtsfälle
-* 08_Dokumentation – vielleicht die schönsten Fotos und Videos eines Menschen
+* 0_Admin – die Verwaltung
+* 1_Info – gesammelte Informationen
+* 3_Kommunikation
+* 4_Finanz – Geldangelegenheiten
+* 5_Recht – Verträge, Versicherungen, Rechtsfälle
+* 9_Dokumentation – vielleicht die schönsten Fotos und Videos eines Menschen
 
 Warum diese merkwürdigen Nummern vor den Namen?
 1. Damit sich die Ordner in einer Reihenfolge sortieren, die uns gefällt – und nicht einfach nach dem Alphabet.
@@ -37,12 +37,12 @@ Dazu kommen wir später. Und natürlich hindern wir dich nicht daran, dieser Str
 
 ## Als Nächstes: Wohnen
 Du hast hoffentlich eine Wohnung, ein Haus oder sogar mehrere. Je nach Bedarf ordnest du das in verschiedenen Projekten und Unterprojekten. Aber in jedem dieser Projekte hast du vermutlich wieder dieselben Themen:
-* 00_Admin
-* 01_Info
-* 03_Kommunikation
-* 04_Finanz
-* 05_Rechtliches
-* 08_Dokumentation
+* 0_Admin
+* 1_Info
+* 3_Kommunikation
+* 4_Finanz
+* 5_Recht
+* 9_Dokumentation
 
 Auch hier kannst du eigene Ordner ergänzen, wenn dir in der Standardstruktur etwas fehlt.
 
@@ -70,7 +70,7 @@ Sieh sie als Baukasten, den du nach deinen Wünschen formst.
 Und **zwei Dinge** solltest du jetzt schon verstehen:
 
 1. Wir überschwemmen dein System nicht mit Standardordnern, sobald du einen gewöhnlichen Ordner in ein Projekt verwandelst. Unsere Standardordner sind nur ein Vorschlag. Sie sind nicht da, bis du sie benutzt. In dem Moment, in dem du eine Datei in einen davon legst, werden sie wirklich. Sie sind wie ungeborene Ordner, die erst zur Welt kommen, wenn du sie brauchst. Diese Magie zeigen wir dir gleich.
-2. Stell dir vor, was es bedeutet, wenn deine Ordner in allen deinen Projekten gleich heißen: **Die Maschine kann deine Struktur lesen.** So wie der Computer einst wusste, wo deine Musik liegt, weiß er jetzt, wo deine Kommunikation, deine Finanzen, deine Dokumentation zu finden sind. Das ist der **Game Changer**. Das ist riesig. Dein Computer könnte wissen, wohin deine Rechnungen und Belege gehören (nach /04_Finanz/ und dort vielleicht nach /Ausgaben/). Wenn du deine Urlaubsfotos und -videos gleich in /08_Dokumentation/Bilder/ legst, sind sie genau da, wo sie hingehören.
+2. Stell dir vor, was es bedeutet, wenn deine Ordner in allen deinen Projekten gleich heißen: **Die Maschine kann deine Struktur lesen.** So wie der Computer einst wusste, wo deine Musik liegt, weiß er jetzt, wo deine Kommunikation, deine Finanzen, deine Dokumentation zu finden sind. Das ist der **Game Changer**. Das ist riesig. Dein Computer könnte wissen, wohin deine Rechnungen und Belege gehören (nach /4_Finanz/ und dort nach /44_Rechnungen/). Wenn du deine Urlaubsfotos und -videos gleich in /9_Dokumentation/92_Bilder/ legst, sind sie genau da, wo sie hingehören.
    **So organisieren wir Menschen uns.** Es ist DEINE Struktur, nicht die, die irgendwelche Computer-Nerds für dich passend finden. Die sperren deine Daten in Container, weil sie Angst haben, jemand könnte Böses damit anstellen. Aber für DICH wurde es zum Albtraum, Daten von einem Container in den anderen zu bringen: Export, Import, Inkompatibilitäten, dieselbe Struktur wieder und wieder nachbauen – in deinem Mailprogramm, deinen Fotos, deinem CMS, deiner Buchhaltung, deinem SAP ... du kennst das.
 
 Erleben wir die Magie dieses Systems also live.

@@ -21,7 +21,7 @@ Jetzt, wo du den Unterschied kennst, schauen wir uns die beiden Ordner von innen
 
 Jetzt schau in den linken Dateibrowser. Er sieht fast gleich aus, mit einem Unterschied: **Siehst du die Standardordner oben?** Im rechten Dateibrowser gibt es sie noch nicht. Sie sind nur virtuell da – blass, als Vorschläge, ungeborene Ordner.
 
-Zieh jetzt im linken Dateibrowser eine Datei in einen dieser vorgeschlagenen Ordner. Vielleicht eine Rechnung nach /04_Finanz/. **Es ist eine Art Magie!**
+Zieh jetzt im linken Dateibrowser eine Datei in einen dieser vorgeschlagenen Ordner. Vielleicht eine Rechnung nach /4_Finanz/. **Es ist eine Art Magie!**
 Plötzlich ist dieser Ordner echt. Er ist nicht mehr blass. Er ist zur Welt gekommen. Schau auf die rechte Seite! Dein neuer Ordner ist da, mit der Datei darin.
 ##### Dein Vorteil:
 * Du musstest keinen einzigen Ordner von Hand anlegen,

@@ -18,12 +18,12 @@ There is your family: your parents, your partner, your kids ... One main project
 Be aware: your projects are not standard folders that we impose on you. Your projects are almost ordinary folders that you create and name yourself. But our standard folders are inside each of them as suggestions.
 
 Now check whether the standard folders fit. You will probably always need:
-* 00_Admin – administration
-* 01_Info – information you collect
-* 03_Communication
-* 04_Finance – money matters
-* 05_Legal – contracts, insurance, legal cases
-* 08_Documentation – maybe the best photos and videos of a person
+* 0_Admin – administration
+* 1_Info – information you collect
+* 3_Kommunikation
+* 4_Finanz – money matters
+* 5_Recht – contracts, insurance, legal cases
+* 9_Dokumentation – maybe the best photos and videos of a person
 
 Why these odd numbers in front of the names?
 1. So the folders sort in an order we like – not just alphabetically.
@@ -37,12 +37,12 @@ We'll come to this later. And of course we don't keep you from adding ordinary f
 
 ## Next: housing
 You hopefully have an apartment, a house, or even several. Depending on your needs, you organize this in various projects and subprojects. But in each of these projects you will probably have the same topics again:
-* 00_Admin
-* 01_Info
-* 03_Communication
-* 04_Finance
-* 05_Legal
-* 08_Documentation
+* 0_Admin
+* 1_Info
+* 3_Kommunikation
+* 4_Finanz
+* 5_Recht
+* 9_Dokumentation
 
 Here, too, you can add folders of your own if something is missing from the standard structure.
 
@@ -70,7 +70,7 @@ Think of them as a set of building blocks you shape to your liking.
 And there are **two things** you should understand right now:
 
 1. We do not flood your system with standard folders the moment you turn an ordinary folder into a project. Our standard folders are just a suggestion. They are not there until you use them. The moment you drop a file into one of them, it becomes real. They are like unborn folders that only come to life when you need them. We'll show you this magic in a moment.
-2. Imagine what it means when your folders are named the same in all your projects: **the machine can read your structure.** Just like the computer once knew where your music was, it now knows where to find your communication, your finances, your documentation. That's the **game changer**. That's huge. Your computer might know where your invoices and receipts belong (in /04_Finance/ and there maybe in /Expenses/). If you put your vacation photos and videos right into /08_Documentation/Pictures/, they are exactly where they belong.
+2. Imagine what it means when your folders are named the same in all your projects: **the machine can read your structure.** Just like the computer once knew where your music was, it now knows where to find your communication, your finances, your documentation. That's the **game changer**. That's huge. Your computer might know where your invoices and receipts belong (in /4_Finanz/ and there in /44_Rechnungen/). If you put your vacation photos and videos right into /9_Dokumentation/92_Bilder/, they are exactly where they belong.
    **That's how we humans organize ourselves.** It's YOUR structure, not the one some computer nerds consider appropriate for you. They lock your data into containers because they are afraid someone could do bad things with it. But for YOU it became a nightmare to move data from one container to another: export, import, incompatibilities, rebuilding the same structure again and again – in your mail program, your photos, your CMS, your accounting, your SAP ... you name it.
 
 So let's experience the magic of this system live.

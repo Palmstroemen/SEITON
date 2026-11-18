@@ -6,21 +6,21 @@
 
 ## Management
 - /*: read
-- /07_Work/Confidential/: read, write
+- /7_Arbeit/Confidential/: read, write
 
 ## Accounting
-- /01_Info/: read
-- /04_Finance/: read, write
-- /05_Legal/: read
+- /1_Info/: read
+- /4_Finanz/: read, write
+- /5_Recht/: read
 
 ## Team
-- /01_Info/: read
-- /07_Work/: read, write
-- /07_Work/Confidential/: none
-- /08_Documentation/: read
+- /1_Info/: read
+- /7_Arbeit/: read, write
+- /7_Arbeit/Confidential/: none
+- /9_Dokumentation/: read
 
 ## Guest
-- /01_Info/: read
+- /1_Info/: read
 
 # Users
 Eva Muster: Management
