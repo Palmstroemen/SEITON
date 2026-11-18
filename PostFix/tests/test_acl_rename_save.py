@@ -90,3 +90,65 @@ def test_with_enforcement_a_reader_neither_renames_nor_saves(project, window, mo
     w._has_local_changes = True
     assert not w._save_current_document()
     assert "Geändert." not in note.read_text()
+
+
+def test_a_note_that_is_no_utf8_opens_read_only(tmp_path, window, monkeypatch):
+    """"docs/Prüfung 2026-11-18.md", PF6: PostFix crashed on such a note. It opens to be read,
+    and is never written over (its bytes would change)."""
+    monkeypatch.setenv(env_name("POSTFIX_EDITOR"), "line")
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    note = tmp_path / "Alt.md"
+    raw = "# Überschrift\n\nÄltere Notiz.\n".encode("latin-1")
+    note.write_bytes(raw)
+    w = window(note)
+    assert "ltere Notiz" in w.editor.get_markdown()
+    w.editor.load_markdown(w.editor.get_markdown() + "Neu.\n")
+    w._has_local_changes = True
+    assert not w._save_current_document()
+    assert note.read_bytes() == raw
+
+
+def test_tags_reach_the_project_when_the_note_is_left_not_while_typing(tmp_path, window, monkeypatch):
+    """"docs/Prüfung 2026-11-18.md", PF4: a tag half typed ("#dring") stayed in Tags.md."""
+    monkeypatch.setenv(env_name("POSTFIX_EDITOR"), "line")
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    root = tmp_path / "P"
+    (root / META_DIR).mkdir(parents=True)
+    (root / META_DIR / "Project.md").write_text("# Project\n")
+    (root / META_DIR / "Tags.md").write_text("# Tags\n#alt\n")
+    note = root / "Notiz.md"
+    note.write_text("# Notiz\n")
+    w = window(note)
+    for _ in range(5):
+        QApplication.processEvents()
+    w.editor.load_markdown("# Notiz\n\n#dring")
+    w._on_editor_tags_changed(["dring"])
+    w._has_local_changes = True
+    assert w._save_current_document()
+    assert "dring" not in (root / META_DIR / "Tags.md").read_text()
+    w.editor.load_markdown("# Notiz\n\n#dringend\n")
+    w._on_editor_tags_changed(["dringend"])
+    w._has_local_changes = True
+    w.close()
+    tags = (root / META_DIR / "Tags.md").read_text()
+    assert "dringend" in tags and "dring\n" not in tags.replace("dringend", "")
+
+
+def test_printing_leaves_out_the_front_matter(tmp_path, window, monkeypatch):
+    """"docs/Prüfung 2026-11-18.md", PF8."""
+    monkeypatch.setenv(env_name("POSTFIX_EDITOR"), "line")
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    note = tmp_path / "Brief.md"
+    note.write_text("---\nwindow_x_permille: 78\n---\n# Brief\n\nText.\n")
+    html = window(note)._printable_html()
+    assert "Brief" in html and "window_x_permille" not in html
+
+
+def test_tags_in_code_and_numbers_are_no_tags():
+    """"docs/Prüfung 2026-11-18.md", PF9: as in Obsidian."""
+    QApplication.instance() or QApplication([])
+    from PostFix.smart_editor import SmartEditor
+
+    body = ("Echter #tag und #zwei.\n\n```c\n#include <stdio.h>\n```\n\nInline `#pragma once` hier.\n"
+            "Issue #123 und #2026_plan.\n~~~\n#define X\n~~~\n")
+    assert SmartEditor().extract_tags(body) == ["tag", "zwei", "2026_plan"]

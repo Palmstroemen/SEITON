@@ -297,66 +297,71 @@ Dein Name (freiwillig):</translation>
     <name>PostFixWindow</name>
     <message>
         <location filename="../main.py" line="184"/>
-        <location filename="../main.py" line="498"/>
+        <location filename="../main.py" line="505"/>
         <source>PostFix</source>
         <translation>PostFix</translation>
     </message>
     <message>
         <location filename="../main.py" line="273"/>
-        <location filename="../main.py" line="519"/>
-        <location filename="../main.py" line="773"/>
+        <location filename="../main.py" line="526"/>
+        <location filename="../main.py" line="791"/>
         <source>Focus mode</source>
         <translation>Fokusmodus</translation>
     </message>
     <message>
-        <location filename="../main.py" line="517"/>
+        <location filename="../main.py" line="489"/>
+        <source>This note is not UTF-8: it is shown, not saved.</source>
+        <translation>Diese Notiz ist kein UTF-8: Sie wird gezeigt, aber nicht gespeichert.</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="524"/>
         <source>File name</source>
         <translation>Dateiname</translation>
     </message>
     <message>
-        <location filename="../main.py" line="616"/>
+        <location filename="../main.py" line="633"/>
         <source>You may not change this note.</source>
         <translation>Diese Notiz darfst du nicht ändern.</translation>
     </message>
     <message>
-        <location filename="../main.py" line="627"/>
-        <location filename="../main.py" line="642"/>
-        <location filename="../main.py" line="729"/>
+        <location filename="../main.py" line="645"/>
+        <location filename="../main.py" line="660"/>
+        <location filename="../main.py" line="747"/>
         <source>Could not save: %1</source>
         <translation>Konnte nicht speichern: %1</translation>
     </message>
     <message>
-        <location filename="../main.py" line="651"/>
+        <location filename="../main.py" line="669"/>
         <source>The note was moved or deleted elsewhere. Your text is kept in: %1</source>
         <translation>Die Notiz wurde anderswo verschoben oder gelöscht. Dein Text liegt in: %1</translation>
     </message>
     <message>
-        <location filename="../main.py" line="733"/>
+        <location filename="../main.py" line="751"/>
         <source>Changed elsewhere at the same place. Your version is kept beside it: %1</source>
         <translation>An derselben Stelle anderswo geändert. Deine Fassung liegt daneben: %1</translation>
     </message>
     <message>
-        <location filename="../main.py" line="858"/>
+        <location filename="../main.py" line="876"/>
         <source>You may not rename this note.</source>
         <translation>Diese Notiz darfst du nicht umbenennen.</translation>
     </message>
     <message>
-        <location filename="../main.py" line="864"/>
+        <location filename="../main.py" line="882"/>
         <source>Rules are waiting for this name. Choose another one.</source>
         <translation>Für diesen Namen warten schon Regeln. Wähle einen anderen.</translation>
     </message>
     <message>
-        <location filename="../main.py" line="912"/>
+        <location filename="../main.py" line="930"/>
         <source>Style: Auto</source>
         <translation>Stil: Auto</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1117"/>
+        <location filename="../main.py" line="1138"/>
         <source>Not saved</source>
         <translation>Nicht gespeichert</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1118"/>
+        <location filename="../main.py" line="1139"/>
         <source>This note could not be saved, nor a copy beside it. Close anyway and lose the changes?</source>
         <translation>Diese Notiz ließ sich nicht speichern, auch keine Kopie daneben. Trotzdem schließen und die Änderungen verlieren?</translation>
     </message>

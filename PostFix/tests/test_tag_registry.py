@@ -105,3 +105,30 @@ def test_assign_tag_color_splits_group_entry():
     urgent_entry = [entry for entry in tags if entry["name"] == "urgent"][0]
     assert urgent_entry["color"] == "#ffaa00"
     assert urgent_entry["luminanceOffset"] == 20
+
+
+def test_an_app_json_that_cannot_be_read_is_not_written_over(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", PF11: Obsidian's settings were lost."""
+    from PostFix.tag_registry import save_tag_registry
+
+    app = tmp_path / "app.json"
+    app.write_text('{"vimMode": true, "colored-tags-wrangler": ', encoding="utf-8")  # half written
+    assert save_tag_registry(app, {"colored-tags-wrangler": {"tags": []}}) is False
+    assert app.read_text(encoding="utf-8").startswith('{"vimMode": true')
+
+
+def test_saving_keeps_what_others_wrote_meanwhile(tmp_path):
+    import json
+
+    from PostFix.tag_registry import save_tag_registry
+
+    app = tmp_path / "app.json"
+    app.write_text(json.dumps({"vimMode": True, "colored-tags-wrangler": {"tags": []}}), encoding="utf-8")
+    ours = json.loads(app.read_text(encoding="utf-8"))
+    app.write_text(json.dumps({"vimMode": False, "spellcheck": True, "colored-tags-wrangler": {"tags": []}}),
+                   encoding="utf-8")  # Obsidian changed it since PostFix read it
+    ours["colored-tags-wrangler"] = {"tags": [{"name": "dringend", "color": "#ff0000"}]}
+    assert save_tag_registry(app, ours)
+    saved = json.loads(app.read_text(encoding="utf-8"))
+    assert saved["spellcheck"] is True and saved["vimMode"] is False
+    assert saved["colored-tags-wrangler"]["tags"][0]["name"] == "dringend"

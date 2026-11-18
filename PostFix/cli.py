@@ -4,6 +4,7 @@ import argparse
 import signal
 import sys
 from pathlib import Path
+from typing import Optional
 
 # Started as a script (python3 PostFix/cli.py): make the repo root importable for
 # `core`, as Scope/Scope.py does. As a module (python3 -m PostFix.main) it already is.
@@ -119,15 +120,28 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def note_to_open(path: Optional[str]) -> Optional[Path]:
+    """The note a start asks for. One not there yet (postfix neu.md) is made empty in its folder,
+    as an editor does: else the running PostFix refused it, a second one started, and what was
+    typed into its window had no file to go to."""
+    if not path:
+        return None
+    candidate = Path(path).expanduser()
+    if candidate.suffix.lower() != ".md":
+        return None
+    if not candidate.exists() and candidate.parent.is_dir():
+        try:
+            candidate.touch(exist_ok=True)
+        except OSError:
+            pass
+    return candidate
+
+
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
 
-    open_path = None
-    if args.path:
-        candidate = Path(args.path).expanduser()
-        if candidate.suffix.lower() == ".md":
-            open_path = candidate
+    open_path = note_to_open(args.path)
 
     # One PostFix for all notes (single_instance.py): a later start hands its note over and ends
     # - before loading the rest of PostFix, which only the running one needs.

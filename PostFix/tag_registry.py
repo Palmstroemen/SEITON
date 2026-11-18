@@ -70,12 +70,30 @@ def load_tag_registry(path: Path | None) -> dict:
         return {}
 
 
+# What PostFix itself changes in an app.json; everything else in it is the vault's (Obsidian's).
+OWN_KEYS = ("colored-tags-wrangler",)
+
+
 def save_tag_registry(path: Path | None, data: dict) -> bool:
+    """Write PostFix's part of data (OWN_KEYS) into the app.json at path, read anew first, so
+    what others wrote meanwhile stays. An app.json that cannot be read is not written over
+    (it may be half written by Obsidian just now)."""
     if not path:
         return False
+    current: dict = {}
+    if path.exists():
+        try:
+            current = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return False
+        if not isinstance(current, dict):
+            return False
+    for key in OWN_KEYS:
+        if key in data:
+            current[key] = data[key]
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        path.write_text(json.dumps(current, ensure_ascii=False, indent=2), encoding="utf-8")
         return True
     except OSError:
         return False

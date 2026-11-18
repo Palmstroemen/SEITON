@@ -255,17 +255,24 @@ class SmartEditor(QWidget):
             self.source_edit.setPlainText(text)
 
     def extract_tags(self, body: str):
+        """The note's tags as Obsidian counts them: not in code (fenced blocks, `inline`), and
+        not a number alone ("Issue #123")."""
         filtered_lines = []
+        in_fence = False
         for line in (body or "").splitlines():
-            if self._parse_color_definition_line(line):
+            stripped = line.lstrip()
+            if stripped.startswith("```") or stripped.startswith("~~~"):
+                in_fence = not in_fence
                 continue
-            filtered_lines.append(line)
+            if in_fence or self._parse_color_definition_line(line):
+                continue
+            filtered_lines.append(re.sub(r"`[^`]*`", "", line))
         cleaned = self._strip_markdown_link_targets("\n".join(filtered_lines))
         found = re.findall(r"(?<!\w)#([a-zA-Z0-9_/\-äöüÄÖÜß]+)\b", cleaned)
         ordered: list[str] = []
         seen: set[str] = set()
         for tag in found:
-            if tag in seen:
+            if tag in seen or tag.isdigit():
                 continue
             seen.add(tag)
             ordered.append(tag)
@@ -491,6 +498,8 @@ class SmartEditor(QWidget):
         if next_idx is None:
             next_idx = indices[0]
 
+        if self.preview_suspended():
+            return True  # the editor page shows the note: keys stay there, no old overlay
         self._active_focus_idx = max(0, min(next_idx, len(self._focus_spans) - 1))
         self._overlay_top_hint = None
         self._apply_focus_text_from_source()
@@ -523,6 +532,8 @@ class SmartEditor(QWidget):
 
         self._last_tag_jump_token = tag_s
         self._last_tag_jump_idx = next_idx
+        if self.preview_suspended():
+            return True  # the editor page shows the note: keys stay there
         self._hide_focus_overlay()
         self._scroll_preview_to_source_index(next_idx, center=True)
         self.preview.setFocus()

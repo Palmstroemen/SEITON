@@ -177,7 +177,8 @@ def test_typing_into_the_rendering_goes_into_the_note_at_its_end(setup):
     QApplication.sendEvent(w.editor.preview, QKeyEvent(QEvent.KeyPress, Qt.Key_X, Qt.NoModifier, "X"))
     assert editor_host._shared is not None and editor_host._shared.owner() is w.editor
     _ready(app, editor_host._shared)
-    ok = _wait(app, lambda: (folder / "Erste.md").read_text(encoding="utf-8").rstrip("\n").endswith("Zweite.md>)X"))
+    # The note's last line break stays (PF7), so its end is a new line.
+    ok = _wait(app, lambda: (folder / "Erste.md").read_text(encoding="utf-8").rstrip("\n").endswith("Zweite.md>)\nX"))
     assert ok, repr((folder / "Erste.md").read_text(encoding="utf-8")[-60:])
 
 
@@ -247,3 +248,46 @@ def test_closing_without_a_place_to_save_asks_first(setup, monkeypatch):
     finally:
         folder.chmod(0o755)
         (folder / "Erste.md").chmod(0o644)
+
+
+def _type_at_end(app, host, text):
+    _js(app, host, "(h => h.view.dispatch({changes: {from: h.view.state.doc.length, insert: %r},"
+                   " userEvent: 'input'}))(window.host)" % text)
+
+
+def test_a_colour_changed_in_the_sidebar_stays_when_one_types_on(setup):
+    """"docs/Prüfung 2026-11-18.md", PF5: the next keystroke set the old colour back."""
+    app, window, folder, editor_host = setup
+    note = folder / "Farbe.md"
+    note.write_text("# Farbe\n\nrot: #ff0000\n", encoding="utf-8")
+    w = window(note)
+    w._take_editor()
+    host = editor_host.shared()
+    _ready(app, host)
+    w._on_color_definition_change("rot", "#ff0000", "#00ff00")
+    assert "rot: #00ff00" in note.read_text(encoding="utf-8")
+    _wait(app, lambda: False, 0.3)
+    _type_at_end(app, host, "Weiter.\n")
+    assert _wait(app, lambda: "Weiter." in note.read_text(encoding="utf-8"))
+    assert "rot: #00ff00" in note.read_text(encoding="utf-8")
+
+
+def test_typing_goes_on_after_a_click_on_a_tag(setup):
+    app, window, folder, editor_host = setup
+    note = folder / "Tags.md"
+    note.write_text("# Tags\n\nEin #wichtig Satz.\n", encoding="utf-8")
+    w = window(note)
+    w._take_editor()
+    host = editor_host.shared()
+    _ready(app, host)
+    w.activateWindow()
+    host.view.setFocus()
+    app.processEvents()
+    w._on_tag_search("wichtig")
+    app.processEvents()
+    assert host.owner() is w.editor and host.view.isVisible()
+    # Keys keep going to the editor: neither the rendering under it nor the old overlay takes them.
+    assert QApplication.focusWidget() not in (w.editor.preview, w.editor.focus_edit)
+    assert not w.editor.focus_edit.isVisible()
+    _type_at_end(app, host, "Danach.\n")
+    assert _wait(app, lambda: "Danach." in note.read_text(encoding="utf-8"))

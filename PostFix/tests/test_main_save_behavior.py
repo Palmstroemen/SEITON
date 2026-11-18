@@ -55,7 +55,7 @@ def test_save_writes_when_local_changes_present_and_cleans_state(tmp_path: Path)
 
     assert ok is True
     assert note.read_text(encoding="utf-8") == "updated"
-    assert w._scope_sync_calls == 1
+    assert w._scope_sync_calls == 0  # Tags.md follows when the note is left, not while typing (PF4)
     assert w._has_local_changes is False
 
 

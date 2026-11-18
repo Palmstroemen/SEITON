@@ -128,3 +128,15 @@ def test_handing_over_needs_no_qt(tmp_path):
             "print(any(m.startswith('PySide6') for m in sys.modules))")
     out = subprocess.run([sys.executable, "-c", code, str(REPO)], capture_output=True, text=True).stdout.strip()
     assert out == "False"
+
+
+def test_a_note_not_there_yet_is_made_for_the_start(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", PF10: "postfix neu.md" started a second PostFix."""
+    from PostFix.cli import note_to_open
+
+    new = tmp_path / "neu.md"
+    assert note_to_open(str(new)) == new and new.exists() and new.read_text() == ""
+    assert note_to_open(str(tmp_path / "fehlt" / "x.md")) == tmp_path / "fehlt" / "x.md"
+    assert not (tmp_path / "fehlt").exists()  # no folders made
+    assert note_to_open(str(tmp_path / "bild.png")) is None and not (tmp_path / "bild.png").exists()
+    assert note_to_open(None) is None

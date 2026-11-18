@@ -266,7 +266,7 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
         self._last_desk_result = {}
         # Always wire editor->window theme callback; dynamic attribute on SmartEditor.
         self.editor.on_theme_color_changed = self.apply_theme_color_hex
-        self.editor.on_source_text_replaced = self._on_editor_text_changed
+        self.editor.on_source_text_replaced = self._on_source_text_replaced
         self.editor.on_frontmatter_changed = self._on_editor_text_changed
         if hasattr(self.editor, "MODE_FOCUS"):
             self.editor.set_view_mode(self.editor.MODE_FOCUS)
@@ -478,8 +478,15 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
         
         # Connect signals
         self.connect_signals()
+        self._not_utf8 = False
         if open_path and open_path.exists() and hasattr(self.editor, "load_markdown"):
-            self._disk_text = open_path.read_text(encoding="utf-8")
+            try:
+                self._disk_text = open_path.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                # Shown to be read, never written over: saving would change its bytes.
+                self._not_utf8 = True
+                self._disk_text = open_path.read_text(encoding="utf-8", errors="replace")
+                QTimer.singleShot(0, lambda: self._notify(self.tr("This note is not UTF-8: it is shown, not saved.")))
             self.editor.load_markdown(self._disk_text)
             if hasattr(self.editor, "set_path"):
                 self.editor.set_path(open_path)
@@ -591,6 +598,14 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
         self._has_local_changes = True
         self._schedule_save()
 
+    def _on_source_text_replaced(self):
+        """The text was changed on the Python side (a colour chip, the title, a tag): as typed,
+        and into the editor page when it shows this note - else its next report set it back."""
+        self._on_editor_text_changed()
+        host = editor_host._shared
+        if host is not None and host.owner() is self.editor:
+            host.set_doc(self._editor_key(), self.editor.body())
+
     def _set_clean_document_state(self):
         self._has_local_changes = False
 
@@ -606,6 +621,8 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
         self._reconcile_with_disk()
         if not self._has_local_changes:
             return False  # merged away
+        if getattr(self, "_not_utf8", False):
+            return False  # read only (see __init__); closing keeps the changes beside it
         if not Path(path).exists():
             # Moved (filing by date, Scope) or deleted elsewhere: not written back to where it
             # was, but what was typed is kept beside it.
@@ -615,8 +632,9 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
             # Security: with enforcement on, a note one may only read is not written.
             self._notify(self.tr("You may not change this note."))
             return False
-        # Finalize scoped tag list using stable editor state at save time.
-        self._sync_scope_tags_from_document()
+        # The project's tag list (Tags.md) is not touched here: saving runs while one types, and
+        # a tag half typed would stay there. It follows when the note is left (closeEvent,
+        # open_note_in_place) or after a pause (_scope_sync_timer).
         try:
             content = self.editor.get_markdown()
             path.write_text(content, encoding="utf-8")
@@ -1075,6 +1093,7 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
     def open_note_in_place(self, path: Path):
         """Another note in this window (a link followed), saved and watched as the first."""
         self._save_current_document()
+        self._sync_scope_tags_from_document()  # the note is left: its tags are final
         path = Path(path)
         try:
             text = path.read_text(encoding="utf-8")
@@ -1101,6 +1120,8 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
 
     def closeEvent(self, event):
         self._save_current_document()
+        self._scope_sync_timer.stop()
+        self._sync_scope_tags_from_document()  # the note is left: its tags are final
         if self._has_local_changes and getattr(self.editor, "current_path", None):
             # Not saved (no write right, the folder gone): beside it, or ask before it is lost.
             if self._keep_beside(Path(self.editor.current_path)) is None and not self._may_close_unsaved():
@@ -1119,9 +1140,13 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
             QMessageBox.Close | QMessageBox.Cancel, QMessageBox.Cancel)
         return answer == QMessageBox.Close
 
+    def _printable_html(self) -> str:
+        """The note as printed: its body, without the front matter (window place, colour)."""
+        body = self.editor.body() if hasattr(self.editor, "body") else self.editor.get_markdown()
+        return render_markdown(body)
+
     def print_to_printer(self, printer_name: str):
-        md_text = self.editor.get_markdown()
-        html = render_markdown(md_text)
+        html = self._printable_html()
         doc = QTextDocument()
         if getattr(self.editor, "current_path", None):
             base_dir = Path(self.editor.current_path).parent
