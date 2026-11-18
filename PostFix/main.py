@@ -42,7 +42,7 @@ except ImportError:
 from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout,
                                QHBoxLayout, QGridLayout, QPushButton, QLabel,
                                QSpacerItem, QSizePolicy, QFrame,
-                               QGraphicsOpacityEffect, QStackedLayout, QLineEdit, QComboBox, QApplication, QMenu)
+                               QGraphicsOpacityEffect, QStackedLayout, QLineEdit, QComboBox, QApplication, QMenu, QMessageBox)
 from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QPoint, QEvent, QRect, QTimer, QTranslator, QUrl, QLibraryInfo, QFileSystemWatcher, QObject, Slot
 from PySide6.QtGui import QColor, QDesktopServices, QGuiApplication, QTextDocument, QCursor
 from PySide6.QtPrintSupport import QPrinter
@@ -601,8 +601,13 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
             return False
         # Never write over a change from outside: merge it in first (or keep both on a conflict).
         self._reconcile_with_disk()
-        if not self._has_local_changes or not Path(path).exists():
-            return False  # merged away, or the note was deleted elsewhere: not written back
+        if not self._has_local_changes:
+            return False  # merged away
+        if not Path(path).exists():
+            # Moved (filing by date, Scope) or deleted elsewhere: not written back to where it
+            # was, but what was typed is kept beside it.
+            self._keep_beside(Path(path))
+            return False
         # Finalize scoped tag list using stable editor state at save time.
         self._sync_scope_tags_from_document()
         try:
@@ -612,7 +617,40 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
             self._set_clean_document_state()
             return True
         except OSError:
+            self._notify(self.tr("Could not save: %1").replace("%1", Path(path).name))
             return False
+
+    def _keep_beside(self, gone: Path):
+        """The text that cannot go into its note: into a copy beside it (never over a file),
+        and the window goes on with the copy. The copy, or None when there is no place."""
+        copy = conflict_copy_path(gone)
+        text = self.editor.get_markdown()
+        try:
+            if not copy.parent.is_dir():
+                raise OSError("the folder is gone")
+            copy.write_text(text, encoding="utf-8")
+        except OSError:
+            self._notify(self.tr("Could not save: %1").replace("%1", gone.name))
+            return None
+        old_key = self._editor_key()
+        self.editor.set_path(copy)
+        self._disk_text = text
+        self._set_clean_document_state()
+        self._reattach_editor(old_key)
+        self._watch_current_file()
+        self._sync_filename_field_from_path(select_all=False)
+        self._notify(self.tr("The note was moved or deleted elsewhere. Your text is kept in: %1").replace("%1", copy.name))
+        return copy
+
+    def _reattach_editor(self, old_key: str):
+        """The note has a new path (renamed, kept beside): the editor shows it under its new
+        key, else what is typed next is reported for the old one, and lost."""
+        host = editor_host._shared
+        if host is None or host.owner() is not self.editor:
+            return
+        host.drop(old_key)
+        host.attach(self.editor, self._editor_key(), self.editor.body(), Path(self.editor.current_path).parent,
+                    on_leave=self._editor_left, background=self.editor.current_bg)
 
     def _watch_current_file(self):
         """Watch the open note (and its folder: many programs replace a file instead of
@@ -678,7 +716,9 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
             try:
                 copy.write_text(mine, encoding="utf-8")
             except OSError:
-                pass
+                # No place for the own version: it stays in the editor, not thrown away.
+                self._notify(self.tr("Could not save: %1").replace("%1", Path(path).name))
+                return True
             self._load_from_disk(disk)
             self._set_clean_document_state()
             self._notify(self.tr("Changed elsewhere at the same place. Your version is kept beside it: %1").replace("%1", copy.name))
@@ -803,12 +843,14 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
         if candidate.exists():
             self._sync_filename_field_from_path(select_all=True)
             return
+        old_key = self._editor_key()
         try:
             original.rename(candidate)
         except OSError:
             self._sync_filename_field_from_path(select_all=True)
             return
         self.editor.set_path(candidate)
+        self._reattach_editor(old_key)
         self._watch_current_file()
         if hasattr(self.editor, "sync_title_from_filename"):
             self.editor.sync_title_from_filename(new_base)
@@ -1032,11 +1074,23 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
 
     def closeEvent(self, event):
         self._save_current_document()
+        if self._has_local_changes and getattr(self.editor, "current_path", None):
+            # Not saved (no write right, the folder gone): beside it, or ask before it is lost.
+            if self._keep_beside(Path(self.editor.current_path)) is None and not self._may_close_unsaved():
+                event.ignore()
+                return
         host = editor_host._shared
         if host is not None:
             host.release(self.editor)  # the editor lives on for the other notes
             host.drop(self._editor_key())
         super().closeEvent(event)
+
+    def _may_close_unsaved(self) -> bool:
+        answer = QMessageBox.question(
+            self, self.tr("Not saved"),
+            self.tr("This note could not be saved, nor a copy beside it. Close anyway and lose the changes?"),
+            QMessageBox.Close | QMessageBox.Cancel, QMessageBox.Cancel)
+        return answer == QMessageBox.Close
 
     def print_to_printer(self, printer_name: str):
         md_text = self.editor.get_markdown()

@@ -241,12 +241,12 @@
 <context>
     <name>ExerciseLauncher</name>
     <message>
-        <location filename="../exercise_links.py" line="219"/>
+        <location filename="../exercise_links.py" line="227"/>
         <source>Finished</source>
         <translation>Fertig</translation>
     </message>
     <message>
-        <location filename="../exercise_links.py" line="220"/>
+        <location filename="../exercise_links.py" line="228"/>
         <source>Done with the tutorial? Your notes and comments are collected and the computer is made ready for the next tester.
 
 Your name (optional):</source>
@@ -296,39 +296,61 @@ Dein Name (freiwillig):</translation>
 <context>
     <name>PostFixWindow</name>
     <message>
-        <location filename="../main.py" line="109"/>
-        <location filename="../main.py" line="415"/>
+        <location filename="../main.py" line="181"/>
+        <location filename="../main.py" line="495"/>
         <source>PostFix</source>
         <translation>PostFix</translation>
     </message>
     <message>
-        <location filename="../main.py" line="190"/>
-        <location filename="../main.py" line="436"/>
-        <location filename="../main.py" line="641"/>
+        <location filename="../main.py" line="270"/>
+        <location filename="../main.py" line="516"/>
+        <location filename="../main.py" line="764"/>
         <source>Focus mode</source>
         <translation>Fokusmodus</translation>
     </message>
     <message>
-        <location filename="../main.py" line="434"/>
+        <location filename="../main.py" line="514"/>
         <source>File name</source>
         <translation>Dateiname</translation>
     </message>
     <message>
-        <location filename="../main.py" line="601"/>
+        <location filename="../main.py" line="620"/>
+        <location filename="../main.py" line="633"/>
+        <location filename="../main.py" line="720"/>
+        <source>Could not save: %1</source>
+        <translation>Konnte nicht speichern: %1</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="642"/>
+        <source>The note was moved or deleted elsewhere. Your text is kept in: %1</source>
+        <translation>Die Notiz wurde anderswo verschoben oder gelöscht. Dein Text liegt in: %1</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="724"/>
         <source>Changed elsewhere at the same place. Your version is kept beside it: %1</source>
         <translation>An derselben Stelle anderswo geändert. Deine Fassung liegt daneben: %1</translation>
     </message>
     <message>
-        <location filename="../main.py" line="760"/>
+        <location filename="../main.py" line="885"/>
         <source>Style: Auto</source>
         <translation>Stil: Auto</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1090"/>
+        <source>Not saved</source>
+        <translation>Nicht gespeichert</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1091"/>
+        <source>This note could not be saved, nor a copy beside it. Close anyway and lose the changes?</source>
+        <translation>Diese Notiz ließ sich nicht speichern, auch keine Kopie daneben. Trotzdem schließen und die Änderungen verlieren?</translation>
     </message>
 </context>
 <context>
     <name>SmartEditor</name>
     <message>
-        <location filename="../smart_editor.py" line="66"/>
-        <location filename="../smart_editor.py" line="122"/>
+        <location filename="../smart_editor.py" line="77"/>
+        <location filename="../smart_editor.py" line="134"/>
         <source>Write markdown here...</source>
         <translation>Markdown hier schreiben...</translation>
     </message>

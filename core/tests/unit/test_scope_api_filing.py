@@ -137,3 +137,21 @@ def test_the_quick_listing_shows_the_same_virtual_folders(few):
     inside = [e["name"] for e in api.list_entries_quick(str(few / "2024" / "03"))]
 
     assert quick == ["2024", "2025", "ohne Datum.pdf"] and inside == ["b 2024-03-01.pdf"]
+
+
+def test_a_new_note_in_a_sorted_folder_opens_where_it_is_filed(project):
+    """Filed at once, not on the next look: an editor opened on the old place would lose
+    everything typed into it ("docs/Prüfung 2026-11-18.md", X2)."""
+    folder = project / "Rechnungen"
+    (folder / META_DIR / "Sort.md").write_text(RULE.replace("DateSource: filename", "DateSource: modified"))
+    _put(folder, "a.pdf", "b.pdf", "c.pdf")  # more than NewLevelFrom: the year folder is real
+    api = ScopeApi(str(project))
+    api.catch_up_filing(str(folder))
+
+    created = Path(api.create_note(str(folder), "Protokoll"))
+
+    assert created.exists() and created.parent != folder
+    assert created.name == "Protokoll.md" and folder in created.parents
+    assert not (folder / "Protokoll.md").exists()
+    api.catch_up_filing(str(folder))
+    assert created.exists()  # filed once, stays there

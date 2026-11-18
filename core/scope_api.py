@@ -2451,6 +2451,12 @@ class ScopeApi:
             target.write_text(f"# {title}\n\n", encoding="utf-8")
         except Exception:
             return None
+        # In a sorted folder it is filed at once: the editor opens it where it stays, not where
+        # the next look at the folder would move it away from under the editor.
+        # Level by level (a year, then its month): followed in the order of the moves.
+        for move in self.catch_up_filing(str(base)).get("moved", []):
+            if Path(move["source"]) == target:
+                target = Path(move["destination"])
         return str(target)
 
     def rename_entry(self, path: str, new_name: str) -> Optional[str]:

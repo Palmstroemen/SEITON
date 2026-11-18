@@ -216,3 +216,34 @@ def test_the_rendering_takes_over_where_the_editor_was_scrolled(setup):
     second._take_editor()  # the editor leaves: the rendering shows the same lines
     line, _offset = first.editor.preview.top_line()
     assert abs(line - host.top_of(first._editor_key())[0]) <= 1
+
+
+def test_typing_after_renaming_the_note_goes_into_the_renamed_file(setup):
+    app, window, folder, editor_host = setup
+    w = window(folder / "Erste.md")
+    w._take_editor()
+    host = editor_host.shared()
+    _ready(app, host)
+    w.file_name_edit.setText("Umbenannt")
+    w.on_filename_edit_finished()
+    renamed = folder / "Umbenannt.md"
+    assert renamed.exists() and not (folder / "Erste.md").exists()
+    _js(app, host, "(h => h.view.dispatch({changes: {from: h.view.state.doc.length, insert: 'Danach getippt.\\n'},"
+                   " userEvent: 'input'}))(window.host)")
+    assert _wait(app, lambda: "Danach getippt." in renamed.read_text(encoding="utf-8"))
+
+
+def test_closing_without_a_place_to_save_asks_first(setup, monkeypatch):
+    app, window, folder, editor_host = setup
+    w = window(folder / "Erste.md")
+    asked = []
+    monkeypatch.setattr(w, "_may_close_unsaved", lambda: asked.append(True) or False)
+    (folder / "Erste.md").chmod(0o444)
+    folder.chmod(0o555)  # neither the note nor a copy beside it can be written
+    try:
+        w._has_local_changes = True
+        w.close()
+        assert asked and w.isVisible()  # not closed: the text is still there
+    finally:
+        folder.chmod(0o755)
+        (folder / "Erste.md").chmod(0o644)

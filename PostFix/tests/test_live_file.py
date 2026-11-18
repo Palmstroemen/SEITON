@@ -64,12 +64,18 @@ class _Editor:
         self.text = text
         self.loads += 1
 
+    def set_path(self, path: Path):
+        self.current_path = path
+
 
 class _Window:
     _save_current_document = PostFixWindow._save_current_document
     _reconcile_with_disk = PostFixWindow._reconcile_with_disk
     _load_from_disk = PostFixWindow._load_from_disk
     _set_clean_document_state = PostFixWindow._set_clean_document_state
+    _keep_beside = PostFixWindow._keep_beside
+    _reattach_editor = PostFixWindow._reattach_editor
+    _editor_key = PostFixWindow._editor_key
 
     def __init__(self, path: Path):
         text = path.read_text(encoding="utf-8")
@@ -83,6 +89,12 @@ class _Window:
         pass
 
     def _after_reload(self):
+        pass
+
+    def _watch_current_file(self):
+        pass
+
+    def _sync_filename_field_from_path(self, select_all=False):
         pass
 
     def _notify(self, text):
@@ -150,8 +162,43 @@ def test_a_deleted_note_is_not_written_back(tmp_path):
     assert not w._reconcile_with_disk()
     w.editor.text = BASE + "x"
     w._has_local_changes = True
-    w._save_current_document()
+    assert not w._save_current_document()
     assert not note.exists()  # deleted elsewhere (e.g. a tester's reset): stays gone
+    # ... but what was typed is not lost: it lies beside, and the window goes on with it.
+    copy = tmp_path / "Virtuelle Ordner (Konflikt).md"
+    assert copy.read_text(encoding="utf-8") == BASE + "x"
+    assert Path(w.editor.current_path) == copy and not w._has_local_changes and w.notices
+    w.editor.text = BASE + "xy"
+    w._has_local_changes = True
+    assert w._save_current_document()
+    assert copy.read_text(encoding="utf-8") == BASE + "xy"
+    assert sorted(p.name for p in tmp_path.iterdir()) == [copy.name]  # one copy, not one per save
+
+
+def test_a_note_moved_away_keeps_what_was_typed(tmp_path):
+    # Filing by date (or Scope) moved the open note into a year folder.
+    note = _note(tmp_path)
+    w = _Window(note)
+    (tmp_path / "2026").mkdir()
+    note.rename(tmp_path / "2026" / note.name)
+    w.editor.text = BASE + "Neu getippt.\n"
+    w._has_local_changes = True
+    w._save_current_document()
+    assert "Neu getippt." in (tmp_path / "Virtuelle Ordner (Konflikt).md").read_text(encoding="utf-8")
+    assert w.notices
+
+
+def test_a_save_that_fails_is_said(tmp_path):
+    note = _note(tmp_path)
+    w = _Window(note)
+    note.chmod(0o444)
+    try:
+        w.editor.text = BASE + "x"
+        w._has_local_changes = True
+        assert not w._save_current_document()
+        assert w._has_local_changes and w.notices  # still to save, and the user knows
+    finally:
+        note.chmod(0o644)
 
 
 def test_a_real_window_follows_changes_from_outside_live(tmp_path, monkeypatch):
