@@ -76,7 +76,7 @@ def test_the_view_while_it_stands_is_calm(tmp_path, ledger):
     clock.set_project(Path("/p/Küche"), "Oliver", NOW - timedelta(minutes=15))
     clock.stop(NOW)
     view = cw.render(clock, ledger, NOW, language="de")
-    assert view["state"] == "calm" and view["text"] == "Küche · 0:15"
+    assert view["state"] == "calm" and view["text"] == "Küche · 0:15 · gestoppt"
 
 
 def test_without_a_project(tmp_path, ledger):
@@ -214,3 +214,19 @@ def test_standing_no_counter(tmp_path, ledger):
     clock.set_project(Path("/p/Küche"), "Oliver", NOW - timedelta(minutes=15))
     clock.stop(NOW)
     assert "counter" not in cw.render(clock, ledger, NOW, language="de")
+
+
+def test_stopped_by_hand_says_so_a_pause_does_not(tmp_path, ledger):
+    # Z8 (review 2026-11-18): after "Stop" the line looked as in a pause - one forgot it and
+    # worked for hours without counting.
+    clock = _clock(tmp_path, ledger)
+    clock.set_project(Path("/p/Küche"), "Oliver", NOW - timedelta(minutes=20))
+    clock.stop(NOW)
+    view = cw.render(clock, ledger, NOW, language="de")
+    assert view["text"].endswith("· gestoppt") and view["state"] == "calm" and view["clock"] == "stopped"
+    assert "Start" in view["tooltip"]
+    clock = _clock(tmp_path / "b", ledger)
+    clock.set_project(Path("/p/Küche"), "Oliver", NOW - timedelta(minutes=20))
+    clock.tick(NOW, timedelta(minutes=10))  # a pause
+    view = cw.render(clock, ledger, NOW, language="de")
+    assert "gestoppt" not in view["text"] and view["clock"] == "paused"

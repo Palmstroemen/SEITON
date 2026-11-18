@@ -13,9 +13,14 @@ ApplicationWindow {
     visible: true
     property var theme: timeScreen.colorScheme()
     property var nowView: timeScreen.now()
-    property var rows: timeScreen.entries("")
+    // The project Entries and Overview show and Add writes to: the active one preselected, or
+    // any chosen one; choosing moves neither the clock nor the Headline (Design 4.4, 5; Z7).
+    property var projectChoices: timeScreen.projects()
+    property string project: ""   // "" : the active project
+    property var rows: timeScreen.entries(project)
+    property int unreadableRows: timeScreen.unreadable(project)
     property string period: "month"
-    property var overviewView: timeScreen.overview("", period, "")
+    property var overviewView: timeScreen.overview(project, period, "")
     readonly property int baseFont: 13
     color: theme.bg || "#0f1014"
     palette.window: theme.bg || "#0f1014"
@@ -25,10 +30,16 @@ ApplicationWindow {
     palette.button: theme.smallButtonBg || "#2c3040"
     palette.buttonText: theme.smallButtonText || theme.text || "#e6e6e6"
 
+    // "9:30" or "09:30" as the file writes it; empty: without a beginning.
+    function startText(text) {
+        var match = String(text || "").trim().match(/^(\d{1,2}):(\d{2})$/)
+        return match ? ("0" + match[1]).slice(-2) + ":" + match[2] : ""
+    }
     function refresh() {
         nowView = timeScreen.now()
-        rows = timeScreen.entries("")
-        overviewView = timeScreen.overview("", period, "")
+        rows = timeScreen.entries(project)
+        unreadableRows = timeScreen.unreadable(project)
+        overviewView = timeScreen.overview(project, period, "")
     }
     Connections {
         target: timeScreen
@@ -45,12 +56,42 @@ ApplicationWindow {
         wrapMode: Text.WordWrap
     }
 
-    header: TabBar {
-        id: tabs
-        TabButton { objectName: "tabNow"; text: qsTr("Now") }
-        TabButton { objectName: "tabEntries"; text: qsTr("Entries") }
-        TabButton { objectName: "tabOverview"; text: qsTr("Overview") }
-        TabButton { objectName: "tabSettings"; text: qsTr("Settings") }
+    header: ColumnLayout {
+        spacing: 0
+        TabBar {
+            id: tabs
+            Layout.fillWidth: true
+            TabButton { objectName: "tabNow"; text: qsTr("Now") }
+            TabButton { objectName: "tabEntries"; text: qsTr("Entries") }
+            TabButton { objectName: "tabOverview"; text: qsTr("Overview") }
+            TabButton { objectName: "tabSettings"; text: qsTr("Settings") }
+        }
+        RowLayout {  // which project Entries and Overview are about
+            visible: tabs.currentIndex === 1 || tabs.currentIndex === 2
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            Layout.topMargin: 8
+            spacing: 8
+            Label2 { text: qsTr("Project") }
+            ComboBox {
+                objectName: "projectChoice"
+                Layout.preferredWidth: 280
+                textRole: "name"
+                valueRole: "path"
+                model: root.projectChoices
+                onActivated: { root.project = currentIndex === 0 ? "" : currentValue; root.refresh() }
+                // The list anew when it opens (not on every refresh, which would undo the choice).
+                popup.onAboutToShow: {
+                    var kept = root.project
+                    root.projectChoices = timeScreen.projects()
+                    currentIndex = kept === "" ? 0 : Math.max(0, indexOfValue(kept))
+                }
+            }
+            Muted {
+                visible: root.projectChoices.length === 0
+                text: qsTr("No project: open one in the Headline, or work in one first.")
+            }
+        }
     }
 
     StackLayout {
@@ -87,7 +128,8 @@ ApplicationWindow {
                 Button {
                     objectName: "stopButton"
                     text: qsTr("Stop")
-                    enabled: root.nowView.clockRuns && root.nowView.state !== "calm"
+                    // Also in a pause: a lunch break can become "stopped" (Z8).
+                    enabled: root.nowView.clockRuns && root.nowView.clock !== "stopped" && root.nowView.clock !== "stands"
                     onClicked: timeScreen.stop()
                 }
                 Button {
@@ -105,6 +147,7 @@ ApplicationWindow {
             RowLayout {  // Add what was done away from the computer
                 spacing: 6
                 TextField { id: addDay; objectName: "addDay"; text: timeScreen.today(); Layout.preferredWidth: 110 }
+                TextField { id: addStart; objectName: "addStart"; placeholderText: qsTr("From"); Layout.preferredWidth: 70 }
                 TextField { id: addDuration; objectName: "addDuration"; placeholderText: qsTr("1:30"); Layout.preferredWidth: 70 }
                 TextField { id: addNote; objectName: "addNote"; placeholderText: qsTr("What"); Layout.fillWidth: true }
                 Button {
@@ -112,7 +155,9 @@ ApplicationWindow {
                     text: qsTr("Add")
                     onClicked: {
                         var minutes = timeScreen.parseMinutes(addDuration.text)
-                        if (timeScreen.add({ day: addDay.text, start: "", minutes: minutes, note: addNote.text }, "")) {
+                        if (timeScreen.add({ day: addDay.text, start: root.startText(addStart.text), minutes: minutes,
+                                             note: addNote.text }, root.project)) {
+                            addStart.text = ""
                             addDuration.text = ""
                             addNote.text = ""
                         }
@@ -120,6 +165,12 @@ ApplicationWindow {
                 }
             }
             Muted { visible: root.rows.length === 0; text: qsTr("No entries yet.") }
+            Muted {  // rows written by hand that could not be read stay in the file (Z11)
+                objectName: "unreadableRows"
+                visible: root.unreadableRows > 0
+                text: qsTr("%n rows of the time files could not be read; they are not counted and stay as they are.", "", root.unreadableRows)
+                Layout.fillWidth: true
+            }
             ListView {
                 objectName: "entryList"
                 Layout.fillWidth: true
@@ -157,12 +208,12 @@ ApplicationWindow {
                             var changed = Object.assign({}, entry.row)
                             changed.minutes = timeScreen.parseMinutes(editDuration.text)
                             changed.note = editNote.text
-                            if (timeScreen.change(entry.row, changed, "")) entry.editing = false
+                            if (timeScreen.change(entry.row, changed, root.project)) entry.editing = false
                         }
                     }
                     Button {
                         text: qsTr("Delete")
-                        onClicked: timeScreen.remove(entry.row, "")
+                        onClicked: timeScreen.remove(entry.row, root.project)
                     }
                 }
             }
@@ -191,7 +242,12 @@ ApplicationWindow {
             }
             Muted {
                 visible: root.overviewView.conflicts > 0
-                text: qsTr("The cloud left %n conflict copies; they are counted apart.", "", root.overviewView.conflicts)
+                text: qsTr("The cloud left %n conflict copies; they are not counted.", "", root.overviewView.conflicts)
+            }
+            Muted {
+                visible: root.overviewView.unreadable > 0
+                text: qsTr("%n rows of the time files could not be read; they are not counted and stay as they are.", "", root.overviewView.unreadable)
+                Layout.fillWidth: true
             }
             Muted { text: qsTr("By project") }
             Repeater {
@@ -235,6 +291,22 @@ ApplicationWindow {
                     displayText: currentText === "0" ? qsTr("not at all") : qsTr("%1 minutes").arg(currentText)
                     currentIndex: Math.max(0, model.indexOf(String(timeScreen.setting("Time/roundStep"))))
                     onActivated: { timeScreen.setSetting("Time/roundStep", currentText); root.refresh() }
+                }
+                ComboBox {  // up or to the nearest (Design 4.4; Z7)
+                    objectName: "roundMode"
+                    textRole: "label"
+                    valueRole: "value"
+                    model: [{ value: "up", label: qsTr("up") }, { value: "nearest", label: qsTr("to the nearest") }]
+                    Component.onCompleted: currentIndex = indexOfValue(String(timeScreen.setting("Time/roundMode")))
+                    onActivated: { timeScreen.setSetting("Time/roundMode", currentValue); root.refresh() }
+                }
+                ComboBox {  // each stretch, or per day
+                    objectName: "roundPer"
+                    textRole: "label"
+                    valueRole: "value"
+                    model: [{ value: "stretch", label: qsTr("each stretch") }, { value: "day", label: qsTr("per day") }]
+                    Component.onCompleted: currentIndex = indexOfValue(String(timeScreen.setting("Time/roundPer")))
+                    onActivated: { timeScreen.setSetting("Time/roundPer", currentValue); root.refresh() }
                 }
             }
             RowLayout {

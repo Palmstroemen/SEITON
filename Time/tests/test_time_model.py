@@ -10,6 +10,8 @@ from pathlib import Path
 import pytest
 
 from core import clock_sources as cs
+from core import clock_widget as cw
+from core.clock_sources import read_active
 from core import time_log as tl
 from core.brand import META_DIR, env_name
 
@@ -195,3 +197,69 @@ def test_ones_own_rows_need_the_right_to_read_them(firma, monkeypatch):
     (firma["root"] / META_DIR / "ACLs.md").write_text(
         "# Permissions\n\n## Buchhaltung\n- /4_Finanz/: read, write\n\n# Users\nAnna: Buchhaltung\n")
     assert firma["model"].entries() == []
+
+
+# --- review 2026-11-18, package 5 ------------------------------------------------------------
+
+def test_conflict_copies_are_not_counted_but_told(model, world):
+    # Z2: a copy holds nearly all rows of the original - counted, it doubled the time.
+    import shutil
+    for project in (world["kueche"], world["haus"]):
+        original = tl.time_file(project, "Oliver")
+        shutil.copy(original, original.with_name("Oliver (conflicted copy 2026-11-17).md"))
+    view = model.overview(str(world["haus"]), period="month")
+    assert view["total"] == "2:45"  # 0:30 Haus, 1:30 + 0:45 Küche - nothing twice
+    assert view["conflicts"] == 2  # the child's copy too
+
+
+def test_correcting_an_added_row_keeps_it_added(model, world):
+    # Z10: "corrected" is an auto row changed by hand; an added or manual one stays what it was.
+    row = {"day": "2026-11-17", "start": "", "minutes": 90, "kind": "added", "note": "Baumarkt"}
+    assert model.add(row)
+    changed = dict(row, note="Baumarkt Hornbach")
+    assert model.change(row, changed)
+    kinds = {r["note"]: r["kind"] for r in model.entries()}
+    assert kinds["Baumarkt Hornbach"] == "added"
+
+
+def test_correcting_an_auto_row_makes_it_corrected(model, world):
+    auto = [r for r in model.entries() if r["kind"] == "auto"][0]
+    assert model.change(auto, dict(auto, minutes=auto["minutes"] + 5))
+    assert any(r["kind"] == "corrected" for r in model.entries())
+
+
+def test_rows_that_cannot_be_read_are_told(model, world):
+    # Z11: a row written by hand as "16.11.2026" or "1h30" was missing silently.
+    path = tl.time_file(world["kueche"], "Oliver")
+    path.write_text(path.read_text() + "| 16.11.2026 | 09:00 | 1h30 | auto | Herd |\n")
+    assert model.unreadable() == 1
+    assert model.overview(str(world["haus"]), period="all")["unreadable"] == 1
+
+
+def test_a_file_with_no_readable_row_is_told_too(model, world):
+    path = tl.time_file(world["haus"], "Liesl")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(tl.render("Liesl", [], "de") + "| gestern | 9 | lang | auto | |\n")
+    assert model.overview(str(world["haus"]), period="all")["unreadable"] == 1
+
+
+def test_the_projects_to_choose_from_the_active_first_then_the_ones_worked_on_last(world, tmp_path):
+    # Z7: without an active project nothing could be added or seen; time for another project
+    # only after switching there, which moved the clock too.
+    from Time.model import TimeModel
+    ledger = cw.Ledger(tmp_path / "ledger.json")
+    from datetime import datetime
+    ledger.seen(world["haus"], datetime(2026, 11, 17, 9, 0), "Oliver")
+    ledger.seen(world["root"] / "Gone", datetime(2026, 11, 17, 10, 0), "Oliver")  # no project now
+    ledger.seen(world["kueche"], datetime(2026, 11, 17, 11, 0), "Oliver")
+    model = TimeModel(active=world["active"], widget=world["widget"], today=lambda: TODAY,
+                      ledger=tmp_path / "ledger.json")
+    assert [p["path"] for p in model.projects()] == [str(world["kueche"]), str(world["haus"])]
+    assert model.projects()[0]["name"] == "Küche"
+
+
+def test_adding_to_another_project_with_a_beginning(model, world):
+    assert model.add({"day": "2026-11-17", "start": "14:30", "minutes": 45, "note": "Holz"}, str(world["haus"]))
+    rows = [r for r in model.entries(str(world["haus"])) if r["note"] == "Holz"]
+    assert rows == [dict(rows[0], start="14:30", minutes=45, kind="added")]
+    assert read_active(world["active"])[0] == world["kueche"]  # the clock stays where it is

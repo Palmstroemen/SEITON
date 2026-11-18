@@ -243,3 +243,27 @@ def test_unknown_rounding_is_refused():
         tl.Rounding(step=7)
     with pytest.raises(ValueError):
         tl.Rounding(step=15, mode="down")
+
+
+def test_a_stretch_after_a_short_gap_joins_the_last_row(tmp_path):
+    # Z4 (review 2026-11-18): every short step out (a glance elsewhere, stop and start) made a
+    # row of its own; the table is meant to be read by hand too.
+    from datetime import time as clock
+    first = tl.Stretch(day=date(2026, 11, 18), start=clock(9, 0), duration=timedelta(minutes=30), kind="auto")
+    second = tl.Stretch(day=date(2026, 11, 18), start=clock(9, 30, 40), duration=timedelta(minutes=20), kind="auto")
+    later = tl.Stretch(day=date(2026, 11, 18), start=clock(11, 0), duration=timedelta(minutes=10), kind="auto")
+    tl.add(tmp_path, "Oliver", first, language="de")
+    tl.add(tmp_path, "Oliver", second, language="de")
+    assert tl.read(tl.time_file(tmp_path, "Oliver")).stretches == [
+        tl.Stretch(day=date(2026, 11, 18), start=clock(9, 0), duration=timedelta(minutes=51), kind="auto")]  # 9:00 to 9:50:40, the file counts minutes
+    tl.add(tmp_path, "Oliver", later, language="de")  # an hour later: a row of its own
+    assert len(tl.read(tl.time_file(tmp_path, "Oliver")).stretches) == 2
+
+
+def test_another_kind_or_note_is_not_joined(tmp_path):
+    from datetime import time as clock
+    tl.add(tmp_path, "Oliver", tl.Stretch(day=date(2026, 11, 18), start=clock(9, 0),
+                                          duration=timedelta(minutes=30), kind="auto"), language="de")
+    tl.add(tmp_path, "Oliver", tl.Stretch(day=date(2026, 11, 18), start=clock(9, 30),
+                                          duration=timedelta(minutes=30), kind="manual"), language="de")
+    assert len(tl.read(tl.time_file(tmp_path, "Oliver")).stretches) == 2

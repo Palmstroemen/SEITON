@@ -277,6 +277,16 @@ def add(project: Union[str, Path], person: str, stretch: Stretch, *, language: s
     return add_to_file(time_file(project, person), person, stretch, language=language)
 
 
+def _last_row(lines: Sequence[str], index: int, end: int, columns: Sequence[str]) -> Optional[Stretch]:
+    """The table's last row, when it is a readable one (a row written by hand stays as it is)."""
+    if end - 1 <= index or _is_rule(lines[end - 1]):
+        return None
+    try:
+        return _row(columns, lines[end - 1])
+    except (ValueError, KeyError):
+        return None
+
+
 def add_to_file(path: Path, person: str, stretch: Stretch, *, language: str, atomic: bool = True) -> Path:
     """add() into a given file (the clock in its sandbox reaches the projects through its drive).
     atomic: written beside it and swapped in; without, the file itself is written anew - on the
@@ -294,8 +304,14 @@ def add_to_file(path: Path, person: str, stretch: Stretch, *, language: str, ato
         addition = render(person, [stretch], language)
         text = (text.rstrip("\n") + "\n\n" + addition) if text.strip() else addition
     else:
-        _index, columns, file_language, end = table
-        lines.insert(end, _format_row(columns, file_language, stretch))
+        index, columns, file_language, end = table
+        last = _last_row(lines, index, end, columns)
+        joined = join_gaps([last, stretch]) if last is not None else []
+        if len(joined) == 1:
+            # Right after the last row (a glance elsewhere, stop and start): one row, not two (Z4).
+            lines[end - 1] = _format_row(columns, file_language, joined[0])
+        else:
+            lines.insert(end, _format_row(columns, file_language, stretch))
         text = "\n".join(lines) + "\n"
     path.parent.mkdir(parents=True, exist_ok=True)
     if not atomic:
@@ -426,6 +442,11 @@ def _files(project: Path) -> List[tuple]:
         match = _CONFLICT.match(path.stem)
         files.append((path, match.group("person") if match else path.stem, bool(match)))
     return sorted(files, key=lambda f: (f[2], f[0].name.lower()))
+
+
+def time_files(project: Union[str, Path], *, children: bool = True) -> List[Path]:
+    """The time files of a project (and with `children` of all below it), conflict copies too."""
+    return [path for folder in _projects(Path(project), children) for path, _p, _c in _files(folder)]
 
 
 def collect(project: Union[str, Path], *, children: bool = True) -> List[Entry]:

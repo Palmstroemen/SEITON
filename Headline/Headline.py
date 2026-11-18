@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """The Headline: SEITON at the screen's edge (Scope/Designdocument Headline.md).
 
-A program of its own, as SunTree is. It shares where one is with Scope and SunTree through the
-session of the lens; what it shows is worked out in Headline/model.py, where its popups go in
-Headline/popup_place.py. Step 1: a line of its own with the CWD, the standard folders, the
-cascade to climb; docking at the top edge comes in step 2.
+A program of its own and SEITON's master, always there (decided 2026-11-18); Scope is only a
+first file browser. It shares where one is with Scope and SunTree through the session of the
+lens. What it shows is worked out in Headline/model.py, where its popups go in
+Headline/popup_place.py. Built: the line at the top edge (a dock with a strut, or hiding itself),
+the panel from the taskbar, the cascade to climb, the standard folders taking drops, the
+widgets (the clock first; Headline/widgets.py), the active project for the clock, its tools and
+its own settings (SettingsWindow.qml). One Headline per user (Headline/instance.py).
 """
 
 from __future__ import annotations

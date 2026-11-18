@@ -89,3 +89,40 @@ def test_started_as_a_script_it_finds_its_modules():
                           text=True, timeout=60, env={**os.environ, "QT_QPA_PLATFORM": "offscreen"})
     assert done.returncode == 0, done.stderr
     assert done.stdout.strip().endswith("ok")
+
+
+def test_the_project_is_chosen_the_active_one_first(started):
+    # Z7 (review 2026-11-18): Entries and Overview were about the active project only.
+    [choice] = _named(started, "projectChoice")
+    assert choice.property("currentText") == "Küche"
+
+
+def test_a_beginning_can_be_given_when_adding(started):
+    from PySide6.QtCore import QMetaObject
+    from core import time_log as tl
+    window = started["window"]
+    for name, text in (("addStart", "9:30"), ("addDuration", "0:45"), ("addNote", "Holz")):
+        _named(started, name)[0].setProperty("text", text)
+    QMetaObject.invokeMethod(_named(started, "addButton")[0], "clicked")
+    started["app"].processEvents()
+    [row] = tl.read(tl.time_file(started["project"], "Oliver")).stretches
+    assert row.start.strftime("%H:%M") == "09:30" and row.duration == timedelta(minutes=45)
+    assert window.property("rows")[0]["note"] == "Holz"
+
+
+def test_how_it_rounds_is_set_here(started):
+    from core.settings import Settings
+    mode, per = _named(started, "roundMode")[0], _named(started, "roundPer")[0]
+    assert mode.property("currentValue") == "up" and per.property("currentValue") == "stretch"
+
+
+def test_a_chosen_project_stays_chosen_when_the_screen_refreshes(started, tmp_path):
+    window = started["window"]
+    other = started["project"].parent / "Dachboden"
+    (other / META_DIR).mkdir(parents=True)
+    (other / META_DIR / "Project.md").write_text("x")
+    window.setProperty("project", str(other))
+    from PySide6.QtCore import QMetaObject
+    QMetaObject.invokeMethod(window, "refresh")
+    started["app"].processEvents()
+    assert window.property("project") == str(other)

@@ -19,7 +19,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from core import clock_widget as cw
 from core import time_log as tl
-from core.clock import rounding_from_settings
+from core.clock import default_store, rounding_from_settings
 from core.clock_sources import active_file, read_active
 from core.acl_enforcement import allowed_at
 from core.identity import person_for
@@ -72,8 +72,11 @@ def stretch_of(row: Dict[str, Any], kind: Optional[str] = None) -> Optional[tl.S
 
 class TimeModel:
     def __init__(self, *, active: Optional[Path] = None, widget: Optional[Path] = None,
-                 today: Callable[[], date] = date.today, language: str = "de") -> None:
+                 today: Callable[[], date] = date.today, language: str = "de",
+                 ledger: Optional[Path] = None) -> None:
         self._active = Path(active) if active is not None else active_file()
+        # The clock's ledger: the projects worked on last, to choose from (Z7).
+        self._ledger = Path(ledger) if ledger is not None else default_store().with_name("ledger.json")
         self._widget = Path(widget) if widget is not None else cw.folder()
         self._today = today
         self._language = language
@@ -87,6 +90,19 @@ class TimeModel:
         project, _person = read_active(self._active)
         return project
 
+    def projects(self) -> List[Dict[str, str]]:
+        """The projects to choose from: the active one first, then those worked on last (the
+        clock's ledger) that are projects still. Choosing one moves nothing: not the clock, not
+        the Headline (Designdocument Time.md, 4.4 and 5)."""
+        found: List[Path] = []
+        active = self.active_project()
+        if active is not None:
+            found.append(Path(active))
+        for recent in cw.Ledger(self._ledger).recent():
+            if recent not in found and is_project(recent):
+                found.append(recent)
+        return [{"name": path.name, "path": str(path)} for path in found]
+
     def _person(self, project: Path) -> str:
         return person_for(project)
 
@@ -95,7 +111,7 @@ class TimeModel:
         view = self._clock_view()
         return {"project": str(project) if project else "", "projectName": project.name if project else "",
                 "clockRuns": view is not None, "text": (view or {}).get("text", ""),
-                "state": (view or {}).get("state", "calm")}
+                "state": (view or {}).get("state", "calm"), "clock": str((view or {}).get("clock") or "")}
 
     def _clock_view(self) -> Optional[Dict[str, Any]]:
         path = self._widget / "view.json"
@@ -140,6 +156,13 @@ class TimeModel:
         ordered = sorted(enumerate(stretches), key=lambda pair: (pair[1].day, pair[0]), reverse=True)
         return [row_of(stretch) for _index, stretch in ordered]
 
+    def unreadable(self, project: Optional[str] = None) -> int:
+        """How many rows of one's own file could not be read (left in the file as they are; Z11)."""
+        path = self._file(project)
+        if path is None or not allowed_at(path, "read"):
+            return 0
+        return len(tl.read(path).problems)
+
     def add(self, row: Dict[str, Any], project: Optional[str] = None) -> bool:
         """What was done away from the computer ("Baumarkt, 1½ h")."""
         stretch = stretch_of(row, kind="added")
@@ -154,7 +177,10 @@ class TimeModel:
         return True
 
     def change(self, old: Dict[str, Any], new: Dict[str, Any], project: Optional[str] = None) -> bool:
-        before, after = stretch_of(old), stretch_of(new, kind="corrected")
+        before = stretch_of(old)
+        # "corrected" is an auto row changed by hand; an added or manual one stays what it is (Z10).
+        kind = "corrected" if before is not None and before.kind == "auto" else (before.kind if before else None)
+        after = stretch_of(new, kind=kind)
         path = self._file(project)
         return bool(before and after and path) and allowed_at(path, "write") and tl.change(path, before, after)
 
@@ -175,11 +201,15 @@ class TimeModel:
         """A project with its children: sums per project and per person, rounded as set."""
         folder = Path(project) if project else self.active_project()
         if folder is None:
-            return {"total": "0:00", "byProject": [], "byPerson": [], "conflicts": 0}
+            return {"total": "0:00", "byProject": [], "byPerson": [], "conflicts": 0, "unreadable": 0}
         # Only what the person may read (A7): a colleague's file, a hidden subproject is not
         # summed up where Scope does not show it - checked by the file's own ACLs.
         readable = [e for e in tl.collect(folder, children=True)
                     if e.source is None or allowed_at(e.source, "read")]
+        # A cloud's conflict copy holds nearly all rows of the original: not counted, only told
+        # (in the whole project, its children too) until there is a way to merge (Z2).
+        copies = {e.source for e in readable if e.conflict}
+        readable = [e for e in readable if not e.conflict]
         entries = tl.only(readable, person=person or None, since=self._since(period))
         rounding = rounding_from_settings(Settings())
         by_project = tl.sums(entries, by="project", rounding=rounding)
@@ -188,5 +218,8 @@ class TimeModel:
             "total": _hours(tl.total(entries, rounding)),
             "byProject": [{"name": Path(p).name, "path": str(p), "time": _hours(t)} for p, t in by_project.items()],
             "byPerson": [{"name": p, "time": _hours(t)} for p, t in by_person.items()],
-            "conflicts": len([c for c in tl.conflicts(folder) if allowed_at(c, "read")]),
+            "conflicts": len(copies),
+            # Rows that could not be read are not summed: told, not dropped silently (Z11).
+            "unreadable": sum(len(tl.read(path).problems) for path in tl.time_files(folder)
+                              if allowed_at(path, "read")),
         }

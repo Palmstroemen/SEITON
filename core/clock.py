@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 Writer = Callable[[Path, str, tl.Stretch], Any]
 SAVE_EVERY = timedelta(minutes=1)
+INPUT_WOBBLE = timedelta(seconds=1)
 
 
 @dataclass(frozen=True)
@@ -176,7 +177,9 @@ class Clock:
                 else:
                     self._pause(running.activity)
         elif self.state == "paused" and self.project is not None and self.settings.auto_resume:
-            if self._paused_at is not None and last_input > self._paused_at:
+            # Only an input clearly after the pause resumes: the estimate of the last input
+            # wobbles by the time it takes to ask the idle time (review 2026-11-18, Z12).
+            if self._paused_at is not None and last_input - self._paused_at > INPUT_WOBBLE:
                 self._begin(last_input, "auto")
         self._save(force=self.state != state_before)
 

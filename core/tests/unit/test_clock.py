@@ -369,15 +369,16 @@ def test_without_its_helper_file_the_writer_needs_only_the_file(tmp_path):
     folder.mkdir()
     path = folder / "Oliver.md"
     stretch = tl.Stretch(day=date(2026, 11, 16), start=time(9, 0), duration=minutes(30), kind="auto")
+    later = tl.Stretch(day=date(2026, 11, 16), start=time(14, 0), duration=minutes(30), kind="auto")
     tl.add_to_file(path, "Oliver", stretch, language="de")
     folder.chmod(0o555)  # the file may be written, nothing new beside it
     try:
         with pytest.raises(PermissionError):
-            tl.add_to_file(path, "Oliver", stretch, language="de")
-        tl.add_to_file(path, "Oliver", stretch, language="de", atomic=False)
+            tl.add_to_file(path, "Oliver", later, language="de")
+        tl.add_to_file(path, "Oliver", later, language="de", atomic=False)
     finally:
         folder.chmod(0o755)
-    assert tl.read(path).stretches == [stretch, stretch]
+    assert tl.read(path).stretches == [stretch, later]
     assert sorted(p.name for p in folder.iterdir()) == ["Oliver.md"]
 
 
@@ -420,3 +421,16 @@ def test_a_store_written_without_a_zone_is_read_with_one(vienna, writer, tmp_pat
     clock.recover(datetime(2026, 11, 16, 10, 0).astimezone())
     clock.tick(datetime(2026, 11, 16, 10, 1).astimezone(), timedelta(seconds=1))
     assert writer.stretches() == [(KITCHEN, time(9, 0), minutes(20), "auto")]
+
+
+def test_a_wobbling_idle_time_does_not_wake_the_paused_clock(clock, writer):
+    # Z12 (review 2026-11-18): now is taken before the idle time is asked; the estimate of the
+    # last input wobbles by that delay, and a later, smaller delay looked like a new input.
+    clock.set_project(KITCHEN, "Oliver", at(0))
+    clock.tick(at(10), idle(0))
+    clock.tick(at(16), idle(6))  # paused at 9:10
+    assert clock.state == "paused"
+    clock.tick(at(16.25), idle(6.25) - timedelta(milliseconds=400))  # 9:10:00.4 - no input
+    assert clock.state == "paused"
+    clock.tick(at(17), idle(0.1))  # a real input
+    assert clock.state == "runs"

@@ -84,6 +84,14 @@ class TimeBackend(QObject):
     def entries(self, project: str) -> list:
         return self._model.entries(project or None)
 
+    @Slot(result="QVariantList")
+    def projects(self) -> list:
+        return self._model.projects()
+
+    @Slot(str, result=int)
+    def unreadable(self, project: str) -> int:
+        return self._model.unreadable(project or None)
+
     @Slot("QVariantMap", str, result=bool)
     def add(self, row, project: str) -> bool:
         return self._done(self._model.add(dict(row), project or None))

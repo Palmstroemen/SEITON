@@ -29,9 +29,13 @@ COMMANDS = ("start", "stop", "yes", "no")
 
 _WORDS = {
     "de": {"none": "Kein Projekt", "ask": "Arbeitest du noch an {project}?", "yes": "Ja", "no": "Nein",
-           "name": "Zeit"},
+           "name": "Zeit", "stopped": "gestoppt",
+           "stoppedTip": "Von Hand gestoppt: es wird nicht gezählt, bis du Start drückst.",
+           "pausedTip": "Pause: die nächste Eingabe zählt weiter."},
     "en": {"none": "No project", "ask": "Still working on {project}?", "yes": "Yes", "no": "No",
-           "name": "Time"},
+           "name": "Time", "stopped": "stopped",
+           "stoppedTip": "Stopped by hand: nothing is counted until you press Start.",
+           "pausedTip": "Pause: the next input counts on."},
 }
 
 
@@ -151,7 +155,7 @@ def render(clock, ledger: Ledger, now: datetime, *, language: str,
     worked on last the time `shows` from their time files (spent); without, what the ledger
     counted today."""
     words = _words(language)
-    view: Dict[str, Any] = {}
+    view: Dict[str, Any] = {"clock": clock.state}  # for the time screen (Stop also in a pause)
     project = clock.project
     if project is None:
         view.update(text=words["none"], state="calm")
@@ -160,6 +164,13 @@ def render(clock, ledger: Ledger, now: datetime, *, language: str,
         today = ledger.on(Path(project), now.date()) + running
         state = {"runs": "active", "asks": "asking"}.get(clock.state, "calm")
         view.update(text=f"{Path(project).name} · {_hours(today)}", state=state)
+        # Stopped by hand looks other than a pause: else one forgets it and works for hours
+        # without counting (review 2026-11-18, Z8).
+        if clock.state == "stopped":
+            view["text"] += f" · {words['stopped']}"
+            view["tooltip"] = words["stoppedTip"]
+        elif clock.state == "paused":
+            view["tooltip"] = words["pausedTip"]
         if clock.state in ("runs", "asks"):
             # The Headline counts on between views, to the second: from where today's time
             # would be naught (Headline/widgets.py, counter).
