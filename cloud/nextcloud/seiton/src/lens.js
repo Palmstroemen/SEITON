@@ -19,7 +19,7 @@ import { emit } from '@nextcloud/event-bus'
 import { DefaultType, FileAction, FileType, Folder, Header, Permission, View, getNavigation, registerFileAction, registerFileListHeaders } from '@nextcloud/files'
 import { defaultRemoteURL, defaultRootPath, getClient, getDefaultPropfind, resultToNode } from '@nextcloud/files/dav'
 import { t } from '@nextcloud/l10n'
-import { askCore, carryOut, folderIcon, upload } from './core.js'
+import { askCore, carryOut, folderIcon, tell, upload } from './core.js'
 
 const APP = 'seiton'
 const VIEW = 'seiton-perspectives'
@@ -168,7 +168,10 @@ function renderUnborn(folder) {
 	button.title = t(APP, 'Click to create it here, or drop files on it')
 	button.innerHTML = folderIcon
 	button.append(document.createTextNode(here.department))
-	const failed = error => console.error('SEITON', error)
+	const failed = error => {
+		console.error('SEITON', error)
+		tell(t(APP, 'Could not create {name} here, or not every file could be put into it.', { name: here.department }))
+	}
 	button.addEventListener('click', () => bearHere(here.path, folder, []).catch(failed))
 	button.addEventListener('dragover', event => {
 		event.preventDefault()

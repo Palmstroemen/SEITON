@@ -51,4 +51,20 @@ export async function upload(path, file) {
 	}
 }
 
+/** A short message at the bottom of the page, gone after a few seconds: what failed, said
+ * (console.error alone left the user with a click that did nothing). */
+export function tell(text) {
+	const note = document.createElement('div')
+	note.setAttribute('role', 'alert')
+	note.textContent = text
+	Object.assign(note.style, {
+		position: 'fixed', insetInline: '0', bottom: '24px', margin: '0 auto', width: 'fit-content',
+		maxWidth: '80vw', padding: '10px 16px', zIndex: '10000', borderRadius: 'var(--border-radius-large, 10px)',
+		background: 'var(--color-main-background)', color: 'var(--color-main-text)',
+		border: '1px solid var(--color-error, #d33)', boxShadow: '0 2px 8px var(--color-box-shadow, rgba(0,0,0,.2))',
+	})
+	document.body.append(note)
+	setTimeout(() => note.remove(), 7000)
+}
+
 export const folderIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>'

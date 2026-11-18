@@ -14,7 +14,7 @@
  */
 import { FileListFilter, Header, getNavigation, registerFileListFilter, registerFileListHeaders } from '@nextcloud/files'
 import { t } from '@nextcloud/l10n'
-import { askCore, carryOut, folderIcon } from './core.js'
+import { askCore, carryOut, folderIcon, tell } from './core.js'
 import { registerPerspectives } from './lens.js'
 
 const APP = 'seiton'
@@ -81,7 +81,11 @@ function render() {
 		button.title = born ? name : t(APP, 'Suggested folder: click to create it')
 		button.innerHTML = folderIcon
 		button.append(document.createTextNode(name))
-		button.addEventListener('click', () => (born ? open(name) : birth(name)).catch(error => console.error('SEITON', error)))
+		button.addEventListener('click', () => (born ? open(name) : birth(name)).catch(error => {
+			console.error('SEITON', error)
+			tell(t(APP, 'Could not create {name}. Some files of its template may be missing.', { name }))
+			show(state.folder) // the row as it is now: a folder made half way shows as there
+		}))
 		el.append(button)
 	}
 	const tags = state.tags ?? []
