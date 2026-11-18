@@ -43,6 +43,7 @@
 | [../core/Dokumentation/Designdocument Export-Import.md](../core/Dokumentation/Designdocument%20Export-Import.md) | Export and import of projects |
 | [../core/Dokumentation/Designdocument Sort.md](../core/Dokumentation/Designdocument%20Sort.md) | `Sort.md`: sorting files into projects |
 | [../core/Dokumentation/Designdocument Time.md](../core/Dokumentation/Designdocument%20Time.md) | Time tracking per project |
+| [../core/Dokumentation/Designdocument Public Interface.md](../core/Dokumentation/Designdocument%20Public%20Interface.md) | Draft: what apps may use of SEITON (files, CLI, daemon, package `seiton`) |
 | [../core/Dokumentation/Designdocument Parser.md](../core/Dokumentation/Designdocument%20Parser.md) | The Markdown settings parser |
 | [../core/Dokumentation/Das Config.md Format.md](../core/Dokumentation/Das%20Config.md%20Format.md) | `Config.md` (German) |
 | [../core/Dokumentation/Designdocument Recent.md](../core/Dokumentation/Designdocument%20Recent.md) | Recent files (fragment, not built) |

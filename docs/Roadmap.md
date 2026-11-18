@@ -75,8 +75,9 @@ Schritt folgt.
   2. **Öffentliche Schnittstelle:** Was eine fremde App von SEITON benutzen darf, wird
      festgeschrieben und versioniert: die Dateiformate (`.seiton/`, `Project.md`, `ACLs.md`,
      Tags), die CLI-Werkzeuge, das Laufwerk „Perspektiven“ und eine kleine Python-API
-     (etwa `seiton.api`) statt `core.scope_api` oder `core.acl_edit` direkt. Ein Test prüft, dass
+     (ein Paket `seiton`) statt `core.scope_api` oder `core.acl_edit` direkt. Ein Test prüft, dass
      `examples/` nur sie importiert. So zeigt jede Beispiel-App, wie eine fremde es machen würde.
+     Entwurf: [Designdocument Public Interface](../core/Dokumentation/Designdocument%20Public%20Interface.md).
   3. **Eigene Repositories, wenn die Schnittstelle hält:** Eine App, die nur noch sie benutzt,
      darf mit ihrer Geschichte (`git filter-repo`) in ein eigenes Repository unter einer
      Organisation `github.com/seiton/` ziehen, wie die Apps von Nextcloud neben
