@@ -129,3 +129,69 @@ def test_adding_to_a_project_that_is_gone_makes_no_ghost(model, world):
     world["kueche"].rename(world["haus"] / "Küche neu")
     assert model.add({"day": "2026-11-17", "start": "", "minutes": 30, "note": "Baumarkt"}) is False
     assert not world["kueche"].exists()
+
+
+# --- the person's rights under enforce (review 2026-11-18, A7, A14) -------------------------
+
+FIRMA_ACLS = ("# Permissions\n\n"
+              "## Everyone\n- /0_Admin/Zeitaufwand/{Self}.md: read, write\n\n"
+              "## Chef\n- /*: *\n\n"
+              "## Buchhaltung\n- /4_Finanz/: read, write\n\n"
+              "# Users\nOliver: Chef\nAnna: Buchhaltung\n")
+
+
+def _stretch(minutes):
+    return tl.Stretch(day=TODAY, start=time(9, 0), duration=timedelta(minutes=minutes), kind="auto")
+
+
+@pytest.fixture
+def firma(tmp_path, monkeypatch):
+    monkeypatch.setenv(env_name("ACL_MODE"), "enforce")
+    monkeypatch.delenv(env_name("ACL_BACKEND"), raising=False)
+    root = _project(tmp_path / "Firma")
+    (root / META_DIR / "ACLs.md").write_text(FIRMA_ACLS)
+    geheim = _project(root / "Geheimkunde Huber")
+    tl.add(root, "Oliver", _stretch(420), language="de")
+    tl.add(root, "Anna", _stretch(30), language="de")
+    tl.add(geheim, "Oliver", _stretch(120), language="de")
+    active = tmp_path / "run" / "seiton" / "active-project.json"
+    cs.write_active(active, root, "Anna")
+    from Time.model import TimeModel
+    return {"root": root, "active": active,
+            "model": TimeModel(active=active, widget=tmp_path / "run" / "seiton-clock", today=lambda: TODAY)}
+
+
+def test_the_overview_shows_only_what_the_person_may_read(firma, monkeypatch):
+    # A7: everyone saw every colleague's hours and the hidden subprojects.
+    monkeypatch.setenv(env_name("ACL_USER"), "anna")
+    view = firma["model"].overview(period="month")
+    assert view["byPerson"] == [{"name": "Anna", "time": "0:30"}]
+    assert [p["name"] for p in view["byProject"]] == ["Firma"] and view["total"] == "0:30"
+    monkeypatch.setenv(env_name("ACL_USER"), "oliver")
+    assert {p["name"] for p in firma["model"].overview(period="month")["byPerson"]} == {"Anna", "Oliver"}
+
+
+def test_without_the_right_to_write_nothing_is_added(firma, monkeypatch):
+    # A14: it wrote where Scope and the clock's drive refuse.
+    (firma["root"] / META_DIR / "ACLs.md").write_text(
+        "# Permissions\n\n## Buchhaltung\n- /4_Finanz/: read, write\n\n# Users\nAnna: Buchhaltung\n")
+    monkeypatch.setenv(env_name("ACL_USER"), "anna")
+    model = firma["model"]
+    assert model.add({"day": "2026-11-17", "start": "", "minutes": 30, "note": "Baumarkt"}) is False
+    assert model.change({"day": "2026-11-17", "start": "09:00", "minutes": 30, "kind": "auto", "note": ""},
+                        {"day": "2026-11-17", "start": "09:00", "minutes": 45, "kind": "auto", "note": ""}) is False
+    assert model.remove({"day": "2026-11-17", "start": "09:00", "minutes": 30, "kind": "auto", "note": ""}) is False
+    assert tl.read(tl.time_file(firma["root"], "Anna")).stretches == [_stretch(30)]
+
+
+def test_with_the_right_to_write_ones_own_file_it_adds(firma, monkeypatch):
+    monkeypatch.setenv(env_name("ACL_USER"), "anna")
+    assert firma["model"].add({"day": "2026-11-17", "start": "", "minutes": 30, "note": "Baumarkt"}) is True
+
+
+def test_ones_own_rows_need_the_right_to_read_them(firma, monkeypatch):
+    monkeypatch.setenv(env_name("ACL_USER"), "anna")
+    assert len(firma["model"].entries()) == 1
+    (firma["root"] / META_DIR / "ACLs.md").write_text(
+        "# Permissions\n\n## Buchhaltung\n- /4_Finanz/: read, write\n\n# Users\nAnna: Buchhaltung\n")
+    assert firma["model"].entries() == []

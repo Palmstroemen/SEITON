@@ -21,6 +21,7 @@ from core import clock_widget as cw
 from core import time_log as tl
 from core.clock import rounding_from_settings
 from core.clock_sources import active_file, read_active
+from core.acl_enforcement import allowed_at
 from core.identity import person_for
 from core.perspective_session import is_project
 from core.settings import Settings
@@ -132,7 +133,7 @@ class TimeModel:
     def entries(self, project: Optional[str] = None) -> List[Dict[str, Any]]:
         """One's own rows of a project (the active one by default), newest first."""
         path = self._file(project)
-        if path is None:
+        if path is None or not allowed_at(path, "read"):
             return []
         stretches = tl.read(path).stretches
         # Newest first: by day, then as written (a row added later, without a beginning, on top).
@@ -147,18 +148,20 @@ class TimeModel:
             return False
         if not is_project(path.parents[2]):
             return False  # gone (renamed, in the trash): no ghost folder at the old place
+        if not allowed_at(path, "write"):
+            return False  # the person's rights, as Scope and the clock's drive ask them (A14)
         tl.add_to_file(path, self._person(path.parents[2]), stretch, language=self._language)
         return True
 
     def change(self, old: Dict[str, Any], new: Dict[str, Any], project: Optional[str] = None) -> bool:
         before, after = stretch_of(old), stretch_of(new, kind="corrected")
         path = self._file(project)
-        return bool(before and after and path) and tl.change(path, before, after)
+        return bool(before and after and path) and allowed_at(path, "write") and tl.change(path, before, after)
 
     def remove(self, row: Dict[str, Any], project: Optional[str] = None) -> bool:
         stretch = stretch_of(row)
         path = self._file(project)
-        return bool(stretch and path) and tl.remove(path, stretch)
+        return bool(stretch and path) and allowed_at(path, "write") and tl.remove(path, stretch)
 
     # --- overview -------------------------------------------------------------------------------
 
@@ -173,8 +176,11 @@ class TimeModel:
         folder = Path(project) if project else self.active_project()
         if folder is None:
             return {"total": "0:00", "byProject": [], "byPerson": [], "conflicts": 0}
-        entries = tl.only(tl.collect(folder, children=True), person=person or None,
-                          since=self._since(period))
+        # Only what the person may read (A7): a colleague's file, a hidden subproject is not
+        # summed up where Scope does not show it - checked by the file's own ACLs.
+        readable = [e for e in tl.collect(folder, children=True)
+                    if e.source is None or allowed_at(e.source, "read")]
+        entries = tl.only(readable, person=person or None, since=self._since(period))
         rounding = rounding_from_settings(Settings())
         by_project = tl.sums(entries, by="project", rounding=rounding)
         by_person = tl.sums(entries, by="person", rounding=rounding)
@@ -182,5 +188,5 @@ class TimeModel:
             "total": _hours(tl.total(entries, rounding)),
             "byProject": [{"name": Path(p).name, "path": str(p), "time": _hours(t)} for p, t in by_project.items()],
             "byPerson": [{"name": p, "time": _hours(t)} for p, t in by_person.items()],
-            "conflicts": len(tl.conflicts(folder)),
+            "conflicts": len([c for c in tl.conflicts(folder) if allowed_at(c, "read")]),
         }
