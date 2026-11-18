@@ -75,7 +75,7 @@ class HeadlineBackend(QObject):
                                                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         self._dock = (self._read_dock(), self.placeMode())
         self._look = self._read_look()
-        self._widgets = widgets.shown()
+        self._widgets = widgets.shown(here=self._model.active_project())
         self._follow = QTimer(self)
         self._follow.setInterval(FOLLOW_MS)
         self._follow.timeout.connect(self._tick)
@@ -100,6 +100,7 @@ class HeadlineBackend(QObject):
         ok = self._model.go(path)
         if ok:
             self.changed.emit()
+            self.checkWidgets()  # another project: a widget names its own again, or no more
         return ok
 
     def _tick(self) -> None:
@@ -116,8 +117,9 @@ class HeadlineBackend(QObject):
 
     @Slot(result=bool)
     def checkWidgets(self) -> bool:
-        """Read the widgets' views anew; True when what they show changed."""
-        now = widgets.shown()
+        """Read the widgets' views anew; True when what they show changed. In the widget's own
+        project it shows its short text: the project stands already at the left."""
+        now = widgets.shown(here=self._model.active_project())
         if now == self._widgets:
             return False
         self._widgets = now

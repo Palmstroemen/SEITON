@@ -230,3 +230,28 @@ def test_stopped_by_hand_says_so_a_pause_does_not(tmp_path, ledger):
     clock.tick(NOW, timedelta(minutes=10))  # a pause
     view = cw.render(clock, ledger, NOW, language="de")
     assert "gestoppt" not in view["text"] and view["clock"] == "paused"
+
+
+# --- its project once (2026-11-18): the Headline shows the project already at the left; in it,
+# the clock shows only the time (apps/Headline/widgets.py, project and short) -------------------
+
+def test_the_view_says_its_project_and_a_short_text_without_it(tmp_path, ledger):
+    clock = _clock(tmp_path, ledger)
+    ledger.add(Path("/p/Küche"), NOW.date(), timedelta(hours=2))
+    clock.set_project(Path("/p/Küche"), "Oliver", NOW - timedelta(minutes=15))
+    view = cw.render(clock, ledger, NOW, language="de")
+    assert view["project"] == "/p/Küche" and view["short"] == "2:15"
+    assert view["counter"]["shortPrefix"] == ""
+
+
+def test_the_short_text_keeps_stopped(tmp_path, ledger):
+    clock = _clock(tmp_path, ledger)
+    clock.set_project(Path("/p/Küche"), "Oliver", NOW - timedelta(minutes=15))
+    clock.stop(NOW)
+    view = cw.render(clock, ledger, NOW, language="de")
+    assert view["short"] == "0:15 · gestoppt"
+
+
+def test_without_a_project_no_short_text(tmp_path, ledger):
+    view = cw.render(_clock(tmp_path, ledger), ledger, NOW, language="en")
+    assert "project" not in view and "short" not in view

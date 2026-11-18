@@ -108,6 +108,9 @@ Rectangle {
     /// Narrow button (minimal view): in "smallIcon" the icon forms the left edge, as high
     /// as the button; only a little room after the name.
     property bool edgeIcon: false
+    /// Small icon: the name in the middle beside the icon (the Headline, where it stands beside
+    /// text buttons). Off, it stands at the top of the row, as Scope's rows lay it out.
+    property bool centerName: false
     readonly property int smallIconBox: edgeIcon ? compactHeight : iconSmall
     property bool tabHoverDropEnabled: false
     property int tabHoverDropPx: 7
@@ -429,7 +432,7 @@ Rectangle {
             font.pixelSize: textSize
             font.bold: shownBold
             // Beside the button-high icon the name is centred; the row is as high as the icon.
-            y: (root.edgeIcon ? Math.round((root.smallIconBox - height) / 2) : 0) + textYOffset
+            y: (root.edgeIcon || root.centerName ? Math.round((root.smallIconBox - height) / 2) : 0) + textYOffset
             visible: !renaming
             // Leave room for the detail column instead of running into it.
             // The name ends where the next column starts (long names are elided).

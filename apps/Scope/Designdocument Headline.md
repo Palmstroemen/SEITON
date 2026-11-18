@@ -132,6 +132,10 @@ does every 15 s.
   question with answers ("Still working on *Küche*?" - Yes / No), perhaps a short list (the
   projects worked on last, each with its text and its path). The widget rewrites the file when
   something changes; the Headline watches it.
+- **Its project once** (2026-11-18): a widget about a project names it (`project`, its path)
+  and gives its text without it (`short`, `2:15`). While the Headline is in that project, which
+  stands already at the left of the line, it shows the short text and names the project in the
+  tooltip; elsewhere the full text.
 - **It is told** what the user did by command files dropped into the same folder (`yes`, `no`,
   `start`, `stop`); the widget looks for them. In the clock's sandbox only this folder is
   writable (`cli/seiton_clock.py`, its binds).

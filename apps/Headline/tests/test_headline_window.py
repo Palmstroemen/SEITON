@@ -606,3 +606,53 @@ def test_only_its_own_settings_can_be_set_from_its_window(started):
     backend = started["engine"]._backend
     assert backend.setSetting("General/postFix", False) is False  # not its own
     assert backend.setSetting("Headline/dock", "nonsense") is False
+
+
+# --- small things (2026-11-18) -----------------------------------------------------------------
+
+def test_the_cwd_shows_it_is_a_project(started):
+    _settle(started["app"])
+    assert _find(started, "cwdButton").property("projectBadge") is True  # Musikstudio is one
+
+
+def test_a_cwd_that_is_no_project_has_no_p(world, started):
+    plain = world["studio"] / "01_Info"
+    backend = started["engine"].rootContext().contextProperty("headline")
+    assert backend.go(str(plain))
+    _settle(started["app"])
+    assert _find(started, "cwdButton").property("projectBadge") is False
+
+
+def test_when_all_fit_none_hides_behind_more(started):
+    """» takes room only when something must hide: just wide enough for all, all are shown."""
+    engine, app = started, started["app"]
+    line = _find(engine, "headlineLine")
+    line.setProperty("width", 3000)
+    _settle(app)
+    folders = _all(engine, "standardFolder")
+    spacing = 4
+    cwd = _find(engine, "cwdButton").property("width")
+    needed = cwd + sum(f.property("implicitWidth") + spacing for f in folders) + 2 * spacing + 8
+    line.setProperty("width", int(needed) + 1)
+    _settle(app)
+    assert all(f.property("visible") for f in _all(engine, "standardFolder"))
+    assert not _find(engine, "moreButton").property("visible")
+    line.setProperty("width", int(needed) - 20)
+    _settle(app)
+    assert _find(engine, "moreButton").property("visible")
+
+
+def _text_middle(item, label):
+    """The middle of the text that shows label inside item, in the window."""
+    for child in _items(item):
+        if child.property("text") == label and child.property("visible") and child.property("height"):
+            return child.mapToItem(None, 0, 0).y() + child.property("height") / 2
+    raise AssertionError(f"no text {label!r}")
+
+
+def test_the_cwd_s_name_stands_on_the_line_of_the_folders(started):
+    """The CWD's name stood a few pixels above the folders' names (2026-11-18)."""
+    _settle(started["app"])
+    cwd = _find(started, "cwdButton")
+    folder = _all(started, "standardFolder")[0]
+    assert abs(_text_middle(cwd, "Musikstudio") - _text_middle(folder, "01_Info")) <= 1

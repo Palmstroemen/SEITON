@@ -163,18 +163,22 @@ def render(clock, ledger: Ledger, now: datetime, *, language: str,
         running = clock.view(now)["running"] if clock.state in ("runs", "asks") else timedelta(0)
         today = ledger.on(Path(project), now.date()) + running
         state = {"runs": "active", "asks": "asking"}.get(clock.state, "calm")
-        view.update(text=f"{Path(project).name} · {_hours(today)}", state=state)
+        # Its project, and the text without it: the Headline names the project already at
+        # the left of its line and shows the short text while it is there (2026-11-18).
+        view.update(text=f"{Path(project).name} · {_hours(today)}", state=state,
+                    project=str(project), short=_hours(today))
         # Stopped by hand looks other than a pause: else one forgets it and works for hours
         # without counting (review 2026-11-18, Z8).
         if clock.state == "stopped":
             view["text"] += f" · {words['stopped']}"
+            view["short"] += f" · {words['stopped']}"
             view["tooltip"] = words["stoppedTip"]
         elif clock.state == "paused":
             view["tooltip"] = words["pausedTip"]
         if clock.state in ("runs", "asks"):
             # The Headline counts on between views, to the second: from where today's time
             # would be naught (apps/Headline/widgets.py, counter).
-            view["counter"] = {"prefix": f"{Path(project).name} · ",
+            view["counter"] = {"prefix": f"{Path(project).name} · ", "shortPrefix": "",
                                "since": now.timestamp() - today.total_seconds()}
         if clock.state == "asks":
             view["question"] = {"text": words["ask"].format(project=Path(project).name),

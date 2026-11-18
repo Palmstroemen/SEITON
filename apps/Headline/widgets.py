@@ -11,6 +11,10 @@ not the clock. A widget may be missing, or be replaced by another one.
   the file when something changes; older than staleAfter, it shows nothing.
 - A **counter** (optional): `{"prefix", "since"}` - the Headline counts on to the second between
   views (the clock writes its view every 15 s): prefix and the time since, H:MM:SS.
+- Its **project** (optional): `project` (an absolute path) and `short`, its text without the
+  project (and `shortPrefix` for the counter). While the Headline is in that project, which it
+  names already at the left of its line, it shows the short text and names the project in the
+  tooltip (2026-11-18).
 - It **is told** by command files dropped into `<folder>/commands/`: an answer to its question,
   or one of the commands it declared.
 - Its **screen is its own**: a click runs its `open` command.
@@ -98,7 +102,11 @@ def _counter(value: Any) -> Optional[Dict[str, Any]]:
     prefix, since = _text(value.get("prefix"), 60), value.get("since")
     if prefix is None or type(since) not in (int, float):
         return None
-    return {"prefix": prefix, "since": float(since)}
+    counter = {"prefix": prefix, "since": float(since)}
+    short = value.get("shortPrefix")
+    if isinstance(short, str) and len(short) <= 60:
+        counter["shortPrefix"] = short
+    return counter
 
 
 def counted(counter: Dict[str, Any], now: Optional[float] = None) -> str:
@@ -121,18 +129,35 @@ def view_of(widget: Dict[str, Any], now: Optional[float] = None) -> Optional[Dic
     text, state = _text(data.get("text")), data.get("state")
     if text is None or state not in STATES:
         return None
+    project = data.get("project")
     return {"text": text, "state": state, "tooltip": _text(data.get("tooltip"), 200) or "",
             "question": _question(data.get("question")), "items": _items(data.get("items")),
-            "counter": _counter(data.get("counter"))}
+            "counter": _counter(data.get("counter")),
+            "project": project if isinstance(project, str) and Path(project).is_absolute() else "",
+            "short": _text(data.get("short")) or ""}
 
 
-def shown(now: Optional[float] = None) -> List[Dict[str, Any]]:
-    """The widgets to show now, each with its id, name and view."""
+def _in_project(view: Dict[str, Any], here: Optional[str]) -> Dict[str, Any]:
+    """The view as shown while the Headline is in `here`: in the widget's own project its short
+    text, the project named in the tooltip."""
+    if not (here and view["project"] and view["short"] and Path(view["project"]) == Path(here)):
+        return view
+    name = Path(view["project"]).name
+    counter = view["counter"]
+    if counter is not None and "shortPrefix" in counter:
+        counter = {**counter, "prefix": counter["shortPrefix"]}
+    return {**view, "text": view["short"], "counter": counter,
+            "tooltip": f"{name}: {view['tooltip']}" if view["tooltip"] else name}
+
+
+def shown(now: Optional[float] = None, here: Optional[str] = None) -> List[Dict[str, Any]]:
+    """The widgets to show now, each with its id, name and view; here: the project the Headline
+    is in (None: none)."""
     result = []
     for widget_id, widget in registered().items():
         view = view_of(widget, now)
         if view is not None:
-            result.append({"id": widget_id, "name": widget["name"], **view})
+            result.append({"id": widget_id, "name": widget["name"], **_in_project(view, here)})
     return result
 
 

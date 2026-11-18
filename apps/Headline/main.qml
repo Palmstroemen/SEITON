@@ -58,16 +58,27 @@ Window {
         view = headline.view()
         Qt.callLater(fit)
     }
+    // » takes room only when something must hide behind it: first all, without it.
     function fit() {
-        var room = line.width - cwdButton.width - moreButton.implicitWidth - 3 * row.spacing - 8
+        var room = line.width - cwdButton.width - 2 * row.spacing - 8
                    - (widgetRow.implicitWidth > 0 ? widgetRow.implicitWidth + 12 : 0)
-        var used = 0
-        var count = 0
+        var widths = []
+        var all = 0
         for (var i = 0; i < folderRepeater.count; i++) {
             var item = folderRepeater.itemAt(i)
             if (!item) break
-            used += item.implicitWidth + row.spacing
-            if (used > room) break
+            widths.push(item.implicitWidth + row.spacing)
+            all += widths[i]
+        }
+        if (widths.length === folderRepeater.count && all <= room) {
+            shownCount = widths.length
+            return
+        }
+        room -= moreButton.implicitWidth + row.spacing
+        var used = 0
+        var count = 0
+        while (count < widths.length && used + widths[count] <= room) {
+            used += widths[count]
             count++
         }
         shownCount = count
@@ -181,8 +192,12 @@ Window {
             objectName: "cwdButton"
             label: line.view.name || ""
             style: "smallIcon"
+            centerName: true
             compactHeight: line.lineHeight - 4
             iconSource: "image://theme/folder-open"
+            projectBadge: !!line.view.project
+            batchSource: line.view.batch || ""
+            batchText: line.view.batchText || ""
             fillColor: line.theme.smallButtonActiveBg || "#2c3a55"
             strokeColor: line.theme.smallButtonActiveBorder || "#4a5675"
             textColor: line.theme.text || "#e6e6e6"

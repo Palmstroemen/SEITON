@@ -121,6 +121,7 @@ Window {
                     width: content.width
                     label: modelData.name
                     style: "smallIcon"
+                    centerName: true
                     compactHeight: panel.rowHeight
                     iconSource: "image://theme/folder"
                     iconSourceHover: "image://theme/folder#active"
@@ -150,6 +151,7 @@ Window {
                     width: content.width
                     label: modelData.name
                     style: "smallIcon"
+                    centerName: true
                     compactHeight: panel.rowHeight
                     iconSource: "image://theme/folder-saved-search"
                     fillColor: panel.theme.pill || "#2c3040"

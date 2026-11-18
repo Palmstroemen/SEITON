@@ -136,3 +136,36 @@ def test_a_broken_counter_is_left_out(clock, counter):
 def test_seconds_shown():
     assert widgets.counted({"prefix": "Küche · ", "since": 1000.0}, now=1000.0 + 2 * 3600 + 15 * 60 + 7) == "Küche · 2:15:07"
     assert widgets.counted({"prefix": "", "since": 1000.0}, now=999.0) == "0:00:00"
+
+
+# --- its project once (2026-11-18): the project already stands at the left of the line ---------
+
+def test_in_its_project_a_widget_shows_its_short_text(clock):
+    _view(clock, text="Küche · 2:15", state="active", project="/p/Küche", short="2:15",
+          counter={"prefix": "Küche · ", "shortPrefix": "", "since": 1000.5})
+    [shown] = widgets.shown(here="/p/Küche")
+    assert shown["text"] == "2:15" and shown["counter"]["prefix"] == ""
+    assert shown["tooltip"] == "Küche"  # which project, on hovering
+
+
+def test_elsewhere_it_names_its_project(clock):
+    _view(clock, text="Küche · 2:15", state="active", project="/p/Küche", short="2:15",
+          counter={"prefix": "Küche · ", "shortPrefix": "", "since": 1000.5})
+    [shown] = widgets.shown(here="/p/Auto")
+    assert shown["text"] == "Küche · 2:15" and shown["counter"]["prefix"] == "Küche · "
+    [shown] = widgets.shown()
+    assert shown["text"] == "Küche · 2:15"
+
+
+def test_its_own_tooltip_comes_after_the_project(clock):
+    _view(clock, text="Küche · 0:15 · gestoppt", state="calm", project="/p/Küche", short="0:15 · gestoppt",
+          tooltip="Stopped by hand.")
+    [shown] = widgets.shown(here="/p/Küche")
+    assert shown["text"] == "0:15 · gestoppt" and shown["tooltip"] == "Küche: Stopped by hand."
+
+
+@pytest.mark.parametrize("project", ["Küche", 5, None])
+def test_a_project_that_is_no_path_keeps_the_long_text(clock, project):
+    _view(clock, text="Küche · 2:15", state="active", project=project, short="2:15")
+    [shown] = widgets.shown(here="Küche")
+    assert shown["text"] == "Küche · 2:15"

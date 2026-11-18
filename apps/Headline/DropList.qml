@@ -84,6 +84,7 @@ Window {
                     width: Math.max(implicitWidth, column.width)
                     label: modelData.name
                     style: "smallIcon"
+                    centerName: true
                     compactHeight: list.rowHeight
                     iconSource: "image://theme/folder"
                     iconSourceHover: "image://theme/folder#active"

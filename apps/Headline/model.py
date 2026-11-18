@@ -156,6 +156,9 @@ class HeadlineModel:
         return {
             "cwd": self._cwd,
             "name": Path(self._cwd).name,
+            # The CWD's icon as in Scope: its own badge, a "P" when it is a project.
+            "project": (Path(self._cwd) / META_DIR / "Project.md").is_file(),
+            **self._badge(Path(self._cwd)),
             "projectsRoot": str(root) if root is not None else "",
             "lens": {
                 "active": in_project,
