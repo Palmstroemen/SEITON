@@ -17,7 +17,7 @@ from PySide6.QtGui import QGuiApplication  # noqa: E402
 sys.path.insert(0, str(REPO))
 from core.brand import META_DIR  # noqa: E402
 from core.scope_api import ScopeApi  # noqa: E402
-from Scope.Scope import load_scope, start_action  # noqa: E402
+from Scope.Scope import close_scope, load_scope, start_action  # noqa: E402
 
 
 @pytest.mark.parametrize("args, action", [
@@ -48,11 +48,7 @@ def _start(place, action):
 
 
 def _gone(engine, window, app):
-    engine._backend.setLanguage("en")
-    window.close()
-    engine.deleteLater()
-    QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
-    app.processEvents()
+    close_scope(engine, app)
 
 
 def test_setup_opens_on_the_back(place):

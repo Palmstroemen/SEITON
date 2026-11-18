@@ -16,7 +16,7 @@ from PySide6.QtGui import QGuiApplication  # noqa: E402
 
 sys.path.insert(0, str(REPO))
 from core.scope_api import ScopeApi  # noqa: E402
-from Scope.Scope import load_scope  # noqa: E402
+from Scope.Scope import close_scope, load_scope  # noqa: E402
 
 
 LAYOUT_LOOP = "Detected recursive rearrange"
@@ -46,11 +46,7 @@ def started(tmp_path_factory):
     yield engine, messages
     # Leave nothing behind for the tests after this one: Scope started in German and installed
     # its translator into the application (they would all run in German), and its window.
-    engine._backend.setLanguage("en")
-    for window in engine.rootObjects():
-        window.close()
-    engine.deleteLater()
-    app.processEvents()
+    close_scope(engine, app)
 
 
 def test_scope_starts_without_qml_errors(started):

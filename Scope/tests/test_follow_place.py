@@ -16,7 +16,7 @@ from PySide6.QtGui import QGuiApplication  # noqa: E402
 sys.path.insert(0, str(REPO))
 from core.brand import META_DIR, env_name  # noqa: E402
 from core.scope_api import ScopeApi  # noqa: E402
-from Scope.Scope import load_scope  # noqa: E402
+from Scope.Scope import close_scope, load_scope  # noqa: E402
 
 
 @pytest.fixture
@@ -46,11 +46,7 @@ def scope(place):
     window._backend = engine._backend  # as Setup switches a setting: through Scope's backend
     _settle(app)
     yield window, app
-    engine._backend.setLanguage("en")
-    window.close()
-    engine.deleteLater()
-    QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
-    app.processEvents()
+    close_scope(engine, app)
 
 
 def _call(window, name, *args):

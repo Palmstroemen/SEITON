@@ -18,7 +18,7 @@ from PySide6.QtGui import QGuiApplication  # noqa: E402
 sys.path.insert(0, str(REPO))
 from core.scope_api import ScopeApi  # noqa: E402
 from core.tags import write_tags  # noqa: E402
-from Scope.Scope import load_scope  # noqa: E402
+from Scope.Scope import close_scope, load_scope  # noqa: E402
 
 
 @pytest.fixture
@@ -38,10 +38,7 @@ def scope(tmp_path):
     window = engine.rootObjects()[0]
     app.processEvents()
     yield app, window, root, sub
-    engine._backend.setLanguage("en")
-    window.close()
-    engine.deleteLater()
-    app.processEvents()
+    close_scope(engine, app)
 
 
 def _wait(app, condition, seconds=8):

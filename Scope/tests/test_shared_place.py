@@ -6,6 +6,7 @@ import functools
 from pathlib import Path
 
 import pytest
+from PySide6.QtCore import QCoreApplication, QEvent
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 from core.brand import META_DIR, env_name
@@ -46,11 +47,20 @@ def programs(world, monkeypatch):
     monkeypatch.setattr(T, "LensLink", shared)
 
     app = QGuiApplication.instance() or QGuiApplication([])
-    scope = S.Backend(ScopeApi(str(world["studio"])), app, QQmlApplicationEngine())
+    engine = QQmlApplicationEngine()  # held: a temporary one went with the backend still using it
+    scope = S.Backend(ScopeApi(str(world["studio"])), app, engine)
     scope.lens("set_cwd", {"path": str(world["studio"])})  # as Scope's QML does on start
     suntree = T.SunTreeBackend(T.BackendAdapter(ScopeApi(str(world["studio"]))), str(world["studio"]))
     yield scope, suntree
     suntree.close()
+    # As Scope at its end: its background work stops before it goes - else a listing or a
+    # thumbnail finished later reached deleted objects and crashed the next test.
+    scope._on_about_to_quit()
+    scope.release_watches()
+    S._CLOSED_BACKENDS.append(scope)  # never freed in a worker thread (see Scope.close_scope)
+    engine.deleteLater()
+    QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
+    app.processEvents()
 
 
 def test_scope_follows_where_suntree_went(world, programs):
@@ -100,4 +110,7 @@ def test_suntree_turned_to_shows_scopes_place(world, programs):
     assert win.property("cwdPath") == str(world["reisen"])
     lens = win.property("lensState")
     assert (lens.toVariant() if hasattr(lens, "toVariant") else lens)["lens"] == ["04_Finanz"]
+    win.close()
     engine.deleteLater()
+    QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
+    QGuiApplication.instance().processEvents()

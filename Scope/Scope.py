@@ -28,6 +28,7 @@ from PySide6.QtCore import (
     QTimer,
     QEvent,
     QSettings,
+    QCoreApplication,
 )
 from PySide6.QtGui import (
     QGuiApplication,
@@ -109,8 +110,11 @@ class Thumbnailer(QObject):
         self._shutting_down = False
         self._lock = Lock()
         self._pending: set[str] = set()
-        self._cache_root = Path("~/.cache/myos-scope/thumbnails").expanduser()
-        self._freedesktop_cache = Path("~/.cache/thumbnails").expanduser()
+        # Under XDG_CACHE_HOME (~/.cache): the tests give it a folder of their own, so they never
+        # write into the user's cache (nor into each other's files while Scope reads them).
+        cache_home = Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache").expanduser()
+        self._cache_root = cache_home / "myos-scope" / "thumbnails"  # the old name: the cache stays
+        self._freedesktop_cache = cache_home / "thumbnails"
         self._pdftoppm = shutil.which("pdftoppm")
         self._md_thumbnailer = Path(__file__).resolve().parents[1] / "core" / "bin" / file_name("md-thumbnailer")
         self._size_px = 256
@@ -1011,6 +1015,12 @@ class Backend(QObject):
         QCursor.setPos(int(round(pos.x() + dx)), int(pos.y()))
         return True
 
+    def release_watches(self) -> None:
+        """Watch no file any more - in the main thread, where the watcher was made."""
+        watched = self._watcher.files() + self._watcher.directories()
+        if watched:
+            self._watcher.removePaths(watched)
+
     def _on_about_to_quit(self) -> None:
         """Stop thumbnail tasks and timers so the app can exit promptly."""
         self._shutting_down = True
@@ -1240,6 +1250,29 @@ def load_scope(api: ScopeApi, app: QGuiApplication, action: str = "") -> QQmlApp
     qml_path = Path(__file__).with_name("main.qml").resolve()
     engine.load(QUrl.fromLocalFile(str(qml_path)))
     return engine
+
+
+# Backends of Scopes ended with close_scope: kept, so Python never frees one in a worker thread
+# (the last task holding it). Its file watcher would then be destroyed there, and the main
+# thread's event loop kept asking its socket notifier - Qt crashed (seen in the tests).
+_CLOSED_BACKENDS: list = []
+
+
+def close_scope(engine: QQmlApplicationEngine, app: QGuiApplication) -> None:
+    """End a Scope that was loaded with load_scope without quitting the application (the tests):
+    its background work stops first, as at aboutToQuit - else a thumbnail or a listing finished
+    later reached deleted objects and crashed Qt. Its translator goes (English again)."""
+    backend = getattr(engine, "_backend", None)
+    if backend is not None:
+        backend._on_about_to_quit()
+        backend.setLanguage("en")
+        backend.release_watches()
+        _CLOSED_BACKENDS.append(backend)
+    for window in engine.rootObjects():
+        window.close()
+    engine.deleteLater()
+    QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
+    app.processEvents()
 
 
 def start_path_from(args: list) -> str:

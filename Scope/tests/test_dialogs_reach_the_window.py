@@ -15,7 +15,7 @@ from PySide6.QtGui import QGuiApplication  # noqa: E402
 
 sys.path.insert(0, str(REPO))
 from core.scope_api import ScopeApi  # noqa: E402
-from Scope.Scope import load_scope  # noqa: E402
+from Scope.Scope import close_scope, load_scope  # noqa: E402
 
 
 def _members(obj) -> set:
@@ -45,7 +45,4 @@ def test_the_dialogs_use_only_what_the_window_has(tmp_path):
                     missing.append(f"{dialog.name}: window.{name}")
         assert not missing, "\n".join(missing)
     finally:
-        engine._backend.setLanguage("en")
-        window.close()
-        engine.deleteLater()
-        app.processEvents()
+        close_scope(engine, app)
