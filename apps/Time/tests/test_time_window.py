@@ -146,8 +146,8 @@ def test_the_dial_counts_on_while_the_clock_counts(started):
     [dial] = _named(started, "nowDial")
     assert dial.property("running") is True
     assert abs(dial.property("seconds") - (2 * 3600 + 15 * 60 + 7)) < 3
-    # The wedge only shows that it runs (2026-11-18): it follows the seconds, a turn a minute.
-    assert dial.property("wedgeAngle") == pytest.approx((dial.property("seconds") % 60) * 6, abs=7)
+    # The wedge only shows that it runs (2026-11-18): opened, it begins at the top.
+    assert dial.property("wedgeAngle") < 12
 
 
 def test_standing_the_dial_stands(started):
@@ -176,13 +176,14 @@ def test_standing_the_wedge_stays_where_it_was(started):
     _view(started, text="Küche · 0:15", short="0:15", state="active", clock="runs",
           counter={"prefix": "", "shortPrefix": "", "since": clock_time.time() - (15 * 60 + 20)})
     [dial] = _named(started, "nowDial")
+    _wait(started["app"], 600)  # it begins at the top and goes on
     running = dial.property("wedgeAngle")
     assert running > 0
     _view(started, text="Küche · 0:15 · gestoppt", short="0:15 · gestoppt", state="calm", clock="stopped")
     assert dial.property("running") is False and dial.property("wedgeAngle") == pytest.approx(running, abs=7)
 
 
-def test_start_and_stop_sit_evenly_under_the_dial(started):
+def test_stop_and_start_sit_evenly_over_the_dial(started):
     from PySide6.QtQuick import QQuickItem
     window = started["window"]
     started["app"].processEvents()
@@ -190,8 +191,96 @@ def test_start_and_stop_sit_evenly_under_the_dial(started):
     start = window.findChild(QQuickItem, "startButton")
     stop = window.findChild(QQuickItem, "stopButton")
     middle = dial.mapToScene(dial.boundingRect().center()).x()
-    left = start.mapToScene(start.boundingRect().topLeft())
-    right = stop.mapToScene(stop.boundingRect().topRight())
+    left = stop.mapToScene(stop.boundingRect().topLeft())  # Stop left, Start right
+    right = start.mapToScene(start.boundingRect().topRight())
     assert abs((left.x() + right.x()) / 2 - middle) <= 2
-    assert left.y() > dial.mapToScene(dial.boundingRect().bottomLeft()).y()
+    assert left.y() < dial.mapToScene(dial.boundingRect().topLeft()).y()  # above it (2026-11-19)
     assert start.width() == stop.width()
+
+
+
+def _wait(app, ms):
+    import time as clock_time
+    end = clock_time.monotonic() + ms / 1000
+    while clock_time.monotonic() < end:
+        app.processEvents()
+        clock_time.sleep(0.01)
+
+
+def test_started_again_the_wedge_goes_on_where_it_stood(started):
+    """It began anew at "57 seconds" (2026-11-18): the wedge is no measure, it goes on."""
+    import time as clock_time
+    app = started["app"]
+    running = dict(text="Küche · 0:15", short="0:15", state="active", clock="runs")
+    _view(started, **running, counter={"prefix": "", "shortPrefix": "", "since": clock_time.time() - 900})
+    _wait(app, 1500)
+    [dial] = _named(started, "nowDial")
+    stood = dial.property("wedgeAngle")
+    assert 3 < stood < 20  # about 1.5 s went by: 9 degrees
+    _view(started, text="Küche · 0:15 · gestoppt", short="0:15 · gestoppt", state="calm", clock="stopped")
+    stood = dial.property("wedgeAngle")
+    _wait(app, 3000)  # long enough that running on through the stop would show (18 degrees)
+    assert dial.property("wedgeAngle") == pytest.approx(stood, abs=0.5)
+    # Started again: the clock's own seconds would put it at 57 s - it goes on from where it stood.
+    _view(started, **running, counter={"prefix": "", "shortPrefix": "", "since": clock_time.time() - (15 * 60 + 57)})
+    _wait(app, 300)
+    assert dial.property("wedgeAngle") == pytest.approx(stood + 1.8, abs=3)  # 0.3 s on: 1.8 degrees
+
+
+def test_a_click_on_start_runs_the_dial_at_once(started):
+    """Up to six seconds went by before the dial moved (the screen read every 5 s)."""
+    app = started["app"]
+    _view(started, text="Küche · 0:15 · gestoppt", short="0:15 · gestoppt", state="calm", clock="stopped")
+    [dial] = _named(started, "nowDial")
+    assert dial.property("running") is False
+    started["window"].setProperty("wish", "start")  # as the Start button does
+    app.processEvents()
+    assert dial.property("running") is True
+
+
+def test_after_a_command_the_screen_reads_the_clock_soon(started):
+    import time as clock_time
+    app = started["app"]
+    backend = started["engine"].rootContext().contextProperty("timeScreen")
+    _view(started, text="Küche · 0:15 · gestoppt", short="0:15 · gestoppt", state="calm", clock="stopped")
+    backend.start()
+    folder = started["project"].parents[1] / "run" / "seiton-clock"
+    import json
+    (folder / "view.json").write_text(json.dumps(dict(
+        text="Küche · 0:15", short="0:15", state="active", clock="runs",
+        counter={"prefix": "", "shortPrefix": "", "since": clock_time.time() - 900})))  # the clock obeyed
+    _wait(app, 900)
+    now = started["window"].property("nowView")
+    now = now.toVariant() if hasattr(now, "toVariant") else now
+    assert now["clock"] == "runs"
+
+
+
+def test_now_reads_person_then_stop_and_start_then_the_dial(started):
+    """The order asked for (2026-11-19): who, the buttons (Stop left, Start right), the dial."""
+    from PySide6.QtQuick import QQuickItem
+    window = started["window"]
+    started["app"].processEvents()
+
+    def top(name):
+        item = window.findChild(QQuickItem, name)
+        return item.mapToScene(item.boundingRect().topLeft())
+    assert top("nowPerson").y() < top("stopButton").y() < top("nowDial").y()
+    assert top("stopButton").y() == top("startButton").y() and top("stopButton").x() < top("startButton").x()
+
+
+def test_opened_standing_a_start_begins_at_the_top(started):
+    """Opened while the clock stood, Start set the wedge to some angle (2026-11-19)."""
+    import time as clock_time
+    app = started["app"]
+    _view(started, text="Küche · 0:15 · gestoppt", short="0:15 · gestoppt", state="calm", clock="stopped")
+    _wait(app, 300)
+    [dial] = _named(started, "nowDial")
+    assert dial.property("wedgeAngle") == 0
+    started["window"].setProperty("wish", "start")  # the click
+    _wait(app, 300)
+    assert dial.property("wedgeAngle") < 5
+    _view(started, text="Küche · 0:15", short="0:15", state="active", clock="runs",
+          counter={"prefix": "", "shortPrefix": "", "since": clock_time.time() - (15 * 60 + 57)})  # the clock obeyed
+    _wait(app, 300)
+    assert dial.property("wedgeAngle") < 8

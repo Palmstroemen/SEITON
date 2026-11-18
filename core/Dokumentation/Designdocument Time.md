@@ -182,9 +182,13 @@ the Headline, the launcher - brings the one open to the front. Its own icon, a s
 - **Now**: the active project, today's time in it, Start/Stop. In the middle a dial
   (2026-11-18, `apps/Time/TimeDial.qml`) that only shows whether the clock runs: while it counts
   a red seconds hand goes round once a minute and draws a green wedge after it; standing, the
-  wedge stays where it was, grey, and "gestoppt" stands in red when stopped by hand. Today's time
-  in the middle as `h:mm h`. Start and Stop evenly below it, then the person counted, with the
-  system's picture (AccountsService, else `~/.face`; without one the first letter).
+  wedge stays where it was, grey, and "gestoppt" stands in red when stopped by hand. The wedge
+  is no measure: it begins at the top and, started again, goes on from where it stood. A click
+  on Start or Stop moves the dial at once; the screen then reads the clock four times a second
+  for three seconds (else every 5 s - it lagged up to six seconds behind the click). Today's time
+  in the middle as `h:mm h`. Top down (2026-11-19): the person counted, with the system's picture
+  (AccountsService, else `~/.face`; without one the first letter); Stop and Start evenly; the
+  dial.
 - **Entries**: one's own rows of the active project, newest first; edit, delete, **Add**.
   Choosing another project: not built yet.
 - **Overview**: the active project with its children (section 3), by period (today, this week,

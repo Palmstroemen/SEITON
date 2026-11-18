@@ -31,6 +31,10 @@ from apps.Time import instance  # noqa: E402
 from apps.Time.model import TimeModel  # noqa: E402
 
 REFRESH_MS = 5000  # how often Now is read anew (the clock writes every 15 s)
+# After Start or Stop: read soon and often for a while - the clock obeys within a second and
+# writes its view at once; at 5 s the screen lagged up to six seconds (2026-11-18).
+SOON_MS = 250
+SOON_FOR_MS = 3000
 _DURATION = re.compile(r"^\s*(\d{1,2}):([0-5]\d)\s*$|^\s*(\d{1,4})\s*$")
 # What the time screen sets (its settings live here, Designdocument Headline.md, 3a).
 TIME_SETTINGS = [key for key in SETTINGS if key.startswith("Time/")]
@@ -55,6 +59,10 @@ class TimeBackend(QObject):
         self._timer = QTimer(self)
         self._timer.setInterval(REFRESH_MS)
         self._timer.timeout.connect(self.changed.emit)
+        self._soon = QTimer(self)
+        self._soon.setInterval(SOON_MS)
+        self._soon.timeout.connect(self._read_soon)
+        self._soon_left = 0
 
     def start_refreshing(self) -> None:
         self._timer.start()
@@ -132,7 +140,15 @@ class TimeBackend(QObject):
     def _done(self, ok: bool) -> bool:
         if ok:
             self.changed.emit()
+            self._soon_left = SOON_FOR_MS // SOON_MS
+            self._soon.start()
         return ok
+
+    def _read_soon(self) -> None:
+        self._soon_left -= 1
+        if self._soon_left <= 0:
+            self._soon.stop()
+        self.changed.emit()
 
 
 def load_time_screen(model: TimeModel, app: QGuiApplication) -> QQmlApplicationEngine:

@@ -13,13 +13,23 @@ Item {
     property string label: ""       // under the time ("heute")
     property bool stopped: false    // stopped by hand: said under it, in red
     property string stoppedText: ""
-    readonly property bool running: since > 0
+    property bool running: since > 0  // the screen may say so at once, on a click
     property real now: Date.now() / 1000
-    readonly property real seconds: running ? Math.max(0, now - since) : todaySeconds
-    readonly property real liveAngle: (seconds % 60) * 6
-    property real lastAngle: 0  // where the wedge stood when the clock stopped
-    onLiveAngleChanged: if (running) lastAngle = liveAngle
-    readonly property real wedgeAngle: running ? liveAngle : lastAngle
+    readonly property real seconds: running && since > 0 ? Math.max(0, now - since) : todaySeconds
+    // The wedge is no measure, only a sign that it runs: it begins at the top and goes on with
+    // the real time, a turn a minute; stopped it stays, started again it goes on from there -
+    // not from the clock's seconds (it began anew "at 57 seconds", 2026-11-18).
+    property real phaseBase: 0   // the angle it went on from
+    property real phaseStart: 0  // when
+    property real lastAngle: 0   // where it stood when the clock stopped
+    readonly property real liveAngle: running ? (phaseBase + Math.max(0, now - phaseStart) * 6) % 360 : lastAngle
+    readonly property real wedgeAngle: liveAngle
+    function _goOn() {
+        phaseBase = lastAngle
+        phaseStart = Date.now() / 1000
+        now = phaseStart
+    }
+    Component.onCompleted: if (running) _goOn()
     readonly property color wedgeColor: running ? "#3fae5f" : (theme.setupMuted || "#9aa0ad")
 
     implicitWidth: 200
@@ -33,7 +43,14 @@ Item {
         onTriggered: dial.now = Date.now() / 1000
     }
     onSecondsChanged: face.requestPaint()
-    onRunningChanged: face.requestPaint()
+    onLiveAngleChanged: {
+        if (running) lastAngle = liveAngle
+        face.requestPaint()
+    }
+    onRunningChanged: {
+        if (running) _goOn()
+        face.requestPaint()
+    }
 
     Canvas {
         id: face

@@ -35,8 +35,14 @@ ApplicationWindow {
         var match = String(text || "").trim().match(/^(\d{1,2}):(\d{2})$/)
         return match ? ("0" + match[1]).slice(-2) + ":" + match[2] : ""
     }
+    // A click on Start or Stop answers at once (2026-11-18): the dial runs or stands as wished
+    // until the clock's view says the same, or for a few seconds at most.
+    property string wish: ""
+    onWishChanged: if (wish) wishTimer.restart()
+    Timer { id: wishTimer; interval: 5000; onTriggered: root.wish = "" }
     function refresh() {
         nowView = timeScreen.now()
+        if ((wish === "start" && nowView.since > 0) || (wish === "stop" && !(nowView.since > 0))) wish = ""
         rows = timeScreen.entries(project)
         unreadableRows = timeScreen.unreadable(project)
         overviewView = timeScreen.overview(project, period, "")
@@ -110,52 +116,7 @@ ApplicationWindow {
             Column {  // in the middle of the page (the column is only as wide as its widest)
                 Layout.preferredWidth: root.width - 32
                 spacing: 10
-                TimeDial {  // today's time as a stopwatch (TimeDial.qml)
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    theme: root.theme
-                    todaySeconds: root.nowView.todaySeconds || 0
-                    since: root.nowView.since || 0
-                    label: qsTr("today")
-                    // Stopped by hand, said in the dial: else one forgets it (Z8).
-                    stopped: root.nowView.clock === "stopped"
-                    stoppedText: qsTr("stopped")
-                }
-                Row {  // Start and Stop, evenly under the dial
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: 12
-                    readonly property real buttonWidth: Math.max(startButton.implicitWidth, stopButton.implicitWidth, 90)
-                    Button {
-                        id: startButton
-                        objectName: "startButton"
-                        width: parent.buttonWidth
-                        text: qsTr("Start")
-                        enabled: root.nowView.clockRuns && root.nowView.state !== "active"
-                        onClicked: timeScreen.start()
-                    }
-                    Button {
-                        id: stopButton
-                        objectName: "stopButton"
-                        width: parent.buttonWidth
-                        text: qsTr("Stop")
-                        // Also in a pause: a lunch break can become "stopped" (Z8).
-                        enabled: root.nowView.clockRuns && root.nowView.clock !== "stopped" && root.nowView.clock !== "stands"
-                        onClicked: timeScreen.stop()
-                    }
-                }
-                Muted {
-                    objectName: "clockNotRunning"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    visible: !root.nowView.clockRuns
-                    text: qsTr("The clock is not running.")
-                }
-                Button {
-                    objectName: "startClockButton"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    visible: !root.nowView.clockRuns
-                    text: qsTr("Start the clock")
-                    onClicked: timeScreen.startClock()
-                }
-                Row {  // for whom it counts: the system's picture and the name in the project
+                Row {  // first: for whom it counts - the system's picture and the name in the project
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 8
                     Rectangle {
@@ -187,6 +148,52 @@ ApplicationWindow {
                         anchors.verticalCenter: parent.verticalCenter
                         text: root.nowView.person || ""
                     }
+                }
+                Row {  // Stop and Start, evenly, above the dial
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 12
+                    readonly property real buttonWidth: Math.max(startButton.implicitWidth, stopButton.implicitWidth, 90)
+                    Button {
+                        id: stopButton
+                        objectName: "stopButton"
+                        width: parent.buttonWidth
+                        text: qsTr("Stop")
+                        // Also in a pause: a lunch break can become "stopped" (Z8).
+                        enabled: root.nowView.clockRuns && root.nowView.clock !== "stopped" && root.nowView.clock !== "stands"
+                        onClicked: { root.wish = "stop"; timeScreen.stop() }
+                    }
+                    Button {
+                        id: startButton
+                        objectName: "startButton"
+                        width: parent.buttonWidth
+                        text: qsTr("Start")
+                        enabled: root.nowView.clockRuns && root.nowView.state !== "active"
+                        onClicked: { root.wish = "start"; timeScreen.start() }
+                    }
+                }
+                Muted {
+                    objectName: "clockNotRunning"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    visible: !root.nowView.clockRuns
+                    text: qsTr("The clock is not running.")
+                }
+                Button {
+                    objectName: "startClockButton"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    visible: !root.nowView.clockRuns
+                    text: qsTr("Start the clock")
+                    onClicked: timeScreen.startClock()
+                }
+                TimeDial {  // today's time as a stopwatch (TimeDial.qml)
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    theme: root.theme
+                    todaySeconds: root.nowView.todaySeconds || 0
+                    since: root.nowView.since || 0
+                    running: root.wish === "start" || (root.wish !== "stop" && (root.nowView.since || 0) > 0)
+                    label: qsTr("today")
+                    // Stopped by hand, said in the dial: else one forgets it (Z8).
+                    stopped: root.nowView.clock === "stopped"
+                    stoppedText: qsTr("stopped")
                 }
             }
             Item { Layout.fillHeight: true }
