@@ -1,3 +1,5 @@
+> Archived 2026-11-18 – describes the early FUSE prototype (`myos_core.py`, no longer in the repo). SEITON was called MyOS until November 2026.
+
 # MyOS Project Details & Technical Notes
 
 ## Design Docs

@@ -13,14 +13,14 @@ Until November 2026 the project was called MyOS; in some places that name still 
 
 ## Purpose
 This document is the practical entry point for contributors. It explains:
-- what MyOS is trying to achieve,
+- what SEITON is trying to achieve,
 - how the current codebase is structured,
 - which design principles should guide new changes.
 
 The goal is fast orientation and consistent decisions.
 
 ## Product Direction
-MyOS is a project-centric environment. It treats project context as a first-class concept rather than an afterthought on top of generic folders.
+SEITON is a project-centric environment. It treats project context as a first-class concept rather than an afterthought on top of generic folders.
 
 Key ideas:
 - Human workflows are project-shaped, not file-shaped.
@@ -72,7 +72,7 @@ Implications:
 
 ## Current Architecture Overview
 
-MyOS currently has two major domains:
+SEITON currently has two major domains:
 - the broader project/filesystem domain (`core`, `Scope`, CLI tools),
 - the PostFix editor domain (`PostFix`).
 
@@ -138,7 +138,7 @@ This keeps perceived startup responsive.
 - Inline color definitions in text are parsed as color entries for UI.
 
 ### Project-Level
-- `.MyOS/Tags.md` is used as project scope tag filter/list.
+- `.seiton/Tags.md` is used as project scope tag filter/list.
 - New document tags can be synced into scope tags.
 - Scope tag changes can trigger propagation hooks through `core.project` signaling.
 - `.seiton/ACLs.md` holds the project's rights. Why the plural, although it is one file (asked

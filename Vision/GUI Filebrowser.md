@@ -2,7 +2,7 @@
 ## CWD
 In aktuellen OS gibt es ein current working directory
 ## CWP
-in MyOS gibt es zusätzlich ein current working **project**
+in SEITON gibt es zusätzlich ein current working **project**
 Das finden wir, wenn wir vom CWD nach oben suchen, bis wir ein Projekt finden.
 ## CTD
 zusätzlich könnte es etwas geben wie ein current **target** diary.
@@ -40,7 +40,7 @@ Das wäre dann so:
 /finanz/Ausgangsrechnungen/**2025**/||/01/, /02/, ...,/12/,/new Standardfolder/, || ,/myFolder/, /myOtherFolder/, /newFolder/ 
 ### Dateien
 Darunter dann der Bereich der Files, der jetzt aber keine Folder mehr anzeigt, sondern nur noch Files, evtl. in der Röntgenansicht.
-Auch hier gibt es vielleicht Dinge wie newNote.md, newFile.xls, newFile.doc, ... (das könnte etwas für eine .MyOS/newFiles.md)
+Auch hier gibt es vielleicht Dinge wie newNote.md, newFile.xls, newFile.doc, ... (das könnte etwas für eine .seiton/newFiles.md)
 
 Zudem gibt es hier vielleicht auch einen Bereich für **Recent Documents**
 
@@ -52,7 +52,7 @@ Ordner öffnen sich nicht nach kurzer Zeit hoovern über einem, sondern erst, we
 Mit ähnlichen Gesten könnte ich durch lange Listen scrollen.
 So habe ich genug Zeit meinen Zielordner zu finden, ohne, dass ständig unter mir irgendwelche Ordner aufgehen, in die ich gar nicht hinein will.
 
-Und genau dafür könnte das CTD hilfreich sein. Man ändert nicht sein CWD sondern bekommt ein kurzlebiges CTD mit dem man aber auch durch alle Pfade navigieren kann, und sich auch darin die MyOS Magie entfaltet. 
+Und genau dafür könnte das CTD hilfreich sein. Man ändert nicht sein CWD sondern bekommt ein kurzlebiges CTD mit dem man aber auch durch alle Pfade navigieren kann, und sich auch darin die SEITON-Magie entfaltet. 
 *Vielleicht zieht das GUI aber auch das CWD mit und setzt es nach einem Drop wieder zurück.*
 Ein Unterschied zum CWD könnte sein, dass durch das CTD nicht die Desktopumgebung geändert wird.
 

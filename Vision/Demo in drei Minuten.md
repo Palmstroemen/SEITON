@@ -1,6 +1,6 @@
 # Demo in drei Minuten
 
-Das Drehbuch für eine kurze Vorführung von MyOS, live oder als Video. Stand 3. November 2026.
+Das Drehbuch für eine kurze Vorführung von SEITON, live oder als Video. Stand 3. November 2026.
 Es zeigt nur, was heute funktioniert; am 3. November einmal ganz durchgespielt (Xephyr, mit den
 Daten aus `scripts/make_demo_data.py`). Aus derselben Geschichte entstehen später der Schnellstart
 vor dem Kurs und die Methode auf einer Seite ([Roadmap](../Roadmap.md)).
@@ -37,7 +37,7 @@ Darin:
   Rechnungen hält, damit die Brille etwas zu zeigen hat.
 - `Projekte/Wohnen`: ein Projekt ohne `04_Finanz`.
 - `Downloads/Rechnung Heizung 2025.odt`, in LibreOffice geöffnet.
-- `Projekte/.MyOS/Templates/Standard`: die Vorlage, ohne Zugriffsrechte (sonst zeigt Scope links ein
+- `Projekte/.seiton/Templates/Standard`: die Vorlage, ohne Zugriffsrechte (sonst zeigt Scope links ein
   Zugriffs-Panel und sperrt Aktionen).
 
 **Zustand vor dem Start:**
@@ -78,7 +78,7 @@ Darin:
 
 ### 4. Die Brille (1:20–2:00)
 
-- **Handgriff:** in Scope zu `Familie` wechseln, in der MyOS-Zeile Doppelklick auf `04_Finanz`.
+- **Handgriff:** in Scope zu `Familie` wechseln, in der SEITON-Zeile Doppelklick auf `04_Finanz`.
 - **Was passiert:** Die Pfadleiste zeigt den Rahmen `Familie [✕ 04_Finanz]`, Scope wird grau
   (der Desk der Finanzabteilung), der Dateibereich zeigt Ausgaben und Einnahmen der Familie.
 - **Handgriff:** in der Projektzeile Doppelklick auf `Projekte`, dann auf `Job`.
@@ -100,7 +100,7 @@ Darin:
   `Projekte`, `Wohnen` und speichern.
 - **Was passiert:** In Scope (oder Nemo) unter `Projekte/Wohnen` ist `04_Finanz` neu geboren, die
   Rechnung liegt darin.
-- **Text:** „LibreOffice weiß nichts von MyOS. Ich habe nur den Weg über die Finanzen genommen. Die
+- **Text:** „LibreOffice weiß nichts von SEITON. Ich habe nur den Weg über die Finanzen genommen. Die
   Rechnung liegt trotzdem im Projekt Wohnen, und der Ordner dafür ist eben entstanden.“
 
 ### 6. Alles beim Projekt (2:40–3:00)
@@ -110,7 +110,7 @@ Darin:
 - **Text:** „Alles vom Urlaub liegt beim Urlaub. Auf einen USB-Stick kopiert, hat der andere alles
   und findet sich sofort zurecht. Und trotzdem habe ich den Überblick über alle Rechnungen.“
 - **Schluss:** „Ordner, die entstehen, wenn du sie brauchst. Und eine Brille für alle Projekte.
-  Das ist MyOS.“
+  Das ist SEITON.“
 
 ## Was nicht vorkommt
 

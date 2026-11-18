@@ -59,7 +59,7 @@ Test suite: `python3 -m pytest core/tests/unit cli/tests PostFix/tests Scope/tes
 - Legacy and duplicate-logic candidates in Scope: `Scope/.Legacy-Code-Kandidaten.md`, `Scope/.FolderBrowser-DoppelKandidaten.md`
 - `main.qml` (~3500 lines) and `FolderBrowser.qml` (~4800 lines) are large; further splitting pending
 - `.TagsHere.json` tag caches appear in many folders; decide whether to track or ignore them
-- `core/context.md` and `Technical Intro.md` still describe the old `myos_core.py` prototype
+- `core/context.md` still describes the old `myos_core.py` prototype (`Technical Intro.md` is archived in `docs/archive/`)
 
 ## Operational Details
 

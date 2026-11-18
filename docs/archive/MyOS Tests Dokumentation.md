@@ -1,3 +1,5 @@
+> Archiviert am 2026-11-18: beschreibt die Testsuite eines frühen Stands (`MyOSLister` gibt es nicht mehr). Die heutige Testsuite steht in docs/STATUS.md und docs/DEVELOPMENT.md. SEITON hieß bis November 2026 MyOS.
+
 ## 📋 Test-Übersicht
 
 MyOS verwendet **Test-Driven Development (TDD)** mit einem umfangreichen Test-Suite, der alle Komponenten abdeckt.

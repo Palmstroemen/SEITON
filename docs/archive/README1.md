@@ -1,3 +1,5 @@
+> Archived 2026-11-18 – superseded by the root README.md. Describes the early FUSE prototype (`myos_core.py`, no longer in the repo); SEITON was called MyOS until November 2026.
+
 # SEITON: A Human-Centric Operating Environment
 
 > **Organically growing, project-centric file management for the human workflow**

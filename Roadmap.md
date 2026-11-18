@@ -1,10 +1,10 @@
-# MyOS Roadmap
+# SEITON Roadmap
 
 Stand 3. November 2026. Die strategische Roadmap; die laufenden Aufgaben stehen im
 [ProjectLogbook.md](ProjectLogbook.md). Auch als Seite:
-[MyOS Roadmap](https://claude.ai/artifact/FMe7ZFHdAruBYHkzSacKUr).
+[SEITON Roadmap](https://claude.ai/artifact/FMe7ZFHdAruBYHkzSacKUr).
 
-Die Idee trägt, und durch KI ist sie eher aktueller geworden. Scheitern würde MyOS nicht am
+Die Idee trägt, und durch KI ist sie eher aktueller geworden. Scheitern würde SEITON nicht am
 Denken, sondern an der Verbreitung und an zu vielen Funktionen auf einmal. Diese Roadmap leitet
 sich daraus ab, was frühere Versuche gelehrt haben.
 
@@ -14,14 +14,14 @@ Versuchen, die Ablage neu zu denken.
 
 ## 00_Admin – Die Leitfrage
 
-**Benutzt jemand MyOS nach einer Woche freiwillig weiter?**
+**Benutzt jemand SEITON nach einer Woche freiwillig weiter?**
 
 Nicht „gefällt es?", sondern „bleibt es?". Jeder Schritt unten muss sich daran messen lassen. Die
 ersten Antworten kommen vom Testrechner ([docs/TEST-MACHINE.md](docs/TEST-MACHINE.md)).
 
 ## 01_Info – Was die Vorläufer lehren
 
-1. **Nicht von anderen abhängen.** OpenDoc und WinFS brauchten, dass alle mitziehen. MyOS muss
+1. **Nicht von anderen abhängen.** OpenDoc und WinFS brauchten, dass alle mitziehen. SEITON muss
    mit unveränderten Programmen heute Nutzen stiften und die Brücken selbst bauen.
 2. **Nutzen sichtbar machen.** KDE Nepomuk war mächtig, aber unsichtbar, und wurde abgeschaltet.
    Der Wert muss in den ersten fünf Minuten sichtbar sein.
@@ -36,7 +36,7 @@ ersten Antworten kommen vom Testrechner ([docs/TEST-MACHINE.md](docs/TEST-MACHIN
 7. **Standards statt eigener Formate.** vCard, iCalendar, ebInterface, Maildir, Seitendateien für
    Tags: übernehmen, wo es sie gibt.
 8. **KI als Chance, nicht als Gegner.** Recall zeigt „keine Ordnung, alles durchsuchen" und den
-   Datenschutz-Aufschrei dazu. MyOS besetzt die Gegenposition: Ordnung, lokal, eine KI, die ablegt.
+   Datenschutz-Aufschrei dazu. SEITON besetzt die Gegenposition: Ordnung, lokal, eine KI, die ablegt.
 
 ## 07_Arbeit – Die Roadmap
 
@@ -48,7 +48,7 @@ Schritt folgt.
 - **Testrechner auswerten** (Leitfrage). Kommentare und Änderungen der Testerinnen und Tester
   sammeln und lesen, Muster suchen: Wo steigen sie aus, was begeistert?
 - **Ein Einstiegsfall: der kleine Betrieb** (3). Vom Fenstertausch-Beispiel her die fünf häufigsten
-  Tätigkeiten der Prokuristin als kleiner Prototyp in MyOS:
+  Tätigkeiten der Prokuristin als kleiner Prototyp in SEITON:
   - Kunde anlegen
   - Rechnung mit fortlaufender Nummer als PDF
   - offene Rechnungen sehen (Perspektive über alle Kunden, Tag `#offen`)
@@ -89,7 +89,7 @@ Schritt folgt.
 
 Aus dem Wissen, ohne neue Recherche; Jahreszahlen ungefähr.
 
-| Versuch | Idee | Stärke | Woran es lag | Für MyOS |
+| Versuch | Idee | Stärke | Woran es lag | Für SEITON |
 |---|---|---|---|---|
 | BeOS-Dateisystem (ca. 1996) | Dateien mit Attributen, live Abfragen; jede Mail eine Datei mit Feldern | Schnell, echt im Betriebssystem | Plattform starb am Markt | Messlatte für Abfragen im Dateisystem |
 | Lifestreams (ca. 1996) | Keine Ordner, ein Zeitstrom | Keine Ablage-Arbeit | Kein Zusammenhang, kein Projektbezug | Gegenentwurf |
@@ -99,7 +99,7 @@ Aus dem Wissen, ohne neue Recherche; Jahreszahlen ungefähr.
 | Microsoft WinFS (2003–2006) | Datenbank unter dem Dateisystem | Durchdacht, ehrgeizig | Zu groß, zu langsam, eingestellt | Warnung: nicht alles auf einmal |
 | Haystack, KDE Nepomuk (2000er–2014) | Semantischer Desktop | Mächtige Verknüpfungen | Ressourcenhunger, unsichtbarer Nutzen | Warnung vor Komplexität |
 | Windows-Bibliotheken, macOS-Tags | Gespeicherte Suchen, Farb-Tags | Eingebaut | Kaum entdeckt, keine Konventionen | Filter und Tags brauchen Konventionen |
-| Smartphones | Jede App hält ihre Daten | Bequem, Massenerfolg | Datensilos, Bindung | Wogegen MyOS antritt |
+| Smartphones | Jede App hält ihre Daten | Bequem, Massenerfolg | Datensilos, Bindung | Wogegen SEITON antritt |
 | Plan 9 | Jeder Prozess hat seine Sicht auf den Baum | Elegant | Nische | Verwandt mit den Perspektiven |
 | TagSpaces, TMSU | Tags für jede Datei per Seitendatei | Funktioniert überall | Nische | Lösung für Tags auf PDFs und Fotos |
 | PARA, Johnny.Decimal, GTD | Methoden | Ohne Software, eine Seite, Gemeinde | Lebt von Disziplin | Nähe zu den nummerierten Standardordnern |

@@ -1,4 +1,4 @@
-# MyOS Documentation Index
+# SEITON Documentation Index
 
 ## Entry Points
 
@@ -23,7 +23,6 @@
 | [DEVELOPMENT.md](DEVELOPMENT.md) | Setup, tests, contribution guidelines |
 | [CONVENTIONS.md](CONVENTIONS.md) | Documentation language and naming conventions |
 | [Portierung auf andere LINUX Systeme.md](Portierung%20auf%20andere%20LINUX%20Systeme.md) | Porting to other Linux distributions, desktops and Wayland (plan) |
-| [../MyOS Tests Dokumentation.md](../MyOS%20Tests%20Dokumentation.md) | Test suite details |
 
 ## Design Documents (core)
 
@@ -39,5 +38,8 @@
 
 | Document | Purpose |
 |----------|---------|
+| [archive/README1.md](archive/README1.md) | Superseded by root README (early FUSE prototype) |
 | [archive/README2.md](archive/README2.md) | Superseded by root README |
 | [archive/README3.md](archive/README3.md) | Superseded by root README |
+| [archive/Technical Intro.md](archive/Technical%20Intro.md) | Early FUSE prototype (`myos_core.py`) |
+| [archive/MyOS Tests Dokumentation.md](archive/MyOS%20Tests%20Dokumentation.md) | Test suite of an early state |

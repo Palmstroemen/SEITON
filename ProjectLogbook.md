@@ -6,7 +6,11 @@ window_y_permille: 44
 background_color: '#f48fb1'
 note_style: notebook
 ---
-# 📖 MyOS: IDEAS / TODO / LEARNINGS
+# 📖 SEITON: IDEAS / TODO / LEARNINGS
+
+Bis November 2026 hieß das Projekt MyOS. Erledigte Einträge behalten die Namen und Pfade von damals
+(`.MyOS`, `~/.config/MyOS`, `MYOS_`, `myos_acl`); heute heißen sie `.seiton`, `~/.config/seiton`, `SEITON_` und
+die Nextcloud-App `seiton`.
 
 ---
 
@@ -143,8 +147,8 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
     [ ] Laufwerk: ein Projekt ohne Abteilungsordner zeigt unter 04_Finanz/Projekte/<Projekt> das Projekt selbst
         (v1.1-Fallback, damit Speichern dort den Ordner gebiert) - in der Buchhalter-Ansicht sieht man so Grundriss
         und Notizen von Wohnen; besser leer zeigen und trotzdem dorthin speichern lassen? (2026-11-03, Demo)
-    [ ] MyOS-Dienst (Konzept A9, 2026-10-23): Laufwerk mit der Anmeldung statt mit Scope; eingehängt wie ein
-        Netzlaufwerk unter /run/user/<uid>/myos, neben "Projekte" nur ein Symlink (sonst ist alles doppelt);
+    [ ] SEITON-Dienst (Konzept A9, 2026-10-23): Laufwerk mit der Anmeldung statt mit Scope; eingehängt wie ein
+        Netzlaufwerk unter /run/user/<uid>/seiton, neben "Projekte" nur ein Symlink (sonst ist alles doppelt);
         Suchen in der Perspektive (Scope über alle Projekte, Spalte "Projekt"). Vorher bei dir prüfen:
         Nemo, Déjà Dup, Suchindex mit dem Symlink. Entscheiden: vor E3?
     [ ] Energiemessung der Suche (A9): künstlicher Bestand (z. B. 200 Projekte), ganzer Home-Ordner vs. nur
@@ -248,12 +252,12 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
     liest es solche Zusätze bei eingehenden Dateien und legt sie gleich im richtigen Projekt ab. Auch ein Teil hilft schon:
     Steht nur `/04_Finanz/Eingangsrechnungen` dabei, ist der Ordner klar, aber nicht das Projekt; dann fragt es nach oder
     schlägt per KI aus dem Kontext eines vor. Kommt die Projektnummer mit, umso besser.
-[ ] Obsidian-MyOS-Plugin
-[ ] MyOS auf einer Cloud (Idee 2026-11-05): Basisfunktionen als Plugin im Webclient, ohne Scope, SunTree und PostFix.
+[ ] Obsidian-SEITON-Plugin
+[ ] SEITON auf einer Cloud (Idee 2026-11-05): Basisfunktionen als Plugin im Webclient, ohne Scope, SunTree und PostFix.
     Reihenfolge: erst OpenCloud oder ownCloud Infinite Scale (dasselbe Erweiterungssystem, klar dokumentiert), dann
     Nextcloud (eigenes Plugin); nicht ownCloud Classic (Support endet laut Wiki im Januar 2027)
-    [ ] Kurzer Versuch: Test-Instanz per Docker, Demo-Daten hinein; wie verhält sich `.MyOS` im Web und per Sync-Client?
-        Dabei prüfen: Laufwerk "Perspektiven" im Sync-Ordner, `.TagsHere.json` und `.MyOS/Trash` (Konflikte?), Vorlagen
+    [ ] Kurzer Versuch: Test-Instanz per Docker, Demo-Daten hinein; wie verhält sich `.seiton` im Web und per Sync-Client?
+        Dabei prüfen: Laufwerk "Perspektiven" im Sync-Ordner, `.TagsHere.json` und `.seiton/Trash` (Konflikte?), Vorlagen
         in einem geteilten `Templates`-Ordner
     [ ] Kleinster Prototyp: eine Ordneransicht zeigt blasse Ordner, eine hineingezogene Datei gebärt den Ordner. Zeigt,
         ob die Andockstellen reichen (Zeilen in die normale Dateiliste einfügen scheint nicht vorgesehen, ungeprüft)
@@ -314,7 +318,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
             (`plan(readable=...)`; jeder Eintrag unter einer Wegregel bekommt jetzt eine eigene Regel). Geburt im
             Browser wie in MyOS: Ordner, versteckte Ordner, Dateien per `COPY`; Embryos nur, wo man anlegen darf.
             Integrationstest und Browser auf der Testinstanz grün
-        [ ] "n hidden" in der Files-App zählt die herausgefilterten MyOS-Ordner mit (so rechnet Nextcloud, ohne
+        [ ] "n hidden" in der Files-App zählt die herausgefilterten SEITON-Ordner mit (so rechnet Nextcloud, ohne
             Eingriff in die Files-App nicht zu ändern)
         [ ] Bündel verkleinern (267 kB, `@nextcloud/files` kommt ganz mit)
         [x] Sicherheit (2026-11-07): Wer an einem Projektordner schreiben durfte, durfte in der Cloud auch dessen
@@ -323,11 +327,11 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
             verwaltet: `ACLs.md`, `ACLs-history`, `Nextcloud.md`, `Embryos.json`, `Embryos/` in jedem `.MyOS` schreibt
             nur, wer `change` auf dessen `ACLs.md` hat; alle anderen höchstens lesen. Der Rest von `.MyOS` folgt den
             Regeln wie in MyOS. Integrationstest: ohne Schutz überschreibt Lisa `Familie/.MyOS/Embryos.json`, mit 403
-        [ ] Mit Desktop-Client: `Embryos.json` und `.MyOS/Embryos/` kämen auch lokal an (stört nicht, ist aber Ballast)
+        [ ] Mit Desktop-Client: `Embryos.json` und `.seiton/Embryos/` kämen auch lokal an (stört nicht, ist aber Ballast)
         [ ] Tags: Unsere Tags auf die "Collaborative Tags" (WebDAV `systemtags`) spiegeln
-    [ ] Der MyOS-Kern als Dienst neben Nextcloud (entschieden 2026-11-08, cloud/nextcloud/Designdocument MyOS Core
-        Service.md): ein Docker-Image mit dem Python-Kern als API, `myos_acl` als Brücke; keine MyOS-Logik in PHP oder
-        JS. Der Kern arbeitet auf einem Schattenbaum (Ordner, `.MyOS` mit den Vorlagen), entscheidet; der Nutzer handelt
+    [ ] Der SEITON-Kern als Dienst neben Nextcloud (entschieden 2026-11-08, cloud/nextcloud/Designdocument MyOS Core
+        Service.md): ein Docker-Image mit dem Python-Kern als API, die App `seiton` als Brücke; keine SEITON-Logik in PHP oder
+        JS. Der Kern arbeitet auf einem Schattenbaum (Ordner, `.seiton` mit den Vorlagen), entscheidet; der Nutzer handelt
         mit eigenen Rechten, Regeln setzt ein Dienstkonto sofort nach jedem Ereignis. Erst als Sidecar, später ExApp
         Reihenfolge umgestellt (2026-11-10): zuerst die Perspektiven, nur ansehen - zeigt am meisten, der Kern setzt
         keine Regeln und schreibt nichts. Getestet wird auf Dell (Image, Kern gegen Schattenbaum im Ordner), GMXtec
@@ -359,10 +363,10 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
                 sonst holte Herunterladen aus dem Finanz-Regal das ganze Projekt
             [ ] Abteilungen und das Regal selbst bleiben gedacht (erfundene Quellen): keine Aktionen darauf
             [ ] Bündel 296 kB (der WebDAV-Client kommt mit)
-            [ ] Schatten bei jeder Änderung ganz neu (Sekunden im Test); später Ereignisse aus `myos_acl`
+            [ ] Schatten bei jeder Änderung ganz neu (Sekunden im Test); später Ereignisse aus der App `seiton`
             [ ] Offen: Abteilungen, in denen man nirgends etwas lesen darf (`00_Admin`), zeigen ein leeres Regal;
                 Unterprojekte erreicht man nur über ihr Projekt (wie im Laufwerk)
-        [ ] Schritt 2: API für Ebene und Geburt, Ereignisse aus `myos_acl`, Rechte live
+        [ ] Schritt 2: API für Ebene und Geburt, Ereignisse aus der App `seiton`, Rechte live
             [x] Rechte live (2026-11-10): Nach jedem Neubau des Schattens tut der Kern, was `myacl sync` tut
                 (core/nextcloud_sync.py, gemeinsam mit der CLI), mit dem Dienstkonto - Regeln und Embryos. Ein
                 später angelegter Ordner hat seine Rechte nach etwa 10-30 Sekunden, eine in der Cloud geänderte
@@ -435,7 +439,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
 
 - Perspective-Daemon (Resolver, FUSE, Scope-Client) mit Idle-Selbstabschaltung.
 - Scope: Pfadleiste H/V, Edge-Dock-Modus, Kontextmenü Löschen, einheitliches `navigationRequested`.
-- Verschachtelte Embryos werden von der Wurzel her geboren; Projekt-Root erfordert `.MyOS/Project.md`.
+- Verschachtelte Embryos werden von der Wurzel her geboren; Projekt-Root erfordert `.seiton/Project.md`.
 - `Project.md`-Metadaten werden atomar geschrieben (behebt zerschossenes Frontmatter durch parallele Schreiber).
 - Desk: Projekt-Icon (`ProjectIcon`) + Remix-Icon-Set.
 - ClipboardTool: CopyQ speichert Text-Clips als Markdown.
@@ -480,7 +484,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
 - Predictable behavior beats clever behavior (MVP-Regel).
 - Dateibasierte, menschenlesbare Metadaten bleiben zentral für Souveränität und Debugbarkeit.
 - Scope-DnD braucht Sicherheitsgeländer (insb. bei Ordnern), sonst entstehen stille Fehlverschiebungen.
-- Obsidian-Kompatibilität ist wichtig, aber nicht auf Kosten klarer MyOS-Semantik.
+- Obsidian-Kompatibilität ist wichtig, aber nicht auf Kosten klarer SEITON-Semantik.
 - MVP-Fokus: reale Nutzung beobachten, dann gezielt erweitern (nicht alles vorab ausbauen).
 
 ---
@@ -489,7 +493,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
 
 - ACL-UX: Wie einfach bleibt es für Nicht-Admins, ohne Sicherheit zu verwässern?
 - Perspektiven: Persistenzmodell und Sharing-Strategie zwischen Projekten?
-- Rooms: Wie eng koppeln wir an Desktop-Umgebung vs. MyOS-eigene Abstraktion?
+- Rooms: Wie eng koppeln wir an Desktop-Umgebung vs. SEITON-eigene Abstraktion?
 - i18n: String-Management früh zentralisieren (Keys), aber ohne Over-Engineering.
 - Demo-Virtualisierung: bestes Setup für Schutz + gute Demo-Performance?
 
