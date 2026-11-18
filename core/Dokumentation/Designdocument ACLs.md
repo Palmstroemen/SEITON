@@ -120,8 +120,13 @@ its rules `{Self}` is the **asking person**, written as in `# Users`:
 - Like `## Folder`, they apply again in every subproject the ACLs.md governs.
 - Someone not in `# Users` is not everyone. A name that is no plain file name (a slash,
   `..`, a wildcard) gets nothing from a `{Self}` rule, so it cannot widen it.
-- Everyone is no role: the GUI's role list, `myacl rules` and the Nextcloud adapter do not
-  show it yet (to come).
+- Everyone is no role: the GUI's role list and `myacl rules` do not show it yet (to come).
+- In Nextcloud (core/acl_nextcloud.py, also the core service) the rules become rules per
+  person, `{Self}` filled in as for the checks: each one gets their own time file, with read
+  on the way there. A rule on a file not there yet is a note ("not there yet") until it
+  exists; a pattern Nextcloud cannot hold is left out with a note (2026-11-18, C5).
+  Open: a person cannot create their first time file there (creating means creating
+  anything in that folder); someone who may write it creates it.
 
 Decided 2026-11-16 for the time tracking ("Designdocument Time.md", 7.4).
 

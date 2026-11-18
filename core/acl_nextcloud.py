@@ -118,8 +118,9 @@ def plan(
     # with an ACLs.md of its own (its rule paths relative to it).
     scopes = [("/", policy, _mappable_rules(policy, result.notes))]
     scopes += [(prefix, sub, _mappable_rules(sub, result.notes)) for prefix, sub in apart]
-    if any("change" in r.rights or "*" in r.rights
-           for _prefix, _policy, rules in scopes for role_rules in rules.values() for r in role_rules):
+    copied = [rule for _prefix, scope, rules in scopes
+              for rule in [*(r for role_rules in rules.values() for r in role_rules), *scope.everyone]]
+    if any("change" in rule.rights or "*" in rule.rights for rule in copied):
         result.notes.append("change is not copied: who may manage the rules is set for the whole Team folder")
     missing: Set[str] = set()
     for group in base_groups:
@@ -131,7 +132,11 @@ def plan(
             named = next(scope for _prefix, scope, _rules in scopes if person in scope.users)
             result.notes.append(f"{named.display_name(person)} has no Nextcloud account in # Accounts: no rules")
             continue
-        mine = [(prefix, [rules.get(role, []) for role in scope.users.get(person, ())]) for prefix, scope, rules in scopes]
+        # A person's rule lists per part of the tree: one per role, and the "## Everyone"
+        # rules with {Self} as this person (C5) - as at home, the person gets their union.
+        mine = [(prefix, [rules.get(role, []) for role in scope.users.get(person, ())]
+                 + [[rule for rule in scope.everyone_rules(person) if _mappable(rule.path)]])
+                for prefix, scope, rules in scopes]
         for path, allowed, way in _person_rules(mine, exists, children, missing, list(readable), list(protected)):
             result.rules.append(PlannedRule(path, "user", account, allowed, traverse=way))
     for path in sorted(missing):
@@ -153,17 +158,25 @@ def rights_files(paths: Iterable[str]) -> List[str]:
     return sorted(found)
 
 
+def _mappable(path: str) -> bool:
+    """Whether Nextcloud can hold a rule on path: a plain path, /folder/** or /*."""
+    plain = path[:-3] if path.endswith("/**") else path
+    return path == "/*" or not re.search(r"[*?\[]", plain)
+
+
 def _mappable_rules(policy: ACLPolicy, notes: List[str]) -> Dict[str, list]:
-    """Rules per role that Nextcloud can hold: for a folder, /folder/** and /*."""
+    """Rules per role that Nextcloud can hold (_mappable); the others with a note, also those
+    of "## Everyone" (kept apart: their {Self} is filled in per person in plan)."""
     kept: Dict[str, list] = {}
     for role, role_rules in sorted(policy.permissions.items()):
         for rule in role_rules:
-            path = rule.path
-            plain = path[:-3] if path.endswith("/**") else path
-            if path == "/*" or not re.search(r"[*?\[]", plain):
+            if _mappable(rule.path):
                 kept.setdefault(role, []).append(rule)
             else:
-                notes.append(f"{policy.display_name(role)}: {path} is a pattern Nextcloud cannot hold: left out")
+                notes.append(f"{policy.display_name(role)}: {rule.path} is a pattern Nextcloud cannot hold: left out")
+    for rule in policy.everyone:
+        if not _mappable(rule.path):
+            notes.append(f"Everyone: {rule.path} is a pattern Nextcloud cannot hold: left out")
     return kept
 
 

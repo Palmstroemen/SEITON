@@ -306,3 +306,81 @@ def test_a_subproject_with_rules_of_its_own_is_ruled_by_them_in_the_cloud(projec
     assert _effective(oliver, "/Job/Kunde") == {"read"}  # on the way to Berichte
     assert _effective(oliver, "/Job/Kunde/Berichte") == {"read"}
     assert _effective(oliver, "/Familie") == {"read", "write", "create"}  # Admin at home
+
+
+# "## Everyone" and {Self} ("docs/Prüfung 2026-11-18.md", C5): in the cloud as at home, every
+# person of the project writes their own time file, also without a role in /0_Admin.
+EVERYONE_ACLS = (
+    "# Permissions\n\n"
+    "## Folder\n- /{Folder}/: read, write\n\n"
+    "## Everyone\n- /0_Admin/Zeitaufwand/{Self}.md: read, write\n- /1_Info/*.md: read\n\n"
+    "## Leitung\n- /*: read, write\n\n"
+    "# Users\nOliver: Leitung\nAnna: 4_Finanz\nBen: 4_Finanz\n"
+)
+EVERYONE_ACCOUNTS = {"oliver": "oliver", "anna": "anna", "ben": "ben"}
+
+
+def _everyone_project(path: Path) -> Path:
+    (path / META_DIR).mkdir(parents=True)
+    (path / META_DIR / "Project.md").write_text("# Project\n")
+    (path / META_DIR / "Templates.md").write_text("# Templates\nStandard\n")
+    return path
+
+
+@pytest.fixture
+def firma(tmp_path):
+    root = _everyone_project(tmp_path / "Firma")
+    for folder in ("0_Admin", "1_Info", "4_Finanz"):
+        (root / META_DIR / "Templates" / "Standard" / folder).mkdir(parents=True)
+        (root / folder).mkdir()
+    (root / META_DIR / "ACLs.md").write_text(EVERYONE_ACLS)
+    (root / "0_Admin" / "Zeitaufwand").mkdir()
+    (root / "0_Admin" / "Zeitaufwand" / "Anna.md").write_text("x")
+    (root / "0_Admin" / "Zeitaufwand" / "Ben.md").write_text("x")
+    (root / "0_Admin" / "Ziele.md").write_text("x")
+    return root
+
+
+def _plan_of(root, accounts=EVERYONE_ACCOUNTS):
+    exists, children = local_tree(root)
+    result = plan(ACLPolicy.for_tree(root), accounts, exists, children)
+    return {(r.kind, r.account, r.path): set(r.allowed) for r in result.rules}, result.notes
+
+
+def test_everyone_writes_their_own_time_file_in_the_cloud(firma):
+    rules, _notes = _plan_of(firma)
+    anna = _of(rules, "anna")
+    assert _effective(anna, "/0_Admin/Zeitaufwand/Anna.md") == {"read", "write", "create"}
+    assert _effective(anna, "/0_Admin/Zeitaufwand") == {"read"}  # only on the way there
+    assert _effective(anna, "/0_Admin/Zeitaufwand/Ben.md") == set()
+    assert _effective(anna, "/0_Admin/Ziele.md") == set()
+    assert _effective(anna, "/4_Finanz") == {"read", "write", "create"}  # her role stays
+    assert _effective(_of(rules, "ben"), "/0_Admin/Zeitaufwand/Ben.md") == {"read", "write", "create"}
+
+
+def test_a_time_file_not_there_yet_is_a_note(firma):
+    (firma / "0_Admin" / "Zeitaufwand" / "Ben.md").unlink()
+    _rules, notes = _plan_of(firma)
+    assert "/0_Admin/Zeitaufwand/Ben.md is not there yet: its rules follow when it exists" in notes
+
+
+def test_an_everyone_pattern_is_left_out_with_one_note(firma):
+    rules, notes = _plan_of(firma)
+    assert notes.count("Everyone: /1_Info/*.md is a pattern Nextcloud cannot hold: left out") == 1
+    assert _effective(_of(rules, "anna"), "/1_Info") == set()
+
+
+def test_everyone_applies_again_in_each_subproject_in_the_cloud(firma):
+    huber = _everyone_project(firma / "Huber")
+    (huber / "0_Admin" / "Zeitaufwand").mkdir(parents=True)
+    (huber / "0_Admin" / "Zeitaufwand" / "Anna.md").write_text("x")
+    policy = ACLPolicy.for_tree(firma)
+    assert "/Huber/0_Admin/Zeitaufwand/{Self}.md" in [rule.path for rule in policy.everyone]
+    rules, _notes = _plan_of(firma)
+    assert _effective(_of(rules, "anna"), "/Huber/0_Admin/Zeitaufwand/Anna.md") == {"read", "write", "create"}
+
+
+def test_everyone_rules_resolve_self_as_everyone_rights_does(firma):
+    policy = ACLPolicy.from_project(firma)
+    assert [rule.path for rule in policy.everyone_rules("anna")] == ["/0_Admin/Zeitaufwand/Anna.md", "/1_Info/*.md"]
+    assert policy.everyone_rules("paul") == []  # not in # Users

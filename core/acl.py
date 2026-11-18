@@ -177,9 +177,16 @@ class ACLPolicy:
         permissions = {role: list(rules) for role, rules in policy.permissions.items()}
         seen = {(role, rule.path, frozenset(rule.rights)) for role, rules in permissions.items() for rule in rules}
         roles, display_names = set(policy.roles), dict(policy.display_names)
+        everyone = list(policy.everyone)
+        seen_everyone = {(rule.path, frozenset(rule.rights)) for rule in everyone}
         for sub in _governed_subprojects(root):
             context = policy.for_context(root, sub)
             roles |= context.roles
+            # "## Everyone" again in each subproject, as the permissions (C5).
+            for rule in context.everyone:
+                if (rule.path, frozenset(rule.rights)) not in seen_everyone:
+                    seen_everyone.add((rule.path, frozenset(rule.rights)))
+                    everyone.append(rule)
             for role, name in context.display_names.items():
                 display_names.setdefault(role, name)
             for role, rules in context.permissions.items():
@@ -188,7 +195,8 @@ class ACLPolicy:
                     if key not in seen:
                         seen.add(key)
                         permissions.setdefault(role, []).append(rule)
-        return replace(policy, roles=roles, permissions=permissions, display_names=display_names)
+        return replace(policy, roles=roles, permissions=permissions, display_names=display_names,
+                       everyone=everyone)
 
     def roles_for_user(self, username: str) -> Set[str]:
         user_key = username.strip().lower()
@@ -212,12 +220,13 @@ class ACLPolicy:
         rights = self.rights_for(role, path)
         return "*" in rights or right.strip().lower() in rights
 
-    def everyone_rights(self, username: str, path: str) -> Set[str]:
-        """Rights the "## Everyone" rules give a person of the project at path ({Self}: that
-        person, as written in "# Users"). Nobody outside "# Users" is everyone."""
+    def everyone_rules(self, username: str) -> List[PermissionRule]:
+        """The "## Everyone" rules for a person of the project, {Self} as that person is
+        written in "# Users"; none for who is not there. Also for tools that copy the rules
+        elsewhere (the Nextcloud adapter: rules per person)."""
         user_key = str(username or "").strip().lower()
         if not self.everyone or user_key not in self.users:
-            return set()
+            return []
         name = self.display_names.get(user_key, user_key)
         # Security: {Self} becomes part of a path rule. A name that is no plain file name
         # (a slash, "..", a wildcard) would widen the rule to other people's files, so for it
@@ -231,8 +240,13 @@ class ACLPolicy:
                 rule = PermissionRule(re.sub(r"\{self\}", lambda _m: name, rule.path, flags=re.IGNORECASE),
                                       rule.rights)
             rules.append(rule)
+        return rules
+
+    def everyone_rights(self, username: str, path: str) -> Set[str]:
+        """Rights the "## Everyone" rules give a person of the project at path ({Self}: that
+        person, as written in "# Users"). Nobody outside "# Users" is everyone."""
         rights: Set[str] = set()
-        for rule in _nearest_rules(rules, _normalize_path(path)):
+        for rule in _nearest_rules(self.everyone_rules(username), _normalize_path(path)):
             rights |= set(rule.rights)
         return rights
 
