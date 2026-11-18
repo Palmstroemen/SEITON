@@ -49,3 +49,28 @@ def test_a_dead_drive_is_cleared_before_a_new_daemon(tmp_path):
     assert not clear_dead_mount(tmp_path, stat=os.stat, unmount=lambda argv: calls.append(argv) or 0)
     assert not clear_dead_mount(tmp_path / "fehlt", unmount=lambda argv: calls.append(argv) or 0)
     assert calls == []
+
+
+def _state(tmp_path):
+    root = tmp_path / "Projekte"
+    (root / ".seiton").mkdir(parents=True)
+    (root / ".seiton" / "Project.md").write_text("# Project\n")
+    return pd.DaemonState(str(root))
+
+
+def test_a_client_asking_on_does_not_keep_an_ending_daemon(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", B8: the Headline asks every second, so the daemon never
+    ended once the last program said shutdown."""
+    state = _state(tmp_path)
+    pd._handle_request(state, {"method": "shutdown"})
+    pd._handle_request(state, {"method": "state"})
+    assert state.shutdown_requested
+    pd._handle_request(state, {"method": "ping"})  # a program connects anew: it stays
+    assert not state.shutdown_requested
+
+
+def test_an_end_by_signal_is_not_cancelled(tmp_path):
+    state = _state(tmp_path)
+    state.request_shutdown(by_signal=True)  # logging out
+    pd._handle_request(state, {"method": "ping"})
+    assert state.shutdown_requested

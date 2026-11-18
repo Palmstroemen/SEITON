@@ -96,19 +96,25 @@ class DaemonState:
         self.projects_root = str(self.session.projects_root)
         self.mount_point = mount_point
         self._shutdown = threading.Event()
+        self._by_signal = False  # an end by SIGTERM (logging out) is never cancelled
 
     @property
     def shutdown_requested(self) -> bool:
         return self._shutdown.is_set()
 
-    def request_shutdown(self) -> None:
+    def request_shutdown(self, by_signal: bool = False) -> None:
         with self._lock:
+            self._by_signal = self._by_signal or by_signal
             self._shutdown.set()
 
-    def cancel_shutdown(self) -> None:
-        """A client came back while the drive was still busy: the daemon stays."""
+    def cancel_shutdown(self) -> bool:
+        """A client came back while the drive was still busy: the daemon stays - unless the
+        end came by a signal. True when it was cancelled."""
         with self._lock:
+            if self._by_signal:
+                return False
             self._shutdown.clear()
+            return True
 
     def wait_for_shutdown(self) -> None:
         self._shutdown.wait()
@@ -171,8 +177,9 @@ _ACTIONS: Dict[str, Callable[[PerspectiveSession, Dict[str, Any]], Any]] = {
 def _handle_request(state: DaemonState, req: Dict[str, Any]) -> str:
     method = (req.get("method") or "").strip()
     params = req.get("params") or {}
-    if method != "shutdown" and state.shutdown_requested:
-        state.cancel_shutdown()
+    # Only a program connecting anew (ping) keeps an ending daemon; one that only asks on (the
+    # Headline's "state" every second) would keep it for ever (B8).
+    if method == "ping" and state.shutdown_requested and state.cancel_shutdown():
         _daemon_log("shutdown cancelled: a client came back")
     try:
         if method == "ping":
@@ -278,7 +285,7 @@ def _shutdown_on_sigterm(state: DaemonState) -> None:
     while True:
         signal.sigwait({signal.SIGTERM})
         _daemon_log("SIGTERM; ending")
-        state.request_shutdown()
+        state.request_shutdown(by_signal=True)
 
 
 def _pulse_loop(log_path: Path) -> None:
