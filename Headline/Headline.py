@@ -41,7 +41,7 @@ from PySide6.QtQml import QQmlApplicationEngine  # noqa: E402
 from core.brand import getenv  # noqa: E402
 from core.clock_sources import active_file, write_active  # noqa: E402
 from core.color_schemes import load_scheme  # noqa: E402
-from core.scope_api import ScopeApi, find_top_project_root, roots_below  # noqa: E402
+from core.scope_api import ScopeApi, start_place  # noqa: E402  (start_place: shared with SunTree, Scope)
 from core.settings import Settings  # noqa: E402
 from daemon.lens_link import LensLink  # noqa: E402
 from Headline.model import HeadlineModel  # noqa: E402
@@ -330,17 +330,6 @@ def install_translator(app: QGuiApplication, code: str) -> Optional[QTranslator]
 parse_start = instance.parse_start  # read before Qt is loaded (H5)
 
 
-def start_place(place: Optional[str]) -> str:
-    """Where the Headline starts: the place given, else the home folder; outside any root it
-    looks downwards (A11) and starts in the first root below (the autostart gives no place)."""
-    start = Path(place or Path.home()).expanduser()
-    if find_top_project_root(start) is None:
-        below = roots_below(start)
-        if below:
-            return str(below[0])
-    return str(start)
-
-
 def to_logical(anchor: Optional[dict], ratio: float) -> Optional[dict]:
     """An anchor in device pixels (Cinnamon) in Qt's logical pixels."""
     if anchor is None or not ratio or ratio == 1.0:
@@ -383,6 +372,8 @@ def main(argv: Optional[list] = None) -> int:
     backend.start_following()
     if request is not None:
         QTimer.singleShot(0, lambda: backend.panelRequested.emit(to_logical(request["panel"], ratio)))
+    from core.quit_on_signal import quit_on_sigterm
+    quit_on_sigterm(app)  # kill/logout: link.close() below still unmounts the lens drive (O2)
     code = app.exec()
     server.close()
     link.close()
