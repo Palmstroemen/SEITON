@@ -277,8 +277,10 @@ def add(project: Union[str, Path], person: str, stretch: Stretch, *, language: s
     return add_to_file(time_file(project, person), person, stretch, language=language)
 
 
-def add_to_file(path: Path, person: str, stretch: Stretch, *, language: str) -> Path:
-    """add() into a given file (the clock in its sandbox reaches the projects through its drive)."""
+def add_to_file(path: Path, person: str, stretch: Stretch, *, language: str, atomic: bool = True) -> Path:
+    """add() into a given file (the clock in its sandbox reaches the projects through its drive).
+    atomic: written beside it and swapped in; without, the file itself is written anew - on the
+    drive the person may write their own file ({Self}.md), not a helper file beside it."""
     if stretch.kind not in KINDS:
         raise ValueError(f"kind {stretch.kind!r}")
     path = Path(path)
@@ -296,6 +298,9 @@ def add_to_file(path: Path, person: str, stretch: Stretch, *, language: str) -> 
         lines.insert(end, _format_row(columns, file_language, stretch))
         text = "\n".join(lines) + "\n"
     path.parent.mkdir(parents=True, exist_ok=True)
+    if not atomic:
+        path.write_text(text, encoding="utf-8")
+        return path
     temporary = path.with_name(f".{path.name}.writing")
     temporary.write_text(text, encoding="utf-8")
     os.replace(temporary, path)
@@ -357,6 +362,8 @@ def split_days(start: datetime, duration: timedelta, *, kind: str, note: str = "
     current = start
     while True:
         midnight = datetime.combine(current.date() + timedelta(days=1), time(0, 0))
+        if current.tzinfo is not None:
+            midnight = midnight.astimezone()  # the real midnight: a day may have 23 or 25 hours
         piece = min(left, midnight - current)
         parts.append(Stretch(day=current.date(), start=current.time(), duration=piece,
                              kind=kind, note=note, offset=offset))

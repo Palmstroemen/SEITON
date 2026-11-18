@@ -259,6 +259,14 @@ Built 16 November 2026 (step 4). The clock does not write the projects directly:
    - `widget`: the widget's folder (`$XDG_RUNTIME_DIR/seiton-clock`: `view.json`, the commands
      the Headline drops), read and write;
    - and the session bus.
+5. **One root.** The clock serves the projects root it was started with (`--projects-root`,
+   else the first root below the home). An active project in another root (A11: `~/Dokumente`
+   and `~/Projekte`) counts as no project: the clock does not show time it could not write.
+   Serving several roots - a drive per root, or one drive over all - is a step of its own
+   (review 2026-11-18, Z5).
+6. **Written in place.** Through the drive the person may write their own file
+   (`/0_Admin/Zeitaufwand/{Self}.md`), nothing beside it, so the clock writes the file itself
+   anew instead of a helper file swapped in (review 2026-11-18, Z6).
 
    The projects root is hidden even where it lies inside the code (`SEITON_Test` in the
    repository): a kept folder would show it again.

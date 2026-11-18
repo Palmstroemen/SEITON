@@ -274,6 +274,8 @@ def test_the_settings_come_from_setup(tmp_path, monkeypatch):
 
 
 def test_the_writer_writes_the_persons_file(tmp_path):
+    (tmp_path / ".seiton").mkdir()
+    (tmp_path / ".seiton" / "Project.md").write_text("# Project\n", encoding="utf-8")
     write = ck.file_writer(language="de")
     stretch = tl.Stretch(day=date(2026, 11, 16), start=time(9, 0), duration=minutes(30), kind="auto")
     write(tmp_path, "Oliver", stretch)
@@ -295,3 +297,126 @@ def test_when_the_clock_ends_the_stretch_closes_at_the_last_activity(clock, writ
     clock.pause_now()
     assert writer.stretches() == [(KITCHEN, time(9, 0), minutes(18), "auto")]
     assert clock.state == "paused"
+
+
+# --- found in the review of 2026-11-18 ------------------------------------------------------
+
+def test_a_sleep_between_two_ticks_is_not_time(clock, writer):
+    # Z1: the lid closed at 9:10, opened the next morning; the idle time knows nothing of the
+    # night and the unlocking is a fresh input.
+    clock.set_project(KITCHEN, "Oliver", at(0))
+    clock.tick(at(10), idle(0))
+    morning = at(10 + 14 * 60)
+    clock.tick(morning, timedelta(seconds=3))
+    assert writer.stretches() == [(KITCHEN, time(9, 0), minutes(10), "auto")]
+    assert clock.state == "runs"  # resumed at the input after waking
+    clock.set_project(None, "Oliver", morning + minutes(30))
+    assert writer.stretches()[-1][1:] == ((morning - timedelta(seconds=3)).time(),
+                                          minutes(30) + timedelta(seconds=3), "auto")
+
+
+def test_a_sleep_while_it_asks_closes_at_the_question(clock, writer):
+    clock.set_project(KITCHEN, "Oliver", at(0))
+    clock.tick(at(6), idle(6), inhibited=True)
+    assert clock.state == "asks"
+    clock.tick(at(6 + 8 * 60), timedelta(seconds=2), inhibited=False)
+    assert writer.stretches()[0] == (KITCHEN, time(9, 0), minutes(6), "auto")
+
+
+def test_no_is_not_an_input_that_resumes(clock, writer):
+    # Z3: the click on "No" came after the question; only an input after the answer resumes.
+    clock.set_project(KITCHEN, "Oliver", at(0))
+    clock.tick(at(6), idle(6), inhibited=True)
+    clock.answer(False, at(7))
+    clock.tick(at(7.25), idle(0.25), inhibited=True)  # the video runs on, no input since "No"
+    assert clock.state == "paused"
+    clock.tick(at(9), idle(0.1))
+    assert clock.state == "runs"
+
+
+def _project(folder: Path) -> Path:
+    (folder / ".seiton").mkdir(parents=True)
+    (folder / ".seiton" / "Project.md").write_text("# Project\n", encoding="utf-8")
+    return folder
+
+
+def test_the_writer_makes_no_ghost_of_a_project_that_is_gone(tmp_path):
+    # X1: renamed or in the trash - the old place must not come back as a folder.
+    write = ck.file_writer(language="de")
+    stretch = tl.Stretch(day=date(2026, 11, 16), start=time(9, 0), duration=minutes(30), kind="auto")
+    with pytest.raises(FileNotFoundError):
+        write(tmp_path / "Proj", "Oliver", stretch)
+    assert not (tmp_path / "Proj").exists()
+
+
+def test_after_a_rename_the_stretch_waits_and_is_told_once(tmp_path, caplog):
+    proj = _project(tmp_path / "Proj")
+    clock = ck.Clock(writer=ck.file_writer(language="de"), store=tmp_path / "c.json")
+    clock.set_project(proj, "Oliver", at(0))
+    proj.rename(tmp_path / "Proj2")
+    with caplog.at_level("INFO", logger="core.clock"):
+        clock.set_project(tmp_path / "Proj2", "Oliver", at(20))
+        for m in range(21, 25):
+            clock.tick(at(m), idle(0))
+    assert not (tmp_path / "Proj").exists()
+    assert len(clock.pending) == 1
+    assert sum("clock.write later" in r.getMessage() for r in caplog.records) == 1
+
+
+def test_without_its_helper_file_the_writer_needs_only_the_file(tmp_path):
+    # Z6: through the drive only {Self}.md may be written, not a helper file beside it.
+    folder = tmp_path / "Zeitaufwand"
+    folder.mkdir()
+    path = folder / "Oliver.md"
+    stretch = tl.Stretch(day=date(2026, 11, 16), start=time(9, 0), duration=minutes(30), kind="auto")
+    tl.add_to_file(path, "Oliver", stretch, language="de")
+    folder.chmod(0o555)  # the file may be written, nothing new beside it
+    try:
+        with pytest.raises(PermissionError):
+            tl.add_to_file(path, "Oliver", stretch, language="de")
+        tl.add_to_file(path, "Oliver", stretch, language="de", atomic=False)
+    finally:
+        folder.chmod(0o755)
+    assert tl.read(path).stretches == [stretch, stretch]
+    assert sorted(p.name for p in folder.iterdir()) == ["Oliver.md"]
+
+
+@pytest.fixture
+def vienna(monkeypatch):
+    import time as systime
+    monkeypatch.setenv("TZ", "Europe/Vienna")
+    systime.tzset()
+    yield
+    monkeypatch.undo()
+    systime.tzset()
+
+
+def test_the_night_of_the_clock_change_counts_real_hours(vienna):
+    # Z9: 24 to 25 October 2026 has 25 hours; a stretch over it is split at the real midnights.
+    begin = datetime(2026, 10, 24, 23, 0).astimezone()
+    parts = tl.split_days(begin, timedelta(hours=27), kind="auto")
+    assert [(p.day, p.start, p.duration) for p in parts] == [
+        (date(2026, 10, 24), time(23, 0), timedelta(hours=1)),
+        (date(2026, 10, 25), time(0, 0), timedelta(hours=25)),
+        (date(2026, 10, 26), time(0, 0), timedelta(hours=1))]
+
+
+def test_an_hour_in_the_spring_night_is_an_hour(vienna, writer, tmp_path):
+    clock = ck.Clock(writer=writer, store=tmp_path / "c.json")
+    begin = datetime(2026, 3, 29, 1, 30).astimezone()
+    clock.set_project(KITCHEN, "Oliver", begin)
+    for k in range(1, 240):
+        clock.tick(begin + timedelta(seconds=15 * k), timedelta(seconds=2))
+    clock.set_project(None, "Oliver", begin + timedelta(hours=1))
+    assert [s.duration for _p, _o, s in writer.written] == [timedelta(hours=1)]
+
+
+def test_a_store_written_without_a_zone_is_read_with_one(vienna, writer, tmp_path):
+    store = tmp_path / "c.json"
+    store.write_text(json.dumps({"state": "runs", "project": str(KITCHEN), "person": "Oliver", "pending": [],
+                                 "running": {"begin": "2026-11-16T09:00:00", "activity": "2026-11-16T09:20:00",
+                                             "kind": "auto"}}), encoding="utf-8")
+    clock = ck.Clock(writer=writer, store=store)
+    clock.recover(datetime(2026, 11, 16, 10, 0).astimezone())
+    clock.tick(datetime(2026, 11, 16, 10, 1).astimezone(), timedelta(seconds=1))
+    assert writer.stretches() == [(KITCHEN, time(9, 0), minutes(20), "auto")]

@@ -140,7 +140,8 @@ def run(projects_root: Path, *, sandbox: bool = True) -> int:
     settings = Settings()
     python = sys.executable
     if not sandbox:
-        return subprocess.call([python, str(REPO / "daemon" / "clock_daemon.py"), *clock_arguments(settings)])
+        return subprocess.call([python, str(REPO / "daemon" / "clock_daemon.py"),
+                                "--projects-root", str(projects_root), *clock_arguments(settings)])
     if shutil.which("bwrap") is None:
         print("bwrap is missing: install bubblewrap, or start with --no-sandbox", file=sys.stderr)
         return 1

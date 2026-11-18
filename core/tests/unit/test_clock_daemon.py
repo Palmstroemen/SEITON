@@ -35,6 +35,17 @@ class Now:
         return self.value
 
 
+def _run(svc, now, minutes, idle=None, idle_from=None):
+    """Steps every 15 seconds, as the daemon makes them (a longer gap is a sleep, Z1);
+    idle_from: the minute of the last input, from then on the idle time grows."""
+    start = now.value
+    for k in range(1, int(minutes * 4) + 1):
+        now.value = start + timedelta(seconds=15 * k)
+        if idle is not None and idle_from is not None:
+            idle["value"] = max(timedelta(0), now.value - (start + timedelta(minutes=idle_from)))
+        svc.step()
+
+
 @pytest.fixture
 def service(tmp_path):
     written = []
@@ -51,7 +62,8 @@ def test_a_step_follows_the_active_project(service):
     cs.write_active(active, Path("/p/Küche"), "Oliver")
     svc.step()
     assert svc.clock.state == "runs" and svc.clock.project == Path("/p/Küche")
-    now.value += timedelta(minutes=20)
+    _run(svc, now, 20 - 0.25)
+    now.value += timedelta(seconds=15)
     cs.write_active(active, Path("/p/Huber"), "Oliver")
     svc.step()
     assert [(p, s.start, s.duration) for p, _o, s in written] == [(Path("/p/Küche"), time(9, 0), timedelta(minutes=20))]
@@ -61,9 +73,7 @@ def test_a_step_sees_the_pause(service):
     svc, written, now, idle, active = service
     cs.write_active(active, Path("/p/Küche"), "Oliver")
     svc.step()
-    now.value += timedelta(minutes=16)
-    idle["value"] = timedelta(minutes=6)
-    svc.step()
+    _run(svc, now, 16, idle=idle, idle_from=10)
     assert svc.clock.state == "paused" and written[0][2].duration == timedelta(minutes=10)
 
 
@@ -72,8 +82,7 @@ def test_without_an_idle_source_it_still_follows_the_project(service):
     svc.idle = lambda: None
     cs.write_active(active, Path("/p/Küche"), "Oliver")
     svc.step()
-    now.value += timedelta(minutes=30)
-    svc.step()
+    _run(svc, now, 30)
     assert svc.clock.state == "runs"
 
 
@@ -155,8 +164,7 @@ def test_every_step_writes_the_view(widget_service):
     svc, now, active, folder = widget_service
     cs.write_active(active, Path("/p/Küche"), "Oliver")
     svc.step()
-    now.value += timedelta(minutes=15)
-    svc.step()
+    _run(svc, now, 15)
     view = _view(folder)
     assert view["text"] == "Küche · 0:15" and view["state"] == "active"
     assert view["items"][0]["path"] == "/p/Küche"  # worked on last
@@ -237,3 +245,56 @@ def test_a_second_start_ends_quietly(monkeypatch):
     monkeypatch.setattr(launcher, "hold_lock", lambda folder: None)
     monkeypatch.setattr(launcher, "run", lambda *a, **k: pytest.fail("started twice"))
     assert launcher.main(["--projects-root", "/tmp"]) == 0
+
+
+def test_a_switch_right_after_waking_does_not_count_the_night(service):
+    # Z1 (review 2026-11-18): the step after a sleep sees another active project.
+    svc, written, now, _idle, active = service
+    cs.write_active(active, Path("/p/Küche"), "Oliver")
+    svc.step()
+    _run(svc, now, 10)
+    now.value += timedelta(hours=14)
+    cs.write_active(active, Path("/p/Huber"), "Oliver")
+    svc.step()
+    assert [(p, s.duration) for p, _o, s in written] == [(Path("/p/Küche"), timedelta(minutes=10))]
+    assert svc.clock.project == Path("/p/Huber") and svc.clock.state == "runs"
+
+
+def test_a_project_in_another_root_is_not_counted(tmp_path):
+    # Z5 (review 2026-11-18): its time could not be written and was dropped after the pause.
+    clock = ck.Clock(writer=lambda *a: None, store=tmp_path / "c.json")
+    now = Now()
+    active = tmp_path / "active-project.json"
+    svc = daemon.ClockService(clock, active=active, idle=lambda: timedelta(0), inhibited=lambda: False,
+                              now=now, projects_root=Path("/home/o/Dokumente"))
+    cs.write_active(active, Path("/home/o/Projekte/Garten"), "Oliver")
+    svc.step()
+    assert svc.clock.state == "stands" and svc.clock.project is None
+    cs.write_active(active, Path("/home/o/Dokumente/Küche"), "Oliver")
+    svc.step()
+    assert svc.clock.state == "runs" and svc.clock.project == Path("/home/o/Dokumente/Küche")
+
+
+def test_the_clock_runs_on_time_with_its_zone():
+    # Z9: naive local time made the night of the clock change an hour long or short.
+    import inspect
+    now = inspect.signature(daemon.ClockService).parameters["now"].default
+    assert now().tzinfo is not None
+
+
+def test_through_the_drive_it_writes_only_the_persons_file(tmp_path):
+    # Z6: the drive lets the person write {Self}.md, no helper file beside it.
+    from datetime import date
+    root = tmp_path / "Dokumente"
+    drive = tmp_path / "drive"
+    folder = drive / "Projekte" / "Küche"
+    folder.mkdir(parents=True)
+    (folder / "Oliver.md").write_text("", encoding="utf-8")
+    writer, _spent = daemon.drive_writers(drive, root, language="de")
+    stretch = ck.tl.Stretch(day=date(2026, 11, 16), start=time(9, 0), duration=timedelta(minutes=30), kind="auto")
+    folder.chmod(0o555)
+    try:
+        writer(root / "Küche", "Oliver", stretch)
+    finally:
+        folder.chmod(0o755)
+    assert ck.tl.read(folder / "Oliver.md").stretches == [stretch]

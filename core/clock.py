@@ -29,6 +29,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from core import time_log as tl
 from core.brand import CONFIG_DIR
+from core.perspective_session import is_project
 
 logger = logging.getLogger(__name__)
 
@@ -57,10 +58,28 @@ def rounding_from_settings(settings) -> tl.Rounding:
 
 
 def file_writer(*, language: str) -> Writer:
-    """The writer of seiton-clock: the person's file in the project (core/time_log.py)."""
+    """The writer of seiton-clock: the person's file in the project (core/time_log.py). A
+    project that is gone (renamed, in the trash) is not made anew as a ghost folder: the stretch
+    waits (FileNotFoundError) until someone looks after it."""
     def write(project: Path, person: str, stretch: tl.Stretch) -> None:
+        if not is_project(Path(project)):
+            raise FileNotFoundError(f"{project}: no project there (renamed or gone?)")
         tl.add(project, person, stretch, language=language)
     return write
+
+
+def local_now() -> datetime:
+    """Now with its zone: differences are real durations, also in the night the clocks change."""
+    return datetime.now().astimezone()
+
+
+def _like(moment: datetime, now: datetime) -> datetime:
+    """A moment read from the store, comparable with now (stores of before had no zone)."""
+    if moment.tzinfo is None and now.tzinfo is not None:
+        return moment.astimezone()
+    if moment.tzinfo is not None and now.tzinfo is None:
+        return moment.astimezone().replace(tzinfo=None)
+    return moment
 
 
 def default_store() -> Path:
@@ -90,6 +109,8 @@ class Clock:
         self._asked: Optional[datetime] = None
         self._paused_at: Optional[datetime] = None  # inputs after this resume
         self._saved_activity: Optional[datetime] = None
+        self._last_tick: Optional[datetime] = None  # a long gap since: the computer slept
+        self._told_later: set = set()  # stretches already reported as waiting
 
     # --- what one does ---------------------------------------------------------------------
 
@@ -129,6 +150,7 @@ class Clock:
             self.state = "runs"
         else:
             self._pause(self._asked or now)
+            self._paused_at = now  # the click on "No" is no input that resumes
         self._save(force=True)
 
     # --- what the system tells -------------------------------------------------------------
@@ -138,6 +160,7 @@ class Clock:
         self._retry()
         state_before = self.state
         last_input = now - idle
+        self.wake(now)
         if self.state in ("runs", "asks") and self._running is not None:
             running = self._running
             if last_input > running.activity:
@@ -183,8 +206,8 @@ class Clock:
         state = data.get("state", "stands")
         running = data.get("running")
         if running:
-            self._running = _Running(begin=datetime.fromisoformat(running["begin"]),
-                                     activity=datetime.fromisoformat(running["activity"]),
+            self._running = _Running(begin=_like(datetime.fromisoformat(running["begin"]), now),
+                                     activity=_like(datetime.fromisoformat(running["activity"]), now),
                                      kind=running["kind"])
             self._pause(self._running.activity)
         elif state == "stopped" and self.project is not None:
@@ -196,6 +219,16 @@ class Clock:
         self._save(force=True)
 
     # --- inside --------------------------------------------------------------------------------
+
+    def wake(self, now: datetime) -> None:
+        """Called first on each step (tick does it too). Did the process stand still (suspend,
+        lid closed) since the last one, the idle time does not count the sleep, and waking is a
+        fresh input: the stretch ends where it was left."""
+        slept = self._last_tick is not None and now - self._last_tick > self.settings.pause
+        self._last_tick = now
+        if slept and self.state in ("runs", "asks") and self._running is not None:
+            asked = self._asked if self.state == "asks" else None
+            self._pause(asked or self._running.activity)
 
     def _begin(self, now: datetime, kind: str) -> None:
         self._running = _Running(begin=now, activity=now, kind=kind)
@@ -225,11 +258,15 @@ class Clock:
                 project, person, stretch = _from_json(item)
                 self.writer(project, person, stretch)
             except OSError as error:
-                logger.info("clock.write later project=%s error=%s", item.get("project"), error)
+                key = json.dumps(item, sort_keys=True)
+                if key not in self._told_later:  # told once, not every 15 seconds
+                    self._told_later.add(key)
+                    logger.info("clock.write later project=%s error=%s", item.get("project"), error)
                 left.append(item)
             except (ValueError, KeyError, TypeError) as error:
                 # never writable (outside the projects, a broken entry): waiting would not help
                 logger.warning("clock.write dropped project=%s error=%s", item.get("project"), error)
+        self._told_later &= {json.dumps(item, sort_keys=True) for item in left}
         if len(left) != len(self.pending):
             self.pending = left
             self._save(force=True)

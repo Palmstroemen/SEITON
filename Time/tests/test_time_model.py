@@ -122,3 +122,10 @@ def test_the_overview_is_rounded_as_set(model, world, monkeypatch):
     Settings().set("Time/roundMode", "up")
     view = model.overview(str(world["haus"]), period="all")
     assert view["total"] == "4:00"  # 0:30 + 1:30 + 1:00 + 1:00 (0:45 up to 1:00)
+
+
+def test_adding_to_a_project_that_is_gone_makes_no_ghost(model, world):
+    # X1 (review 2026-11-18): renamed while the active project still names the old place.
+    world["kueche"].rename(world["haus"] / "Küche neu")
+    assert model.add({"day": "2026-11-17", "start": "", "minutes": 30, "note": "Baumarkt"}) is False
+    assert not world["kueche"].exists()

@@ -22,6 +22,7 @@ from core import time_log as tl
 from core.clock import rounding_from_settings
 from core.clock_sources import active_file, read_active
 from core.identity import person_for
+from core.perspective_session import is_project
 from core.settings import Settings
 
 STALE = 60  # seconds: an older view means the clock does not run
@@ -144,6 +145,8 @@ class TimeModel:
         path = self._file(project)
         if stretch is None or path is None:
             return False
+        if not is_project(path.parents[2]):
+            return False  # gone (renamed, in the trash): no ghost folder at the old place
         tl.add_to_file(path, self._person(path.parents[2]), stretch, language=self._language)
         return True
 

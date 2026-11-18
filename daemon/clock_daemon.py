@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import logging
 import signal
 import sys
@@ -19,7 +20,7 @@ from typing import Callable, Optional, Sequence
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from core import clock_widget as cw  # noqa: E402
-from core.clock import Clock, ClockSettings, default_store, file_writer  # noqa: E402
+from core.clock import Clock, ClockSettings, default_store, file_writer, local_now  # noqa: E402
 from core.clock_sources import IdleTime, Inhibited, active_file, read_active  # noqa: E402
 
 logger = logging.getLogger(__name__)
@@ -44,15 +45,17 @@ class ClockService:
     view after each step, and the Headline's commands in between."""
 
     def __init__(self, clock: Clock, *, active: Path, idle: Callable[[], Optional[timedelta]],
-                 inhibited: Callable[[], bool], now: Callable[[], datetime] = datetime.now,
-                 widget: Optional[Widget] = None) -> None:
+                 inhibited: Callable[[], bool], now: Callable[[], datetime] = local_now,
+                 widget: Optional[Widget] = None, projects_root: Optional[Path] = None) -> None:
         self.clock = clock
         self.active = active
         self.idle = idle
         self.inhibited = inhibited
         self.now = now
         self.widget = widget
+        self.projects_root = Path(projects_root) if projects_root is not None else None
         self._seen = (None, "")
+        self._outside_said: set = set()
         self._idle_unknown_said = False
 
     def show(self) -> None:
@@ -72,9 +75,23 @@ class ClockService:
             self.show()
         return bool(commands)
 
+    def _inside(self, project: Optional[Path]) -> Optional[Path]:
+        """The active project, if the clock can write it: below its projects root. One in another
+        root (A11) counts as no project - better not counting than counting time it must drop."""
+        if project is None or self.projects_root is None:
+            return project
+        if self.projects_root in Path(project).parents:
+            return project
+        if project not in self._outside_said:
+            self._outside_said.add(project)
+            logger.warning("clock.outside project=%s root=%s: not counted", project, self.projects_root)
+        return None
+
     def step(self) -> None:
         now = self.now()
+        self.clock.wake(now)  # first: a switch right after waking must not count the sleep
         project, person = read_active(self.active)
+        project = self._inside(project)
         if (project, person) != self._seen:
             self._seen = (project, person)
             self.clock.set_project(project, person, now)
@@ -89,6 +106,16 @@ class ClockService:
             idle = timedelta(0)
         self.clock.tick(now, idle, inhibited=self.inhibited() if self.clock.state in ("runs", "asks") else False)
         self.show()
+
+
+def drive_writers(drive: Path, projects_root: Path, *, language: str):
+    """Writer and reader of the time files through the role's drive. Written without a helper
+    file: the drive lets the person write their own file ({Self}.md), nothing beside it."""
+    from core.role_drive import drive_path, drive_writer
+    writer = drive_writer(drive, projects_root, language=language,
+                          add=functools.partial(cw.tl.add_to_file, atomic=False))
+    spent = cw.spent_from(lambda project, person: drive_path(drive, projects_root, project, person))
+    return writer, spent
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -110,9 +137,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.drive is not None:
         if args.projects_root is None:
             parser.error("--drive needs --projects-root")
-        from core.role_drive import drive_path, drive_writer
-        writer = drive_writer(args.drive, args.projects_root, language=args.language)
-        spent = cw.spent_from(lambda project, person: drive_path(args.drive, args.projects_root, project, person))
+        writer, spent = drive_writers(args.drive, args.projects_root, language=args.language)
     else:
         writer = file_writer(language=args.language)
         spent = cw.spent_from(cw.tl.time_file)
@@ -121,11 +146,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     store = args.store or default_store()
     ledger = cw.Ledger(store.with_name("ledger.json"))
     clock = Clock(writer=cw.counting(writer, ledger), store=store, settings=settings)
-    clock.recover(datetime.now())
+    clock.recover(local_now())
     widget = Widget(folder=args.widget or cw.folder(), ledger=ledger, language=args.language,
                     spent=spent, shows=args.recent)
     service = ClockService(clock, active=args.active or active_file(), idle=IdleTime(), inhibited=Inhibited(),
-                           widget=widget)
+                           widget=widget, projects_root=args.projects_root)
 
     ending = threading.Event()
     for signum in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
