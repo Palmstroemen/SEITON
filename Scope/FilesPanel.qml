@@ -1703,6 +1703,7 @@ Rectangle { // Files panel
 
         GridView {
             id: filesGrid
+            objectName: "filesGrid"
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
@@ -1838,12 +1839,21 @@ Rectangle { // Files panel
                 }
                 onCanceled: root.endFileDrag(false)
             }
-            onContentYChanged: {
-                if (contentHeight <= height) return
+            // More when the end comes near - also when what is there does not fill the view
+            // (a big panel showed only the first chunk, with nothing to scroll). The host stops
+            // giving when all are there, so the view stops growing and asking.
+            function askForMoreIfNear() {
                 if ((contentY + height + root.prefetchThreshold) >= contentHeight) {
                     root.requestMore()
                 }
             }
+            onContentYChanged: {
+                if (contentHeight <= height) return
+                askForMoreIfNear()
+            }
+            onContentHeightChanged: Qt.callLater(askForMoreIfNear)
+            onHeightChanged: Qt.callLater(askForMoreIfNear)
+            onCountChanged: Qt.callLater(askForMoreIfNear)  // tiles: a chunk may fill only the last row
         }
 
         // Resting the pointer on the size column (not only its head) asks for folder sizes.

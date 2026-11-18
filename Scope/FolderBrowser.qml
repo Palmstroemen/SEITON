@@ -4174,6 +4174,12 @@ Item { // ROOT
                                         // false = from H-View preview row, not CWD overlay; must open next row.
                                         updatePreviewFromHover(previewLevel + 1, fullPath, modelData, fillColor, centerPoint.x, centerPoint.y, false)
                                     }
+                                    // A folder of the preview row takes the file in hand, as in the folder row.
+                                    allowDrops: root.allowDrops
+                                    onDrop: function(payload) {
+                                        if (!payload) return
+                                        emitMoveEntryIntent(payload, fullPath)
+                                    }
                                 }
                             }
                         }
