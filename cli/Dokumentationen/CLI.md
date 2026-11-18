@@ -23,6 +23,7 @@ Project management.
 Examples:
 - `myproject create /path/to/folder`
 - `myproject create --new /path/to/new-folder` (makes the folder first)
+- `myproject remove /path/to/project` (an ordinary folder again, as the crossed-out P in Scope; with settings of its own it asks for `--keep-own`: they go into the parent project's trash)
 - `myproject tidy .` (born template folders that hold nothing of the user become embryos again)
 - `myproject trash list .` (the trash of the project the path lies in)
 - `myproject trash restore NAME --in .` / `myproject trash delete NAME --in .` (`NAME` as `trash list` shows it)

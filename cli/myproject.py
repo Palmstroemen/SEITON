@@ -15,23 +15,58 @@ from core.project import ProjectConfig
 
 
 def _create_project(path: str, create_missing: bool = False) -> int:
+    """As Scope's P button does: through ScopeApi, with the same checks (CLI4)."""
+    from core.scope_api import ScopeApi  # late: heavy
+
+    made_now = False
     try:
         project_path = Path(path).expanduser()
         if project_path.exists():
             if not project_path.is_dir():
                 raise ValueError(f"Target exists and is not a folder: {project_path}")
+            if (project_path / META_DIR / "Project.md").is_file():
+                raise ValueError(f"{project_path} is already a project")
         else:
             if not create_missing:
                 raise ValueError(
                     f"Target folder does not exist: {project_path} (use --new to create)"
                 )
             project_path.mkdir(parents=True, exist_ok=True)
-        ProjectConfig.create(project_path)
+            made_now = True
+        if not ScopeApi(str(project_path)).create_project(str(project_path)):
+            raise ValueError(f"{project_path} cannot become a project here (a template folder, a "
+                             f"settings folder, outside the projects tree, or no write right)")
         print(f"Created project at {project_path.resolve()}")
         return 0
     except Exception as exc:
+        if made_now:
+            try:
+                project_path.rmdir()  # made for nothing: away again
+            except OSError:
+                pass
         print(f"Error: {exc}", file=sys.stderr)
         return 1
+
+
+def _remove_project(path: str, keep_own: bool) -> int:
+    """A project becomes an ordinary folder again, as with Scope's crossed-out P (CLI5)."""
+    from core.scope_api import ScopeApi  # late: heavy
+
+    target = Path(path).expanduser()
+    result = ScopeApi(str(target)).remove_project(str(target), keep_own=keep_own)
+    if result.get("ok"):
+        print(f"{target.resolve()} is an ordinary folder again")
+        return 0
+    reason = result.get("reason")
+    if reason == "own":
+        print(f"Error: {target} has settings of its own: {', '.join(result.get('own') or [])}.\n"
+              f"With --keep-own they go into the parent project's trash (restorable).", file=sys.stderr)
+    elif reason == "permission":
+        print(f"Error: you may not change the rights there ({target})", file=sys.stderr)
+    else:
+        print(f"Error: {target} cannot become an ordinary folder (no project, the top project, "
+              f"or in a template)", file=sys.stderr)
+    return 1
 
 
 def _sub_project_roots(project_root: Path) -> list:
@@ -111,6 +146,11 @@ def parse_args(args=None) -> argparse.Namespace:
         help="Create the folder if it does not exist",
     )
 
+    remove = sub.add_parser("remove", help="Make a project an ordinary folder again")
+    remove.add_argument("path", help="The project folder")
+    remove.add_argument("--keep-own", action="store_true",
+                        help="Its own settings go into the parent project's trash (else it refuses)")
+
     tidy = sub.add_parser(
         "tidy",
         help="Turn born template folders that hold nothing of the user back into embryos",
@@ -137,6 +177,8 @@ def main() -> None:
     args = parse_args()
     if args.command == "create":
         sys.exit(_create_project(args.path, create_missing=args.new))
+    if args.command == "remove":
+        sys.exit(_remove_project(args.path, args.keep_own))
     if args.command == "tidy":
         sys.exit(_tidy_project(args.path))
     if args.command == "trash":

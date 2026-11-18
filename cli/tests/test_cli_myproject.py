@@ -173,3 +173,49 @@ def test_myproject_trash_list_restore_delete_empty():
         assert trash.list_trash(root) == []
         missing = _run(["trash", "restore", "Nix", "--in", str(root)], cwd=tmpdir)
         assert missing.returncode != 0
+
+
+def _myproject(args, cwd):
+    import subprocess
+    import sys
+    script = Path(__file__).parent.parent.parent / "cli" / "myproject.py"
+    return subprocess.run([sys.executable, str(script)] + args, capture_output=True, text=True, cwd=cwd)
+
+
+def _root(tmp_path):
+    from core.brand import META_DIR
+
+    root = tmp_path / "Projekte"
+    (root / META_DIR / "Templates" / "Standard" / "4_Finanz").mkdir(parents=True)
+    (root / META_DIR / "Project.md").write_text("# SEITON Project\n")
+    (root / META_DIR / "Templates.md").write_text("# Templates\nStandard\n")
+    return root
+
+
+def test_create_refuses_what_the_p_button_refuses(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", CLI4: a template folder or a settings folder became a project."""
+    from core.brand import META_DIR
+
+    root = _root(tmp_path)
+    template_folder = root / META_DIR / "Templates" / "Standard" / "4_Finanz"
+    refused = _myproject(["create", str(template_folder)], tmp_path)
+    assert refused.returncode == 1 and not (template_folder / META_DIR).exists(), refused.stderr
+    again = _myproject(["create", str(root)], tmp_path)
+    assert again.returncode == 1 and "already" in again.stderr.lower()
+    (root / "Kunde").mkdir()
+    assert _myproject(["create", str(root / "Kunde")], tmp_path).returncode == 0
+
+
+def test_remove_makes_a_project_a_folder_again(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", CLI5."""
+    from core.brand import META_DIR
+
+    root = _root(tmp_path)
+    kunde = root / "Kunde"
+    kunde.mkdir()
+    assert _myproject(["create", str(kunde)], tmp_path).returncode == 0
+    (kunde / META_DIR / "Tags.md").write_text("# Tags\n#wichtig\n")  # a setting of its own
+    asked = _myproject(["remove", str(kunde)], tmp_path)
+    assert asked.returncode == 1 and "Tags.md" in asked.stderr and "--keep-own" in asked.stderr
+    assert _myproject(["remove", str(kunde), "--keep-own"], tmp_path).returncode == 0
+    assert not (kunde / META_DIR).exists()
