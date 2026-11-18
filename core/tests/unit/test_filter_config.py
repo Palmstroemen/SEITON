@@ -461,3 +461,32 @@ def test_a_plain_rule_looks_at_the_name_not_at_where_the_project_lies(tmp_path):
     assert shown("## Exclude\n2024\n") == ["Beleg Januar.pdf", "Quittung.pdf"]
     assert shown("## Exclude\n*2024*\n") == ["Beleg Januar.pdf", "Quittung.pdf"]
     assert shown("## Filter\nBeleg\n") == ["Beleg Januar.pdf"]
+
+
+def test_groups_by_date_and_by_the_project_each_entry_lies_in(tmp_path):
+    # B9: flattened across subprojects everything stood in one group - the date came from a
+    # field nobody set, the project was always that of the CWD.
+    import os
+    import time
+
+    from core.perspective import _group_key_for_entry
+
+    wohnen = tmp_path / "Wohnen"
+    garten = wohnen / "Garten"
+    (wohnen / META_DIR).mkdir(parents=True)
+    (wohnen / META_DIR / "Project.md").write_text("# SEITON Project\n")
+    (garten / META_DIR).mkdir(parents=True)
+    (garten / META_DIR / "Project.md").write_text("# SEITON Project\n")
+    (garten / "Hecke").mkdir()
+    in_garten, in_wohnen = garten / "Hecke" / "a.pdf", wohnen / "b.pdf"
+    for path in (in_garten, in_wohnen):
+        path.write_text("x")
+    ts = time.mktime((2025, 3, 15, 12, 0, 0, 0, 0, -1))
+
+    def key(path, groups):
+        entry = {"path": str(path), "modifiedTs": ts, "tags": []}
+        return _group_key_for_entry(entry, groups, wohnen, wohnen)
+
+    assert key(in_garten, ["project"]) == "Garten" and key(in_wohnen, ["project"]) == "Wohnen"
+    assert key(in_wohnen, ["date"]) == "2025-03"
+    assert key(in_garten, ["project", "date"]) == "Garten | 2025-03"

@@ -8,6 +8,7 @@ from __future__ import annotations
 import os
 import re
 import sys
+import time
 from dataclasses import dataclass
 from fnmatch import fnmatch
 from pathlib import Path
@@ -614,8 +615,10 @@ def _group_key_for_entry(
     for raw_group in groups or []:
         group = str(raw_group or "").strip().lower()
         if group == "project":
-            if project_root is not None:
-                parts.append(project_root.name or str(project_root))
+            # The project the entry lies in (flattened across subprojects they differ).
+            own = _nearest_project(item_path.parent, project_root)
+            if own is not None:
+                parts.append(own.name or str(own))
             else:
                 parts.append("project")
         elif group == "folder":
@@ -625,10 +628,19 @@ def _group_key_for_entry(
         elif group == "tags":
             parts.append(tags[0] if tags else "")
         elif group == "date":
-            parts.append(str(entry.get("mtimeDate") or ""))
+            ts = entry.get("modifiedTs")
+            parts.append(time.strftime("%Y-%m", time.localtime(float(ts))) if ts else "")
         else:
             parts.append(group)
     return " | ".join([part for part in parts if part])
+
+
+def _nearest_project(folder: Path, fallback: Optional[Path]) -> Optional[Path]:
+    """The nearest folder from folder upwards with a .seiton/Project.md, else fallback."""
+    for candidate in _walk_up(folder):
+        if (candidate / META_DIR / "Project.md").is_file():
+            return candidate
+    return fallback
 
 
 def _walk_up(start_path: Path) -> Iterable[Path]:

@@ -21,7 +21,7 @@ The term **Perspective** names the flipped path-space navigation model, the lens
 - Filter by tags (future)
 - Filter by AI analysis (future)
 - Flatten deep trees while preserving provenance
-- Group by project, folder, tag, or date (built: folder and tag; see section 8)
+- Group by project, folder, tag, or date (see section 8)
 - Provide a custom UI profile (`Desk.md`)
 - Name a lens (`## Perspective`; read, but it puts on nothing since 2026-10-26, see section 6)
 
@@ -129,9 +129,9 @@ Grouping defines how views are organized:
 - by tag
 - by date
 
-Built: folder segment and tag (the first tag). `project` gives the project of the CWD for
-every entry, also when flattening reaches into subprojects. `date` gives nothing yet: no date
-is passed in ("Prüfung 2026-11-18", B9).
+Built: all four. `project` is the project each entry lies in (flattened across subprojects they
+differ), `folder` its folder, `tag` its first tag, `date` the month it was last changed
+(`2025-03`).
 
 ---
 
@@ -165,7 +165,6 @@ Term note: **Perspective** is the lens; it has its own APIs (`core/perspective_s
 - tag‑based filters
 - AI‑based filters
 - `sparse` inheritance mode
-- grouping by date, and by project across subprojects (section 8)
 - the choice by hand in Scope (section 4.2)
 
 ---
