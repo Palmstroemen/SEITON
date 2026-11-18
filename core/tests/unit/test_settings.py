@@ -98,3 +98,13 @@ def test_the_headline_at_the_top_edge_or_from_the_taskbar(config):
     assert Settings().get("Headline/place") == "top"
     assert Settings().set("Headline/place", "taskbar") and Settings().get("Headline/place") == "taskbar"
     assert not Settings().set("Headline/place", "left")
+
+
+def test_a_change_by_another_program_is_not_undone(config):
+    """"docs/Prüfung 2026-11-18.md", P3: Scope's one instance wrote its old state back."""
+    scope = Settings()  # read once at Scope's start
+    other = Settings()  # the time screen, the Headline
+    assert other.set("Time/pauseMinutes", 9.0)
+    assert scope.set("General/postFix", False)
+    fresh = Settings()
+    assert fresh.get("Time/pauseMinutes") == 9.0 and fresh.get("General/postFix") is False

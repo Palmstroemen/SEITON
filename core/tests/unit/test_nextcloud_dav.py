@@ -324,3 +324,13 @@ def test_a_tag_the_server_refuses_says_why():
 
     with pytest.raises(NextcloudError, match="403"):
         dav.create_system_tag("Wichtig")
+
+
+def test_a_nextcloud_under_a_path_is_found(monkeypatch):
+    """"docs/Prüfung 2026-11-18.md", C4: https://host/nextcloud answered hrefs with the prefix,
+    and every folder seemed missing."""
+    prefixed = {"/nextcloud" + key: value.replace(b"<d:href>/remote.php", b"<d:href>/nextcloud/remote.php")
+                for key, value in SERVER.items()}
+    transport = _transport(prefixed)
+    dav = NextcloudDAV("http://localhost:8081/nextcloud", "oliver", "secret", "Projekte", transport=transport)
+    assert set(dav.tree()) == {"/", "/Familie", "/Job", "/Familie/Kind", "/Familie/Notiz für Tom.md"}

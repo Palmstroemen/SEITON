@@ -866,3 +866,17 @@ def test_acl_embryos_in_a_subproject_follow_the_parents_rules(monkeypatch):
 
         assert Blueprint(top).get_embryos_at("") == ["info"]
         assert Blueprint(sub).get_embryos_at("") == ["info"]
+
+
+def test_a_deleted_born_folder_is_an_embryo_again(monkeypatch):
+    """"docs/Prüfung 2026-11-18.md", P4: it stayed "born" until Scope started anew."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        project_root = Path(tmpdir) / "P"
+        _create_test_project(project_root, "Standard")
+        layer = Blueprint(project_root)
+        embryo = next(name for name in layer.get_embryos_at(""))
+        assert layer.is_embryo(embryo)
+        (project_root / embryo).mkdir()
+        assert not layer.is_embryo(embryo)
+        (project_root / embryo).rmdir()
+        assert layer.is_embryo(embryo)

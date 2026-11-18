@@ -36,3 +36,17 @@ def test_the_auto_command_runs_by_itself_and_skips_file_copies():
 
 def test_the_manual_command_is_in_the_menu():
     assert str(_command("copyq-myos-save-manual.ini")["InMenu"]).lower() == "true"
+
+
+def test_clips_of_the_same_second_are_all_kept(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", ST2: several selected items left only the last one."""
+    import subprocess
+    import sys
+
+    env = {"PATH": "/usr/bin:/bin", "MYOS_CLIPBOARD_PATH": str(tmp_path), "HOME": str(tmp_path)}
+    for text in ("erster", "zweiter", "dritter"):
+        done = subprocess.run([sys.executable, str(TOOL / "save_clip_to_myos.py")], input=text.encode(),
+                              env=env, capture_output=True)
+        assert done.returncode == 0, done.stderr
+    texts = sorted(p.read_text(encoding="utf-8") for p in tmp_path.glob("clip_*.md"))
+    assert len(texts) == 3 and all(any(w in t for t in texts) for w in ("erster", "zweiter", "dritter"))

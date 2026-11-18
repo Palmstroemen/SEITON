@@ -69,17 +69,23 @@ def main() -> int:
     now = datetime.now()
     stamp = now.strftime("%Y%m%d_%H%M%S")
     copied_iso = now.strftime("%Y-%m-%d %H:%M")
-    filename = f"clip_{stamp}.md"
-    filepath = base / filename
-
     source_url = extract_first_url(text)
     content = build_content(text, copied_iso, source_url)
 
-    try:
-        filepath.write_text(content, encoding="utf-8")
-    except OSError as e:
-        print(f"save_clip_to_myos: write {filepath}: {e}", file=sys.stderr)
-        return 1
+    # Created, never written over: several clips in one second (the menu command saves each
+    # selected item) each get a file of their own - clip_..._2.md and so on.
+    number = 1
+    while True:
+        filepath = base / (f"clip_{stamp}.md" if number == 1 else f"clip_{stamp}_{number}.md")
+        try:
+            with open(filepath, "x", encoding="utf-8") as handle:
+                handle.write(content)
+            break
+        except FileExistsError:
+            number += 1
+        except OSError as e:
+            print(f"save_clip_to_myos: write {filepath}: {e}", file=sys.stderr)
+            return 1
 
     return 0
 

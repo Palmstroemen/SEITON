@@ -15,7 +15,8 @@ from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuick import QQuickImageProvider
 
 from core.brand import getenv
-from core.scope_api import ScopeApi
+from core.scope_api import ScopeApi, start_place
+from core.perspective_drive import PROJECTS as PROJECTS_FOLDER  # "Projekte", as in Scope
 from core.color_schemes import load_scheme
 from core.settings import Settings
 from Scope.window_icon import seiton_icon
@@ -157,7 +158,8 @@ class SunTreeBackend(QObject):
         self._glide.valueChanged.connect(lambda at: self.pointerTo(round(at.x()), round(at.y())))
         self._glide.finished.connect(self.pointerGlideDone)
         self._backdrops = 0
-        self._ensure_clipboard_dir()
+        # The clipboard folder is made when something goes there (dropFiles, moveToClipboard),
+        # not at each start (ST4: ~/Clipboard appeared at every login).
 
     @Slot(result=str)
     def cwd(self) -> str:
@@ -429,8 +431,12 @@ class SunTreeBackend(QObject):
         self._lens.close()  # the drive ends with the program that started it
 
     def _resolve_clipboard_dir(self) -> str:
+        """Scope's clipboard (main.qml, resolveClipboardPath): next to the projects root
+        "Projekte", else in the root project (ST4: SunTree had one of its own)."""
         top_root = self._adapter.get_top_root()
         base = Path(top_root).expanduser().resolve() if top_root else Path(self._cwd).expanduser().resolve()
+        if base.name == PROJECTS_FOLDER:
+            return str(base.parent / "Clipboard")
         return str(base / "Clipboard")
 
     def _ensure_clipboard_dir(self) -> None:
@@ -481,7 +487,9 @@ class BackendAdapter:
 
 
 def main() -> int:
-    start_path = sys.argv[1] if len(sys.argv) > 1 else str(Path.cwd())
+    # Outside every root (the autostart starts in the home folder): the first root below, as
+    # the Headline does - else SunTree had no lens and shared no place with Scope (ST3).
+    start_path = start_place(sys.argv[1] if len(sys.argv) > 1 else str(Path.cwd()))
 
     app = QGuiApplication(sys.argv)
     app.setApplicationName("SunTree")

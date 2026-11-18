@@ -207,8 +207,10 @@ def system_packages(places: Places, options: Options, run: Run, ask: Ask, which:
 
 
 def python_packages(places: Places, run: Run) -> None:
-    if not places.python.exists():
-        if run([sys.executable, "-m", "venv", str(places.venv)]) != 0:
+    # Asked by pip, not by python: a first run without python3-venv leaves a venv with python
+    # but no pip, and every later run stopped there (I3). --clear makes such a one anew.
+    if not (places.venv / "bin" / "pip").exists():
+        if run([sys.executable, "-m", "venv", "--clear", str(places.venv)]) != 0:
             raise SystemExit(f"Could not make the venv {places.venv} (python3-venv missing?)")
     run([str(places.python), "-m", "pip", "install", "--upgrade", "pip"])
     if run([str(places.python), "-m", "pip", "install", "-r", str(places.repo / "installer" / "requirements.txt")]) != 0:

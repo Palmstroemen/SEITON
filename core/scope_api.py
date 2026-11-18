@@ -102,6 +102,18 @@ def roots_below(path: Path) -> List[Path]:
             if (grandchild / META_DIR / "Project.md").is_file()]
 
 
+def start_place(place: Optional[str]) -> str:
+    """Where a program starts: the place given, else the home folder; outside any root it
+    looks downwards (A11) and starts in the first root below - an autostart gives the home
+    folder (the Headline, SunTree; "docs/Prüfung 2026-11-18.md", ST3)."""
+    start = Path(place or Path.home()).expanduser()
+    if find_top_project_root(start) is None:
+        below = roots_below(start)
+        if below:
+            return str(below[0])
+    return str(start)
+
+
 def find_top_project_root(start_path: Path) -> Optional[Path]:
     start_path = start_path.resolve()
     found: Optional[Path] = None

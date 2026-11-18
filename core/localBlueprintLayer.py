@@ -431,7 +431,7 @@ class Blueprint(Operations):
         
         # If it exists physically, it is not an embryo
         if exists_physically:
-            self._embryo_cache[path] = False
+            # Not cached: a born folder deleted later is an embryo again (P4).
             return False
         
         # Check cache (only if not physically present)

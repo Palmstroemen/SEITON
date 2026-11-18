@@ -105,6 +105,9 @@ class Settings:
 
     def __init__(self, path: Optional[Path] = None) -> None:
         self.path = Path(path) if path else settings_path()
+        self._read()
+
+    def _read(self) -> None:
         self._parser = configparser.ConfigParser(interpolation=None)
         self._parser.optionxform = str  # keep "lineT", not "linet"
         try:
@@ -133,6 +136,9 @@ class Settings:
         if value is None:
             return False
         group, _, name = key.partition("/")
+        # Read anew first: another program (the Headline, the time screen) may have changed the
+        # file since; writing this instance's old state back would undo that (P3).
+        self._read()
         if not self._parser.has_section(group):
             self._parser.add_section(group)
         self._parser.set(group, name, str(value).lower() if isinstance(value, bool) else str(value))
@@ -141,6 +147,7 @@ class Settings:
 
     def reset(self, key: str) -> None:
         group, _, name = key.partition("/")
+        self._read()  # as in set()
         if self._parser.has_option(group, name):
             self._parser.remove_option(group, name)
             self._write()

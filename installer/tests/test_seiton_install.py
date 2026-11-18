@@ -29,9 +29,11 @@ class Runner:
     def __call__(self, command, quiet=False):
         self.commands.append([str(c) for c in command])
         if command[1:3] == ["-m", "venv"]:
-            python = Path(command[3]) / "bin" / "python"
-            python.parent.mkdir(parents=True, exist_ok=True)
-            python.write_text("")
+            # As a real venv: its python and its pip (the path is the last argument).
+            for name in ("python", "pip"):
+                made = Path(command[-1]) / "bin" / name
+                made.parent.mkdir(parents=True, exist_ok=True)
+                made.write_text("")
         query = inst.QUERY.get(self.manager)
         if query and list(command[:len(query)]) == query:
             return 0 if command[-1] in self.installed else 1
@@ -110,7 +112,7 @@ def test_without_consent_no_sudo(places):
 def test_python_packages_go_into_seitons_own_venv(places):
     runner = _install(places)
     python = str(places.venv / "bin" / "python")
-    assert [sys.executable, "-m", "venv", str(places.venv)] in runner.commands
+    assert [sys.executable, "-m", "venv", "--clear", str(places.venv)] in runner.commands
     assert [python, "-m", "pip", "install", "-r", str(REPO / "installer" / "requirements.txt")] in runner.commands
 
 
@@ -392,3 +394,13 @@ def test_the_settings_under_the_former_name_come_over_first(places):
     _install(places)
     assert (places.config / "Identity.md").read_text(encoding="utf-8") == "Names: Oliver\n"
     assert not old.exists()
+
+
+def test_a_half_made_venv_is_made_anew(places):
+    """"docs/Prüfung 2026-11-18.md", I3: a venv without pip (python3-venv was missing at the
+    first run) stopped every later run."""
+    (places.venv / "bin").mkdir(parents=True)
+    places.python.write_text("")  # bin/python, but no pip
+    runner = _install(places)
+    made = [c for c in runner.commands if c[1:3] == ["-m", "venv"]]
+    assert made and "--clear" in made[0]

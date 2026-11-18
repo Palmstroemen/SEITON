@@ -15,7 +15,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional, Tuple
-from urllib.parse import quote, unquote
+from urllib.parse import quote, unquote, urlsplit
 from xml.sax.saxutils import escape
 
 from core.acl_nextcloud import bits, mask_of
@@ -210,7 +210,9 @@ class NextcloudDAV:
         return {entry.path: entry for entry in self._parse(body)}
 
     def _parse(self, body: bytes) -> List[Entry]:
-        base = unquote(self._base)
+        # The hrefs carry the path of the URL too, when Nextcloud lives under one
+        # (https://host/nextcloud): else every folder seemed missing (C4).
+        base = urlsplit(self.url).path.rstrip("/") + unquote(self._base)
         entries = []
         for response in ET.fromstring(body).iter(_DAV + "response"):
             href = unquote(response.findtext(_DAV + "href") or "").rstrip("/")
