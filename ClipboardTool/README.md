@@ -41,10 +41,9 @@ Make sure CopyQ is started with these variables (e.g. from the same shell, or vi
 3. Select `copyq-myos-save-auto.ini` and `copyq-myos-save-manual.ini` from this folder (or load both in one go).
 4. Confirm with **OK** / **Apply**.
 
-**Known problem (2026-11-18):** the `Command=` value in both `.ini` files spans several lines
-without quotes. Read as an INI file, only `copyq:` remains, so the loaded commands do nothing
-and show no error. Until the files are fixed, create the two commands in CopyQ by hand and
-paste the script from the `.ini` file (everything after `Command=`).
+The `.ini` files are in CopyQ's own export format (`[Commands]`, the script as one quoted
+value with `\n`), so the whole script arrives when they are loaded
+(`core/tests/unit/test_clipboard_tool_commands.py` reads them as CopyQ does).
 
 ### 3. (Optional) Web clipping with source URL
 
