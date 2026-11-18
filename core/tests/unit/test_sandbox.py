@@ -142,3 +142,27 @@ def test_the_code_inside_the_projects_root_comes_back(tmp_path):
     hidden = args.index(str(projects))
     kept = max(i for i, a in enumerate(args) if a == str(code) and args[i - 1] == "--ro-bind")
     assert args[hidden - 1] == "--tmpfs" and hidden < kept  # the root hidden first, the code back over it
+
+
+def test_the_drive_checks_each_project_by_its_own_acls(tmp_path, monkeypatch):
+    """Not by the rules of the projects root ("docs/Prüfung 2026-11-18.md", A3): a project with
+    an ACLs.md of its own decides for itself, a subproject without one inherits."""
+    from core.brand import env_name
+
+    for key in (env_name("ACL_BACKEND"),):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv(env_name("ACL_MODE"), "enforce")
+    monkeypatch.setenv(env_name("ACL_USER"), "anna")
+    root = tmp_path / "Projekte"
+    firma = _project(root / "Firma")
+    (firma / META_DIR / "ACLs.md").write_text(
+        "# Permissions\n\n## Team\n- /*: read, write\n\n# Users\nAnna: Team\n")
+    kunde = _project(firma / "7_Arbeit" / "Kunde")  # inherits Firma's rules
+    verein = _project(root / "Verein")
+    (verein / META_DIR / "ACLs.md").write_text(
+        "# Permissions\n\n## Kasse\n- /*: read\n\n# Users\nBen: Kasse\n")
+
+    may = rd.role_may(CLOCK, root, rd.acls_by_path)
+    assert may(firma / "0_Admin" / "Zeitaufwand" / "Anna.md", "write")
+    assert may(kunde / "0_Admin" / "Zeitaufwand" / "Anna.md", "write")
+    assert not may(verein / "0_Admin" / "Zeitaufwand" / "Anna.md", "write")  # not listed there

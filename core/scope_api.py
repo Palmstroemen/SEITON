@@ -352,6 +352,11 @@ class ScopeApi:
         self._acl_enforcement: Optional[ACLEnforcementService] = None
         # Project the ACL rules were loaded from: their paths are relative to it.
         self._acl_root: Optional[Path] = None
+        # From the environment, every path is checked by the ACLs.md that governs it (its own
+        # project's): one service per such file, rebuilt when the file changes. A service set
+        # with set_acl_enforcement (tests, embedding) is used as it is.
+        self._acl_per_path = False
+        self._acl_services: Dict[Tuple[Path, Optional[Path], int], ACLEnforcementService] = {}
         # Who the user is depends on the project (core.identity); set_acl_enforcement may fix it.
         self._acl_user_override: Optional[str] = None
         self._acl_audit_events: List[Dict[str, Any]] = []
@@ -866,6 +871,7 @@ class ScopeApi:
     ) -> None:
         """Use service for ACL checks; its rule paths are relative to root (default: project)."""
         self._acl_enforcement = service
+        self._acl_per_path = False
         self._acl_root = Path(root).expanduser().resolve() if root else (self.project_root or self.start_path)
         if user is not None and str(user).strip():
             self._acl_user_override = str(user).strip().lower()
@@ -883,19 +889,44 @@ class ScopeApi:
         """The user ACLs are checked for at path (see core.identity)."""
         return self._acl_user_override or acl_user_for(path)
 
-    def _acl_resource_path(self, resource: Path) -> str:
+    def _acl_service_for(self, resource: Path) -> Optional[Tuple[ACLEnforcementService, Path]]:
+        """The checks for resource: by the ACLs.md that governs it (its own project's, or the
+        parent's it inherits), with that project as the root of the rule paths. None where no
+        ACLs.md governs (nothing is checked there)."""
+        try:
+            target = Path(resource).expanduser().resolve()
+            root = find_acl_project_root(target)
+            if root is None:
+                return None
+            stamp = (root / META_DIR / "ACLs.md").stat().st_mtime_ns
+        except OSError:
+            return None
+        context = find_project_root(target)
+        key = (root, context, stamp)
+        service = self._acl_services.get(key)
+        if service is None:
+            backend = str(getenv("ACL_BACKEND") or "auto").strip().lower() or "auto"
+            authorizer = ACLAuthorizer.from_project(
+                root, backend=backend if backend in {"auto", "legacy", "casbin"} else "auto", context=context)
+            service = ACLEnforcementService(authorizer, mode=self._acl_enforcement.mode)
+            self._acl_services = {k: v for k, v in self._acl_services.items() if k[0] != root or k[1] != context}
+            self._acl_services[key] = service
+        return service, root
+
+    def _acl_resource_path(self, resource: Path, root: Optional[Path] = None) -> str:
         """
         Path as written in ACLs.md: relative to the ACL project ("/" for its root).
         Paths outside that project stay absolute, so only global rules like "/*" match them.
         """
+        root = root if root is not None else self._acl_root
         try:
             absolute = Path(resource).expanduser().resolve()
         except OSError:
             return str(resource)
-        if self._acl_root is None:
+        if root is None:
             return str(absolute)
         try:
-            rel = absolute.relative_to(self._acl_root)
+            rel = absolute.relative_to(root)
         except ValueError:
             return str(absolute)
         text = str(rel).replace("\\", "/")
@@ -963,6 +994,8 @@ class ScopeApi:
 
         self._acl_enforcement = ACLEnforcementService(authorizer, mode=mode)
         self._acl_root = Path(root).resolve()
+        self._acl_per_path = True
+        self._acl_services = {}
 
         audit_path = str(getenv("ACL_AUDIT_FILE") or "").strip()
         audit_enabled = str(getenv("ACL_AUDIT") or "").strip().lower() in {"1", "true", "yes", "on"}
@@ -999,13 +1032,26 @@ class ScopeApi:
             "move": "write",
             "delete": "delete",
         }.get(str(action or "").strip().lower(), str(action or "read").strip().lower() or "read")
-        user = self._acl_user_at(self._acl_root or resource)
+        service, root = self._acl_enforcement, self._acl_root
+        if self._acl_per_path:
+            # Security: the rules of the path's own project, not of the project Scope is in.
+            try:
+                picked = self._acl_service_for(resource)
+            except Exception:
+                picked = None
+                if find_acl_project_root(Path(resource)) is not None:
+                    return ACLCheckResult(allowed=False, enforced=True, reason="acl_unreadable",
+                                          mode=self._acl_enforcement.mode)
+            if picked is None:
+                return None
+            service, root = picked
+        user = self._acl_user_at(root or resource)
         try:
-            result = self._acl_enforcement.check(
+            result = service.check(
                 ACLCheckRequest(
                     user=user,
                     action=acl_action,
-                    resource=self._acl_resource_path(resource),
+                    resource=self._acl_resource_path(resource, root),
                 )
             )
             self._on_acl_audit_event(
@@ -1018,7 +1064,7 @@ class ScopeApi:
                     "allowed": result.allowed,
                     "enforced": result.enforced,
                     "reason": result.reason,
-                    "backend": self._acl_enforcement.authorizer.backend,
+                    "backend": service.authorizer.backend,
                 }
             )
             return result

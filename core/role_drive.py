@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Callable, Optional, Sequence, Union
 
 from core import time_log as tl
+from core.acl_enforcement import allowed_at
 from core.perspective_drive import PROJECTS
 from core.programs import Role, role_for
 
@@ -56,6 +57,12 @@ def drive_writer(folder: Path, projects_root: Union[str, Path], *, language: str
     return write
 
 
+def acls_by_path(action: str, path: Path) -> bool:
+    """The person's ACLs at path: by the ACLs.md that governs path (its own project's, or the
+    parent's it inherits), read anew when it changes - not by the rules of the projects root."""
+    return allowed_at(path, action)
+
+
 def mount(program: str, projects_root: str, mount_point: str, acls: Optional[Acls] = None) -> None:
     """Mount the drive of program at mount_point (blocks until unmounted)."""
     from core.perspective_fuse import mount_perspective_drive
@@ -64,8 +71,7 @@ def mount(program: str, projects_root: str, mount_point: str, acls: Optional[Acl
     if role is None:
         raise SystemExit(f"{program}: no role in Programs.md")
     if acls is None:
-        from core.scope_api import ScopeApi  # late: heavy
-        acls = ScopeApi(start_path=projects_root).acl_allows
+        acls = acls_by_path
     Path(mount_point).mkdir(parents=True, exist_ok=True)
     logger.info("role_drive.mount program=%s root=%s at=%s", program, projects_root, mount_point)
     mount_perspective_drive(projects_root=projects_root, mount_point=mount_point,
