@@ -2,7 +2,10 @@
 
 Started 2026-11-17. The minimal view M inside Scope was a trial (2026-10-25 to 10-26, E4 in the
 ProjectLogbook); now it becomes a tool of its own, made "nice and round". M inside Scope stays
-as it is until the Headline replaces it.
+as it is until the Headline replaces it (state 2026-11-18: M is still in Scope).
+
+What is built and what not: section 4, Steps. Sections 1 to 3a describe the picture, not all of
+it is there yet.
 
 ## 1. The Picture
 
@@ -111,14 +114,15 @@ knows widgets.
 
 **What the Headline gives every widget:** where one is. On every change of project it writes the
 active project (`core/clock_sources.write_active`, `$XDG_RUNTIME_DIR/seiton/active-project.json`;
-nobody writes it yet). Whoever wants, reads it - the clock does every 15 s.
+`Headline/model.py` calls it on each change of project). Whoever wants, reads it - the clock
+does every 15 s.
 
-**How a widget comes in** (proposal, to be tried with the clock):
+**How a widget comes in** (built 2026-11-17 with the clock, `Headline/widgets.py`):
 
 - **It registers** with a small file in `~/.config/seiton/headline/widgets/<name>.json`: its
   name, where its view lies, the command that opens its own screen. The installer of the widget
   writes it, the uninstaller takes it away; the Headline shows what is registered (in Setup, tab
-  Headline: on/off, order).
+  Headline: on/off, order - not built yet).
 - **It shows** what its view file says (a folder of its own in `$XDG_RUNTIME_DIR/<name>/`,
   `view.json`): a short text (`Küche · 2:15`), a state (calm, active, asking), a tooltip, perhaps a
   question with answers ("Still working on *Küche*?" - Yes / No), perhaps a short list (the
@@ -135,8 +139,10 @@ nobody writes it yet). Whoever wants, reads it - the clock does every 15 s.
   section Time) are on that screen.
 - **No widget, no gap:** if none is registered or its view is missing or stale, nothing shows.
 
-**Who starts the clock:** to be tried - an autostart entry by the installer; until it runs the
-widget shows grey "Clock not running", and its click starts it.
+**Who starts the clock:** the installer's autostart entry (`./install.sh --clock`). Built
+besides: the Headline's tool "Time tracking" opens the time screen even when no clock runs, and
+the time screen can start the clock (`Time/TimeScreen.py`, `startClock`). Not built: a grey
+"Clock not running" widget whose click starts it - without a clock, its widget does not show.
 
 ## 4. Steps
 
@@ -162,8 +168,9 @@ widget shows grey "Clock not running", and its click starts it.
    outside closes it. One Headline per user (`Headline/instance.py`, as PostFix): a later start,
    `Headline.py --panel`, hands "open the panel" to the one running, at the pointer or at an
    anchor (for the applet). Setup: "Where" - the top edge, or from the taskbar (no line then).
-   Still to come in the panel: the widgets and the person (2a), the clipboard, search, new
-   project and Setup buttons.
+   Built since: the widgets in the panel (with their question, the last three, "More") and a
+   row of buttons (`Headline/Tools.qml`: Open in Scope, Setup, Search, Clipboard, Time tracking,
+   Light / dark). Still open in the panel: the person, new project.
 4. **The Cinnamon applet:** the button in the taskbar that opens the panel above itself.
    Built 2026-11-17: `Headline/cinnamon/seiton-headline@seiton/` - a button with SEITON's box;
    a click runs `seiton-headline --panel --anchor x,y,w,h` with where the button is (device
@@ -171,6 +178,12 @@ widget shows grey "Clock not running", and its click starts it.
    `seiton-headline`, a menu entry "SEITON Panel" (`--panel`, to pin to any taskbar), on Cinnamon
    the applet (the user adds it: right click on the panel, Applets), and with `--headline` the
    Headline at login; uninstalling takes all of it.
+4a. **The line, state 2026-11-18:** built are the CWD button with the cascade, the standard
+   folders with », the widgets (their answers Yes/No, but not the question's text). The buttons
+   lie for now on top of the CWD dropdown (`Headline/Tools.qml`, as M's tools). Still open in the
+   line: SEITON's box, the perspectives, the person. Suggested folders (embryos) show pale but
+   do nothing on a click, and dragging onto a folder (section 3) is not built, neither in the
+   line nor in the panel.
 5. Later: KDE's plasmoid; Wayland.
 
 ## 5. Open

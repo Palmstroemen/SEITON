@@ -1,12 +1,13 @@
-# MyOS Markdown Thumbnailer
+# SEITON Markdown Thumbnailer
 
 This component adds markdown thumbnails for Linux file browsers that implement
 the Freedesktop thumbnailer standard (for example Nautilus, Nemo, Caja).
 
 ## Visual behavior
 
-- Short notes are rendered as sticky notes (Post-it style).
-- Longer notes are rendered as notebook pages (Notizblock/Heft style).
+- Short notes (fewer than 10 lines) are rendered as sticky notes (Post-it style).
+- Longer notes are rendered as A4 sheets, very long ones (100 lines and more) as notebook pages (Notizblock/Heft style).
+- Files inside a `.seiton` folder are rendered as config cards, long chats as speech bubbles.
 - If markdown frontmatter contains `background_color: "#rrggbb"`, that color is used.
 - Optional frontmatter `note_style` (or the former `myos_note_style`) can override style manually.
 
@@ -23,28 +24,37 @@ Supported style values (aliases in German/English are accepted):
 
 ## Files
 
-- `scripts/seiton_md_thumbnailer.py` - renderer script
+- `core/thumbnailer/markdown_thumbnailer.py` - renderer
+- `scripts/seiton_md_thumbnailer.py` - renderer script (entry point)
 - `installer/seiton-md.thumbnailer` - thumbnailer template
-- `installer/install-thumbnailer.sh` - local installer helper
+- `installer/seiton_install.py` - writes it (`./install.sh --thumbnailer`)
+- `installer/install-thumbnailer.sh` - older local helper, still works
 
 ## Install (per user)
 
 From project root:
 
 ```bash
-chmod +x installer/install-thumbnailer.sh scripts/seiton_md_thumbnailer.py
-./installer/install-thumbnailer.sh install
+./install.sh --thumbnailer
 rm -rf ~/.cache/thumbnails/*
 ```
 
-Then restart/reopen your file browser.
+This writes `~/.local/share/thumbnailers/seiton-md.thumbnailer` with the Python of SEITON's
+venv (which has Pillow). Then restart/reopen your file browser.
 
-## Verify / remove
+## Remove
 
 ```bash
-./installer/install-thumbnailer.sh check
-./installer/install-thumbnailer.sh uninstall
+./install.sh --uninstall
 ```
+
+takes it away with everything else the installer wrote. Not yet: `./install.sh --thumbnailer`
+does not remove definitions under the former name (`myos-md.thumbnailer`,
+`myos-markdown.thumbnailer`); `./installer/install-thumbnailer.sh install` does.
+
+The older helper (`./installer/install-thumbnailer.sh install|check|uninstall`) writes the
+same file but runs the system's `python3`: without the system's Pillow
+(`python3-pil`) the previews stay empty.
 
 ## Frontmatter example
 
@@ -61,7 +71,7 @@ Nudeln
 
 ## Notes
 
-- Installer is idempotent: running `install` repeatedly is safe.
+- Installer is idempotent: running it repeatedly is safe.
 - Thumbnailer writes a tiny fallback PNG if Pillow is unavailable.
-- Enable diagnostics via `MYOS_THUMBNAILER_DEBUG=1`.
+- Enable diagnostics via `SEITON_THUMBNAILER_DEBUG=1` (the former `MYOS_THUMBNAILER_DEBUG` is still read).
 - Thumbnailers are asynchronous: previews may appear with a short delay.

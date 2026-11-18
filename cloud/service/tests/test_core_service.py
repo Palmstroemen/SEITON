@@ -1,4 +1,4 @@
-"""The core service over HTTP ("Designdocument MyOS Core Service.md", 4 and 6): only who
+"""The core service over HTTP ("Designdocument SEITON Core Service.md", 4 and 6): only who
 knows the shared secret is answered (myos_acl, which passes the logged-in account along);
 an account without a person in the project's "# Accounts" sees nothing."""
 
@@ -80,7 +80,7 @@ def test_while_there_is_no_shadow_yet_the_service_says_so(shadow):
 
 
 def test_the_service_runs_without_fuse():
-    # The image has no FUSE (Designdocument MyOS Core Service.md, 9.2): nothing it loads may need it.
+    # The image has no FUSE (Designdocument SEITON Core Service.md, 9.2): nothing it loads may need it.
     import subprocess
     import sys
     code = "import sys; sys.modules['fuse'] = None; import cloud.service.server, cloud.service.reconcile"

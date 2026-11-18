@@ -21,7 +21,7 @@ use Psr\Log\LoggerInterface;
  * for (lens), the SEITON folders of a level (level), what a birth does (birth), what saving
  * through a lens needs first (bear) and the tags a folder's project suggests (tags), as the core
  * answers them for the logged-in account. No SEITON logic here - the core decides, this only
- * passes the account on ("Designdocument MyOS Core Service.md", 4 and 6).
+ * passes the account on ("Designdocument SEITON Core Service.md", 4 and 6).
  * Set by the admin: occ config:app:set seiton core_url --value=http://seiton-core:8080
  * and occ config:app:set seiton core_secret --sensitive --value=...
  */

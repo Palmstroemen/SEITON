@@ -1,20 +1,24 @@
-Im /.MyOS/-Ordner aber auch ausserhalb in beliebigen Foldern können Config.md-Files liegen, die vom System verwendet werden, um MyOS-Funktionalitäten bereitzustellen.
+Im /.seiton/-Ordner (bis November 2026 /.MyOS/) aber auch ausserhalb in beliebigen Foldern können Config.md-Files liegen, die vom System verwendet werden, um SEITON-Funktionalitäten bereitzustellen.
 Beispiele: Templates.md, ACLs.md, Tags.md, Desk.md, usw.
 
-Diese Config.md werden in einer gewissen Weise von MyOS interpretiert:
+Diese Config.md werden in einer gewissen Weise von SEITON interpretiert:
 
 1. **Überschriften 1** werden wie einzelne Files interpretiert. Das ermöglicht uns 2, mehr oder alle Config-Files in nur einem einzigen File zusammenzufassen.
    
-   Also 2 getrennte Files (Tags.md, Templates.md) haben den gleichen Effekt wie eine Config.md, die so aufgebaut ist: 
-# Tags
-   * red: important
-   * yellow: recent
-   * green: done
-		
+   Also ein File Templates.md (und weitere wie ACLs.md, Tags.md) hätte den gleichen Effekt wie eine Config.md, die so aufgebaut ist: 
 # Templates
 * Standard
 * Website
+
+# …
 Überschriften der Ebene # 1 können also im Weiteren als ebensolche oder als einzelne MD-Files verstanden werden. 
+
+   Stand heute (nachgeprüft 2026-11-18): Gebaut ist das nur für Abschnitte, die `ProjectConfig.resolve_effective_section` (core/project.py) liest, heute `Templates`: erst `.seiton/Templates.md`, dann `.seiton/Config.md`. `ACLs.md`, `Tags.md` und `Desk.md` werden nur als eigene Dateien gelesen, ein Abschnitt `# Tags` in einer Config.md wirkt nicht.
+
+   `Tags.md` hat ein eigenes Format (siehe "Designdocument Tags.md", 3): die Überschrift `# Tags`, dann je Zeile ein Tag mit `#` davor, ohne Leerzeichen dazwischen:
+# Tags
+#wichtig
+#in Arbeit
   
 
 

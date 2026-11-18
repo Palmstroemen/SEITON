@@ -2,7 +2,7 @@
 
 SunTree is for dropping things into folders: it shows folders, no files, and has no search
 (decided 2026-10-25). Today it is static: the folders of the CWD lie in two half rings, the
-MyOS folders on the left, the other folders on the right, and the stem in the middle (the
+SEITON folders on the left, the other folders on the right, and the stem in the middle (the
 CWD and its parents). The crown makes it move softly: one reaches deep folders by moving the
 mouse outward, without clicking through levels.
 
@@ -23,6 +23,10 @@ in it. Uses, all of this shape:
    place, not only a change of the CWD.
 7. **Only looking** - where am I, which lens is on? The one use without an action, so
    cancelling must always work: Esc, the shortcut again, a click beside the crown.
+
+State 2026-11-18: uses 1 to 4 are built. Not built: 5 (dragging out of the Clipboard) and 6
+(opening a folder in Scope). In use 7 Esc only lets go of the crown, it does not put SunTree
+away (see ToDo.md).
 
 What follows from it:
 
@@ -56,6 +60,8 @@ What follows from it:
 - **Always ready** (2026-10-26): SunTree is not ended by going away; it starts hidden at login
   (`SunTree/install_autostart.py <projects root>` writes the autostart entry). Appearing, it
   stands where Scope stands; with the CWD outside the project tree, at the projects root.
+  Not so yet when installed: `./install.sh --suntree` gives it the home folder, and SunTree
+  then stands there (see ToDo.md).
 - **Fading away** (2026-10-26): SunTree does not vanish at once. A snapshot of it
   (`ShaderEffectSource`, not live) blurs strongly (blurMax 64), fades out and draws together towards the stem (to
   60 %) over 300 ms, slowly at first; then the window hides and the crown is back at rest.
@@ -110,7 +116,7 @@ The tree draws its branches inward and makes them part of its stem.
 - Diving is only showing. A drop puts the file into the folder under the pointer (an embryo
   is born by it); a click goes into it (the CWD, and Scope follows, as the place is shared).
   The folders drawn into the stem are shown there as a preview (dashed).
-- Both halves: on the left the MyOS folders (born or embryo, embryos pale), on the right the
+- Both halves: on the left the SEITON folders (born or embryo, embryos pale), on the right the
   other folders. The lens works as before (Designdocument Perspective Resolver MVP.md, A3).
 
 - **Looking, not going: the CTD** (2026-10-26). The middle of SunTree shows the CTD, the
@@ -143,7 +149,7 @@ The tree draws its branches inward and makes them part of its stem.
   down to the old CWD and runs back to rest as when letting go; the stem shows the folders on
   the way as previews above the new CWD while they come out. The stem's entries glide: the
   parent from its place into the oval, the old CWD from the oval to its preview. The half is
-  the one the way lies in (right, or left for MyOS folders); where the way is not in the crown
+  the one the way lies in (right, or left for SEITON folders); where the way is not in the crown
   (a lens on), SunTree goes up as before.
 
 ## 4. The Stem From Top to Bottom

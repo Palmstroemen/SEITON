@@ -1,7 +1,7 @@
-# **MyOS Markdown Parser - Design Document (Draft)**
+# **SEITON Markdown Parser - Design Document (Draft)**
 
 ## **1. Purpose**
-Define the parsing rules for MyOS Markdown configuration files to keep them human-friendly, consistent, and machine-readable.
+Define the parsing rules for SEITON Markdown configuration files (in `.seiton/`; code: `core/config/parser.py`, `MarkdownConfigParser`) to keep them human-friendly, consistent, and machine-readable.
 
 ---
 
@@ -13,6 +13,13 @@ Define the parsing rules for MyOS Markdown configuration files to keep them huma
 - Comma-separated values are split into list entries.
 - Lines with multiple words are treated as prose and end the section.
 - Repeated headers merge their items.
+- A list item may start with `* ` and then contain spaces (`* Standard Plus`); `- ` is not
+  a list item here and ends the section.
+- `#` after a value starts an inline comment.
+- A header needs a space after the hashes (`#tag` is no header).
+- A header line with `key: value` (`#### inherit: dynamic`) is a property of the current
+  section, not a new section.
+- Values of `Key: Value` come back as lists (`Version: 1.0` → `{Version: [1.0]}`).
 
 ---
 
@@ -59,6 +66,14 @@ Result: `Templates = [Standard, Person, FiBu, Scrum]`
 - An empty line
 - A line with multiple words (prose)
 - A non-parseable line
+
+---
+
+### **4.1 Files with rules of their own**
+`ACLs.md` and `Desk.md` do not follow 4: blank lines, notes and `<!-- comments -->` do not end
+a section there (see "Designdocument ACLs.md", 2.3, and "Designdocument Desk.md", 5).
+`Tags.md` and the folder tags (`myTags.md`) are not read with this parser at all (see
+"Designdocument Tags.md", 3).
 
 ---
 

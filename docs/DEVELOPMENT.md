@@ -1,4 +1,4 @@
-# MyOS Development Guide
+# SEITON Development Guide
 
 ## Design Docs
 
@@ -7,29 +7,51 @@
 - [Designdocument ACLs](../core/Dokumentation/Designdocument%20ACLs.md)
 - [Designdocument Tags](../core/Dokumentation/Designdocument%20Tags.md)
 - [Designdocument Export-Import](../core/Dokumentation/Designdocument%20Export-Import.md)
+- [Designdocument Time](../core/Dokumentation/Designdocument%20Time.md) (time tracking)
+- [Designdocument Headline](../Scope/Designdocument%20Headline.md)
+- [Designdocument Setup](../Scope/Designdocument%20Setup.md)
+- [Designdocument Krone](../SunTree/Designdocument%20Krone.md) (SunTree)
 
 ## Repository Structure
 
 ```
-MyOS/
+SEITON/
 ├── core/                 # API, FUSE layer, project config, ACLs
-├── Scope/                # QML GUI file browser
-├── PostFix/              # Markdown editor
-├── cli/                  # CLI tools (myls, myproject, mytag, etc.)
 ├── core/Dokumentation/   # Design documents
+├── Scope/                # QML GUI file browser
+├── Headline/             # the line at the top edge (replaces Scope's minimal view M)
+├── Time/                 # the time tracking's screen
+├── SunTree/              # the crown, for dropping into folders
+├── PostFix/              # Markdown editor
+├── cli/                  # CLI tools (myls, myproject, mytag, etc.), see cli/Dokumentationen/CLI.md
+├── daemon/               # the lens drive's daemon, the clock
+├── cloud/                # Nextcloud app and the core service
+├── installer/            # seiton_install.py (./install.sh) and its requirements
+├── scripts/              # translations, test machine, tutorial data
+├── templates/            # the templates the installer copies to ~/.seiton/Templates
+├── Learning SEITON/      # the tutorial
 ├── docs/                 # Consolidated documentation
-├── SEITON_Test/            # Test/demo project structure
 └── LICENSE
 ```
+
+`SEITON_Test/` (test and demo data) is local and not in git.
 
 ## Development Environment Setup
 
 ### Dependencies
 
 ```bash
-sudo apt-get install fuse3 libfuse3-dev python3-pip
-pip3 install -r core/requirements.txt
+./install.sh
+~/.local/share/seiton/venv/bin/pip install -r requirements-dev.txt
 ```
+
+`./install.sh` installs the system packages (libfuse 2, bubblewrap, ...) and SEITON's own venv
+(`~/.local/share/seiton/venv`) with `installer/requirements.txt`; a plain `pip install` into
+the system Python is refused on newer distributions (PEP 668). The tutorial's example data also
+needs `reportlab` in that venv (`pip install reportlab`); without it its tests are skipped.
+
+`requirements-full.txt` still points to `core/requirements.txt`, a second, older list (other Qt
+version, `pynput` with its dependencies). Use `installer/requirements.txt`.
 
 ### Run Tests
 
@@ -50,32 +72,43 @@ python3 -m pytest PostFix/tests/
 python3 -m pytest core/tests/unit -m benchmark
 ```
 
+`python3` here is the venv's: `~/.local/share/seiton/venv/bin/python -m pytest`, or activate
+the venv first. Qt runs offscreen in the tests (`conftest.py`). The Nextcloud tests
+(`cloud/nextcloud/tests`) need a test server and skip without one.
+
 ### Launch Applications
 
 ```bash
 python3 Scope/Scope.py
 python3 PostFix/cli.py path/to/file.md
-python3 cli/myls.py SEITON_Test/Projekte/ --recent=5
+python3 Headline/Headline.py
+python3 SunTree/SunTree.py SEITON_Test/Projekte/
+python3 cli/myls.py SEITON_Test/Projekte/ --extended
 ```
+
+After `./install.sh` the same as launchers in `~/.local/bin`: `seiton`, `seiton-postfix`,
+`seiton-headline`, `seiton-time`, `seiton-clock`, the CLI tools.
 
 ## UI Language (i18n)
 
 UI strings in the code are **English** (`qsTr("…")` in QML/JS, `self.tr("…")` in Python);
 every other language is a translation:
 
-- `Scope/i18n/scope_de.ts`, `PostFix/i18n/postfix_de.ts` — German translations
+- `Scope/i18n/scope_de.ts`, `PostFix/i18n/postfix_de.ts`, `SunTree/i18n/suntree_de.ts`,
+  `Headline/i18n/headline_de.ts`, `Time/i18n/time_de.ts` — German translations
   (source), compiled to the `.qm` files the apps load.
 - After adding or changing strings run `python3 scripts/update_translations.py`: it
   extracts the strings (new ones arrive as "unfinished"), keeps existing translations and
   rebuilds the `.qm`. Translate the unfinished entries (e.g. Qt Linguist) and run it again.
-- Language: `MYOS_UI_LANG` (default `de`); English needs no file.
-- `Scope/tests/test_scope_i18n.py` and `PostFix/tests/test_postfix_i18n.py` fail when a
-  string has no German translation or a `.qm` is out of date.
+- Language: `SEITON_UI_LANG` (default `de`; the former `MYOS_UI_LANG` is still read); English
+  needs no file.
+- The `test_*_i18n.py` tests of each app fail when a string has no German translation or a
+  `.qm` is out of date.
 
 ## Security
 
 - Path traversal protection in embryo paths and API
-- ACL system: `off` / `monitor` / `enforce` (see [ACL_ROLLOUT.md](../core/Dokumentation/ACL_ROLLOUT.md))
+- ACL system: `off` / `monitor` / `enforce` (`SEITON_ACL_MODE`, see [ACL_ROLLOUT.md](../core/Dokumentation/ACL_ROLLOUT.md))
 - Test in user space; do not run FUSE as root
 
 ## Contribution Guidelines
@@ -87,4 +120,4 @@ every other language is a translation:
 
 ---
 
-*Last verified: 2026-02-17*
+*Last verified: 2026-11-18*

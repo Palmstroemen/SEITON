@@ -1,76 +1,80 @@
-# MyOS on Nextcloud - The Core as a Service (decided 2026-11-08)
+# SEITON on Nextcloud - The Core as a Service (decided 2026-11-08)
+
+Until 2026-11-14 the project was called MyOS: the app `seiton` was `myos_acl`, the image
+`seiton-core` was `myos-core`, the project folder `.seiton` was `.MyOS`. This document uses
+the names of today; the test container `myos-nc` on the GMXtec kept its name.
 
 ## 1. The Goal
 
 Someone with a Nextcloud - on Linux, Windows or a Mac, it does not matter, they only use the
-browser - installs MyOS as an add-on next to it and gets MyOS there: projects, embryos and
+browser - installs SEITON as an add-on next to it and gets SEITON there: projects, embryos and
 births, ACLs with inheritance, perspectives, tags. Not a look-alike: the same behaviour as on
 the desktop, because the same code decides.
 
 ## 2. The One Rule
 
-**There is one engine: the MyOS core (Python).** Nothing of MyOS' logic is rebuilt in PHP or
+**There is one engine: the SEITON core (Python).** Nothing of SEITON's logic is rebuilt in PHP or
 JavaScript - not the template resolution, not the inheritance of `ACLs.md` or `Templates.md`,
 not the perspective resolver, not the tags. PHP and JavaScript only
 
 - show what the core answers,
 - pass on what the user does and what changes in the files,
-- and enforce what the core decided (Nextcloud's own ACLs, the lock of `myos_acl`).
+- and enforce what the core decided (Nextcloud's own ACLs, the lock of `seiton`).
 
-Whatever a test can only check in JavaScript or PHP is suspect: if it encodes a MyOS rule, it
+Whatever a test can only check in JavaScript or PHP is suspect: if it encodes a SEITON rule, it
 belongs in the core.
 
 ## 3. Where We Stand (commit 1e05deb)
 
-MyOS runs on the desktop as a compiler and the cloud gets the result: `myacl sync` reads a
+SEITON runs on the desktop as a compiler and the cloud gets the result: `myacl sync` reads a
 local copy, sets real Team folder rules and uploads `Embryos.json` with the template files.
 The rights are real, Nextcloud enforces them. But the logic only runs at sync time:
 
 | In Nextcloud ...                 | today                                                     |
 |----------------------------------|-----------------------------------------------------------|
-| read, write, lock                | real, computed by MyOS                                    |
+| read, write, lock                | real, computed by SEITON                                  |
 | a new folder in the browser      | locked at once, its rights only at the next sync          |
 | `ACLs.md` edited in the browser  | no effect until a sync from a local copy                  |
-| birth of an embryo               | the browser copies a list MyOS computed beforehand        |
+| birth of an embryo               | the browser copies a list SEITON computed beforehand      |
 | perspectives, tags, filters      | missing                                                   |
 
 Kept as they are: `core/acl_nextcloud.py` (the planner), `core/nextcloud_dav.py` (rules and
-files over WebDAV), `core/cloud_embryos.py` (what a birth copies), the lock in `myos_acl`
+files over WebDAV), `core/cloud_embryos.py` (what a birth copies), the lock in `seiton`
 (the safety net for the moment between a change and the core's answer), the row in Files.
 Replaced: the static `Embryos.json` and the payload as the browser's source.
 
 ## 4. The Picture
 
-    Browser (Files app)                  Nextcloud server                   MyOS container
+    Browser (Files app)                  Nextcloud server                   SEITON container
     ───────────────────                  ────────────────                   ──────────────
-    row "MyOS folders",       ──OCS──▶   myos_acl (PHP)          ──HTTP──▶  myos-core
+    row "SEITON folders",     ──OCS──▶   seiton (PHP)            ──HTTP──▶  seiton-core
     perspectives view,                   - proxies the API,                 - shadow tree
     tags                                   with the user's id               - Blueprint, ACLAuthorizer,
                                          - forwards file events               perspective resolver, tags
                               ◀──────    - locks new entries                - applies rules (WebDAV,
                                                                               service account)
 
-- **myos-core** is one Docker image: the MyOS core plus a small HTTP API. It is the CLI's
+- **seiton-core** is one Docker image: the SEITON core plus a small HTTP API. It is the CLI's
   logic as an API, not a second implementation.
-- **myos_acl** (our PHP app) becomes the bridge: routes `/apps/myos_acl/api/...` to the core
+- **seiton** (our PHP app) becomes the bridge: routes `/apps/seiton/api/...` to the core
   (shared secret, the logged-in user's id passed along), and forwards Nextcloud's file events
   (created, renamed, copied, deleted, written) for Team folders the core manages.
-- **The browser** talks only to `myos_acl`, never to the container directly.
+- **The browser** talks only to `seiton`, never to the container directly.
 
 ## 5. The Shadow Tree
 
 The core works on a filesystem (`Path`); Nextcloud's storage may be local, S3 or anything.
 Instead of rewriting the core for WebDAV, the container keeps a **shadow tree** per managed
-Team folder: every folder (empty), every `.MyOS` file - with `.MyOS/Templates/` and its
+Team folder: every folder (empty), every `.seiton` file - with `.seiton/Templates/` and its
 files, where the templates live (since 2026-11-09). No user documents. That is all Blueprint,
 ACLAuthorizer and the perspective resolver read. Since the templates come into the Team folder
-with the project, a birth in step 2 can copy straight from `.MyOS/Templates`, by the core's
-answer; the copies in `.MyOS/Embryos/` are then no longer needed.
+with the project, a birth in step 2 can copy straight from `.seiton/Templates`, by the core's
+answer; the copies in `.seiton/Embryos/` are then no longer needed.
 
 - Built at start from a WebDAV walk (as `NextcloudDAV.tree()` does today), then kept current
   by the forwarded events; a periodic ETag check catches what an event missed.
 - The shadow is a cache, never a source: on doubt it is rebuilt.
-- The source of truth is the Team folder itself. A desktop MyOS with the sync client sees the
+- The source of truth is the Team folder itself. A desktop SEITON with the sync client sees the
   same `ACLs.md`; `myacl sync` from the desktop becomes optional.
 
 ## 6. Who Acts with Which Rights
@@ -90,9 +94,9 @@ answer; the copies in `.MyOS/Embryos/` are then no longer needed.
   template (e.g. `/00_Admin` for someone outside the role Admin). The birth then copies with
   the user's own rights; there are no files a user owns afterwards but was not allowed to
   read before. Built into `myacl sync` already (2026-11-08): each embryo's folder in
-  `.MyOS/Embryos/` is readable for who may read the folder it becomes, as Scope shows an
+  `.seiton/Embryos/` is readable for who may read the folder it becomes, as Scope shows an
   embryo (read there); births need create on top, which Nextcloud checks.
-- `myos_acl` passes the user's id; the core trusts only that header and only with the shared
+- `seiton` passes the user's id; the core trusts only that header and only with the shared
   secret. The container is reachable from the Nextcloud server alone.
 
 ## 7. Hosting
@@ -100,7 +104,7 @@ answer; the copies in `.MyOS/Embryos/` are then no longer needed.
 One image, two ways to run it, the same code:
 
 1. **Sidecar (first):** `docker compose` next to Nextcloud; the admin sets the core's URL and
-   secret in `myos_acl`. Needs Docker on the server and `myos_acl`, nothing else. Works for
+   secret in `seiton`. Needs Docker on the server and `seiton`, nothing else. Works for
    the friend's Nextcloud 32.0.1 if he can run a container there.
 2. **ExApp (later, deferred 2026-11-12):** packaged for AppAPI (shipped with Nextcloud since
    30.0.1), installed from the app store; the admin needs a deploy daemon (HaRP is the
@@ -110,9 +114,9 @@ One image, two ways to run it, the same code:
      no `docker run`, network, `trusted_domains`, shared secret or `CoreController`. The ExApp
      may act as any user without a password (WebDAV too): no service account password, but a
      lot of power.
-   - `myos_acl` stays a PHP app all the same. AppAPI loads an ExApp's scripts only on the
+   - `seiton` stays a PHP app all the same. AppAPI loads an ExApp's scripts only on the
      ExApp's own top-menu page (`ScriptsService::applyExAppScripts`, used by
-     `TopMenuController` alone): the row of MyOS folders and "Perspectives" need the PHP app.
+     `TopMenuController` alone): the row of SEITON folders and "Perspectives" need the PHP app.
      An ExApp hears of a change only afterwards, so the locks (`LockNewEntries`) stay PHP.
    - AppAPI's own file events for ExApps are gone ("removed FileEventsListener in favor of
      webhooks_listener", 2025-04-14; its docs still describe them). `webhook_listeners`
@@ -123,7 +127,7 @@ One image, two ways to run it, the same code:
      image must lie in a public registry.
 
    Deferred: for a test with someone we know, the sidecar does the job (Nextcloud 32 and AIO
-   35). To be taken up when strangers are to install MyOS from the app store; a first try
+   35). To be taken up when strangers are to install SEITON from the app store; a first try
    then: HaRP switched on in the AIO test instance, the core registered as an ExApp with a
    local image, nothing published.
 
@@ -140,11 +144,11 @@ the start (`docker buildx`); only the core runs in it, without FUSE (9.2).
 | Machine   | Role                                                                               |
 |-----------|------------------------------------------------------------------------------------|
 | Dell      | builds the image, runs the core against a shadow tree in a folder, no Nextcloud;   |
-|           | the tests stay offscreen and away from `~/.config/MyOS`                           |
+|           | the tests stay offscreen and away from `~/.config/seiton`                         |
 | GMXtec    | the real setup: the core in its own Docker network with `myos-nc`, no open port;   |
 |           | the integration tests through the ssh tunnel as today; the other stack untouched  |
 |           | and next to it AIO (2026-11-12): the newest Nextcloud as AIO installs it, the core |
-|           | `myos-core-aio` in the network `nextcloud-aio`, only on 127.0.0.1 (8180, 11000);  |
+|           | `seiton-core-aio` in the network `nextcloud-aio`, only on 127.0.0.1 (8180, 11000);|
 |           | the same integration tests through a second tunnel (11000). Kept: AIO updates to   |
 |           | each new major version, so it is where we see a new Nextcloud first               |
 | DS212+    | later the second platform (WebDAV), the core reaching it from outside - nothing    |
@@ -166,7 +170,7 @@ the most and risk the least - the core sets no rules and writes nothing.
    Files (left bar). Done when: the integration test as Lisa sees `/04_Finanz/Projekte` with
    the projects she may read, and Tom does not see them.
    State 2026-11-10: done up to the view - `cloud/service/` (lens.py, shadow.py, server.py),
-   the container next to `myos-nc` on the GMXtec, `myos_acl` passes `GET .../api/v1/lens` on
+   the container next to `myos-nc` on the GMXtec, `seiton` passes `GET .../api/v1/lens` on
    (LensController.php, since step 2 CoreController.php); the integration test passes through the bridge. The shadow is
    rebuilt whole when the Team folder's ETag changes (seconds for the test folder; events
    later). The view "Perspectives" in Files (src/lens.js) since the same day: the virtual
@@ -174,36 +178,36 @@ the most and risk the least - the core sets no rules and writes nothing.
    rights, a folder opened at its turned path by an own default action (before the Files
    app's "open-folder", which would open the real path). Left for this step: the integration
    test through the browser, the view in the friend's Nextcloud.
-2. **Births and rights live** - `GET level?path=` (MyOS folders of a level: born, embryos,
-   may create) and `GET birth?path=` (what the birth creates and copies); `myos_acl`
+2. **Births and rights live** - `GET level?path=` (SEITON folders of a level: born, embryos,
+   may create) and `GET birth?path=` (what the birth creates and copies); `seiton`
    proxies them and forwards events; the core sets the rules after each event. The row in
-   Files asks the API instead of listing `.MyOS/Embryos/`, as the first piece of the small
+   Files asks the API instead of listing `.seiton/Embryos/`, as the first piece of the small
    Scope (9.4): the web component, with the Files app as its first shell. Done when: the
    integration test births a folder as Lisa and the folder has its `ACLs.md` rights without
    a sync; editing `ACLs.md` in the cloud changes the rules.
    State 2026-11-10: rights live are done, differently than first thought - no events yet.
    After each rebuild of the shadow (the Team folder's ETag changed) the core does what
    `myacl sync` does (core/nextcloud_sync.py, shared with the CLI) with the service account:
-   rules and `.MyOS/Embryos/`. A folder made later has its rights in about 10-30 seconds;
+   rules and `.seiton/Embryos/`. A folder made later has its rights in about 10-30 seconds;
    until then `LockNewEntries` keeps it locked on the way. An `ACLs.md` that leaves no one
    who may change the rights is not sent (most likely broken: its parser is lenient, garbage
-   names no one); the rules stay. Births still copy from `.MyOS/Embryos/`, now kept by the
+   names no one); the rules stay. Births still copy from `.seiton/Embryos/`, now kept by the
    core. The integration test covers both criteria (10 tests, about 18 minutes with the
    waiting). `level`/`birth` since the same day (cloud/service/level.py): the row in Files
-   asks the core which MyOS folders a level holds - born ones the person may read, embryos
+   asks the core which SEITON folders a level holds - born ones the person may read, embryos
    where the person may create, by Scope's code (`Blueprint.get_template_folders_at` with the
-   person's write check) - and what a birth creates and copies from `.MyOS/Embryos/`; the
+   person's write check) - and what a birth creates and copies from `.seiton/Embryos/`; the
    browser does it with the user's rights. The paths are in the user's files: the service
    takes the Team folder's place off and puts it back, so the browser needs not know it.
-   Events since the same day: `myos_acl` tells the core of every change in a Team folder
+   Events since the same day: `seiton` tells the core of every change in a Team folder
    (ForwardChanges.php, POST /changed: path and whether a folder - no decision); the core
-   decides whether it matters to the shadow (folders and `.MyOS` files) and starts a round at
+   decides whether it matters to the shadow (folders and `.seiton` files) and starts a round at
    once. The look at the ETag stays as the net for what no one told (every 60 s). A round
    that failed is tried again without a change; a refused `ACLs.md` waits for the next one.
    What made the rounds slow was not the waiting but the walks: one PROPFIND per folder,
    0.27 s each on the test instance, four to five walks a round (~40 s). Now one PROPFIND with
    `Depth: infinity` (Nextcloud allows it by default; folder by folder where a server refuses)
-   and unchanged `.MyOS` files taken from the shadow before by their ETag: a folder made in
+   and unchanged `.seiton` files taken from the shadow before by their ETag: a folder made in
    the browser has its rights after about 5 s. Shadow and rules are still rebuilt whole per
    round - fine for a Team folder of this size, to be measured on bigger ones.
 3. **Saving through a lens** - the core maps the path (the department folder born on the
@@ -219,7 +223,7 @@ the most and risk the least - the core sets no rules and writes nothing.
    born folder and lets Files fetch the lens anew. Uploads through Files' own button into the
    project's folder stay refused there (read-only), so nothing lands in the wrong place.
 4. **Tags and filters** - onto Nextcloud's collaborative tags where they fit.
-   Decided 2026-11-11: in the cloud, MyOS tags are Nextcloud's collaborative tags - the only
+   Decided 2026-11-11: in the cloud, SEITON tags are Nextcloud's collaborative tags - the only
    place Nextcloud keeps a mark per file; the Files list, search and its Tags view show them.
    They are one list for the whole instance, seen by all its users. Desktop (xattr) and cloud
    stay apart for now - the sync client carries no extended attributes; a bridge is a step of
@@ -234,14 +238,14 @@ the most and risk the least - the core sets no rules and writes nothing.
    4b, filters: not built for the cloud for now (decided 2026-11-11). Tried: Nextcloud 32's
    WebDAV SEARCH finds by name (`LIKE`), not by path - so a `Filter.md` (path rules, patterns
    over paths, several forms of the path) cannot be put into a search, and filtering the rest
-   in the browser would be MyOS logic in JavaScript. The core could apply the filters itself
+   in the browser would be SEITON logic in JavaScript. The core could apply the filters itself
    with Scope's code (`apply_filter_projection`), but then the shadow would have to hold the
    names of all documents and be rebuilt on every document change. Too much for a feature
    used seldom: in the cloud, the lenses cover the common case (one department across all
    projects), the tag bar quick filtering, Nextcloud its own filters and search. Step 4 ends
    with the tags; to be taken up again when someone needs filters in the cloud.
 5. **ExApp packaging.** Deferred (2026-11-12), see 7: it would replace only the sidecar,
-   `myos_acl` stays; worth it once strangers install from the app store.
+   `seiton` stays; worth it once strangers install from the app store.
 
 ## 9. Nextcloud Is the First, Not the Only One - the Whole Picture
 
@@ -249,8 +253,8 @@ Next could be Obsidian, OneDrive, Google Drive/Docs, Dropbox, Synology, OpenClou
 we build now is cut along that line from the start.
 
     ┌──────────────── Docker image (the same everywhere) ────────────────┐
-    │  MyOS core: Blueprint, ACLs, perspective resolver, tags            │
-    │  API in MyOS terms (embryos, births, rights, lenses, projects)     │
+    │  SEITON core: Blueprint, ACLs, perspective resolver, tags          │
+    │  API in SEITON terms (embryos, births, rights, lenses, projects)   │
     │  adapters: nextcloud | synology | onedrive | ...                   │
     │            (shadow tree + changes, rights translated)              │
     │  the small Scope as a web component                                │
@@ -288,7 +292,7 @@ other). Checked 2026-11-10: `core/perspective_drive.py` maps the turned paths wi
 
 ### 9.3 Small Adapters, Three Parts
 
-- **The core knows no platform.** It reads a shadow tree and answers in MyOS terms. The
+- **The core knows no platform.** It reads a shadow tree and answers in SEITON terms. The
   service's API speaks these terms, never a platform's.
 - **Files**: build and keep the shadow tree (walk, then events or polling) and carry out
   what the user does through the platform (WebDAV here; Graph API for OneDrive, Drive API,
@@ -297,11 +301,14 @@ other). Checked 2026-11-10: `core/perspective_drive.py` maps the turned paths wi
 - **Rights**: map the rights the core computes to what the platform enforces, and report
   what it cannot hold - as `core/acl_nextcloud.py` does with patterns and `change`.
   Platforms differ most here: Nextcloud's advanced permissions and Synology's Windows-like
-  ACLs hold MyOS' "nearest rule wins"; OneDrive, Google Drive and Dropbox only share items
+  ACLs hold SEITON's "nearest rule wins"; OneDrive, Google Drive and Dropbox only share items
   (rights add up, nothing can be taken away deeper), so there the adapter must refuse or
   approximate, never pretend.
-- Today the Nextcloud parts live in `core/` (`acl_nextcloud.py`, `nextcloud_dav.py`); with
-  step 2 they move into the Nextcloud adapter, so `core/` keeps no platform code.
+- Today the Nextcloud parts still live in `core/` (`acl_nextcloud.py`, `nextcloud_dav.py`,
+  `nextcloud_sync.py`, the last shared by `myacl sync` and the core service since step 2), and
+  `cloud/service/` imports them from there. So `core/` is not free of platform code yet. They
+  move into a Nextcloud adapter with the second adapter (e.g. Synology), not before (state
+  2026-11-18).
 
 ### 9.4 The Small Scope: Built Once, a Thin Shell per Platform
 
@@ -323,4 +330,4 @@ The desktop stays as it is: the drive with FUSE, Scope, SunTree, PostFix.
 - Events from the sync client and `occ files:scan` arrive the same way? To be checked.
 - Which events are enough to keep the shadow current, and how fast the ETag check must be.
 - Rights of the user who edits `ACLs.md` in the browser: the core applies only what that
-  user's `change` allows (as in MyOS); what does the user see when part is refused?
+  user's `change` allows (as in Scope); what does the user see when part is refused?

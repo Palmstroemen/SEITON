@@ -1,13 +1,19 @@
-# **MyOS CLI Overview (Draft)**
+# **SEITON CLI Overview**
+
+`./install.sh` puts a launcher of the same name into `~/.local/bin` for `myls`, `myproject`, `mytag`, `myedit`, `myfilter`, `myacl`, `myexport` and `myimport`, and also `seiton-clock` and `seiton-time`. In the repository: `python3 cli/<name>.py`. Every tool knows `--help`; exit 1 = error, 2 = wrong arguments.
+
+Of the tools only `myacl` knows the ACL mode `enforce`; the others act with the rights of the file system (see "Designdocument ACLs.md").
 
 ## **myls**
-List files with MyOS-aware views.
+List files with SEITON-aware views.
 
 Examples:
 - `myls .`
-- `myls --extended`
+- `myls --extended` (embryo status; `--color`: embryos in light blue)
 - `myls --tags`
 - `myls --roentgen` (x-ray: files of small folders, while the terminal's height suffices; `--roentgen 10`: 10 lines). Files seen through show where they lie: `r1.pdf   (in Rechnungen/2024)`
+
+Not built: `--recent` prints nothing yet, `--all` shows only the extended view.
 
 ---
 
@@ -16,7 +22,13 @@ Project management.
 
 Examples:
 - `myproject create /path/to/folder`
-- `myproject create --new /path/to/new-folder`
+- `myproject create --new /path/to/new-folder` (makes the folder first)
+- `myproject tidy .` (born template folders that hold nothing of the user become embryos again)
+- `myproject trash list .` (the trash of the project the path lies in)
+- `myproject trash restore NAME --in .` / `myproject trash delete NAME --in .` (`NAME` as `trash list` shows it)
+- `myproject trash empty --in . --yes` (delete everything in the trash for good; cannot be undone)
+
+Not there: making a project an ordinary folder again (in Scope: the crossed-out P button).
 
 ---
 
@@ -36,15 +48,20 @@ Examples:
 - `myimport /tmp/export/package`
 - `myimport /tmp/export/package --target /path/to/target --mode adopt --conflict merge`
 
+`--mode adopt|restore`, `--conflict merge|overwrite|skip`.
+
 ---
 
 ## **myfilter**
-Filter utilities (list and resolve).
+Filter utilities.
 
 Examples:
-- `myfilter list .`
+- `myfilter list .` (filters from the path upwards; `--verbose`: where each comes from)
 - `myfilter resolve .`
 - `myfilter resolve . --manual /path/to/Filter.md`
+- `myfilter show .` (the effective filter in detail)
+- `myfilter activate /path/to/Filter.md` (a manual filter, it holds until `clear`)
+- `myfilter clear`
 
 ---
 
@@ -58,21 +75,23 @@ Examples:
 - `mytag remove file.txt dringend`
 - `mytag clear file.txt`
 
+For folders mytag reads and writes the xattr, Scope reads folder tags from `.seiton/myTags.md`: the two do not see the same folder tags yet.
+
 ---
 
 ## **myacl**
-ACLs: who may do what, and every rule of a project. Read-only; edit rules with `myedit acl` or in Scope/PostFix. With `MYOS_ACL_MODE=enforce` only people who may read ACLs.md see them.
+ACLs: who may do what, and every rule of a project. Read-only; edit rules with `myedit acl` or in Scope/PostFix. With `SEITON_ACL_MODE=enforce` only people who may read ACLs.md see them.
 
 Examples:
 - `myacl show Finanz/Archiv` (roles and people with their rights here; per role `here` or `from /Finanz`: the folder whose rule decides)
 - `myacl check Anna Finanz delete` (prints yes/no; exit 0 = allowed, 1 = not, 2 = error)
 - `myacl check Anna Finanz` (all rights of Anna there)
 - `myacl rules .` / `myacl rules . --json` (every rule, `## Folder` rules resolved into each subproject, paths as written in ACLs.md, `[]` = `none`; the input for adapters, e.g. to a cloud)
-- `myacl sync --plan .` (the rules a Nextcloud Team folder with "advanced permissions" should hold, per person; settings in `.MyOS/Nextcloud.md`, see below; no network)
-- `myacl sync --dry-run .` (reads the Team folder and its rules over WebDAV and shows what would change: `+` new, `~` changed, `-` goes because it is not from ACLs.md; sends nothing. Login from `MYOS_NEXTCLOUD_USER` and `MYOS_NEXTCLOUD_PASSWORD`, best an app password; the account needs "manage advanced permissions" and should be able to read the whole folder)
-- `myacl sync .` (shows the same, asks, sends the rules path by path, deepest first, and reads them back to check; `--yes` sends without asking, needed without a terminal. Rules not from ACLs.md go. Needs `group:`; with the server app `cloud/nextcloud/myos_acl` new entries on the way are locked at once, see `cloud/nextcloud/README.md`. Uploads each project's embryos first - a folder per embryo in `.MyOS/Embryos/` with what its birth copies, and `.MyOS/Embryos.json` to know what is up there - for the row of MyOS folders in the Files app; each embryo may be read by who may read the folder it becomes, as Scope shows it. What manages rights and the sync in a `.MyOS` - `ACLs.md`, `ACLs-history`, `Nextcloud.md`, the embryos - only who has `change` on that `ACLs.md` may write, so the syncing account needs it. With the MyOS core service next to Nextcloud the same runs there after each change, see `cloud/nextcloud/README.md`)
+- `myacl sync --plan .` (the rules a Nextcloud Team folder with "advanced permissions" should hold, per person; settings in `.seiton/Nextcloud.md`, see below; no network)
+- `myacl sync --dry-run .` (reads the Team folder and its rules over WebDAV and shows what would change: `+` new, `~` changed, `-` goes because it is not from ACLs.md; sends nothing. Login from `SEITON_NEXTCLOUD_USER` and `SEITON_NEXTCLOUD_PASSWORD`, best an app password; the account needs "manage advanced permissions" and should be able to read the whole folder)
+- `myacl sync .` (shows the same, asks, sends the rules path by path, deepest first, and reads them back to check; `--yes` sends without asking, needed without a terminal. Rules not from ACLs.md go. Needs `group:`; with the server app `cloud/nextcloud/seiton` new entries on the way are locked at once, see `cloud/nextcloud/README.md`. Uploads each project's embryos first - a folder per embryo in `.seiton/Embryos/` with what its birth copies, and `.seiton/Embryos.json` to know what is up there - for the row of SEITON folders in the Files app; each embryo may be read by who may read the folder it becomes, as Scope shows it. What manages rights and the sync in a `.seiton` - `ACLs.md`, `ACLs-history`, `Nextcloud.md`, the embryos - only who has `change` on that `ACLs.md` may write, so the syncing account needs it. With the SEITON core service next to Nextcloud the same runs there after each change, see `cloud/nextcloud/README.md`)
 
-`.MyOS/Nextcloud.md`:
+`.seiton/Nextcloud.md`:
 ```
 # Nextcloud
 url: https://cloud.example.org
@@ -86,23 +105,39 @@ Anna Huber: anna.h       (person in # Users: Nextcloud account; people without o
 ---
 
 ## **myedit**
-Open a config section of the project in `$EDITOR`. myedit writes nothing itself: a file that is not there yet is made when the editor saves it. Until then the project inherits, and myedit says from which file (a file of its own ends the inheritance; an `ACLs.md` of its own gives only the rights written in it).
+Open a config section of the project in `$EDITOR` (`tags`, `templates`, `acl`, `config`). myedit writes nothing itself: a file that is not there yet is made when the editor saves it. Until then the project inherits, and myedit says from which file (a file of its own ends the inheritance; an `ACLs.md` of its own gives only the rights written in it).
 
 Examples:
 - `myedit tags .`
 - `myedit templates /path/to/project`
-- `myedit acls /path/to/project`
+- `myedit acl /path/to/project`
 
 ---
 
-## **myperspectivefs**
-Mount the flipped perspective FUSE adapter as a separate filesystem.
+## **seiton-clock, seiton-time**
+The time tracking (see "Designdocument Time.md").
+
+- `seiton-clock` starts the clock with its role: it mounts the drive of its role and runs the clock in bubblewrap. `--projects-root PATH`: the folder holding the projects (else the first root below the home folder). `--no-sandbox`: without bubblewrap and role drive (development). A second start does nothing while a clock runs. `./install.sh --clock` starts it at login.
+- `seiton-time` opens the time screen (`Time/TimeScreen.py`).
+
+---
+
+## **migrate_name**
+Moves projects and the user's settings from a former name (MyOS until 2026-11-14) to SEITON: `.MyOS` becomes `.seiton`, `~/.config/MyOS` becomes `~/.config/seiton`. Not installed as a launcher.
 
 Examples:
-- `myperspectivefs --project-root /data/Projekte --mount-point /mnt/myos-structure --foreground`
-- `myperspectivefs --project-root /data/Projekte --mount-point /mnt/myos-structure --start-real-path /data/Projekte/ProjektA/kommunikation/email`
+- `python3 cli/migrate_name.py ~/Projekte` (only shows the plan)
+- `python3 cli/migrate_name.py --apply ~/Projekte` (does it)
+- `python3 cli/migrate_name.py --apply --config` (the user's settings folder too)
+
+---
+
+## **myperspectivefs** (developer tool)
+Mounts the flipped perspective FUSE adapter as a separate filesystem. Not installed; the lens drive in daily use is mounted by the perspective daemon (`cli/perspective_daemon.py`).
+
+Example:
+- `python3 cli/myperspectivefs.py --projects-root /data/Projekte --mount-point /mnt/seiton-structure --foreground`
 
 Notes (MVP):
-- v1 supports only `--perspective flipped`
 - no small-project fallback behavior yet
 - adapter is thin: mapping semantics come from the core perspective resolver

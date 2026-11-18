@@ -1,5 +1,5 @@
 """The MyOS folders of a level and what a birth does, as the core service answers them for the
-row in Files ("Designdocument MyOS Core Service.md", 8, step 2). As Scope with ACLs enforced:
+row in Files ("Designdocument SEITON Core Service.md", 8, step 2). As Scope with ACLs enforced:
 born MyOS folders for who may read them, embryos only for who may create them there. A birth
 copies from the project's .MyOS/Embryos/ (kept by the core): the files and hidden folders of
 that template level; visible subfolders stay embryos."""

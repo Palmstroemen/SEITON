@@ -1,4 +1,4 @@
-# **MyOS Tags - Design Document (Draft)**
+# **SEITON Tags - Design Document (Draft)**
 
 ## **1. Purpose**
 Tags add human-readable meaning to files and folders. They should be explicit words, not just colors, and can optionally carry color or icon hints.
@@ -13,21 +13,26 @@ Tags add human-readable meaning to files and folders. They should be explicit wo
 
 ---
 
-## **3. Tag Format (Draft)**
-Tags are defined as simple label entries with optional attributes:
+## **3. Tag Format**
+A project suggests its tags in `.seiton/Tags.md`: the heading `# Tags`, then one tag per
+line with `#` in front and no space after it (`core/tags.py`, `hash_line_tags`):
 
 ```
 # Tags
-wichtig, rot, !
-dringend, orange, clock
-in Arbeit, gelb
-erledigt, grün, check
+#wichtig
+#dringend
+#in Arbeit
+#erledigt
 ```
 
-Interpretation:
-- first value is the label
-- second value is optional color
-- third value is optional icon
+- A line `# …` (hashes, then a space) is a Markdown heading, not a tag.
+- Other lines are ignored. Each tag counts once; they are shown sorted.
+- Like other configs, `Tags.md` inherits: a subproject without one suggests the tags of the
+  nearest parent project that has one.
+- `Tags.md` is read only as its own file, not as a `# Tags` section of a `Config.md`.
+
+Open (not built): a color and an icon per tag. An earlier draft wrote them as
+`wichtig, rot, !`; the code does not read that form (such a line gives no tag).
 
 ---
 
@@ -45,13 +50,14 @@ Primary storage uses filesystem metadata:
 - macOS/Linux: extended attributes (xattr)
 - Windows/NTFS: to be evaluated
 
-Fallback storage (if metadata is unavailable) may use `.MyOS/Tags.md`, but MVP will prefer native metadata and may not support tags on filesystems without it.
+File tags live in the xattr `user.seiton.tags` (until November 2026 `user.myos.tags`; old
+ones are moved over by `cli/migrate_name.py`), as a comma-separated list, a value written as
+`tag=value` (`mytag set`). On filesystems without xattr there are no file tags; there is no
+fallback. `.seiton/Tags.md` holds only the suggested tags (see 3), not the tags of files.
 
-Folder tagging is prepared via a non-project sidecar file:
-- `/.MyOS/myTags.md` on the tagged folder itself
-- this sidecar does **not** make a folder a MyOS project (`Project.md` remains the project marker)
-
-For MVP, this sidecar path is considered an optional technical bridge and is not actively expanded in UI/semantics yet.
+Folder tags live in a sidecar file on the tagged folder itself:
+- `.seiton/myTags.md`, one `#tag` per line (Scope writes it; without tags it is removed)
+- this sidecar does **not** make a folder a SEITON project (`Project.md` remains the project marker)
 
 ---
 
@@ -66,13 +72,15 @@ For MVP, this sidecar path is considered an optional technical bridge and is not
 ---
 
 ## **7. Summary**
-Tags are text-first labels with optional color and icon hints. They remain readable without UI decoration and align with the MyOS “self-explanatory” principle.
+Tags are text-first labels with optional color and icon hints. They remain readable without UI decoration and align with the SEITON “self-explanatory” principle.
 
 ---
 
 ## **8. MVP Checkpoint**
 - File tags via xattr are the primary shipped behavior.
-- Folder-tag sidecar support (`/.MyOS/myTags.md`) is prepared but intentionally not pushed further for now.
+- Folder tags via the sidecar `.seiton/myTags.md` are read and written by Scope.
+- The project's suggested tags (`.seiton/Tags.md`) are offered in Scope; the Nextcloud sync
+  creates them as system tags there (`core/nextcloud_sync.py`).
 - Scope's tag bar has three sections, each tag shown once in the first that applies:
   **This folder** (its own sidecar tags), **Subfolders** (tags of the listed subfolders,
   only while folders are shown) and **File tags**. A click filters the listing (2026-10-21).

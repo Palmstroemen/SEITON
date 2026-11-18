@@ -1,6 +1,6 @@
 # level.py - the MyOS folders of a level and what a birth does, as the core service answers
 #
-# See "cloud/nextcloud/Designdocument MyOS Core Service.md", 8, step 2. For the row of MyOS
+# See "cloud/nextcloud/Designdocument SEITON Core Service.md", 8, step 2. For the row of MyOS
 # folders in Files - and for saving through a lens (bear) - which template folders a level
 # holds, born or embryo, by the same code as
 # Scope (core/localBlueprintLayer.py), with the rights of the person asking (ACLs.md, as Scope

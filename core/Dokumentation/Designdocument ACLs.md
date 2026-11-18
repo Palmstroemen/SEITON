@@ -1,14 +1,14 @@
-# **MyOS ACLs - Design Document (Draft)**
+# **SEITON ACLs - Design Document (Draft)**
 
 ## **1. Purpose**
-MyOS ACLs define **human‑readable, project‑level access rules** that are **self‑explanatory** and
+SEITON ACLs (until November 2026 called MyOS ACLs) define **human‑readable, project‑level access rules** that are **self‑explanatory** and
 portable across platforms. The system must work even when OS‑native ACLs are unavailable, and it
 should be adaptable via plugins.
 
 ---
 
 ## **2. ACLs.md Format (Draft)**
-`ACLs.md` lives in `.MyOS/` and follows the same parser rules as other config files,
+`ACLs.md` lives in `.seiton/` and follows the same parser rules as other config files,
 with one exception for its layout (see 2.3).
 
 ### **2.1 Sections**
@@ -23,22 +23,22 @@ Recommended sections:
 
 ## Folder
 - /{Folder}/: read, write
-- /info/: read
+- /1_Info/: read
 
 ## Admin
 - /*: read, write, execute
-- /.MyOS/ACLs.md: read, write, change
+- /.seiton/ACLs.md: read, write, change
 
 ## Buchhalter
-- /finanz/: read, write, execute
-- /rechtliches/: read
+- /4_Finanz/: read, write, execute
+- /5_Recht/: read
 
 ## Entwickler
-- /finanz/eingang/: read, write
-- /ressources/: read
-- /ressources/datenblaetter/: read, write
-- /work/scrum/: read, write, execute
-- /work/personal/: none
+- /4_Finanz/Eingang/: read, write
+- /6_Ressourcen/: read
+- /6_Ressourcen/Datenblaetter/: read, write
+- /7_Arbeit/Scrum/: read, write, execute
+- /7_Arbeit/Personal/: none
 
 # Users
 anna: Admin
@@ -47,27 +47,27 @@ karl: Entwickler, Buchhalter
 
 Notes:
 - Rights are explicit. **MVP rights set**: `read`, `write`, `execute`, `change`, `delete`.
-- `change` only grants write access to `.MyOS/ACLs.md` (ACL management).
+- `change` only grants write access to `.seiton/ACLs.md` (ACL management).
 - `delete` allows deleting entries. It is **not** implied by `write`: who may edit a folder
   may not automatically delete in it (moving entries needs `write`). `*` includes `delete`.
-- Paths are **relative to the project root** (e.g. `/finanz/`).
+- Paths are **relative to the project root** (e.g. `/4_Finanz/`).
 - `*` can be used as a wildcard path (e.g. `/*: read, write`).
 - **Nearest rule wins (per role):** a rule on a deeper folder *replaces* what the role
   would inherit from rules on its parent folders – also when it grants less. So rights
   can be taken away in sub-folders. `none` locks a role out of a folder
-  (e.g. `/work/personal/: none`). Roles without a rule on the sub-folder keep inheriting.
-  Rules written for the same folder (`/finanz/` and `/finanz/**`) are combined.
+  (e.g. `/7_Arbeit/Personal/: none`). Roles without a rule on the sub-folder keep inheriting.
+  Rules written for the same folder (`/4_Finanz/` and `/4_Finanz/**`) are combined.
 - A user's rights are the **union of their roles**: if one role is locked out of a folder
   but another role of the same user may enter it, the user may enter it.
 - Because the nearest rule wins, a file-specific rule must list all intended rights
-  (e.g. `/.MyOS/ACLs.md: read, write, change`, not just `change`).
+  (e.g. `/.seiton/ACLs.md: read, write, change`, not just `change`).
 - **Subprojects inherit directly:** a subproject without its own `ACLs.md` is governed by
   the nearest parent project's `ACLs.md`; paths stay relative to that parent project
   (e.g. `/Familie/Ich/` for the subproject `Familie/Ich`). A subproject with its own
   `ACLs.md` uses only that file.
 - **Folder rules in subprojects:** the `## Folder` rules apply again to the template
   folders of every subproject below, with the subproject's path in front (for the role
-  `04_Finanz`, `/{Folder}/` also becomes `/Familie/04_Finanz/`). The rules of a role's own
+  `4_Finanz`, `/{Folder}/` also becomes `/Familie/4_Finanz/`). The rules of a role's own
   section stay paths of the project holding `ACLs.md` (see 2.4).
 - If no `inherit` is defined, the default is **`dynamic`**.
 
@@ -136,17 +136,18 @@ Decided 2026-11-16 for the time tracking ("Designdocument Time.md", 7.4).
 ---
 
 ## **3. Default Domain Structure (Suggested)**
-This is a **default template** that can be adapted by users via their own templates:
+This is the **default template** (`templates/Standard` in the repository) that can be
+adapted by users via their own templates:
 
-- **/admin/** → leadership / management
-- **/info/** → reception / first information
-- **/team/** → HR and team administration (not the work area)
-- **/communikation/** → internal/external communication (web, social, customers, investors, vendors)
-- **/finanz/** → finance
-- **/rechtliches/** → legal
-- **/ressources/** → assets, inventory, manuals, infrastructure
-- **/work/** → actual work (scrum, shifts, patients, clients, etc.)
-- **/dokumentation/** → archive, documentation, media
+- **/0_Admin/** → leadership / management
+- **/1_Info/** → reception / first information
+- **/2_Team/** → HR and team administration (not the work area)
+- **/3_Kommunikation/** → internal/external communication (web, social, customers, investors, vendors)
+- **/4_Finanz/** → finance
+- **/5_Recht/** → legal
+- **/6_Ressourcen/** → assets, inventory, manuals, infrastructure
+- **/7_Arbeit/** → actual work (scrum, shifts, patients, clients, etc.)
+- **/9_Dokumentation/** → archive, documentation, media
 
 Users can **customize** this structure by creating their own templates.
 
@@ -154,10 +155,10 @@ Users can **customize** this structure by creating their own templates.
 
 ## **4. ACL Concepts**
 ### **4.1 Roles from Structure**
-Each top‑level folder implies a **default role**:
-- `/finanz/` → **Finance**
-- `/team/` → **HR**
-- `/admin/` → **Admin**
+Each template folder implies a **default role** of the same name (a template folder role):
+- `/4_Finanz/` → **4_Finanz**
+- `/2_Team/` → **2_Team**
+- `/0_Admin/` → **0_Admin**
 - etc.
 
 **Folder defaults:**  
@@ -166,10 +167,10 @@ They are the role's **inherited** entries; a role-specific block adds **explicit
 and an explicit entry replaces the inherited one for the same folder (see 2.4). So rights
 can be removed as well as added.
 Within the `## Folder` block, **duplicate paths are merged** (rights are unioned) so that
-global defaults like `/info/` remain additive.
+global defaults like `/1_Info/` remain additive.
 
 ### **4.2 Custom Roles**
-Admins can define **custom roles**, e.g. **“Prokura”** with access to `/finanz/` and `/rechtliches/`.
+Admins can define **custom roles**, e.g. **“Prokura”** with access to `/4_Finanz/` and `/5_Recht/`.
 
 ### **4.3 Admin Role**
 The **Admin** role:
@@ -181,12 +182,12 @@ Other roles may **read** ACLs but not change them.
 
 ## **5. Storage & Management**
 ### **5.1 Source of Truth**
-ACL rules live in **`.MyOS/ACLs.md`** (technical source of truth).
+ACL rules live in **`.seiton/ACLs.md`** (technical source of truth).
 
 ### **5.2 Team Management View**
 The **/team/** area is the **human management space** for teams:
 - team lists, CVs, staffing, goals
-- **UI / workflow** to edit ACLs (writes to `.MyOS/ACLs.md`)
+- **UI / workflow** to edit ACLs (writes to `.seiton/ACLs.md`)
 
 This keeps technical config hidden while remaining **accessible and self‑explanatory**.
 
@@ -196,8 +197,8 @@ panel: right click on a chip, as a left click filters). The model is the Windows
 **“Security” tab** many users know: a principal, one switch per right (in our chip
 pictogram `◂` read, `▸` write, `x`, `c`, `d`), inherited rights shown as such
 (“inherited from `/Familie/`”), and **“back to inherited”**.
-- **Who may edit:** users with `change` on `/.MyOS/ACLs.md` (the current user as for
-  enforcement: `MYOS_ACL_USER`, else `$USER`). For everybody else the chips only display.
+- **Who may edit:** users with `change` on `/.seiton/ACLs.md` (the current user as for
+  enforcement: `SEITON_ACL_USER`, else `$USER`). For everybody else the chips only display.
 - **What an edit writes:** because the nearest rule wins, an edit is always one rule for
   one role at exactly this path (`- /path/: read, write`); all rights off writes `none`,
   “back to inherited” removes the line. A person has no rules of their own: editing a
@@ -219,9 +220,9 @@ pictogram `◂` read, `▸` write, `x`, `c`, `d`), inherited rights shown as suc
   must be easy. So a name in `# Users` is free (`Anna Huber`), and the people listed
   simply travel along.
 - **Who am I here?** (`core/identity.py`, decided 2026-10-22) Each computer keeps the
-  user's names locally in `~/.config/MyOS/Identity.md` (`# Identity` / `Names: Oliver,
+  user's names locally in `~/.config/seiton/Identity.md` (`# Identity` / `Names: Oliver,
   Oliver Rafelsberger`), not in the project. In a project the user is the first of these
-  names the project lists in `# Users`, else (as before) the login name; `MYOS_ACL_USER`
+  names the project lists in `# Users`, else (as before) the login name; `SEITON_ACL_USER`
   overrides it (development, tests). Several names because a customer's project may list
   you differently than your own; this works wherever the stick is mounted. Scope, PostFix
   and the embryo layer all ask `core.identity`, per project.
@@ -235,19 +236,19 @@ pictogram `◂` read, `▸` write, `x`, `c`, `d`), inherited rights shown as suc
   on mouse-over other projects (downwards) and the current subfolders and embryos (to the
   right). Sign-in and “who am I” belong there; the top row of today's Scope is the
   prototype for it.
-- **Vision: `00_Admin` and `02_Team`** list the people of a project (person cards, e.g.
-  `02_Team/Mitarbeiter/Anna Huber.md`); who is not there should in the end have no
+- **Vision: `0_Admin` and `2_Team`** list the people of a project (person cards, e.g.
+  `2_Team/Mitarbeiter/Anna Huber.md`); who is not there should in the end have no
   access. `# Users` stays the one place for the groups (checked, with history); the cards
-  are the human view of it. Later MyOS links both and shows where they disagree (a card
+  are the human view of it. Later SEITON links both and shows where they disagree (a card
   without a line in `# Users` or the other way round); adding a person can then also
   create the card.
-- **Suggested folders follow enforcement** (decided 2026-11-03): with `MYOS_ACL_MODE` off
+- **Suggested folders follow enforcement** (decided 2026-11-03): with `SEITON_ACL_MODE` off
   (the default) or `monitor`, everyone sees a project's suggested folders and may give them
   life, also a person its `ACLs.md` does not list; only with `enforce` do the rights hide
   them and refuse a birth. Before, they were hidden as soon as an `ACLs.md` existed - so a
   project made from a template with example users showed none to anyone else.
 - **Protection, honestly:** on a foreign computer anyone could claim to be someone, and a
-  USB stick (FAT32) has no rights at all: MyOS ACLs say who *should* do what and prevent
+  USB stick (FAT32) has no rights at all: SEITON ACLs say who *should* do what and prevent
   mistakes; they do not stop intent there. Open: authentication, and when exporting to a
   format without rights, a warning and protection on offer (encryption, e.g. per group;
   signed `ACLs.md` so a secret change shows).
@@ -255,33 +256,43 @@ pictogram `◂` read, `▸` write, `x`, `c`, `d`), inherited rights shown as suc
   creates one with just that explicit entry. The folder rules stay inherited (2.4), so
   nothing else changes for the role, also not in subprojects.
 - **Writing:** only the affected line changes (comments, order and spelling elsewhere
-  stay); the result is validated (`acl_schema`) before it is written, atomically.
+  stay); the draft is loaded as a whole policy (`ACLPolicy.from_project`) and the result is
+  checked (the edited rule says what was asked, the editor keeps `change`) before it is
+  written, atomically. There is no schema check: an unknown right (a typo) is not reported;
+  it grants nothing, and as the nearest rule it still takes inherited rights away.
 - **Rules follow renames and moves:** renaming or moving an entry inside the project
   rewrites the rules for its old path (and below) to the new one; rights stay, `{Folder}`
   rules are no fixed paths and stay. This needs no `change` right (nothing about the
   rights changes). Security: if rules already wait for the new path, the rename or move is
   refused — rights of the same folder add up, so a prepared `none` could be undone.
 - **History instead of audit:** before each GUI edit the previous `ACLs.md` is kept
-  (dated copy in `.MyOS/`). That gives undo and a simple “who changed what, when” trail
+  (dated copy in `.seiton/ACLs-history/`, named with time and editor). That gives undo and a simple “who changed what, when” trail
   without a separate audit system; formal audits are not an MVP goal.
 
 ---
 
 ## **6. Cross‑Platform & External Media**
 ### **6.1 General Principle**
-MyOS ACLs are **logical rules** that can be:
+SEITON ACLs are **logical rules** that can be:
 1) enforced internally (FUSE, CLI, GUI)
 2) mapped to OS‑native ACLs when possible
+
+Today (with `SEITON_ACL_MODE=enforce`) they are enforced by Scope, SunTree and Headline
+(through `core/scope_api.py`), PostFix, the drives (`core/role_drive.py`, the embryo layer)
+and `myacl`. The other CLI tools (`myls`, `mytag`, `myimport`, `myexport`, `myedit`) work
+with the rights of the operating system, like `ls` and `cp`. See `ACL_ROLLOUT.md` §2.
+Mapped today: Nextcloud (`myacl sync`, app `seiton`); NTFS/APFS/POSIX are not built.
 
 ### **6.2 USB / FAT32 / exFAT**
 These filesystems lack proper ACL support.  
 **Proposed MVP behavior:** provide **role‑based export** instead of native ACLs.  
-Example: a “Finance” export includes only `/finanz/` (and any other paths granted to that role).
+Example: a “Finance” export includes only `/4_Finanz/` (and any other paths granted to that role).
+Not built: `myexport` copies with the rights of the operating system, not by role.
 
 ### **6.3 Clouds & Sync**
 Cloud providers vary in ACL support.  
-**MVP approach:** keep `.MyOS/ACLs.md` as the portable source of truth and enforce access
-through MyOS tooling when the project is mounted or opened.
+**MVP approach:** keep `.seiton/ACLs.md` as the portable source of truth and enforce access
+through SEITON tooling when the project is mounted or opened.
 
 ### **6.4 Windows / macOS Integration (Future)**
 Provide **optional mapping plugins**:
@@ -289,12 +300,12 @@ Provide **optional mapping plugins**:
 - **APFS plugin** (macOS)
 - **POSIX ACL plugin** (Linux)
 
-These plugins would translate MyOS roles into native ACL entries when supported.
+These plugins would translate SEITON roles into native ACL entries when supported.
 
 ### **6.4.1 Mapping to Windows, macOS and Linux**
-The MyOS model is no invention of its own: its building blocks match the native ACLs.
+The SEITON model is no invention of its own: its building blocks match the native ACLs.
 
-| MyOS | Windows (NTFS) | macOS (extended ACLs) | Linux |
+| SEITON | Windows (NTFS) | macOS (extended ACLs) | Linux |
 |---|---|---|---|
 | role | group | group | group (several via POSIX ACLs) |
 | person | user | user | user |
@@ -305,20 +316,20 @@ The MyOS model is no invention of its own: its building blocks match the native 
 | `none` / fewer rights deeper | disable inheritance there | same | leave the entry out |
 
 **Decision: no “deny”.** Windows and macOS know deny entries, and there a deny wins over
-an allow through another group. MyOS deliberately has none: a user's rights are the union
+an allow through another group. SEITON deliberately has none: a user's rights are the union
 of their roles (Karl in Team and Geschäftsleitung may enter a folder closed to Team). Hence
 `none` and “fewer rights deeper” mean **“stop inheriting for this role here”**, which
 Windows/macOS express by disabling inheritance at that folder and listing the remaining
 entries, and Linux by leaving the entry out. Without deny the model translates into all
 three systems, including Linux, which has no deny at all.
 
-**Inheritance:** MyOS evaluates inheritance live (a change on a folder applies below it at
+**Inheritance:** SEITON evaluates inheritance live (a change on a folder applies below it at
 once). Windows propagates changes; macOS and POSIX default ACLs are copied when a file is
 created. A mapping plugin therefore writes explicit entries where needed and re-applies
 them after changes.
 
-### **6.5 Live‑MyOS on USB (Exploratory)**
-Consider a **portable “Live‑MyOS”** image for USB sticks that enforces ACLs at runtime,
+### **6.5 Live‑SEITON on USB (Exploratory)**
+Consider a **portable “Live‑SEITON”** image for USB sticks that enforces ACLs at runtime,
 independent of the underlying filesystem.
 
 ---
@@ -329,22 +340,27 @@ Public API should live in `core/acl.py` and be used by CLI/GUI:
 - `ACLPolicy.can_access(role, path, right)`
 - `ACLPolicy.roles_for_user(username)`
 
+Built as listed (`core/acl.py`). Around it: `ACLAuthorizer` (`can_user_access`),
+`core/acl_enforcement.py` (`allowed_at`, the off/monitor/enforce modes), `core/acl_edit.py`
+(GUI edits), `core/acl_view.py` (what the panels show) and `core/identity.py` (who am I).
+
 ---
 
 ## **8. MVP Scope**
 The MVP should demonstrate that **access control is real and intentional**:
-- ACLs stored in `.MyOS/ACLs.md`
-- Role‑based checks in the MyOS layer (FUSE/CLI)
-- Export restricted by role (USB or share)
+- ACLs stored in `.seiton/ACLs.md` (built)
+- Role‑based checks in the SEITON layer (built for the GUI, the drives and `myacl`; the other
+  CLI tools work with the rights of the operating system, see 6.1)
+- Export restricted by role (USB or share) (not built)
 - Clear API boundaries for future plugins
 
 ---
 
 ## **9. Plugin‑Ready Architecture (Concept)**
 Define a small, stable interface for ACL backends:
-- **Read rules** from `.MyOS/ACLs.md`
+- **Read rules** from `.seiton/ACLs.md`
 - **Resolve role → allowed paths**
-- **Enforce** rules in MyOS tooling
+- **Enforce** rules in SEITON tooling
 - **Optionally sync** to OS‑native ACLs
 
 ---
@@ -355,11 +371,11 @@ Define a small, stable interface for ACL backends:
 - How should role inheritance be expressed?
 - Should template roles auto‑generate users/groups?
 - **Templates with their own ACLs** (decided and built 2026-10-22): templates are ordinary
-  folder structures; whatever lies in `.MyOS/Templates/<name>/.MyOS` (`ACLs.md`, `Desk.md`,
-  `Color.md`, …) is copied into a new project's `.MyOS` when it is created (P-Button,
+  folder structures; whatever lies in `.seiton/Templates/<name>/.seiton` (`ACLs.md`, `Desk.md`,
+  `Color.md`, …) is copied into a new project's `.seiton` when it is created (P-Button,
   `myproject create`; `core/template_seed.py`). Nothing already there is overwritten; with
   several templates the first one with a file wins; only plain files (no symlinks, no
-  `ACLs-history`, no drafts). Give the Buchhalter `/04_Finanz/` once in the template and
+  `ACLs-history`, no drafts). Give the Buchhalter `/4_Finanz/` once in the template and
   every new project has it.
   - The new project's own `ACLs.md` governs it from then on (not the parent's). So nobody
     loses their place: a template without `# Users` takes the people of the ACLs that
@@ -368,13 +384,13 @@ Define a small, stable interface for ACL backends:
   - In the template's folders the ACL panel shows and edits the template's rights. A
     template is no project: its `# Users` are the people of future projects, so whoever
     may write the template may edit them (no lock-out check, no “who are you?” hint).
-    Who may write it is up to the project whose `.MyOS/Templates` holds it (decided
-    2026-11-09): write on `/.MyOS/Templates/<name>/.MyOS/ACLs.md` by that project's
+    Who may write it is up to the project whose `.seiton/Templates` holds it (decided
+    2026-11-09): write on `/.seiton/Templates/<name>/.seiton/ACLs.md` by that project's
     `ACLs.md`, never the template's own rights (they take effect only in the projects made
-    from it). A template outside any project with `ACLs.md` (`MYOS_TEMPLATES_DIR`): the file
+    from it). A template outside any project with `ACLs.md` (`SEITON_TEMPLATES_DIR`): the file
     system decides.
-  - `.MyOS` and other hidden folders of a template are neither embryos nor roles.
-  - Open: changing them later is not rolled out by itself; MyOS may ask "Apply these new
+  - `.seiton` and other hidden folders of a template are neither embryos nor roles.
+  - Open: changing them later is not rolled out by itself; SEITON may ask "Apply these new
     rights to all existing projects?" (e.g. after an employee left).
 - ~~How is auditing handled (who changed ACLs, when)?~~ No audit system in the MVP: GUI
   edits keep the previous `ACLs.md` (see 5.3). Access logging exists in the enforcement
@@ -383,8 +399,8 @@ Define a small, stable interface for ACL backends:
 ---
 
 ## **11. Summary**
-MyOS ACLs are **human‑first** and **portable**:
+SEITON ACLs are **human‑first** and **portable**:
 - **Self‑explanatory** because they mirror project structure
 - **Adaptable** via templates
 - **Portable** across systems via plugins and exports
-- **Enforceable** through MyOS tooling, even without OS ACL support
+- **Enforceable** through SEITON tooling, even without OS ACL support

@@ -6,11 +6,11 @@ This document helps new contributors quickly understand PostFix:
 - runtime flow,
 - design principles for safe changes.
 
-PostFix is a focused Markdown editor inside MyOS, optimized for fast reading/editing and project-aware tag workflows.
+PostFix is a focused Markdown editor from SEITON's workshop (SEITON runs without it), optimized for fast reading/editing and project-aware tag workflows.
 
 ## Product Goals
 - Fast time-to-first-readable-content.
-- Inline "focus editing" with minimal UI friction.
+- Editing like Obsidian: CodeMirror 6 with a live preview.
 - Strong Markdown compatibility.
 - Obsidian-friendly tag color interoperability.
 - Predictable behavior with incremental, low-risk evolution.
@@ -34,71 +34,57 @@ Use portable, file-based formats and compatible registry structures.
 
 ## Current Module Architecture
 
-### `main.py`
-- Contains `PostFixWindow` and app orchestration.
-- Wires editor, sidebars, toolbars, and mixins.
-- Handles lifecycle events (save, print, open/send actions).
+### Window and program
+- `main.py`: `PostFixWindow` (one window per note) and the app; wires the note, sidebars,
+  toolbars and the mixins; lifecycle (save, print, open/send).
+- `single_instance.py`: one PostFix for all notes (below).
+- `cli.py`: arguments and start.
 
-### `smart_editor.py`
-- Owns document editing and preview rendering.
-- Implements focus-line editing behavior.
-- Parses document tags and color definitions.
-- Applies runtime tag color rendering in preview.
+### The text
+- `editor_host.py`: the one editor of a PostFix, CodeMirror 6 in a QtWebEngine page, moved into
+  the note being edited (below). The editor itself lives in `codemirror/src/editor.js`, built
+  into `codemirror/dist`.
+- `light_render.py`, `light_view.py`: the light rendering a note shows while the editor is
+  elsewhere, drawn by Qt line for line like the editor (below).
+- `smart_editor.py`: the note's text widget: keeps the document, finds tags and colour
+  definitions in it, hosts the editor or the light rendering. Its own line editing is the old
+  editor, only with `SEITON_POSTFIX_EDITOR=line`, until it goes.
+- `live_file.py`: changes from outside while a note is open (three-way merge, below).
+- `markdown_render.py`: Markdown helpers; `metadata.py`: front matter.
 
-### `ui_panels.py`
-- Reusable UI components:
-  - `TagSidebar`
-  - `ACLSidebar` (currently hidden dummy)
-  - `BottomToolbar`
-
-### `window_layout.py`
-- Window layout and composition helper logic.
-
-### `window_theme.py`
-- Theme/color transitions and visual synchronization.
-
-### `window_tags.py`
-- Tag-context orchestration:
-  - reacts to editor tag/color events,
-  - syncs project scope tags (`.MyOS/Tags.md`),
-  - updates sidebar tag UI,
-  - writes registry-backed tag colors.
-
-### `tag_registry.py`
-- Pure data-layer helpers for:
-  - scope tag file parsing/writing,
-  - vault root discovery,
-  - tag color registry load/save/flatten/update.
-
-### `metadata.py`
-- Frontmatter parsing/building helpers.
-
-### `obsidian_embed.py`
-- Optional embed integration behavior.
-
-### `resize_overlay.py`
-- Frameless window edge resize behavior.
-
-### `cli.py`
-- CLI argument parsing and app bootstrap.
+### Sidebars and the rest
+- `ui_panels.py`: widgets: `TagSidebar`, `ACLSidebar` (who may access the note: roles and people
+  with their rights), `BottomToolbar`.
+- `window_acls.py`: the ACL sidebar's behaviour: reading the rights, editing them where one may
+  (`change`).
+- `window_tags.py`, `tag_registry.py`: tags of the note, the project's tag list
+  (`.seiton/Tags.md`), the Obsidian-compatible colour registry.
+- `window_layout.py`, `window_theme.py`: layout and colours of the window.
+- `exercise_links.py`: links of the tutorial (below).
+- `obsidian_embed.py`: optional embed integration; `resize_overlay.py`: resizing the frameless
+  window.
+- `cm_prototype.py`: the first prototype of the editor beside Obsidian (2026-11-03), not used by
+  PostFix.
 
 ## Runtime Flow (High Level)
-1. `PostFixWindow` initializes UI and editor.
-2. Markdown is loaded and rendered early.
-3. Deferred startup initializes non-critical context.
-4. `SmartEditor` emits tag/color-definition signals.
-5. `WindowTagsMixin` updates scope/config/sidebar state.
-6. Save pipeline writes document and synced tag scope.
+1. A start hands its note to the PostFix already running, or becomes it (`single_instance.py`).
+2. `PostFixWindow` shows the note at once in its light rendering.
+3. A click or a key loads the editor into the note (once per PostFix, about 0.5 s); typed text
+   comes back through `changed` and goes through the usual save.
+4. Tags and colour definitions found in the text update the sidebar, the project's tag list and
+   the colour registry (`window_tags.py`).
+5. Every save merges first with what changed on disk meanwhile (`live_file.py`).
 
 ## Data and Config Model
 
 ### Document Level
-- Markdown content (+ optional frontmatter).
+- Markdown content (+ optional frontmatter, kept by PostFix; the editor sees only the body).
 - Inline color definitions parsed as UI "color chips".
 
 ### Project Level
-- `.MyOS/Tags.md` as scope tag list/filter.
+- `.seiton/Tags.md` as scope tag list/filter.
 - Missing document tags can be added into scope automatically.
+- `.seiton/ACLs.md`: the rights shown and edited in the ACL sidebar.
 
 ### Vault Level
 - Obsidian-compatible tag color registry structures.
@@ -113,7 +99,7 @@ Use portable, file-based formats and compatible registry structures.
   running and ends - in plain Python before loading Qt, in about half a second. The running
   one opens the note in a window of its own, or brings its window to the front.
 - One PostFix per user, display and settings folder (`XDG_CONFIG_HOME`): tests and test
-  harnesses with settings of their own never reach the user's. `MYOS_POSTFIX_SINGLE=0` turns it off.
+  harnesses with settings of their own never reach the user's. `SEITON_POSTFIX_SINGLE=0` turns it off (the former `MYOS_` name is still read).
 - Security: the connection lies in the user's private runtime folder (`$XDG_RUNTIME_DIR`,
   owner-only socket); only existing `.md` files are taken.
 - A closed note's window is really gone (`WA_DeleteOnClose`); the program ends with the last.
@@ -123,7 +109,7 @@ Use portable, file-based formats and compatible registry structures.
 
 ## One Editor For All Notes
 
-`PostFix/editor_host.py`, the editor since 2026-11-07 (`MYOS_POSTFIX_EDITOR=line` brings back the
+`PostFix/editor_host.py`, the editor since 2026-11-07 (`SEITON_POSTFIX_EDITOR=line` brings back the
 old line editor of `smart_editor.py` until it goes). Measured: every
 further CodeMirror page costs 40-80 MB and leaks some when dropped; moving one page between
 windows takes 40-120 ms. So one page serves all notes of a PostFix:
@@ -138,7 +124,7 @@ windows takes 40-120 ms. So one page serves all notes of a PostFix:
   as typing.
 - PostFix keeps the front matter; the editor only sees the body. Typed text goes through the
   usual save (merge with changes from outside, conflict copy).
-- Links in the editor: notes open in the same window, other files with their program, myos links
+- Links in the editor: notes open in the same window, other files with their program, `seiton:` links
   as exercise links.
 - The editor leaves a note before it is deleted (window closed or deleted), so it lives on for
   the others; the page itself is deleted before Qt ends (otherwise QtWebEngine crashes on exit).
@@ -181,12 +167,12 @@ of lesson 7 back on closing:
 
 ## Exercise Links (Learning SEITON)
 
-A lesson says `[▶ Übung öffnen](<myos:open?scope=Urlaub 2025&files=Urlaub 2025>)`: a click
+A lesson says `[▶ Übung öffnen](<seiton:open?scope=Urlaub 2025&files=Urlaub 2025>)`: a click
 opens Scope in the exercise folder (`scope=`) and, if the exercise needs it, the desktop's
 classic file browser (`files=`, via `xdg-open`) - with wmctrl (X11) Scope on the left half of
 the screen, the file browser on the right. `PostFix/exercise_links.py`, decided 2026-10-26:
 
-- PostFix registers the handler for `myos` itself (`QDesktopServices.setUrlHandler`); nothing
+- PostFix registers the handler for `seiton` (and the former `myos`, so old notes keep their links) itself (`QDesktopServices.setUrlHandler`); nothing
   on the system changes, so these links work in PostFix only (Obsidian shows dead links).
 - Folders are relative to the note shown (lesson links move the preview on to other notes).
 - Security: only folders inside the note's own folder; absolute paths and `..` are refused.
@@ -204,7 +190,7 @@ PostFix stores note style intent in frontmatter and the thumbnail pipeline consu
 ### Conservative autodetection policy
 Autodetection is intentionally narrow and predictable:
 
-1. If file path is inside `/.MyOS/`, style is `config`.
+1. If file path is inside `/.seiton/`, style is `config`.
 2. Else if content looks like a long structured dialog, style is `chat`.
 3. Else line-count thresholds apply:
    - fewer than 10 content lines -> `postit`
@@ -221,7 +207,9 @@ No other styles are auto-selected by default.
 ## Contributor Rules of Thumb
 
 ### Put new code where responsibility already exists
-- Editor behavior -> `smart_editor.py`
+- Editing behaviour -> `codemirror/src/editor.js` (in the page), `editor_host.py` (between page and window)
+- How a note looks while not edited -> `light_render.py` / `light_view.py`, measured against the editor
+- ACL sidebar -> `window_acls.py`
 - Tag sync/registry behavior -> `window_tags.py` / `tag_registry.py`
 - Pure widget behavior -> `ui_panels.py`
 - Window visuals/layout -> `window_theme.py` / `window_layout.py`
@@ -235,7 +223,7 @@ No other styles are auto-selected by default.
 ## Minimal Smoke Test Checklist
 - Open markdown file.
 - Verify top-panel drag-to-move and window controls.
-- Verify focus editing and cursor movement behavior.
+- Verify editing: a click loads the editor at the letter clicked, switching notes keeps each note's cursor and undo.
 - Verify tag sidebar reflects document tags.
 - Verify color chip click/double-click behavior.
 - Verify style selector persists via frontmatter `note_style`.
@@ -243,7 +231,7 @@ No other styles are auto-selected by default.
   - 9 lines -> post-it
   - 10 lines -> A4 sheet
   - 100 lines -> notebook
-- Verify files inside `/.MyOS/` render as config style.
+- Verify files inside `/.seiton/` render as config style.
 - Verify save, close, reopen persistence.
 - Verify startup remains fast.
 

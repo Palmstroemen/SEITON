@@ -1,4 +1,4 @@
-# The SEITON core service ("cloud/nextcloud/Designdocument MyOS Core Service.md", 7): the core
+# The SEITON core service ("cloud/nextcloud/Designdocument SEITON Core Service.md", 7): the core
 # and its HTTP API, nothing else (no FUSE, no GUI, no packages beyond Python's own).
 # Built from the repository root, for both architectures:
 #   docker buildx build --platform linux/amd64,linux/arm64 -f cloud/service/Dockerfile -t seiton-core .

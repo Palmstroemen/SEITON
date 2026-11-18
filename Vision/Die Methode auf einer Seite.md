@@ -1,6 +1,6 @@
 # Die Methode auf einer Seite
 
-*Erster Entwurf, 5. November 2026.*
+*Erster Entwurf, 5. November 2026; Ordnernummern vom 15. November.*
 
 Ordnung für alle deine Dateien, die du heute Abend anfangen kannst, im Dateimanager, den du schon hast. Du brauchst nur drei Regeln. Die Software dazu heißt SEITON, aber die Methode funktioniert auch ohne sie.
 
@@ -18,27 +18,27 @@ Wird ein Projekt groß, bekommt es Unterprojekte, nach denselben Regeln.
 
 | Ordner | Was hineingehört |
 |---|---|
-| `00_Admin` | die Leitung des Projekts: Planung, Überblick |
-| `01_Info` | was man wissen muss, wenn man neu dazukommt |
-| `02_Team` | die Menschen: Mitarbeiter, Berater, Lieferanten |
-| `03_Kommunikation` | Mails, Briefe, Protokolle |
-| `04_Finanz` | Rechnungen, Ausgaben, Einnahmen |
-| `05_Rechtliches` | Verträge, Versicherungen |
-| `06_Ressourcen` | Geräte, Fahrzeuge, Software, Datenblätter |
-| `07_Arbeit` | die eigentliche Arbeit |
-| `08_Dokumentation` | Fotos, Videos, Berichte, das Archiv |
+| `0_Admin` | die Leitung des Projekts: Ziele, Planung, Entscheidungen |
+| `1_Info` | was man wissen muss, wenn man neu dazukommt |
+| `2_Team` | die Menschen im Projekt: Bewerbungen, Mitarbeiter, Externe |
+| `3_Kommunikation` | mit wem man es zu tun hat: Partner, Lieferanten, Kunden, Öffentlichkeit |
+| `4_Finanz` | Budget, Angebote, Aufträge, Rechnungen, Zahlungen, Steuern |
+| `5_Recht` | Schutzrechte, Verträge, Versicherungen, Behörden |
+| `6_Ressourcen` | Räume, Fahrzeuge, Geräte, Software, Lager |
+| `7_Arbeit` | die eigentliche Arbeit |
+| `9_Dokumentation` | Berichte, Fotos, Videos, Handbücher, das Archiv |
 
-Die Nummern halten die Reihenfolge fest, und die Namen ändern sich nie. So weißt du in jedem Projekt, auch im fremden, sofort, wo die Rechnungen liegen. Innerhalb dieser Ordner ordnest du, wie du willst.
+Die Nummern halten die Reihenfolge fest, und die Namen ändern sich nie. Die `8` bleibt frei: Manche Vorlagen brauchen dort einen eigenen Ordner, etwa die für eine Firma `8_Produkte`. So weißt du in jedem Projekt, auch im fremden, sofort, wo die Rechnungen liegen. Innerhalb dieser Ordner ordnest du, wie du willst.
 
 ## 3. Ein Ordner entsteht erst, wenn du ihn brauchst
 
-Lege nie alle neun auf Vorrat an, sonst stehst du vor lauter leeren Ordnern. Für eine einzelne Rechnung brauchst du noch keinen Ordner, sie darf einfach im Projekt liegen. Kommen die ersten Rechnungen und wird es langsam unübersichtlich, legst du `04_Finanz` an. Wann das ist, liegt an dir und deinem Ordnungsbedürfnis. Die Tabelle oben ist ein Vorschlag, keine Pflicht.
+Lege nie alle neun auf Vorrat an, sonst stehst du vor lauter leeren Ordnern. Für eine einzelne Rechnung brauchst du noch keinen Ordner, sie darf einfach im Projekt liegen. Kommen die ersten Rechnungen und wird es langsam unübersichtlich, legst du `4_Finanz` an. Wann das ist, liegt an dir und deinem Ordnungsbedürfnis. Die Tabelle oben ist ein Vorschlag, keine Pflicht.
 
 ## Und der Überblick?
 
-Wo sind jetzt alle Rechnungen von 2025? Such im Dateimanager nach `04_Finanz`: Du bekommst die Finanzen jedes Projekts, Projekt für Projekt. Und im Pfad steckt deine Projektstruktur: Bei `Projekte/Familie/04_Finanz` siehst du sofort, wozu eine Rechnung gehört. Namen wie `2025 Rechnung Excalibur Projekt 203456-2 Obere Leitstelle` kannst du dir sparen: Das Projekt steht schon im Pfad. Weil der Name überall gleich ist, musst du dafür nichts vorbereiten. Was noch lose im Projekt liegt, siehst du hier nicht. Spätestens wenn du den Überblick brauchst, ist es Zeit für den Ordner.
+Wo sind jetzt alle Rechnungen von 2025? Such im Dateimanager nach `4_Finanz`: Du bekommst die Finanzen jedes Projekts, Projekt für Projekt. Und im Pfad steckt deine Projektstruktur: Bei `Projekte/Familie/4_Finanz` siehst du sofort, wozu eine Rechnung gehört. Namen wie `2025 Rechnung Excalibur Projekt 203456-2 Obere Leitstelle` kannst du dir sparen: Das Projekt steht schon im Pfad. Weil der Name überall gleich ist, musst du dafür nichts vorbereiten. Was noch lose im Projekt liegt, siehst du hier nicht. Spätestens wenn du den Überblick brauchst, ist es Zeit für den Ordner.
 
-Genauso bei den Fotos: Früher lagen sie in einem Ordner `Fotos`, und du musstest darin deine Projekte von Hand nachbauen: `2025 Urlaub`, `2025 Ausflug Schneeberg` und so weiter. Jetzt liegen sie beim Projekt, und die Suche nach `08_Dokumentation` führt dich zu ihnen, in genau der Ordnung deiner Projekte, wie du sie kennst.
+Genauso bei den Fotos: Früher lagen sie in einem Ordner `Fotos`, und du musstest darin deine Projekte von Hand nachbauen: `2025 Urlaub`, `2025 Ausflug Schneeberg` und so weiter. Jetzt liegen sie beim Projekt, und die Suche nach `9_Dokumentation` führt dich zu ihnen, in genau der Ordnung deiner Projekte, wie du sie kennst.
 
 Das ist die eigentliche Idee: **Du musst nicht wählen, ob du nach Projekten oder nach Themen ordnest.** Du legst nach Projekten ab und schaust nach Themen.
 

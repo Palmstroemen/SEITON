@@ -2,21 +2,23 @@
 
 Draft of 16 November 2026. Time tracking per project: a small clock counts the time one spends
 in a project, writes it into the project, and a parent project collects the time of its
-children. It is part of SEITON, not of the workshop: it sits in the top bar of Scope, where one
-switches projects.
+children. It is part of SEITON, not of the workshop. It first was to sit in the top bar of Scope;
+since 17 November 2026 it is a program of its own that shows in the Headline as a widget
+(Scope/Designdocument Headline.md, 3a), where one switches projects.
 
 It is also the first program with a role of its own ("Ein Zaun um die Arbeit", point 2): it
 may write one folder in every project and nothing else (section 7).
 
 ## 1. The Picture
 
-- In the top bar, next to the person (login, logout), there is a **clock button**. It shows
-  whether the clock runs, and for which project: `Küche · 2:15`. Grey when it stands.
+- In the Headline there is the clock's **widget**. It shows whether the clock runs, and for
+  which project: `Küche · 2:15`. Calm when it stands.
 - One works in a project, the clock counts. One goes for lunch without logging out, and after
   5 minutes without mouse or keyboard the clock stops; those 5 minutes do not count.
 - A video runs, nobody touches the mouse: now and then the clock asks "Still working on
   *Küche*?" One click, and it keeps counting (the dead man's button, section 4.3).
-- A click on the clock button opens the **time screen**: start and stop by hand, add what was
+- A click on the widget opens the **time screen**, a small window of the time tracking itself:
+  start and stop by hand, add what was
   done away from the computer ("Baumarkt, 1½ h"), correct, and see the time of a project with
   its children, by person and period.
 
@@ -67,7 +69,9 @@ A Markdown table, readable and editable without SEITON:
   both, whatever language the file was begun in; it keeps the language of a file it adds to.
 - **Local time, readable** (decided 2026-11-16): `09:12`, without an offset. Only when the
   computer's time zone is not the person's usual one (holidays abroad) does Von carry it:
-  `09:12+09:00`. Sums never depend on it, because they add durations.
+  `09:12+09:00`. Sums never depend on it, because they add durations. Built so far: an offset
+  in a file is read and written again; the clock never writes one. That comes later, with a
+  setting for the person's usual time zone.
 - A stretch does not run over midnight: the clock closes it at 24:00 and opens the next day's,
   so the sums per day are simple.
 - Sorted by date and From. Rows the person wrote by hand stay where they are; SEITON adds new
@@ -99,18 +103,20 @@ decided by the child's ACLs, as for any file (section 7.2).
 
 ### 4.1 The active project
 
-The project of the top bar: the one chosen there, or the nearest project above the folder
-Scope stands in (`resolve_cwp`). Switching the project closes the running stretch and opens
-one in the new project. No project active: the clock stands.
+The project of the Headline: it writes the active project on every change
+(`core/clock_sources.write_active`, `$XDG_RUNTIME_DIR/seiton/active-project.json`), and the clock
+reads it every 15 s. Without a running Headline the clock sees no project. Switching the
+project closes the running stretch and opens one in the new project. No project active: the
+clock stands.
 
 ### 4.2 Activity
 
 - The clock asks the session how long no input came (the **idle time**), every 15 s. It does
   not record keys or the mouse, it only asks "how long since the last input?".
-- Idle time above the **pause limit** (5 minutes, set in Setup): the stretch is closed at the
-  last input. The idle minutes do not count.
+- Idle time above the **pause limit** (5 minutes, set on the time screen): the stretch is
+  closed at the last input. The idle minutes do not count.
 - The next input opens a new stretch in the same project (automatic resume, can be switched off
-  in Setup; then the clock waits for a click).
+  on the time screen; then the clock waits for a click).
 - Short gaps are not stretches: if a new stretch begins less than 1 minute after the last one
   ended in the same project, the two become one row.
 - A stretch shorter than a minute is a glance, not time (passing through a project on the way
@@ -139,7 +145,7 @@ power management (`HasInhibit`). Seen on the test machine: a browser playing a v
 alone does not keep the clock counting. The clock sees that:
 
 - idle time above the pause limit **and** an inhibitor active: the clock does not stop, it
-  asks: a small notice at the clock button, "Still working on *Küche*?" with "Yes" and "No".
+  asks: its question in the widget, "Still working on *Küche*?" with "Yes" and "No".
 - **Yes**: it keeps counting, and asks again after the next pause limit.
 - **No**, or no answer within 2 minutes: the stretch ends at the moment it asked.
 - Without inhibitor information (a desktop that does not tell), the clock stops as in 4.2.
@@ -150,7 +156,9 @@ alone does not keep the clock counting. The clock sees that:
   shows that it was stopped by hand (an outline instead of grey).
 - **Start** in a stand: counts as `manuell`, and the pause limit still applies.
 - **Add**: date, project (the active one preselected, any project one may write), From (may stay
-  empty) and a duration, a note. Example: shopping for the project in town.
+  empty) and a duration, a note. Example: shopping for the project in town. Built so far: date,
+  duration and note, into the active project; choosing the project and From are not offered
+  yet.
 - **Correct, delete**: only one's own rows. A changed `auto` row becomes `korrigiert`.
 
 ### 4.5 A crash or a switched-off computer
@@ -163,20 +171,28 @@ and the cloud does not sync a file that keeps changing.
 
 ## 5. The Time Screen
 
-Opened by the clock button; a page like Setup, so it fits in the top bar form of Scope.
+Opened by a click on the widget in the Headline; a small window of the time tracking itself
+(`Time/TimeScreen.py`, `Time/main.qml`, `Time/model.py`), with the person's own rights, not the
+sandboxed clock's (decided 2026-11-17; first planned as a page like Setup in Scope's top bar).
+It talks to the running clock as the Headline does: it reads the clock's view and drops
+commands.
 
 - **Now**: the active project, today's time in it, Start/Stop.
-- **Entries**: one's own rows of the active project (or any chosen one), newest first; edit,
-  delete, **Add**.
-- **Overview**: a project with its children (section 3), filtered by person, period (week,
-  month, own range) and kind; sums per project and per person. Later: export as CSV for an
-  invoice.
-- **Rounding** (for invoices) is only done in the overview and the export, never in the file. It
-  is set in Setup (decided 2026-11-16): none, or to 5, 10, 15 or 30 minutes, upwards or to the
-  nearest, per stretch or per day.
+- **Entries**: one's own rows of the active project, newest first; edit, delete, **Add**.
+  Choosing another project: not built yet.
+- **Overview**: the active project with its children (section 3), by period (today, this week,
+  this month, all); sums per project and per person. Not built yet: choosing another project,
+  filtering by person and kind, an own range, export as CSV for an invoice.
+- **Rounding** (for invoices) is only done in the overview and the export, never in the file
+  (decided 2026-11-16): none, or to 5, 10, 15 or 30 minutes, upwards or to the nearest, per
+  stretch or per day.
+- **Settings** (a tab of its own): pause limit, automatic resume, the dead man's button on/off,
+  the rounding step, and what the widget shows beside the projects worked on last. Kept in
+  `core/settings.py`, section Time; upwards/nearest and per stretch/day are there
+  (`Time/roundMode`, `Time/roundPer`) but not on the screen yet. The clock takes changes when
+  it starts anew.
 
-Setup gets a "Time" part (General tab): pause limit, automatic resume, the dead man's button
-on/off, rounding.
+Setup (Scope) has no "Time" part: the settings are on the time screen.
 
 ## 6. Parts
 
@@ -186,8 +202,10 @@ on/off, rounding.
 | Collecting | `core/time_log.py` | a project with its children, filters, sums |
 | The clock | `core/clock.py` | the states (stands, runs, paused, asks, stopped by hand), driven by events and a clock; no Qt, no system calls |
 | Sources | `core/clock_sources.py` | `IdleSource` (X11, Wayland, fake), inhibitors, the active project |
-| The program | `daemon/clock_daemon.py` (`seiton-clock`) | runs the clock, tells the top bar over a socket what it shows |
-| The widget and the screen | the time tracking itself; shown by the Headline (Scope/Designdocument Headline.md, 3a) | its view and command files, the time screen as its own window with its settings |
+| The program | `daemon/clock_daemon.py` (`seiton-clock`) | runs the clock every 15 s, writes its widget's view |
+| The launcher | `cli/seiton_clock.py` | mounts the role's drive, starts the clock in its sandbox (section 7.2); one clock per user |
+| The widget | `core/clock_widget.py`; shown by the Headline (Scope/Designdocument Headline.md, 3a) | its view (`view.json`) and command files, a small ledger of the projects worked on last |
+| The screen | `Time/` | the time screen as its own window with its settings (section 5) |
 
 The clock is a program of its own rather than a part of Scope: it has to run when no Scope
 window is open, and it gets a role of its own (section 7).
@@ -238,6 +256,8 @@ Built 16 November 2026 (step 4). The clock does not write the projects directly:
    - `0_Admin/Zeitaufwand`: the role's folder from its drive, read and write;
    - `state`: the clock's state (`~/.local/state/seiton`), read and write;
    - `run`: the folder of `active-project.json`, read only;
+   - `widget`: the widget's folder (`$XDG_RUNTIME_DIR/seiton-clock`: `view.json`, the commands
+     the Headline drops), read and write;
    - and the session bus.
 
    The projects root is hidden even where it lies inside the code (`SEITON_Test` in the
@@ -294,7 +314,7 @@ Not part of the first steps, written down so the design leaves room for it:
 
 - **Switching projects on the phone**, for holidays or for work on the road from one job to the
   next. The phone writes the active project into the person's own place in the cloud, and the
-  clock and the top bar follow.
+  clock and the Headline follow.
 - **Photos by the time line**: the Nextcloud app already uploads photos into a folder. SEITON
   puts each photo, by the time it was taken, into the project that was active then (the time
   files are the time line): `9_Dokumentation/92_Bilder`. A photo from a time without a project
@@ -325,11 +345,13 @@ Each step with its tests first (fake clock, fake idle source, tmp projects).
 
 ## 10. Decisions (16 November 2026)
 
-1. **Time zones**: readability. Local time, an offset only away from home (section 2.1).
+1. **Time zones**: readability. Local time, an offset only away from home (section 2.1; the
+   offset is not written yet).
 2. **Columns**: `Datum | Von | Dauer | Art | Notiz`, no "Bis": it is redundant, and it confuses
    when summer time begins or ends. In the user's language, SEITON reads German and English.
 3. **`{Self}`** in the ACLs, in a new section `## Everyone` (section 7.4).
 4. **Several computers** at once: one file per person all the same; the rare conflict is
    accepted. When the cloud leaves a conflict copy (`Oliver (conflicted copy ...).md`), the time
-   screen shows it and offers to merge it.
+   screen shows it and offers to merge it. Built so far: the overview says how many conflict
+   copies there are and counts them apart; merging is not built.
 5. **Rounding**: configurable, only in the overview and the export (section 5).

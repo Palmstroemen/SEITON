@@ -1,4 +1,4 @@
-"""The shadow tree ("Designdocument MyOS Core Service.md", 5): every folder of the Team folder
+"""The shadow tree ("Designdocument SEITON Core Service.md", 5): every folder of the Team folder
 (empty) and every file of a .MyOS, built from a WebDAV walk; no user documents. Rebuilt when
 the Team folder's ETag changes; a rebuild that fails keeps the shadow there was."""
 

@@ -1,6 +1,6 @@
 # lens.py - what a turned path stands for, as the core service answers it
 #
-# See "cloud/nextcloud/Designdocument MyOS Core Service.md", 8.1. The meaning of a path comes
+# See "cloud/nextcloud/Designdocument SEITON Core Service.md", 8.1. The meaning of a path comes
 # from core/perspective_drive.py, the same as on the FUSE drive; the rights from ACLs.md, the
 # same as in Scope (core/acl_view.py). The service reads a shadow tree (folders and .MyOS
 # files, no documents): it names the real folder, the browser lists it with the user's rights.

@@ -10,7 +10,7 @@ Until November 2026 the project was called MyOS; in some places that name still 
 
 ## Project Status
 
-**Current phase:** MVP implementation — core API, Scope GUI, CLI tools, and blueprint layer are in place and iteratively hardened. Not a complete operating system; early experiments with FUSE, QML file browser, tagging, and workflow tools.
+**Current phase:** MVP implementation. The core API, Scope, the Headline, the time tracking, the CLI tools, the perspectives drive and a first Nextcloud integration are in place and being hardened. Not a complete operating system.
 
 For a concise status snapshot and priorities, see [docs/STATUS.md](docs/STATUS.md). For the operational roadmap and open questions, see [ProjectLogbook.md](ProjectLogbook.md).
 
@@ -40,6 +40,10 @@ The building blocks exist but are fragmented. SEITON aims to unify them into one
 |------|--------------|
 | **core/** | API, FUSE/blueprint layer, project config, ACLs, tagging, design docs |
 | **Scope/** | QML file browser (Templates + Projects rows, tags, CWD/CTD) |
+| **Headline/** | The line at the top edge of the screen: project, standard folders, perspectives |
+| **Time/** | Time tracking per project (the clock and its screen) |
+| **daemon/** | The session daemon: the perspectives drive, the shared lens, the clock |
+| **cloud/** | Nextcloud: the app `seiton` and the core as a service |
 | **PostFix/** | From the workshop: Markdown editor with tag sidebar, Obsidian-compatible |
 | **SunTree/** | From the workshop: the folder fan for quick dropping |
 | **templates/** | The templates SEITON ships (Standard, Person, Firma, Development) |
@@ -48,7 +52,7 @@ The building blocks exist but are fragmented. SEITON aims to unify them into one
 | **docs/** | Documentation index, development guide, conventions, security |
 | **Vision/** | Concept and GUI notes (e.g. CWD/CWP/CTD) |
 | **Learning SEITON/** | Tutorial and learning content (DE/EN) |
-| **SEITON_Test/** | Test/demo project structure |
+| **SEITON_Test/** | Local test data for the GUI (not in the repository) |
 
 Design documents live under `core/Dokumentation/`. Entry points: [Designdokument.md](Designdokument.md), [docs/INDEX.md](docs/INDEX.md).
 
@@ -81,8 +85,9 @@ cd SEITON
 It installs the missing system packages (after asking, with sudo), puts SEITON's Python packages
 into a venv of its own (`~/.local/share/seiton/venv`), adds SEITON to the menu, the launchers
 `seiton`, `seiton-postfix` and the CLI tools to `~/.local/bin`, and the templates to
-`~/.seiton/Templates`. It asks whether SunTree should start at login and whether the file
-browsers should show Markdown previews (`--suntree`, `--thumbnailer`; `--yes` asks nothing).
+`~/.seiton/Templates`. It asks whether SunTree, the Headline and the clock of the time tracking should start at
+login and whether the file browsers should show Markdown previews (`--suntree`, `--headline`,
+`--clock`, `--thumbnailer`; `--yes` asks nothing).
 Update: `git pull` and `./install.sh` again. Remove: `./install.sh --uninstall` (settings and
 templates stay).
 
@@ -100,7 +105,7 @@ python3 -m pytest
 
 **CLI examples:**
 ```bash
-python3 cli/myls.py SEITON_Test/Projekte/ --extended
+python3 cli/myls.py "Learning SEITON/DE/Lektion10" --extended
 python3 PostFix/cli.py path/to/file.md
 ```
 

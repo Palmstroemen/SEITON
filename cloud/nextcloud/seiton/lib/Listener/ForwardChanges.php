@@ -21,7 +21,7 @@ use Psr\Log\LoggerInterface;
  * folder: created, renamed, copied, deleted, written - the path in the Team folder and whether
  * it is a folder. No SEITON logic here: the core decides what matters (its shadow tree holds
  * folders and .seiton files) and brings the rules in step at once, instead of at its next look
- * at the Team folder's ETag ("Designdocument MyOS Core Service.md", 4).
+ * at the Team folder's ETag ("Designdocument SEITON Core Service.md", 4).
  *
  * @template-implements IEventListener<Event>
  */

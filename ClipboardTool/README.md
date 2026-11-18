@@ -1,12 +1,17 @@
-# CopyQ MyOS Clipboard Integration
+# CopyQ SEITON Clipboard Integration
 
-Saves text clipboard contents as Markdown files in your MyOS Clipboard folder. File/folder copies are ignored. Works with QuoteURLText or Excerpt with Link for web clipping with source URLs.
+Saves text clipboard contents as Markdown files in your SEITON Clipboard folder. File/folder copies are ignored. Works with QuoteURLText or Excerpt with Link for web clipping with source URLs.
 
 ## Requirements
 
 - **CopyQ** (v4 or later)
 - **Python 3**
-- No MyOS core dependency; only path convention and environment variables
+- No SEITON core dependency; only path convention and environment variables
+
+The tool was written when SEITON was still called MyOS. Its files (`save_clip_to_myos.py`,
+`copyq-myos-save-*.ini`), the command names (`MyOS | ...`) and the environment variables
+(`MYOS_...`) still carry the old name. Unlike the rest of SEITON, the tool reads only the
+`MYOS_` variables; `SEITON_CLIPBOARD_PATH` is not read.
 
 ## Setup
 
@@ -36,6 +41,11 @@ Make sure CopyQ is started with these variables (e.g. from the same shell, or vi
 3. Select `copyq-myos-save-auto.ini` and `copyq-myos-save-manual.ini` from this folder (or load both in one go).
 4. Confirm with **OK** / **Apply**.
 
+**Known problem (2026-11-18):** the `Command=` value in both `.ini` files spans several lines
+without quotes. Read as an INI file, only `copyq:` remains, so the loaded commands do nothing
+and show no error. Until the files are fixed, create the two commands in CopyQ by hand and
+paste the script from the `.ini` file (everything after `Command=`).
+
 ### 3. (Optional) Web clipping with source URL
 
 For “copy selection + URL” from the browser:
@@ -51,13 +61,13 @@ Clip text with one of these; the auto-save command will store it (including any 
 | Command | Trigger | Effect |
 |--------|---------|--------|
 | **MyOS \| Auto-Save Clipboard to MD** | Automatic on clipboard change | If the clipboard has plain text and no file list (`text/uri-list`), writes `clip_YYYYMMDD_HHMMSS.md` in `MYOS_CLIPBOARD_PATH`. |
-| **MyOS \| Save to Clipboard (MD file)** | From CopyQ menu (right‑click or Item menu) | Saves the selected item(s) as one MD file per item. |
+| **MyOS \| Save to Clipboard (MD file)** | From CopyQ menu (right‑click or Item menu) | Saves the selected item(s) as one MD file per item (items saved in the same second overwrite each other, see below). |
 
 ## File format
 
 Each saved file:
 
-- **Filename:** `clip_YYYYMMDD_HHMMSS.md`
+- **Filename:** `clip_YYYYMMDD_HHMMSS.md` (two clips in the same second get the same name: the second overwrites the first)
 - **Content:** Optional YAML frontmatter (`source:` URL if detected, `copied:` timestamp) and the clipboard text.
 
 Example:

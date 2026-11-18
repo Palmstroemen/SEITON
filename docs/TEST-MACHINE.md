@@ -24,7 +24,7 @@ and lesson 1 opens for the next tester.
    Ctrl+Alt+Space:
    ```
    $PY scripts/testrun.py install
-   $PY SunTree/install_autostart.py ~/MyOS-Tutorial/DE
+   $PY SunTree/install_autostart.py ~/SEITON-Tutorial/DE
    ```
 5. Make the first copy and open lesson 1: `$PY scripts/testrun.py start`.
 6. Check: lesson 1 shows in PostFix; in lesson 7, "▶ Übung öffnen" opens Scope and the file
@@ -33,11 +33,14 @@ and lesson 1 opens for the next tester.
 
 ## What a tester sees
 
-The tutorial is its own root (`Learning SEITON/.seiton`: Standard template, no ACLs - everyone
-may see it), so "In Projekt verwandeln" works in the lessons although no "Projekte" lies
-above it. Example rights only come where a lesson needs them (lesson 11).
+The tutorial is its own root (`Learning SEITON/.seiton`: Standard template, no ACLs of its
+own), so "Zum Projekt machen" (the P button) works in the lessons although no "Projekte" lies
+above it. Projects made in the lessons get the example rights of the Standard template
+(`templates/Standard/.seiton/ACLs.md`: `## Folder`, `## Everyone`, the role `Buchhaltung` on
+`4_Finanz`): the rights panel shows after the first folder is born (lesson 7), not only in
+lesson 11.
 
-- PostFix with lesson 1 of the copy (`~/MyOS-Tutorial`, German). The repository is never
+- PostFix with lesson 1 of the copy (`~/SEITON-Tutorial`, German). The repository is never
   touched.
 - Under every lesson "💬 Kommentar zu dieser Lektion": it opens the note "Meine Kommentare"
   as a sticky note and adds a heading for the lesson.
@@ -47,19 +50,19 @@ above it. Example rights only come where a lesson needs them (lesson 11).
 ## What "Bin fertig" does
 
 1. Closes the Scope and PostFix windows showing the copy (other windows stay).
-2. Collects into `~/MyOS-Testergebnisse/<date>_<time>_<name or Tester_N>/`:
+2. Collects into `~/SEITON-Testergebnisse/<date>_<time>_<name or Tester_N>/`:
    - `Meine Kommentare.md` - the comments,
    - `Änderungen.md` - every note added, changed (with a diff) or gone (moved or deleted),
    - `Neu/`, `Geändert/` - those files themselves,
-   - `Einstellungen/` - the tester's MyOS and PostFix settings,
+   - `Einstellungen/` - the tester's SEITON and PostFix settings,
    - `Zusammenfassung.md` - name, start, end, counts.
    PostFix's window place in a note's front matter (`window_...`) is no change.
-3. Deletes the copy and makes a fresh one; resets `~/.config/MyOS` and `~/.config/PostFixDev`.
+3. Deletes the copy and makes a fresh one; resets `~/.config/seiton` and `~/.config/PostFixDev`.
 4. Opens lesson 1.
 
-By hand: `python3 scripts/testrun.py finish --name "Anna"` (add `--no-restart` to only
-collect and reset), `python3 scripts/testrun.py prepare` (reset without collecting).
-`MYOS_TUTORIAL_DIR` and `MYOS_RESULTS_DIR` move the copy and the results.
+By hand: `$PY scripts/testrun.py finish --name "Anna"` (add `--no-restart` to only
+collect and reset), `$PY scripts/testrun.py prepare` (reset without collecting).
+`SEITON_TUTORIAL_DIR` and `SEITON_RESULTS_DIR` move the copy and the results.
 
 ## Safety
 
@@ -77,6 +80,9 @@ collect and reset), `python3 scripts/testrun.py prepare` (reset without collecti
 
 - The classic file browser opened by lesson 7 stays open after "Bin fertig" (on the old,
   deleted folder); testers close it themselves.
+- Resetting `~/.config/seiton` also takes the clock's widget registration the installer wrote
+  (`headline/widgets/clock.json`): after the first "Bin fertig" the Headline shows no time
+  widget until `./install.sh` runs again. The time screen still opens (`seiton-time`).
 - The links work in PostFix only (not in Obsidian); English lessons have no comment links.
 - Following "zur nächsten Lektion" shows the next lesson in the same PostFix window, but
   editing still applies to the note opened first - comments therefore go into their own note.

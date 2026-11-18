@@ -72,72 +72,31 @@ Implications:
 
 ## Current Architecture Overview
 
-SEITON currently has two major domains:
-- the broader project/filesystem domain (`core`, `Scope`, CLI tools),
-- the PostFix editor domain (`PostFix`).
+SEITON is the core with its tools, and a few pieces from the workshop beside it. Each part has
+its own design document; this one only shows how they fit together.
 
-This section focuses on PostFix, because it is currently under active refactoring.
+| Part | What it is | Design documents |
+|---|---|---|
+| `core/` | the logic: projects, templates and embryos, ACLs, tags, filters, perspectives, trash, export/import, time tracking, colours; no Qt | `core/Dokumentation/` (one `Designdocument X.md` per topic) |
+| `cli/` | the CLI tools (myls, myproject, mytag, myacl, myedit, myimport, myexport, myfilter) on the core | `cli/Dokumentationen/CLI.md` |
+| `daemon/` | the session daemon: the lens shared by the programs, the FUSE drive "Perspektiven", the clock | `core/Dokumentation/Designdocument Perspectives.md`, `… Perspective Resolver MVP.md`, `… Time.md` |
+| `Scope/` | the file browser (QML) with its settings on the back | `Scope/README.md`, `Scope/Designdocument Setup.md`, `Scope/Colour inventory.md` |
+| `Headline/` | the line at the top edge of the screen; the minimal view M of Scope as a tool of its own | `Scope/Designdocument Headline.md` |
+| `Time/` | the screen of the time tracking | `core/Dokumentation/Designdocument Time.md` |
+| `cloud/` | Nextcloud: the app `seiton`, the core as a service beside it | `cloud/nextcloud/Designdocument SEITON Core Service.md`, `cloud/nextcloud/README.md` |
+| `installer/` | installing for one user (`install.sh`) | `installer/thumbnailer.md` (Markdown previews) |
+| `PostFix/` (workshop) | the Markdown editor, editing like Obsidian | `PostFix/Designdokument.md` |
+| `SunTree/` (workshop) | the folder fan for quick dropping | `SunTree/Designdocument Krone.md` |
 
-## PostFix Architecture (Current)
-
-### Module Map
-- `PostFix/main.py`
-  - `PostFixWindow` orchestration
-  - app/window lifecycle
-  - final wiring of modules and signals
-- `PostFix/smart_editor.py`
-  - inline focus editing model
-  - markdown rendering flow
-  - cursor/line mapping behavior
-  - tag and color-definition extraction from document text
-- `PostFix/ui_panels.py`
-  - top-level reusable UI widgets:
-    - `TagSidebar`
-    - `ACLSidebar` (currently hidden dummy)
-    - `BottomToolbar`
-- `PostFix/window_layout.py`
-  - layout construction helpers for the main window
-- `PostFix/window_theme.py`
-  - color/theme transitions and visual state updates
-- `PostFix/window_tags.py`
-  - tag context orchestration:
-    - sync with scope tags
-    - color registry updates
-    - sidebar refresh behavior
-- `PostFix/tag_registry.py`
-  - read/write logic for tag configuration data (Obsidian-compatible)
-- `PostFix/metadata.py`
-  - frontmatter read/write helper logic
-- `PostFix/obsidian_embed.py`
-  - optional embed integration behavior
-- `PostFix/resize_overlay.py`
-  - frameless resize interaction support
-- `PostFix/cli.py`
-  - CLI entrypoint and argument wiring
-
-### Runtime Responsibility Flow
-1. `PostFixWindow` boots and wires editor + sidebars.
-2. `SmartEditor` owns document interaction and preview rendering.
-3. `WindowTagsMixin` observes editor tag events and updates:
-   - local UI chips,
-   - project scope tags,
-   - tag color registry.
-4. Theme/layout mixins apply visual composition and transitions.
-
-### Fast-Start Strategy
-PostFix uses deferred non-critical startup:
-- show readable markdown as early as possible,
-- initialize non-critical visuals and context shortly after first paint.
-
-This keeps perceived startup responsive.
+The rule between them: logic goes into `core/` (testable without a screen), the programs only
+show it and hand on what the user does. The programs talk to each other through the session
+daemon (`daemon/`), never directly.
 
 ## Data and Configuration Model
 
-### Document-Level
-- Markdown body and optional frontmatter (handled by `metadata.py` / `SmartEditor`).
-- Inline color definitions in text are parsed as color entries for UI.
-
 ### Project-Level
+- A project is a folder with `.seiton/Project.md`; everything SEITON keeps about it lies in its
+  `.seiton` folder (`core/Dokumentation/Designdocument Projects.md`).
 - `.seiton/Tags.md` is used as project scope tag filter/list.
 - New document tags can be synced into scope tags.
 - Scope tag changes can trigger propagation hooks through `core.project` signaling.
@@ -148,29 +107,35 @@ This keeps perceived startup responsive.
   renamed, then to a name a layperson understands (`Rights.md`, `Access.md`), not for one
   letter. Old projects would need a time in which both names are read, as with MyOS.
 
-### Vault-Level (Obsidian Compatibility)
-- Tag color registry is persisted in Obsidian-compatible app config data.
-- Tag color edits from PostFix update registry structures directly.
+### User-Level
+- Settings in `~/.config/seiton/seiton.conf` (`core/settings.py`), colour schemes beside them in
+  `~/.config/seiton/schemes/`, templates in `~/.seiton/Templates`.
+
+### Document-Level, Vault-Level
+- Front matter, colour definitions and the Obsidian-compatible tag colour registry are PostFix's:
+  `PostFix/Designdokument.md`.
 
 ## Contributor Guidance
 
 ### Where to Put New Logic
-- New editor behavior: `smart_editor.py`
-- Tag context / sync / registry behavior: `window_tags.py` or `tag_registry.py`
-- Pure UI widget behavior: `ui_panels.py`
-- Window composition or theming: corresponding mixin modules
-- Cross-cutting orchestration only: `main.py`
+- Rules, file formats, anything that decides: `core/`, with a test in `core/tests/unit`.
+- What the user sees: the program's QML and its backend (`Scope/Scope.py`, `Headline/`, …), which
+  only call the core.
+- Between programs: the session daemon (`daemon/`).
+- Inside PostFix: see its own design document.
+- UI strings are English in the code; German comes from the `*_de.ts` files
+  (`scripts/update_translations.py`).
 
 ### What Not to Do
-- Do not re-centralize large feature logic in `main.py`.
+- Do not re-centralize large feature logic in an entry point (`main.qml`, `main.py`).
 - Do not mix parsing/business logic into pure UI widget classes.
 - Do not break existing save/sync flows without explicit migration notes.
 
 ### Safe Change Pattern
-1. Make one focused change.
-2. Run syntax checks and a minimal smoke test.
-3. Commit in small increments.
-4. Only then proceed to next refactor step.
+1. Look first, then write a test that fails (TDD).
+2. Make one focused change.
+3. Run the tests from the repository root (`python3 -m pytest`, or one folder) and a minimal smoke test.
+4. Commit in small increments; only then proceed to the next step.
 
 This is especially important because large PySide refactors can create transient crash-prone states.
 
@@ -202,12 +167,10 @@ Current Scope behavior is intentionally conservative and safety-oriented.
 - Broader integration tests for mixed source payloads (folders + files).
 
 ## Minimal Smoke Test Checklist
-- Open a Markdown file from Scope/PostFix.
-- Verify top-panel interactions (including window move on top free area).
-- Verify focus editing and line navigation.
-- Verify tag sidebar updates from document tags.
-- Verify color definition chip behavior.
-- Verify save, close, reopen persistence.
+- Start Scope on test data (not on one's own projects): rows, embryos, a drop on an embryo bears it.
+- Put a lens on (double click on a SEITON folder), move to another project, take it off.
+- The Headline shows the project and its standard folders; the clock counts.
+- Open a note from Scope (PostFix, or the editor set on Scope's back).
 - Verify startup still feels fast.
 
 ## Design Quality Bar
@@ -244,7 +207,7 @@ before its "funeral". ARCHIVE THIS PROJECT copied everything kept into the paren
   project. A project's life has no last step yet.
 - In SEITON, "keep" could be a tag instead of extra folders. When a project is closed, what is
   tagged keep goes to the parent project for review. The rest is packed, with its `.seiton` and
-  ACL history, into the parent's archive (where? `08_Dokumentation`?).
+  ACL history, into the parent's archive (where? `9_Dokumentation/95_Archiv`?).
 - Open: whether an archive can still be searched and seen through lenses, whether it can be
   unpacked to come back to life, and what happens to the rules on Nextcloud.
 
@@ -254,9 +217,9 @@ manage the team, find files, archive. Most of them were workarounds for a file b
 not know about projects; in SEITON they belong in Scope (P button, embryos) and in the CLI.
 Two ideas remain:
 - `_check_this`: the admin collected links to things to check regularly (time sheets, reports,
-  status). In SEITON this could be a tag or a saved filter shown in `00_Admin`, without links that
+  status). In SEITON this could be a tag or a saved filter shown in `0_Admin`, without links that
   break.
-- `00_Admin` as the cockpit: the project's settings (rights, templates, cloud) where a person
+- `0_Admin` as the cockpit: the project's settings (rights, templates, cloud) where a person
   looks for them, as files or a view, instead of only hidden in `.seiton`.
 
 ### 4) Vertical communication between projects
@@ -269,8 +232,8 @@ down, one level at a time. In `_admin` there were two folders:
 In every subproject a link `_from_top_project` pointed there. Nothing passed further down by
 itself: each admin decided what to pass on to the next level.
 - In SEITON this is a question of rights plus a view, not of links (links do not survive
-  Nextcloud). A folder in the parent's `03_Kommunikation` is readable by the people of the direct
-  subprojects. The subproject shows it in its own `03_Kommunikation` as "from the parent
+  Nextcloud). A folder in the parent's `3_Kommunikation` is readable by the people of the direct
+  subprojects. The subproject shows it in its own `3_Kommunikation` as "from the parent
   project", faint like an embryo.
 - For this, `ACLs.md` would need roles like "people of the direct subprojects" or "admins of the
   direct subprojects", which it does not have today.
@@ -279,7 +242,7 @@ itself: each admin decided what to pass on to the next level.
 - From the TEAM file, FreeDMS created a folder in `_team` for each person, with `_my_admin`
   (time sheets, expenses, contracts, payments). Only that person and the admin could see it.
   When someone left, their folder was packed. In SEITON this could follow `ACLs.md` `# Users`:
-  a folder in `02_Team` per person, with rules only for that person and the admin.
+  a folder in `2_Team/22_Mitarbeiter` per person, with rules only for that person and the admin.
 - The rights sketch had a "master": the admin of the parent project, who keeps rights in every
   subproject. Today a subproject with its own `ACLs.md` uses only that file, so the parent's
   admin is out unless listed again. Also: someone removed from a team was removed from every
@@ -289,10 +252,10 @@ itself: each admin decided what to pass on to the next level.
 - Browsing beyond folder borders: after the last picture of a folder, the viewer shows the next
   folder's name as a picture and then its first picture (photos sorted by year and month).
 - Files that come with tags from the sender (a ticket, a bill, the terms) find their folder on
-  their own: an airline's bill goes to `04_Finanz`. Today SEITON would need a person or AI for that.
+  their own: an airline's bill goes to `4_Finanz`. Today SEITON would need a person or AI for that.
 - Programs as roles: a finance program gets exactly the finance folders of all projects (a lens
-  for programs, not only for people), plus a small interface: "all `04_Finanz` below here",
-  "save into `04_Finanz` of this project, create it if needed".
+  for programs, not only for people), plus a small interface: "all `4_Finanz` below here",
+  "save into `4_Finanz` of this project, create it if needed".
 
 ---
 

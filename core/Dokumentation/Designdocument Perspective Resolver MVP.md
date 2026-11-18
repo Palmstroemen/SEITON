@@ -1,4 +1,4 @@
-# MyOS Perspective - The Lens (Behaviour) and the Resolver Contract
+# SEITON Perspective - The Lens (Behaviour) and the Resolver Contract
 
 Part A describes how the perspective behaves for the user (decided 2026-10-22). Part B was
 the resolver contract of the first build (v1/v1.1, February/March 2026); the lens session
@@ -10,29 +10,29 @@ what was built before.
 ## A1. The Picture
 
 A perspective is a **lens**: one looks at the projects from a department's point of view.
-Normally one looks from a project: `/Projekte/Job/04_Finanz/Rechnungen`. Wearing the lens
-of the finance department, the path is turned round: `/04_Finanz/Projekte/Job/Rechnungen`.
-Below `/04_Finanz` one sees only finances, but those of all projects ("the shelf",
-`/04_Finanz/Projekte`). See "Vision/Brillen und die runde Halle.md".
+Normally one looks from a project: `/Projekte/Job/4_Finanz/Rechnungen`. Wearing the lens
+of the finance department, the path is turned round: `/4_Finanz/Projekte/Job/Rechnungen`.
+Below `/4_Finanz` one sees only finances, but those of all projects ("the shelf",
+`/4_Finanz/Projekte`). See "Vision/Brillen und die runde Halle.md".
 
 Example. Two passions: making music and travelling, so two projects, `/Musikstudio` and
 `/Reisen`.
 
 1. I am in the music studio: top left in my slim Scope, `/Musikstudio` is the CWD; dark
    theme, Ableton and MuseScore in the taskbar (Desk).
-2. An invoice for the studio comes in. Mouse up: I see the studio's MyOS folders and drop
-   it onto `/04_Finanz` (embryo or born; an embryo is born by that). No lens needed.
+2. An invoice for the studio comes in. Mouse up: I see the studio's SEITON folders and drop
+   it onto `/4_Finanz` (embryo or born; an embryo is born by that). No lens needed.
 3. An invoice for the travels comes in. I do not want to go to `/Reisen`. I hover through
-   `/04_Finanz` → `/Ausgangsrechnungen` → `/2026` and double-click `2026`: I now wear the
-   `/04_Finanz/Ausgangsrechnungen/2026` lens. The desktop turns into the finance one
+   `/4_Finanz` → `/Ausgangsrechnungen` → `/2026` and double-click `2026`: I now wear the
+   `/4_Finanz/Ausgangsrechnungen/2026` lens. The desktop turns into the finance one
    (light theme, spreadsheet and accounting in the taskbar).
-4. The path line now reads `Projekte › Musikstudio › [✕ 04_Finanz › Ausgangsrechnungen ›
+4. The path line now reads `Projekte › Musikstudio › [✕ 4_Finanz › Ausgangsrechnungen ›
    2026]`. A click on `Projekte` (left of the frame) lets me choose `Reisen`: the frame
-   stays, I am at once in `Reisen/04_Finanz/Ausgangsrechnungen/2026` and drop the invoice
+   stays, I am at once in `Reisen/4_Finanz/Ausgangsrechnungen/2026` and drop the invoice
    there. (If `2026` does not exist there yet, it shows as an embryo inside the frame; the
    folder is born by the drop, or sorting by date files it into its year.)
 5. Back to the studio: `Projekte` → `Musikstudio` (the frame comes along), then ✕ - the
-   frame is gone, I am in `Musikstudio/04_Finanz/Ausgangsrechnungen/2026` with the
+   frame is gone, I am in `Musikstudio/4_Finanz/Ausgangsrechnungen/2026` with the
    studio's desktop.
 
 ## A2. Terms
@@ -41,12 +41,12 @@ Example. Two passions: making music and travelling, so two projects, `/Musikstud
   without a lens.
 - **CTD** - where I look and drop (see "Vision/GUI Filebrowser.md"). With a lens on, the
   lens is the CTD: it can point into another project than the CWD.
-- **Lens (CPD)** - the turned path, e.g. `/04_Finanz/Ausgangsrechnungen/2026/Projekte/Reisen`
+- **Lens (CPD)** - the turned path, e.g. `/4_Finanz/Ausgangsrechnungen/2026/Projekte/Reisen`
   in the session's form (`cpd`): the department path (template side), the project, and a tail.
-  A lens may sit at any depth of the department (`/04_Finanz`, `/04_Finanz/Ausgangsrechnungen/2026`).
-- **Department** - a template folder (`00_Admin` ... `08_Dokumentation`).
+  A lens may sit at any depth of the department (`/4_Finanz`, `/4_Finanz/Ausgangsrechnungen/2026`).
+- **Department** - a template folder (`0_Admin` ... `9_Dokumentation`).
 - **CLD** (current lens directory, 2026-10-23) - the department path the lens fixes, e.g.
-  `04_Finanz/Ausgaben`. Scope shows it framed inside the one path line (A3). The CPD is the
+  `4_Finanz/Ausgaben`. Scope shows it framed inside the one path line (A3). The CPD is the
   same lens in the turned form of the drive.
 
 ## A3. The Path Line With the Frame (CLD)
@@ -55,13 +55,13 @@ Decided 2026-10-23 after a clickable sketch (artifact "Brillenrahmen"); replaces
 menus (left: CWD, right: lens) decided on 2026-10-22, which did not work in Scope.
 
 **One line, one place.** Scope shows one path line. Without a lens:
-`Projekte › Job › 04_Finanz › Ausgaben`. With a lens the department part is framed:
-`Projekte › Job › [✕ 04_Finanz › Ausgaben]`. The frame shows what is fixed: the CLD. There
+`Projekte › Job › 4_Finanz › Ausgaben`. With a lens the department part is framed:
+`Projekte › Job › [✕ 4_Finanz › Ausgaben]`. The frame shows what is fixed: the CLD. There
 is no second place to come back to - the line is where one is, with or without a frame.
 
-1. **Put on a lens:** a double click on a MyOS folder (department folder or any folder
+1. **Put on a lens:** a double click on a SEITON folder (department folder or any folder
    below it, at any depth, born or embryo) frames the department path down to it. A
-   double click elsewhere sets the CWD as before. So inside the MyOS folders a double click
+   double click elsewhere sets the CWD as before. So inside the SEITON folders a double click
    always puts on a lens; one never sets a plain CWD there. Within one's own project this
    is not felt - the line and the FilesPanel look as if the CWD had been set; the frame
    only matters when the project changes. (Decided 2026-10-23.)
@@ -78,16 +78,16 @@ is no second place to come back to - the line is where one is, with or without a
    With a lens, choosing one moves the lens; the frame stays. A flat view of the CLD of
    all projects at once (with a "Project" column) is not needed for now.
 4. **Inside the frame - which department path:** a click on a segment makes the lens
-   flatter; the folders below the frame make it sharper; a double click on another MyOS
+   flatter; the folders below the frame make it sharper; a double click on another SEITON
    folder changes the lens.
 5. **The frame never changes for embryos.** A folder of the CLD not born in the shown
    project is drawn as an embryo (pale, dashed) inside the frame, as everywhere; the frame
    itself stays as it is. The FilesPanel shows the fallback (A4).
 6. **✕ takes off only the frame.** One stays where the lens looked:
-   `Projekte › Job › [✕ 04_Finanz › Ausgaben]` becomes `Projekte › Job › 04_Finanz ›
+   `Projekte › Job › [✕ 4_Finanz › Ausgaben]` becomes `Projekte › Job › 4_Finanz ›
    Ausgaben`, now the CWD (an embryo there stays an embryo until something is dropped).
    The Desk turns back to the project's (A5).
-7. **Without a lens:** a click on a folder goes into it (a MyOS folder of the CWD's
+7. **Without a lens:** a click on a folder goes into it (a SEITON folder of the CWD's
    project, born or embryo - not the real `Templates` folder); a click on a segment goes
    back up.
 8. **The lens stays on until taken off** (decided 2026-10-25). Going elsewhere with it
@@ -96,12 +96,12 @@ is no second place to come back to - the line is where one is, with or without a
    (`Job/Aufträge`) keeps it in that project; a folder of projects (`Wohnen`, the projects
    root) puts it on the shelf there; outside the projects it stays where it was. Only ✕
    (or lifting the filter that put it on) takes it off.
-9. **MyOS folders only on the left** (2026-10-25): born or embryo, they are shown in the
-   MyOS-folder row (SunTree: the left half), never among the folders on the right.
+9. **SEITON folders only on the left** (2026-10-25): born or embryo, they are shown in the
+   SEITON-folder row (SunTree: the left half), never among the folders on the right.
 
 **The frame in tutorials (and later perhaps in Scope).** The frame shows the turned path
 directly: an animation slides the framed part to the left in front of `Projekte › Job`,
-giving the drive's form `04_Finanz › Ausgaben › Projekte › Job`, and back again.
+giving the drive's form `4_Finanz › Ausgaben › Projekte › Job`, and back again.
 
 ## A4. What the Lens Shows
 
@@ -118,23 +118,23 @@ giving the drive's form `04_Finanz › Ausgaben › Projekte › Job`, and back 
 ## A5. Desk With a Lens
 
 While a lens is on, the department's Desk applies (the nearest `Desk.md` up the department
-path: `2026` → `Ausgangsrechnungen` → `04_Finanz`, prepared in the template, e.g.
-`.MyOS/Templates/Standard/04_Finanz/.MyOS/Desk.md`), wherever the lens or the CWD is moved. The
+path: `2026` → `Ausgangsrechnungen` → `4_Finanz`, prepared in the template, e.g.
+`.seiton/Templates/Standard/4_Finanz/.seiton/Desk.md`), wherever the lens or the CWD is moved. The
 lens' Desk overrules the project's: moving the lens from `Musikstudio` (dark) to `Reisen`
 keeps the finance Desk (light); Reisen's Desk is ignored while the frame is on. Taking the
-lens off (✕) brings the Desk of the project one then stands in: in `Reisen/04_Finanz/...`
+lens off (✕) brings the Desk of the project one then stands in: in `Reisen/4_Finanz/...`
 that is Reisen's, not Musikstudio's. Dropping something into a department folder without a
 lens does not change the Desk.
 
-- **The template's Desk wins** (decided 2026-10-24). Birth copies `.MyOS`, so a born
-  `Musikstudio/04_Finanz` holds an old copy of the template's Desk. With a lens the
+- **The template's Desk wins** (decided 2026-10-24). Birth copies `.seiton`, so a born
+  `Musikstudio/4_Finanz` holds an old copy of the template's Desk. With a lens the
   template's Desk applies; a Desk in the project's department folder counts only where
   the template has none for the department. Without a lens no department Desk applies
-  (also not after ✕ inside `04_Finanz`): the project's.
+  (also not after ✕ inside `4_Finanz`): the project's.
 - **Changes are kept in the template** (decided 2026-10-24). What the user changes on the
   desktop while the lens is on goes, without asking, into the template's Desk that
   applies; where the department has none yet, it is created there
-  (`.MyOS/Templates/Standard/04_Finanz/.MyOS/Desk.md`), as a project without Desk gets one
+  (`.seiton/Templates/Standard/4_Finanz/.seiton/Desk.md`), as a project without Desk gets one
   ("Designdocument Desk.md", 12). The change then applies to the lens in every project.
   Where the template cannot be written (file system), the change is not kept; the
   desktop still follows.
@@ -148,23 +148,23 @@ lens does not change the Desk.
 - Scope starts *its* daemon for its projects root when none runs, and does not attach to a
   daemon serving another root.
 - The **FUSE drive** is why the daemon exists: third-party programs (LibreOffice "Save
-  as") write into `/04_Finanz/Projekte/Job` and the file lands in `Projekte/Job/04_Finanz`.
+  as") write into `/4_Finanz/Projekte/Job` and the file lands in `Projekte/Job/4_Finanz`.
   The drive always shows the **whole turned tree** of the projects root -
   `/<department>/Projekte/<project>/...` - independent of the lens Scope shows.
 - **Where:** a visible folder `Perspektiven` next to `Projekte` (decided 2026-10-22):
-  `.../Perspektiven/04_Finanz/Projekte/Job`. Its top level shows the departments
-  (`00_Admin` ... `08_Dokumentation`), each with `Projekte` below. It is not mounted over
+  `.../Perspektiven/4_Finanz/Projekte/Job`. Its top level shows the departments
+  (`0_Admin` ... `9_Dokumentation`), each with `Projekte` below. It is not mounted over
   `Projekte`: programs (file managers, backups, git, Scope) keep seeing the real projects,
   and the daemon reads them without reading itself.
 - A filter may put on a lens (`## Perspective`, see "Designdocument Perspectives.md";
   decided and built 2026-10-25, E6): it names the department and deeper levels without a
-  project (`04_Finanz/Ausgaben`; `..` and `.` are refused). Chosen by hand, the filter puts
+  project (`4_Finanz/Ausgaben`; `..` and `.` are refused). Chosen by hand, the filter puts
   the lens on through the session where one stands, like the gesture; lifting it (or
   choosing another) takes the lens off - only while it is still the filter's, not when the
   user went on with it. An auto filter never puts on a lens.
   **Taken back** (2026-10-26): choosing a filter by hand, with its menu (open, save to another
   level), was a step on the way and is gone from Scope and the core - the lens comes by a
-  double click on the MyOS folder. Auto filters work as before (flattening, groups); a
+  double click on the SEITON folder. Auto filters work as before (flattening, groups); a
   `## Perspective` in a filter is read but puts on nothing.
 
 ## A7. Built In Core
@@ -178,12 +178,12 @@ Built (2026-10-22):
   path below the projects root, lens path), not as a parsed CPD: projects may be nested
   (`Wohnen/Garten`).
 - `core/perspective_drive.py` - the drive's turned tree (E2), independent of the session:
-  `/` the departments, `/04_Finanz[/...]` template subfolders and `Projekte`, the shelf
+  `/` the departments, `/4_Finanz[/...]` template subfolders and `Projekte`, the shelf
   (real projects and the folders leading to them), then the project. Saving into a project
   without the department folder bears it (`Blueprint.materialize_dir`, with its template
   content). Denied access is reported as denied, not as missing. Where the lens enters a
   project cannot be removed or renamed through the drive. Subprojects are reached through
-  their project. Hidden files other than `.MyOS` are allowed (LibreOffice lock files).
+  their project. Hidden files other than `.seiton` are allowed (LibreOffice lock files).
 - `core/perspective_fuse.py` - `PerspectiveDriveFuse`, the FUSE operations on the real
   paths; `cli/myperspectivefs.py --projects-root ... --mount-point ...`.
 - `daemon/perspective_daemon.py` - the session plus the drive, one socket per projects
@@ -201,17 +201,17 @@ Built (2026-10-22):
   thread, which stays inside FUSE). The former idle timeout (24 h without a request) is
   gone: it would have taken the drive away under a running Scope.
 - Scope connects only to the daemon of its projects root and starts it when none runs
-  (`MYOS_SCOPE_START_DAEMON=0` switches that off; the tests do). The client is
+  (`SEITON_SCOPE_START_DAEMON=0` switches that off, the former `MYOS_` name is still read; the tests do). The client is
   `daemon/client.py` (as `Scope/daemon_client.py` it was never imported when Scope runs as
   a script: there "Scope" means Scope.py).
 - Scope on the session (E3, 2026-10-23; the gestures below are an interim state - the
   path line with the framed lens (CLD, A3) replaces them in E3b): `Backend.lens(method, params)` asks the session
   (the daemon's, or without a daemon `LocalSession`, the same answers in Scope's process);
   `lensBear()` bears the lens' folder where the user may write. QML builds no lens paths:
-  the MyOS-folder row shows the lens' folder as a real path in its project (`target`, path
+  the SEITON-folder row shows the lens' folder as a real path in its project (`target`, path
   bar from `project_dir`), so its menus, embryos and hover preview work as without a lens;
   the FilesPanel shows `shown` (the lens' folder or the fallback). Gestures: a double click
-  on a MyOS folder puts on its lens (`look_at`, any depth); with a lens on, a click on a
+  on a SEITON folder puts on its lens (`look_at`, any depth); with a lens on, a click on a
   folder of the row or a path segment moves the lens there (sharper, flatter, another
   department); a double click in the left menu changes the CWD and the lens follows (a
   single click browses as without a lens: its menus open, the FilesPanel shows the folder,
@@ -223,8 +223,8 @@ Built (2026-10-22):
   goes into the lens' folder, born then. On the shelf (the CWD a folder of projects) Scope
   shows the CWD until E4; the session then puts the shelf at the projects root, not at
   the folder of projects (to fix with E4).
-- The path line with the frame (E3b, 2026-10-23, A3): the MyOS-folder row's path line
-  frames the segments below the lens' project (`Job › [✕ 04_Finanz › Ausgaben]`; in the
+- The path line with the frame (E3b, 2026-10-23, A3): the SEITON-folder row's path line
+  frames the segments below the lens' project (`Job › [✕ 4_Finanz › Ausgaben]`; in the
   vertical view the framed segments are outlined, the ✕ stands before them). Path
   segments whose folder does not exist are pale, as embryos are in the rows - in every
   path line, with or without a lens (the path line never showed embryos before); asked
@@ -245,7 +245,7 @@ Built (2026-10-22):
   the department folder.
 - The minimal view (M, E4 step 1, 2026-10-24, A3.2): a button "M" at the left of the top
   bar. One line: the projects row is only its CWD button (`usePathBar: false`, the cascade
-  built in 2025 and not used until now; `foldersShown: false`), the MyOS-folder row follows
+  built in 2025 and not used until now; `foldersShown: false`), the SEITON-folder row follows
   without the project segment (`pathShownBelow`), with the frame. The dropdown on hover
   starts with the CWD (its children open too) and ends at the projects root
   (`cascadeTopPath`, `Backend.projectsRoot()`); a click browses, a double click goes there
@@ -258,20 +258,21 @@ Built (2026-10-22):
   the top of the CWD dropdown (`Scope/CwdTools.qml`, `FolderBrowser.cwdHoverTools`): Clipboard
   (click: the Clipboard becomes the CWD; drop: into it; pale while empty), search (the field
   opens in the line beside the CWD), light/dark, language, hidden folders. Search and Clipboard
-  left the MyOS-folder row. No H and no E (2026-10-26): M is becoming a tool of its own,
+  left the SEITON-folder row. No H and no E (2026-10-26): M is becoming a tool of its own,
   docked at the top of the screen; one does not switch it to the full view, at most one opens
-  a normal Scope beside it. Next: a Setup button opening a
+  a normal Scope beside it (that tool is the Headline, started 2026-11-17,
+  "Scope/Designdocument Headline.md"; M stays in Scope until it replaces it). Next: a Setup button opening a
   configuration page (colour scheme, SunTree's values such as Enter/Leave); it needs a
   settings file shared by Scope and SunTree. Later perhaps signing in / switching user and
   switching off. The top bar is unchanged in M for now: its other switches (filter, Projekte/
   Vorlagen AN, Dateien 50 %, ...) are not in the tools yet.
-- M is one line (2026-10-26): the MyOS folders stand right of the CWD and never flow onto a
+- M is one line (2026-10-26): the SEITON folders stand right of the CWD and never flow onto a
   second line (`FolderBrowser.wrapFolders` off); what does not fit is reached by the wheel.
 - SunTree at the session (E5, 2026-10-25): `daemon/lens_link.py` is a program's line to the
   lens - the daemon of its projects root (started when none runs, ended only by the program
   that started it), the lens requests, and the Desk following each move (A5). Scope and
   SunTree both use it, so they share one lens. SunTree has Scope's gestures: a double click
-  on a MyOS folder (left half) puts on its lens and the CWD stays; with a lens on the left
+  on a SEITON folder (left half) puts on its lens and the CWD stays; with a lens on the left
   half shows the lens' folder in its project and a click makes it sharper; the right half
   and the parents take the lens along (A3.8); a frame above the CWD
   (✕ and the lens' levels) replaces the old CPD stack. Coming back (hotkey, activation)
@@ -313,21 +314,21 @@ Built (2026-10-22):
 - **Unchanged:** the directory fallback with folders (A4), a template double click sets
   only the lens.
 
-## A9. The Drive Belongs to MyOS (Concept, 2026-10-23)
+## A9. The Drive Belongs to SEITON (Concept, 2026-10-23)
 
 Not built yet; to be decided whether before E3.
 
-**A MyOS service, not a Scope feature.** LibreOffice, the command line (`cd
-Perspektiven/04_Finanz/Projekte`) and every other program use the drive without Scope. So
+**A SEITON service, not a Scope feature.** LibreOffice, the command line (`cd
+Perspektiven/4_Finanz/Projekte`) and every other program use the drive without Scope. So
 the daemon lives with the login session, not with a Scope window:
 
-- "Starting MyOS" is logging in: a systemd user service (`systemctl --user`) starts the
+- "Starting SEITON" is logging in: a systemd user service (`systemctl --user`) starts the
   daemon at login and ends it at logout (SIGTERM; the ending of A7 - busy drive waits,
-  never killed - already holds). `myos start`, `myos stop` and `myos status` as plain
+  never killed - already holds). `seiton start`, `seiton stop` and `seiton status` as plain
   commands.
 - Scope only connects; it neither starts nor stops the daemon (at most it starts a missing
-  one). Closing Scope does not end MyOS; the small Scope instance (top left) may offer
-  "Quit MyOS".
+  one). Closing Scope does not end SEITON; the small Scope instance (top left) may offer
+  "Quit SEITON".
 - Service and small Scope stay separate (invisible base / user interface) but start
   together (autostart).
 - More may move into the service later: catching up on filing (Designdocument Sort.md,
@@ -341,34 +342,34 @@ make all projects seem gone (dead mount point), not only the view; shells, open 
 and backups inside `Projekte` would suddenly see the turned tree. Instead, as gvfs does
 for network drives (`/run/user/<uid>/gvfs`):
 
-- The drive is mounted outside the home folder: `/run/user/<uid>/myos/Perspektiven`
+- The drive is mounted outside the home folder: `/run/user/<uid>/seiton/Perspektiven`
   (one per projects root).
 - Next to `Projekte` lies only a symlink `Perspektiven` to it. In file managers, in
   LibreOffice and on the command line it behaves like a folder; tools walking the home
   folder from above do not follow symlinks by default (`find`, `rsync`, `du`; to be
   checked for Nemo, Déjà Dup and the search indexes on the real desktop before deciding).
-- Without MyOS running, the symlink points nowhere - more honest than an empty folder one
+- Without SEITON running, the symlink points nowhere - more honest than an empty folder one
   could save into by mistake.
 
 **Searching in the perspective.** The perspectives are where one searches most: "Where is
 the invoice from FirmaX from two weeks ago? In which project was it?"
 
 - Global search (desktop search, indexes) finds the real file once, under
-  `Projekte/Job/04_Finanz/...`; the path names the project. Without the symlink every hit
+  `Projekte/Job/4_Finanz/...`; the path names the project. Without the symlink every hit
   would appear twice.
 - A search started *inside* the perspective (the file manager's search in
-  `Perspektiven/04_Finanz/Projekte`, `find . -iname '*FirmaX*' -mtime -14` there) walks
+  `Perspektiven/4_Finanz/Projekte`, `find . -iname '*FirmaX*' -mtime -14` there) walks
   the drive and finds everything; the first part of the path is the project.
 - Scope answers the same question faster on the real tree, since it knows the mapping:
-  with the lens `04_Finanz` on, a search for "FirmaX", last two weeks, looks only into the
-  `04_Finanz` folders of all projects and lists the hits with a "Project" column (E7,
+  with the lens `4_Finanz` on, a search for "FirmaX", last two weeks, looks only into the
+  `4_Finanz` folders of all projects and lists the hits with a "Project" column (E7,
   postponed on 2026-10-25 until the search is missed in daily use; lean: file names only,
   one field in Scope; SunTree gets no search - it shows folders only, for dropping). The
   dates come from the sort rules' date sources (Designdocument Sort.md, section 5), right
   even when copying changed the modification time.
 - Energy: such a search touches only the department's folders, not the whole disk or the
   whole home folder. For one person this is irrelevant; across many users and data
-  centres it may be a real argument for MyOS. Claim (Oliver): about one hundredth of the
+  centres it may be a real argument for SEITON. Claim (Oliver): about one hundredth of the
   energy for such searches. To be measured - it depends on the share of files in the
   department's folders, and against a search that already uses an index the gain is
   smaller than against a full scan.
@@ -390,13 +391,16 @@ the invoice from FirmaX from two weeks ago? In which project was it?"
 - Going deeper without changing the lens (right of the frame) - not drawn yet.
 - Whether the CWD survives as a word: with one line it is simply where one is.
 - The default of the fallback: with or without folders (A4).
-- The MyOS service (A9): which projects roots it serves (a small configuration: the real
+- The SEITON service (A9): which projects roots it serves (a small configuration: the real
   one, `SEITON_Test`); autostart of the small Scope; how Nemo, Déjà Dup and the search
   indexes treat the `Perspektiven` symlink on the real desktop.
 
 ## A11. Several Roots, Several Perspectives (Concept, 2026-11-16)
 
-Not built, not decided. Came up when SEITON was rolled out on the Dell: `~/Dokumente` became a
+Partly decided (below, 2026-11-16). Built: the named perspectives as favourites in the Headline's
+panel (2026-11-17, `Headline/model.py` reads `.seiton/Perspectives.md`; Scope/Designdocument
+Headline.md, step 3). Not built: the drive showing only the list, the drives in one place
+(`~/Perspektiven/<root>`), finding roots downwards. Came up when SEITON was rolled out on the Dell: `~/Dokumente` became a
 projects root, and a second root `~/Projekte` was planned beside it (left out for now).
 
 **What breaks today.** The code knows one projects root. The daemon mounts its drive *next to*
@@ -453,7 +457,9 @@ and sees exactly that across all projects and nothing else.
 - **An entry is named as its folder:** `9_Dokumentation/92_Bilder` appears as `92_Bilder`. Two named
   perspectives with the same name get a part of the path added, as with roots.
 
-**Idea: the named perspectives as favourites (2026-11-16, not decided).** Today Scope and SunTree
+**Idea: the named perspectives as favourites (2026-11-16; built in the Headline's panel 2026-11-17:
+one click puts the lens on, on the worn one takes it off; `Perspectives.md` is written by hand,
+"Keep as perspective" is not built).** Today Scope and SunTree
 show either the normal view or the perspectives. The named perspectives of the current root could
 stay in sight at all times, like the favourites of a web browser:
 - One click puts the lens on at that place; clicking the active entry again (or "normal") takes it

@@ -1,4 +1,4 @@
-# **MyOS API Overview (Draft)**
+# **SEITON API Overview (Draft)**
 
 ## **1. Purpose**
 This document provides a high-level overview of the public Python APIs used by CLI, GUI, and plugins. It is an onboarding map for developers.

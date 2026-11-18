@@ -119,7 +119,8 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
                     "Dateien 50%", "Projekt mit Thema versehen", "Ordnung aktivieren", "Schmal", Edge-Dock-Schalter entfernt;
                     Filter im Tab Scope; bleiben: ⚙ ganz links und M (eine Zeile per Vorgabe aus: vorerst nicht)
                 Später: Anmelden/Ummelden, Abschalten
-            [ ] Schritt 2: Auftauchen am oberen Bildschirmrand (Edge-Dock) - zurückgestellt (2026-10-25): im Prototyp reicht
+            [x] Schritt 2: Auftauchen am oberen Bildschirmrand (Edge-Dock) - gebaut als eigenes Werkzeug, die Headline
+                (2026-11-17, Scope/Designdocument Headline.md, 4.2). Ursprünglich zurückgestellt (2026-10-25): im Prototyp reicht
                 das CWD links oben im Scope-Fenster. Später voraussichtlich: volle Bildschirmbreite, Kante über die ganze
                 Breite klappt sofort auf, zu nach ca. 0,5 s ohne Maus im Fenster; Verhältnis zum alten Edge-Dock offen
             [x] Ein Badge (z. B. das € von 04_Finanz) nimmt Klicks an wie das Ordner-Icon (2026-10-25)
@@ -177,11 +178,22 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
     [ ] Am Ende des Tutorials (Idee 2026-10-24): Bitte an den Nutzer, selbst eine oder mehrere
         Template-Strukturen zu entwerfen: wie er sie in Firmen vorgefunden hat oder für vernünftig hielte,
         und vielleicht eine andere für sich privat
-[ ] Beispielanwendung Zeiterfassung (Idee 2026-10-24): Stunden pro Projekt, keine proprietäre Datenbank,
+[x] Beispielanwendung Zeiterfassung (Idee 2026-10-24; gebaut 2026-11-16/17, core/Dokumentation/Designdocument
+    Time.md, 9): Stunden pro Projekt, keine proprietäre Datenbank,
     sondern kleine MD-Dateien im Projekt selbst (Tabelle: wann, wie lange, optional was); eine Perspektive
     zeigt die Gesamtübersicht als Dateien, ein kleines Programm wertet sie aus. Schwierig: offen gelassen ist
     nicht gearbeitet. Erster Anlauf: Aktivität (Mausbewegungen, Bearbeitungen auch in anderen Programmen)
     mit einer Nachlaufzeit von etwa 5 min zählen
+[ ] Zeiterfassung, offene Reste (core/Dokumentation/Designdocument Time.md):
+    [ ] Mit FUSE und bubblewrap am Desktop ausprobieren (die Uhr mit eigener Rolle, 7)
+    [ ] Quellen unter Wayland (Leerlauf, Inhibitors; 9, Schritt 3)
+    [ ] Export als CSV (5)
+    [ ] Das Telefon (8)
+[ ] Headline (2026-11-17, Scope/Designdocument Headline.md): eigene Zeile an der oberen Kante, Panel wie ein
+    Startmenü, Cinnamon-Applet, Widgets (die Uhr als erstes); sie löst M in Scope ab
+    [ ] Mit FUSE und bubblewrap am Desktop ausprobieren (4, 2a)
+    [ ] Tab Headline im Setup fertig (Schritt 4 oben)
+    [ ] Andere Arbeitsflächen: KDE-Plasmoid, GNOME-Erweiterung, Wayland (4, Schritt 5)
 [ ] Demodaten als Playground
 [ ] Scope UI verfeinern  
     [ ] Layout-Schleife in der oberen Zeile (gefunden 2026-11-16 mit dem neuen Smoke-Test): Pfadleiste und Ordner
@@ -233,7 +245,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
     [ ] Zugriffsrechte einrichten: als Tutorial/Assistent in 00_Admin (Template-Datei, kommt bei der Geburt mit).
         Nur der Admin richtet Rechte ein; Scope bietet das sonst nirgends an.
         Dafür: Embryos zeigen innen die Dateien ihrer Vorlage blass; eine öffnen = Ordner gebären ("ergreifen").
-        Offen: wo das ausgelieferte Standard-Template liegt (Templates/ im Repo ist leer).
+        Das ausgelieferte Standard-Template liegt in templates/; der Installer kopiert es nach ~/.seiton/Templates.
     [x] Personen-Chip: Gruppen einer Person ändern (`# Users`)
     [x] Person hinzufügen (neue Zeile in `# Users`; freier Name, Personen des Projekts statt Logins)
     [x] Wer bin ich hier? Eigene Namen pro Rechner in ~/.config/MyOS/Identity.md (core/identity.py)
@@ -329,7 +341,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
             Regeln wie in MyOS. Integrationstest: ohne Schutz überschreibt Lisa `Familie/.MyOS/Embryos.json`, mit 403
         [ ] Mit Desktop-Client: `Embryos.json` und `.seiton/Embryos/` kämen auch lokal an (stört nicht, ist aber Ballast)
         [ ] Tags: Unsere Tags auf die "Collaborative Tags" (WebDAV `systemtags`) spiegeln
-    [ ] Der SEITON-Kern als Dienst neben Nextcloud (entschieden 2026-11-08, cloud/nextcloud/Designdocument MyOS Core
+    [ ] Der SEITON-Kern als Dienst neben Nextcloud (entschieden 2026-11-08, cloud/nextcloud/Designdocument SEITON Core
         Service.md): ein Docker-Image mit dem Python-Kern als API, die App `seiton` als Brücke; keine SEITON-Logik in PHP oder
         JS. Der Kern arbeitet auf einem Schattenbaum (Ordner, `.seiton` mit den Vorlagen), entscheidet; der Nutzer handelt
         mit eigenen Rechten, Regeln setzt ein Dienstkonto sofort nach jedem Ereignis. Erst als Sidecar, später ExApp

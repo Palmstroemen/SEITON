@@ -1,6 +1,6 @@
 # shadow.py - the shadow tree of a Team folder, what the core reads in the cloud
 #
-# See "cloud/nextcloud/Designdocument MyOS Core Service.md", 5: every folder (empty) and every
+# See "cloud/nextcloud/Designdocument SEITON Core Service.md", 5: every folder (empty) and every
 # file of a .MyOS (with .MyOS/Templates), no user documents. Built from a WebDAV walk with the
 # service account; a cache, never a source - on doubt it is rebuilt. Here it is rebuilt when
 # the Team folder's ETag changes (Nextcloud changes it for anything below); myos_acl tells the

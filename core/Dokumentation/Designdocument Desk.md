@@ -1,9 +1,9 @@
-# MyOS Desk Profiles - Design Document (Draft)
+# SEITON Desk Profiles - Design Document (Draft)
 
 ## 1. Purpose
 
-`Desk.md` defines a project-aware desktop profile for MyOS.
-It controls environment-facing preferences (for example wallpaper and theme) while MyOS remains the source of truth.
+`Desk.md` defines a project-aware desktop profile for SEITON.
+It controls environment-facing preferences (for example wallpaper and theme) while SEITON remains the source of truth.
 
 The MVP targets deterministic behavior:
 - resolve the active desk profile from the current path,
@@ -15,7 +15,7 @@ How the desktop follows the projects, and how user changes are kept, is section 
 ## 2. Core Principles
 
 - Path-based inheritance with "nearest ancestor wins"
-- Explicit, file-first configuration in `/.MyOS/Desk.md`
+- Explicit, file-first configuration in `/.seiton/Desk.md`
 - Safe defaults and graceful fallback when profiles are missing or invalid
 - Backend-agnostic core, backend-specific adapters
 - Idempotent application (no repeated apply for same effective profile)
@@ -25,10 +25,10 @@ How the desktop follows the projects, and how user changes are kept, is section 
 ### Canonical location
 
 Primary candidate:
-- `/.MyOS/Desk.md`
+- `/.seiton/Desk.md` (a `.MyOS/Desk.md` from before the rename is no longer read; `python3 cli/migrate_name.py` moves it over)
 
 Optional compatibility candidate:
-- `/Desk.md` at folder root (disabled by default, feature-flagged)
+- `/Desk.md` at folder root (disabled by default; `SEITON_DESK_INCLUDE_ROOT=1` switches it on)
 
 ### Resolver algorithm
 
@@ -91,7 +91,7 @@ Notes:
   dropped every setting after such a line).
 - `WallpaperPreset`: a picture relative to the `Desk.md` (must stay inside its folder) or
   an absolute path; symbolic names are not implemented.
-- `WallpaperPath`: optional direct override (plain path; MyOS writes this one).
+- `WallpaperPath`: optional direct override (plain path; SEITON writes this one).
 - `## Taskbar`: the programs pinned to the taskbar, a list of `.desktop` ids (Cinnamon
   adds `:flatpak` for Flatpak apps), in this order. Running programs are not touched.
   A heading without items means "nothing pinned"; no heading means "inherited" (see 4).
@@ -99,19 +99,21 @@ Notes:
   Plain `.desktop` ids are not pretty; Scope can show the program names later.
 - Subheadings stay inside `# Desk`; a heading of the same or a higher level ends it.
 - `ProjectIcon`: icon of the project in Scope (theme icon name, path or URL).
-- `RecentPolicy`: optional UI-level recents display hint.
+- `RecentPolicy`: reserved, not used yet. It is read, inherited and counted in the profile's
+  hash, but nothing acts on it (KDE only logs a step, and only with the developer switch
+  `SEITON_DESK_KDE_RECENT_ENABLE=1`).
 - `Inherit`: recognized values `dynamic | fix | not` (default `dynamic`).
 
 ## 6. Precedence Rules
 
 When multiple sources can provide a desk profile:
 
-1. Manual profile override (explicit path argument)  
-2. Active perspective-linked desk profile  
-3. Nearest ancestor `/.MyOS/Desk.md`  
-4. Global fallback desk profile  
+1. A given desk file (`manual_desk`; Scope passes the lens' Desk, "Designdocument Perspective Resolver MVP.md", A5)  
+2. The desk named by the active filter (`## Desk` in a `Filter.md`; must stay inside the filter's folder)  
+3. Nearest ancestor `/.seiton/Desk.md`  
+4. Fallback desk profile (the system default `~/.config/seiton/Desk.md`, section 12; `SEITON_DESK_FALLBACK` for tests)  
 
-If both root `Desk.md` and `/.MyOS/Desk.md` are enabled for one directory, `/.MyOS/Desk.md` wins.
+If both root `Desk.md` and `/.seiton/Desk.md` are enabled for one directory, `/.seiton/Desk.md` wins.
 
 ## 7. Runtime Apply Rules
 
@@ -123,7 +125,7 @@ If both root `Desk.md` and `/.MyOS/Desk.md` are enabled for one directory, `/.My
   2) panel theme,
   3) wallpaper,
   4) taskbar (step "dock"),
-  5) optional recents policy handoff.
+  5) recents policy (reserved, nothing happens yet; see 5).
 
 ## 8. Backend Model
 
@@ -144,9 +146,9 @@ Backends (`core/desktop_backends/`), chosen from `XDG_CURRENT_DESKTOP`:
   in the settings file of its window list applet,
   `~/.config/cinnamon/spices/grouped-window-list@cinnamon.org/<instance>.json`
   (`pinned-apps`; the instance from `org.cinnamon enabled-applets`, the first window
-  list only). MyOS changes only `pinned-apps.value` there (atomically; everything else,
+  list only). SEITON changes only `pinned-apps.value` there (atomically; everything else,
   `__md5__` included, stays). The applet does not react to the file by itself
-  (Cinnamon 6.0: no callback for `pinned-apps`), so MyOS then calls over D-Bus
+  (Cinnamon 6.0: no callback for `pinned-apps`), so SEITON then calls over D-Bus
   `org.Cinnamon.updateSetting` (reload the file) and `org.Cinnamon.activateCallback
   updateFavorites` (the applet reloads its pinned programs). If that fails, the file is
   written and Cinnamon shows it at its next start. KDE (launchers in
@@ -170,13 +172,16 @@ no quotes or control characters).
 
 Always on, no switch in the UI (decided 2026-10-21). Environment variables only serve
 development and tests:
-- `MYOS_DESK_BACKEND=auto|kde|cinnamon|gnome|none` (default `auto`); the tests run with
+- `SEITON_DESK_BACKEND=auto|kde|cinnamon|gnome|none` (default `auto`); the tests run with
   `none` (root `conftest.py`), so a test run never changes the real desktop.
-- `MYOS_DESK_ENABLE=0` / `MYOS_DESK_DRY_RUN=1` to switch applying off / only log it.
+- `SEITON_DESK_ENABLE=0` / `SEITON_DESK_DRY_RUN=1` to switch applying off / only log it.
+- Further: `SEITON_DESK_INCLUDE_ROOT`, `SEITON_DESK_DISABLE_FILTER`, `SEITON_DESK_FALLBACK`,
+  `SEITON_DESK_KDE_RECENT_ENABLE` (`core/desk_runtime.py`, `core/desktop_backends/kde.py`).
+- The former names (`MYOS_DESK_...`) are still read when the `SEITON_` one is not set.
 
 ## 11. Acceptance Criteria (MVP)
 
-- Nearest valid `/.MyOS/Desk.md` is resolved deterministically.
+- Nearest valid `/.seiton/Desk.md` is resolved deterministically.
 - Entering subprojects without local desk does not trigger re-apply.
 - Leaving a local desk area activates the next ancestor profile.
 - Broken configs do not crash navigation.
@@ -185,27 +190,27 @@ development and tests:
 ## 12. The Desktop Follows the Projects (decided 2026-10-21)
 
 - **Inside the projects tree** (`/Projekte` and below) the nearest `Desk.md` applies (see
-  3); `/Projekte/.MyOS/Desk.md` is the fallback for all projects.
+  3); `/Projekte/.seiton/Desk.md` is the fallback for all projects.
 - **Outside** (Documents, Music, …) the user's own desktop applies: the **system
-  default**, `~/.config/MyOS/Desk.md`. Desktops do not keep a second copy of their
-  settings once MyOS changed them, so MyOS saves the user's desktop there once, before it
+  default**, `~/.config/seiton/Desk.md`. Desktops do not keep a second copy of their
+  settings once SEITON changed them, so SEITON saves the user's desktop there once, before it
   changes anything.
 - **Changes by the user are kept, without asking**: when the desktop differs from what
-  MyOS set last, MyOS writes themes, wallpaper and taskbar into the `.MyOS/Desk.md` of the project
+  SEITON set last, SEITON writes themes, wallpaper and taskbar into the `.seiton/Desk.md` of the project
   where the user was (creating it), keeping every other line (`ProjectIcon`, …).
   Outside projects the change goes into the system default. There is no "where to save"
   question: where it lands is not the user's concern.
 - **Scope and PostFix** both follow (PostFix with the folder of the open note). They
-  share what MyOS set last in `~/.config/MyOS/desk-state.json`, so neither takes the
+  share what SEITON set last in `~/.config/seiton/desk-state.json`, so neither takes the
   other's switch for a change by the user.
 - Open: projects shared by several people (sync, team) would get the personal desktop
   of whoever changed it; belongs to the sharing model.
-- A setting MyOS has never set (e.g. the taskbar, which older versions did not read) is
-  the user's own: when the system default lacks it, MyOS adds it there.
-- **Closing Scope** (or PostFix) keeps the look last used; MyOS does not restore the
+- A setting SEITON has never set (e.g. the taskbar, which older versions did not read) is
+  the user's own: when the system default lacks it, SEITON adds it there.
+- **Closing Scope** (or PostFix) keeps the look last used; SEITON does not restore the
   user's own desktop then (decided 2026-10-22).
 - Observed (2026-10-21): switching the panel theme makes Cinnamon reload its theme, and
-  the order of the windows in the taskbar changed. MyOS only switches when the profile
+  the order of the windows in the taskbar changed. SEITON only switches when the profile
   differs; keep an eye on it.
 - Ideas from the user: finance golden, law dark green, music purple, cars a dark theme.
 

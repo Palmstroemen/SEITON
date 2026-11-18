@@ -1,6 +1,6 @@
 # SEITON Roadmap
 
-Stand 3. November 2026. Die strategische Roadmap; die laufenden Aufgaben stehen im
+Stand 3. November 2026, nachgezogen am 18. November. Die strategische Roadmap; die laufenden Aufgaben stehen im
 [ProjectLogbook.md](ProjectLogbook.md). Auch als Seite:
 [SEITON Roadmap](https://claude.ai/artifact/FMe7ZFHdAruBYHkzSacKUr).
 
@@ -12,14 +12,14 @@ Entstanden aus der Rückmeldung einer Prokuristin eines Fenstertausch-Betriebs (
 keiner", sie kannte nur ihre 15 Jahre alte Access-Datenbank) und dem Vergleich mit früheren
 Versuchen, die Ablage neu zu denken.
 
-## 00_Admin – Die Leitfrage
+## 0_Admin – Die Leitfrage
 
 **Benutzt jemand SEITON nach einer Woche freiwillig weiter?**
 
 Nicht „gefällt es?", sondern „bleibt es?". Jeder Schritt unten muss sich daran messen lassen. Die
 ersten Antworten kommen vom Testrechner ([docs/TEST-MACHINE.md](docs/TEST-MACHINE.md)).
 
-## 01_Info – Was die Vorläufer lehren
+## 1_Info – Was die Vorläufer lehren
 
 1. **Nicht von anderen abhängen.** OpenDoc und WinFS brauchten, dass alle mitziehen. SEITON muss
    mit unveränderten Programmen heute Nutzen stiften und die Brücken selbst bauen.
@@ -38,7 +38,7 @@ ersten Antworten kommen vom Testrechner ([docs/TEST-MACHINE.md](docs/TEST-MACHIN
 8. **KI als Chance, nicht als Gegner.** Recall zeigt „keine Ordnung, alles durchsuchen" und den
    Datenschutz-Aufschrei dazu. SEITON besetzt die Gegenposition: Ordnung, lokal, eine KI, die ablegt.
 
-## 07_Arbeit – Die Roadmap
+## 7_Arbeit – Die Roadmap
 
 Ohne Termine: Die Reihenfolge ist die Information. In Klammern steht, aus welcher Lehre ein
 Schritt folgt.
@@ -56,7 +56,8 @@ Schritt folgt.
   - die fünfte Tätigkeit, die sie nennt
 - **Die Methode auf einer Seite** (4). Projekte, nummerierte Standardordner, Vorschläge und
   Perspektiven so erklärt, dass man sie auch ohne die Software anwenden kann. Das Tutorial bleibt
-  die ausführliche Fassung.
+  die ausführliche Fassung. Erste Fassung: [Vision/Die Methode auf einer Seite.md](Vision/Die%20Methode%20auf%20einer%20Seite.md)
+  (2026-11-05).
 
 ### Als Nächstes – Dorthin, wo die Leute schon sind
 
@@ -65,15 +66,15 @@ Schritt folgt.
 - **Einnisten statt ersetzen** (6). Ein Obsidian-Plugin oder eine Dateimanager-Erweiterung bringt
   Standardordner, Vorschläge und Perspektiven zu den Leuten, ohne Systemwechsel.
 - **Brücken selbst bauen** (1). Nicht auf Hersteller warten, sondern importieren: Mails ins
-  Projekt, Fotos nach `08_Dokumentation`, Access-Datenbanken für Firmen (wer seine 15 Jahre
+  Projekt, Fotos nach `9_Dokumentation`, Access-Datenbanken für Firmen (wer seine 15 Jahre
   mitnehmen kann, steigt um).
 - **Standards übernehmen** (7). Tags für jede Datei per Seitendatei (wie TagSpaces), Kontakte als
   vCard, Rechnungen exportierbar als ebInterface.
 - **Sichtbarer Nutzen zuerst** (2). Vorschläge und Perspektiven sind der erste Eindruck. Linse,
   Desk und Perspektiven-Laufwerk bleiben für Fortgeschrittene im Hintergrund. Installation mit
-  einem einzigen Schritt.
-- **Editieren wie in Obsidian** (2). PostFix bekommt CodeMirror 6 mit Live-Vorschau. Recherchiert,
-  erst ein Prototyp im direkten Vergleich mit Obsidian.
+  einem einzigen Schritt: erledigt (2026-11-16, `./install.sh`).
+- **Editieren wie in Obsidian** (2). PostFix hat CodeMirror 6 mit Live-Vorschau: erledigt, seit
+  2026-11-07 der Standard.
 
 ### Später – Das Fundament für Firmen und KI
 
@@ -82,10 +83,10 @@ Schritt folgt.
   Index, Archiv und Export. Die Dateien bleiben die Wahrheit, die Oberflächen darüber sind
   austauschbar.
 - **Lokale KI als Ablage-Helfer** (8). Eine lokale KI legt ein: Rechnung kommt herein, landet im
-  richtigen Projekt unter `04_Finanz`, sichtbar in der Perspektive. Dazu eine Schnittstelle, über
+  richtigen Projekt unter `4_Finanz`, sichtbar in der Perspektive. Dazu eine Schnittstelle, über
   die Agenten die Struktur lesen und befüllen.
 
-## 08_Dokumentation – Die Vorläufer im Vergleich
+## 9_Dokumentation – Die Vorläufer im Vergleich
 
 Aus dem Wissen, ohne neue Recherche; Jahreszahlen ungefähr.
 

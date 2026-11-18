@@ -1,6 +1,6 @@
 # server.py - the MyOS core service: the core's answers over HTTP
 #
-# See "cloud/nextcloud/Designdocument MyOS Core Service.md", 4, 6 and 8.1. Reached only from
+# See "cloud/nextcloud/Designdocument SEITON Core Service.md", 4, 6 and 8.1. Reached only from
 # the platform's bridge (myos_acl for Nextcloud), never from a browser: the bridge sends the
 # shared secret and the logged-in account. GET /lens?path= and /bear?path= (turned paths),
 # /level?path=, /birth?path= and /tags?path= (paths in the user's files); the browser acts with the

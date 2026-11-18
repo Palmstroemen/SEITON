@@ -1,4 +1,4 @@
-"""What the core service answers for a turned path ("Designdocument MyOS Core Service.md", 8.1).
+"""What the core service answers for a turned path ("Designdocument SEITON Core Service.md", 8.1).
 
 The service reads a shadow tree: folders and .MyOS files, no documents. For a virtual level
 (departments, a department path, the shelf) it lists the entries; for a path inside a project

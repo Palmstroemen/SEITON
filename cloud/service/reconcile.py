@@ -1,6 +1,6 @@
 # reconcile.py - the Team folder in step with its ACLs.md, after each change
 #
-# See "cloud/nextcloud/Designdocument MyOS Core Service.md", 8, step 2. What `myacl sync`
+# See "cloud/nextcloud/Designdocument SEITON Core Service.md", 8, step 2. What `myacl sync`
 # does from a desktop (core/nextcloud_sync.py), the core service does after each rebuild of
 # the shadow tree, with the service account: a folder born in the browser gets its rights
 # from ACLs.md within seconds, an ACLs.md edited in the cloud changes the rules. Who may

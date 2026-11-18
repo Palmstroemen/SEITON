@@ -1,9 +1,9 @@
-# MyOS Sort Profiles - Design Document
+# SEITON Sort Profiles - Design Document
 
 ## 1. Purpose
 
-Many people keep files in `/Year/Month/` structures (photos, invoices, ...). MyOS takes that
-work off them: a folder can carry a sort rule, and MyOS files what lands in it by date - but
+Many people keep files in `/Year/Month/` structures (photos, invoices, ...). SEITON takes that
+work off them: a folder can carry a sort rule, and SEITON files what lands in it by date - but
 only as far as a structure actually helps. A project with two invoices keeps them flat in
 `/Rechnungen`; everybody finds them there.
 
@@ -11,7 +11,7 @@ Sections 2-9: the concept decided on 2026-10-22, built the same day (section 10)
 
 ## 2. The Folder Carries Its Rule
 
-A rule belongs to the folder it sorts, in that folder's `.MyOS/Sort.md`:
+A rule belongs to the folder it sorts, in that folder's `.seiton/Sort.md`:
 
 ```md
 # Sort
@@ -20,9 +20,12 @@ DateSource: filename, modified
 NewLevelFrom: 20 files
 ```
 
-- **Templates prepare it:** `.MyOS/Templates/Standard/.../Rechnungen/.MyOS/Sort.md`. Nothing is
+Further keys (`core/filing.py`, `read_rule`): `Conflict: rename|skip|error` (see 8) and
+`Enabled: false` to switch the rule off.
+
+- **Templates prepare it:** `.seiton/Templates/Standard/.../Rechnungen/.seiton/Sort.md`. Nothing is
   filed inside a template (no data there); when the folder is born in a project, its
-  `.MyOS` is copied along (as for every embryo), and the rule works there.
+  `.seiton` is copied along (as for every embryo), and the rule works there.
 - **Any folder** inside a project can get a rule; outside projects there are none.
 - The former form - one project-level `Sort.md` with `Root: /Pictures` - is replaced
   (nobody uses it yet).
@@ -52,10 +55,10 @@ folder remains. Only a folder emptied completely disappears, as born folders alr
 
 ## 4. Filing Without Watching
 
-MyOS does not depend on catching every file event (a watcher misses files while Scope is
+SEITON does not depend on catching every file event (a watcher misses files while Scope is
 elsewhere, and a debounce can swallow a second file). Instead it **catches up**: whenever
-the folder is looked at (Scope, `myls`), when Scope starts, and once a day, MyOS checks
-what is due and files it. This is idempotent: what was left last time is filed next time;
+the folder is looked at in Scope, when Scope starts, and once a day, SEITON checks
+what is due and files it. (`myls` does not file; this section once named it too.) This is idempotent: what was left last time is filed next time;
 nothing gets lost.
 
 Only files lying directly in the sorted folder (or in a real level's folder, for the next
@@ -93,7 +96,9 @@ decided, the rule goes into the template; from then on new projects file by them
 - Path traversal is rejected; folders are created inside the sorted folder only.
 - Name clashes: `rename` (default, "name (2).pdf"), `skip` or `error`.
 - Self-moves are not taken for new arrivals.
-- Filing follows the ACLs: files are only moved where the user may write.
+- Filing follows the ACLs: files are only moved where the user may write (with
+  `SEITON_ACL_MODE=enforce`, as all ACL checks).
+- A symlinked `Sort.md` is ignored (it could send files elsewhere).
 
 ## 9. Open
 
