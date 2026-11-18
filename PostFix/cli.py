@@ -140,6 +140,9 @@ def note_to_open(path: Optional[str]) -> Optional[Path]:
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
+    # The settings under the former name first: else this start wrote the new folder (D5).
+    from core.name_migration import take_over_old_config
+    take_over_old_config()
 
     open_path = note_to_open(args.path)
 

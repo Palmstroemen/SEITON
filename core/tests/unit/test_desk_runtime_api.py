@@ -143,7 +143,7 @@ def test_kde_backend_timeout_is_clamped(monkeypatch):
     assert backend_invalid.command_timeout_s == 15
 
 
-def test_kde_backend_rejects_nonexistent_wallpaper_path_for_security(tmp_path):
+def test_kde_backend_sets_no_nonexistent_wallpaper(tmp_path):
     source = tmp_path / "Project" / META_DIR / "Desk.md"
     source.parent.mkdir(parents=True, exist_ok=True)
     source.write_text("# Desk\n", encoding="utf-8")
@@ -161,8 +161,8 @@ def test_kde_backend_rejects_nonexistent_wallpaper_path_for_security(tmp_path):
 
     result = backend.apply_wallpaper(config, dry_run=True)
 
-    assert result.ok is False
-    assert "invalid path" in result.message
+    # Nothing is set; a missing file is skipped so the rest of the desk applies (D3).
+    assert "missing" in result.message
 
 
 def test_kde_backend_rejects_relative_wallpaper_escape_for_security(tmp_path):
@@ -433,3 +433,16 @@ def test_kde_capture_tolerates_broken_or_missing_config(monkeypatch, tmp_path):
     config.mkdir()
     (config / "kdeglobals").write_text("[KDE]\nLookAndFeelPackage=a\nLookAndFeelPackage=b\n[[broken\n", encoding="utf-8")
     assert KdeDesktopBackend().capture() is None
+
+
+def test_a_missing_wallpaper_does_not_stop_the_rest_of_the_desk(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", D3: the taskbar never followed, the theme was set anew on
+    every folder change."""
+    source = tmp_path / "Project" / META_DIR / "Desk.md"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("# Desk\n", encoding="utf-8")
+    backend = KdeDesktopBackend()
+    config = DeskConfig(source_path=source, theme_preset=None, project_icon=None, wallpaper_preset=None,
+                        wallpaper_path=str(tmp_path / "gelöscht.png"), recent_policy=None, inherit="dynamic", raw={})
+    result = backend.apply_wallpaper(config, dry_run=True)
+    assert result.ok is True and "missing" in result.message

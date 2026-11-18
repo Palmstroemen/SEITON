@@ -25,7 +25,7 @@ from typing import Optional, Tuple
 
 from core.desk import DeskConfig
 from core.desktop_backends.base import BackendStepResult, DesktopState
-from core.desktop_backends.command import CommandDesktopBackend, is_safe_app_id, plain_path
+from core.desktop_backends.command import WALLPAPER_MISSING, CommandDesktopBackend, is_safe_app_id, plain_path
 
 # flavor -> (wallpaper schema, wallpaper keys, theme schema, theme key)
 _SCHEMAS = {
@@ -123,7 +123,7 @@ class GnomeFamilyDesktopBackend(CommandDesktopBackend):
     def apply_wallpaper(self, config: DeskConfig, *, dry_run: bool = True) -> BackendStepResult:
         wallpaper, error = self._resolve_wallpaper_path(config)
         if error:
-            return BackendStepResult(ok=False, message=error)
+            return BackendStepResult(ok=error == WALLPAPER_MISSING, message=error)
         if not wallpaper:
             return BackendStepResult(ok=True, message="wallpaper skipped (no path/preset)")
         uri = _gvariant_string(Path(wallpaper).as_uri())

@@ -379,3 +379,16 @@ def test_install_sh_hands_over_to_the_installer():
     text = (REPO / "install.sh").read_text(encoding="utf-8")
     assert "installer/seiton_install.py" in text and "myos_core" not in text
     assert os.access(REPO / "install.sh", os.X_OK)
+
+
+def test_the_settings_under_the_former_name_come_over_first(places):
+    """"docs/Prüfung 2026-11-18.md", D5/P2: the installer made ~/.config/seiton before the old
+    settings could move there."""
+    from core import brand
+
+    old = places.config.parent / brand.LEGACY_CONFIG_DIRS[0]
+    old.mkdir(parents=True)
+    (old / "Identity.md").write_text("Names: Oliver\n", encoding="utf-8")
+    _install(places)
+    assert (places.config / "Identity.md").read_text(encoding="utf-8") == "Names: Oliver\n"
+    assert not old.exists()

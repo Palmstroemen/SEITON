@@ -92,11 +92,20 @@ def _xattrs(root: Path, apply: bool) -> List[Step]:
             if prefix is None:
                 continue
             new_key = brand.XATTR_PREFIX + key[len(prefix):]
+            if new_key in keys and key[len(prefix):] != "tags":
+                # Under both names and no tags to join: the new one stays, the old one too.
+                steps.append(Step("conflict", path, detail=f"{key} and {new_key}"))
+                continue
             steps.append(Step("xattr", path, detail=f"{key} -> {new_key}"))
             if apply:
                 value = os.getxattr(path, key)
-                if new_key not in keys:
-                    os.setxattr(path, new_key, value)
+                if new_key in keys:
+                    # Tags set after the update: the old ones join them (P5), the new value wins.
+                    from core.tags import _format_tags, _parse_tags  # late: light, keeps imports small
+                    old_tags = _parse_tags(value.decode("utf-8", errors="replace"))
+                    new_tags = _parse_tags(os.getxattr(path, new_key).decode("utf-8", errors="replace"))
+                    value = _format_tags({**old_tags, **new_tags}).encode("utf-8")
+                os.setxattr(path, new_key, value)
                 os.removexattr(path, key)
     return steps
 
@@ -135,6 +144,26 @@ def migrate_tree(root, apply: bool = False) -> List[Step]:
     return steps
 
 
+def _merge_config(old: Path, new: Path, name: str, apply: bool) -> List[Step]:
+    """Move old's entries into the existing new folder, the settings file under its new name;
+    an entry whose name is taken there stays and is a conflict. old goes when it is empty."""
+    steps: List[Step] = []
+    for entry in sorted(old.iterdir(), key=lambda p: p.name):
+        target_name = f"{brand.CONFIG_DIR}.conf" if entry.name == f"{name}.conf" else entry.name
+        target = new / target_name
+        if target.exists() or target.is_symlink():
+            steps.append(Step("conflict", entry, target, "both names exist"))
+            continue
+        below = [entry] if entry.is_file() else _files_below(entry)
+        steps += _rewrite_files(below, apply)
+        steps.append(Step("rename", entry, target))
+        if apply:
+            entry.rename(target)
+    if apply and not any(old.iterdir()):
+        old.rmdir()
+    return steps
+
+
 def migrate_config(env: Optional[Mapping[str, str]] = None, apply: bool = False) -> List[Step]:
     """Move the user's settings folder (~/.config/MyOS) over to the current name."""
     new = brand.config_dir(env)
@@ -144,7 +173,9 @@ def migrate_config(env: Optional[Mapping[str, str]] = None, apply: bool = False)
         if not old.is_dir() or old == new:
             continue
         if new.exists():
-            steps.append(Step("conflict", old, new, "both names exist"))
+            # The new folder is there already (the installer makes it, so does a first start):
+            # each entry moves over unless one of its name is there too (P2).
+            steps += _merge_config(old, new, name, apply)
             continue
         steps += _rewrite_files(_files_below(old), apply)
         steps.append(Step("rename", old, new))
@@ -157,3 +188,13 @@ def migrate_config(env: Optional[Mapping[str, str]] = None, apply: bool = False)
             if apply:
                 (new / old_file).rename(new / f"{brand.CONFIG_DIR}.conf")
     return steps
+
+
+def take_over_old_config(env: Optional[Mapping[str, str]] = None) -> List[Step]:
+    """At a start (Scope, PostFix, the installer): the settings under the former name come over
+    before anything writes the new folder - else the first start saved the project look shown
+    as the user's own desktop ("docs/Prüfung 2026-11-18.md", D5). Never fails a start."""
+    try:
+        return migrate_config(env=env, apply=True)
+    except OSError:
+        return []

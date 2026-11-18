@@ -216,3 +216,34 @@ def test_export_leaves_out_the_trash_and_the_audit_log(tmp_path):
     assert (package / META_DIR / "Project.md").exists()
     found = [p.relative_to(package) for p in package.rglob("*")]
     assert not [p for p in found if p.name in ("Trash", "audit.log")], found
+
+
+def test_a_single_file_is_exported_with_its_folders(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", D6: the package came without the file."""
+    project_root = tmp_path / "Project"
+    _create_project(project_root)
+    (project_root / "Dach").mkdir()
+    (project_root / "Dach" / "a.txt").write_text("A")
+    package = export_subtree(project_root / "Dach" / "a.txt", tmp_path / "exports").package_path
+    assert (package / "Dach" / "a.txt").read_text() == "A"
+    from core.importer import import_package
+
+    target = tmp_path / "Ziel"
+    target.mkdir()
+    import_package(package, target_root=target, mode="adopt")
+    assert (target / "Dach" / "a.txt").read_text() == "A"
+
+
+def test_names_with_a_colon_go_there_and_back(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", D7: times in file names are usual on Linux."""
+    from core.importer import import_package
+
+    project_root = tmp_path / "Project"
+    _create_project(project_root)
+    (project_root / "Dach").mkdir()
+    (project_root / "Dach" / "Besprechung 10:30.md").write_text("Notiz")
+    package = export_subtree(project_root / "Dach", tmp_path / "exports", zip_output=True).package_path
+    target = tmp_path / "Ziel"
+    target.mkdir()
+    import_package(package, target_root=target, mode="adopt")
+    assert (target / "Dach" / "Besprechung 10:30.md").read_text() == "Notiz"

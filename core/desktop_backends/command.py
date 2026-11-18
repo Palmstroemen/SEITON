@@ -46,6 +46,10 @@ def plain_path(value: str) -> str:
     return text
 
 
+# A wallpaper file that is not there: skipped, not failed (Designdocument Desk, 12).
+WALLPAPER_MISSING = "wallpaper skipped (file missing)"
+
+
 class CommandDesktopBackend(DesktopBackend):
     timeout_key = "DESK_TIMEOUT_S"  # MYOS_DESK_TIMEOUT_S
 
@@ -76,7 +80,9 @@ class CommandDesktopBackend(DesktopBackend):
 
         def _validate(resolved: Path) -> tuple[str, str]:
             if not resolved.exists() or not resolved.is_file():
-                return "", "wallpaper failed (invalid path)"
+                # Gone (deleted, the project renamed, a Desk.md from another computer): the
+                # wallpaper is left as it is and the rest of the desk still applies.
+                return "", WALLPAPER_MISSING
             return str(resolved), ""
 
         explicit = str(config.wallpaper_path or "").strip()

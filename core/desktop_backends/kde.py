@@ -6,7 +6,7 @@ from typing import Optional
 
 from core.desk import DeskConfig, env_flag_is_true
 from core.desktop_backends.base import BackendStepResult, DesktopState
-from core.desktop_backends.command import CommandDesktopBackend, plain_path
+from core.desktop_backends.command import WALLPAPER_MISSING, CommandDesktopBackend, plain_path
 from core.brand import getenv
 
 
@@ -56,7 +56,7 @@ class KdeDesktopBackend(CommandDesktopBackend):
     def apply_wallpaper(self, config: DeskConfig, *, dry_run: bool = True) -> BackendStepResult:
         wallpaper, error = self._resolve_wallpaper_path(config)
         if error:
-            return BackendStepResult(ok=False, message=error)
+            return BackendStepResult(ok=error == WALLPAPER_MISSING, message=error)
         if not wallpaper:
             return BackendStepResult(ok=True, message="wallpaper skipped (no path/preset)")
         if not self.enable_wallpaper:

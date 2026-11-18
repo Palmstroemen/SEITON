@@ -1243,6 +1243,9 @@ def load_scope(api: ScopeApi, app: QGuiApplication, action: str = "") -> QQmlApp
 
 
 def main() -> int:
+    # The settings under the former name first: else this start wrote the new folder (D5).
+    from core.name_migration import take_over_old_config
+    take_over_old_config()
     places = [arg for arg in sys.argv[1:] if not arg.startswith("--")]
     start_path = places[0] if places else str(Path.cwd())
     api = ScopeApi(start_path)

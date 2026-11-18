@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Optional, Union, Dict
 import logging
 import os
+import re
 import shutil
 import tempfile
 import zipfile
@@ -134,6 +135,14 @@ def _validate_subtree_path(subtree: str) -> Path:
 def _copy_tree_secure(src: Path, dst: Path, conflict: str) -> None:
     if conflict not in {"merge", "overwrite", "skip"}:
         raise ValueError(f"Invalid conflict mode: {conflict}")
+    if src.is_file():  # a package of a single file (D6)
+        if src.is_symlink():
+            raise ValueError("Symlinked files are not allowed in import")
+        if dst.exists() and conflict != "overwrite":
+            return
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+        return
 
     for root, dirs, files in os.walk(src, followlinks=False):
         root_path = Path(root)
@@ -162,9 +171,11 @@ def _safe_extract_zip(zip_path: Path, dest: Path) -> None:
     with zipfile.ZipFile(zip_path, "r") as zf:
         for member in zf.infolist():
             name = member.filename
-            if name.startswith(("/", "\\")) or ":" in name:
+            # Security: no absolute path, no drive letter (C:...); a colon elsewhere is a
+            # usual file name on Linux (a time, "Besprechung 10:30.md") and stays allowed.
+            if name.startswith(("/", "\\")) or re.match(r"^[A-Za-z]:", name):
                 raise ValueError("Unsafe path in zip archive")
             member_path = (dest / name).resolve()
-            if not str(member_path).startswith(str(dest.resolve())):
+            if not member_path.is_relative_to(dest.resolve()):
                 raise ValueError("Zip traversal detected")
             zf.extract(member, dest)

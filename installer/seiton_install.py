@@ -362,6 +362,9 @@ def _read_manifest(places: Places) -> List[str]:
 def install(places: Places, options: Options, run: Run = run_command, ask: Ask = ask_user,
             which: Which = shutil.which) -> None:
     written = Written()
+    # The settings under the former name come over before anything writes the new folder (D5).
+    from core.name_migration import take_over_old_config
+    take_over_old_config({"XDG_CONFIG_HOME": str(places.config.parent)})
     print(f"{NAME}: system packages ...")
     system_packages(places, options, run, ask, which)
     print(f"{NAME}: Python packages in {places.venv} ...")

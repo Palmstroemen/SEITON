@@ -125,12 +125,46 @@ def test_config_moves_with_its_settings_file(tmp_path):
     assert conf == f"[Scope]\nlast = /p/{brand.META_DIR}/Desk.md\n"
 
 
-def test_config_under_both_names_is_a_conflict(tmp_path):
+def test_config_under_both_names_is_moved_entry_by_entry(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", P2: the installer makes the new folder first (the clock's
+    widget), and the old settings were never taken over."""
     env = {"XDG_CONFIG_HOME": str(tmp_path)}
-    (tmp_path / "OldName").mkdir()
-    brand.config_dir(env).mkdir()
-    assert [s.kind for s in migrate_config(env=env, apply=True)] == ["conflict"]
-    assert (tmp_path / "OldName").is_dir()
+    old = tmp_path / "OldName"
+    old.mkdir()
+    (old / "Identity.md").write_text("Names: Oliver\n", encoding="utf-8")
+    (old / "OldName.conf").write_text("[Scope]\nlast = /p/.OldName/Desk.md\n", encoding="utf-8")
+    (old / "Desk.md").write_text("# Desk\nThemePreset: Mint-Y\n", encoding="utf-8")
+    new = brand.config_dir(env)
+    (new / "headline" / "widgets").mkdir(parents=True)
+    (new / "headline" / "widgets" / "clock.json").write_text("{}", encoding="utf-8")
+    (new / "Desk.md").write_text("# Desk\nThemePreset: Projekt\n", encoding="utf-8")  # already written
+
+    steps = migrate_config(env=env, apply=True)
+
+    assert (new / "Identity.md").read_text(encoding="utf-8") == "Names: Oliver\n"
+    assert (new / f"{brand.CONFIG_DIR}.conf").read_text(encoding="utf-8") == f"[Scope]\nlast = /p/{brand.META_DIR}/Desk.md\n"
+    assert (new / "headline" / "widgets" / "clock.json").exists()
+    assert (new / "Desk.md").read_text(encoding="utf-8") == "# Desk\nThemePreset: Projekt\n"
+    assert (old / "Desk.md").exists()  # the one under both names stays, said as a conflict
+    assert [s.path.name for s in steps if s.kind == "conflict"] == ["Desk.md"]
+    assert sorted(p.name for p in old.iterdir()) == ["Desk.md"]
+
+
+def test_old_tags_and_new_ones_come_together(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", P5: tags set after the update dropped the old ones."""
+    root = _project(tmp_path / "Haus")
+    doc = root / "Rechnung.pdf"
+    doc.write_bytes(b"%PDF")
+    try:
+        os.setxattr(doc, "user.oldname.tags", b"bezahlt, wichtig")
+        os.setxattr(doc, brand.XATTR_PREFIX + "tags", b"neu")
+    except OSError:
+        pytest.skip("file system without user xattrs")
+    migrate_tree(root, apply=True)
+    from core.tags import read_tags
+
+    assert set(read_tags(doc)) == {"bezahlt", "wichtig", "neu"}
+    assert "user.oldname.tags" not in os.listxattr(doc)
 
 
 def test_nothing_to_do(tmp_path):
@@ -146,3 +180,15 @@ def test_mounted_drives_are_left_alone(tmp_path, monkeypatch):
     steps = migrate_tree(root, apply=True)
     assert (drive / OLD).is_dir() and brand.meta_dir(root).is_dir()
     assert all(mount not in s.path.parents for s in steps)
+
+
+def test_a_start_takes_the_old_settings_over_first(tmp_path):
+    """"docs/Prüfung 2026-11-18.md", D5."""
+    from core.name_migration import take_over_old_config
+
+    env = {"XDG_CONFIG_HOME": str(tmp_path)}
+    (tmp_path / "OldName").mkdir()
+    (tmp_path / "OldName" / "Desk.md").write_text("# Desk\nThemePreset: Eigen\n", encoding="utf-8")
+    take_over_old_config(env)
+    assert (brand.config_dir(env) / "Desk.md").read_text(encoding="utf-8") == "# Desk\nThemePreset: Eigen\n"
+    assert take_over_old_config(env) == []  # done once

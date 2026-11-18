@@ -74,8 +74,13 @@ def export_subtree(
     # Create package root
     package_path.mkdir(parents=True)
 
-    # Copy subtree contents
-    _copy_tree_no_symlinks(export_root / subtree_rel, package_path / subtree_rel)
+    # Copy subtree contents (a single file with the folders on its way, D6)
+    source = export_root / subtree_rel
+    if source.is_file() and not source.is_symlink():
+        (package_path / subtree_rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, package_path / subtree_rel)
+    else:
+        _copy_tree_no_symlinks(source, package_path / subtree_rel)
 
     # Copy project .MyOS from export root (its templates: only the used ones, below)
     _copy_tree_no_symlinks(export_root / META_DIR, package_path / META_DIR, skip={TEMPLATES_REL.name})
