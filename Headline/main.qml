@@ -147,7 +147,7 @@ Window {
     function dropped(payload, path) {
         var plan = headline.dropPlan(payload, path)
         if (!plan.sources || plan.sources.length === 0) return
-        if (plan.folders > 0) dropAsk.askAbout(plan)
+        if (plan.folders > 0 && plan.ask) dropAsk.askAbout(plan)
         else move(plan)
     }
     function move(plan) {

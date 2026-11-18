@@ -21,6 +21,9 @@ SETTINGS: Dict[str, Tuple[type, Any, Any]] = {
     "General/embryoBadgeOpacity": (float, 0.7, (0.1, 1.0)),
     # Notes (.md) open in PostFix, the editor of the workshop; off: Obsidian or the system's editor.
     "General/postFix": (bool, True, None),
+    # Ask before folders are moved by a drag (Scope, the Headline); off by default - deleting
+    # folders always asks (decided 2026-11-18).
+    "General/askBeforeMove": (bool, False, None),
     # The time tracking (core/Dokumentation/Designdocument Time.md): the pause limit in minutes,
     # resuming at the next input, the dead man's button while a video runs, and how the sums
     # are rounded (never the file).

@@ -186,8 +186,11 @@ class HeadlineBackend(QObject):
 
     @Slot(str, str, result="QVariantMap")
     def dropPlan(self, payload: str, target: str) -> dict:
-        """What a drop onto the folder target would move (H9); folders are asked about first."""
-        return self._model.plan_drop(payload, target)
+        """What a drop onto the folder target would move (H9); ask: folders among it are asked
+        about first (Setup: General/askBeforeMove, off by default)."""
+        plan = self._model.plan_drop(payload, target)
+        plan["ask"] = bool(Settings().get("General/askBeforeMove"))
+        return plan
 
     @Slot("QVariantList", str, result="QVariantMap")
     def dropMove(self, sources, target: str) -> dict:

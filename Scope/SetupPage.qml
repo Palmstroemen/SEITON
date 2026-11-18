@@ -28,6 +28,8 @@ Rectangle {
     property bool sunTreePresent: true
     // Notes open in PostFix, unless switched off (core/bin/open_md.py reads the setting).
     property bool postFixOn: settings ? settings.setting("General/postFix") === true : true
+    // Folders moved by a drag are asked about only when this is on; deleting always asks.
+    property bool askBeforeMoveOn: settings ? settings.setting("General/askBeforeMove") === true : false
     // How pale embryos are, as one slides (Scope follows at once; without settings the default).
     readonly property real embryoOpacity: settings ? embryoSlider.value : 0.4
     readonly property real embryoBadgeOpacity: settings ? badgeSlider.value : 0.7
@@ -704,6 +706,28 @@ Rectangle {
                             }
                             Text {
                                 text: qsTr("Off: notes open in Obsidian or in the system's editor.")
+                                color: root.mutedColor
+                                font.pixelSize: root.baseFont - 1
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                                Layout.maximumWidth: 560
+                            }
+                        }
+                    }
+                    RowLayout {
+                        spacing: 12
+                        Text { text: qsTr("Moving"); color: root.textColor; font.pixelSize: root.baseFont; Layout.preferredWidth: 180; Layout.alignment: Qt.AlignTop }
+                        ColumnLayout {
+                            spacing: 4
+                            Layout.fillWidth: true
+                            CheckItem {
+                                objectName: "checkAskBeforeMove"
+                                label: qsTr("Ask before moving folders")
+                                checked: root.askBeforeMoveOn
+                                onToggled: { root.askBeforeMoveOn = !root.askBeforeMoveOn; root.keep("General/askBeforeMove", root.askBeforeMoveOn) }
+                            }
+                            Text {
+                                text: qsTr("In Scope and in the Headline. Deleting folders always asks.")
                                 color: root.mutedColor
                                 font.pixelSize: root.baseFont - 1
                                 wrapMode: Text.WordWrap

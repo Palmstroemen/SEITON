@@ -509,7 +509,20 @@ def test_a_file_dropped_onto_a_pale_folder_in_the_line_bears_it(world, started):
     assert finanz.property("opacity") == 1.0  # born now
 
 
-def test_a_folder_dropped_is_asked_about_first(world, started):
+def test_a_folder_dropped_moves_without_asking_by_default(world, started):
+    _settle(started["app"])
+    folder = world["studio"] / "Alte Sachen"
+    folder.mkdir()
+    [info] = [o for o in _all(started, "standardFolder") if o.property("label") == "01_Info"]
+    _drop(info, str(folder))
+    _settle(started["app"])
+    assert not _find(started, "dropAsk").isVisible()
+    assert (world["studio"] / "01_Info" / "Alte Sachen").is_dir()
+
+
+def test_a_folder_dropped_is_asked_about_first_when_setup_says_so(world, started):
+    from core.settings import Settings
+    assert Settings().set("General/askBeforeMove", True)
     _settle(started["app"])
     folder = world["studio"] / "Alte Sachen"
     folder.mkdir()

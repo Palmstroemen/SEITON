@@ -1039,7 +1039,8 @@ ApplicationWindow {
         if (!sources || sources.length === 0) {
             return
         }
-        if (_containsDirectory(sources)) {
+        // Folders are asked about only when Setup says so (General/askBeforeMove, off by default).
+        if (_containsDirectory(sources) && backend.setting("General/askBeforeMove") === true) {
             pendingMoveSources = sources
             pendingMoveTargetDir = resolvedTarget
             var count = sources.length

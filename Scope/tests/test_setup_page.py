@@ -661,3 +661,13 @@ def test_the_headline_at_the_top_edge_or_from_the_taskbar(page):
     assert not _named(view, "headlineDock_keep").property("visible")  # only for the top edge
     _click(view, _named(view, "headlinePlace_top"))
     assert Settings().get("Headline/place") == "top" and _named(view, "headlineDock_keep").property("visible")
+
+
+def test_asking_before_moving_folders_is_off_unless_switched_on(page):
+    from core.settings import Settings
+
+    view, _ = page
+    check = _named(view, "checkAskBeforeMove")
+    assert check is not None and check.property("checked") is False
+    QMetaObject.invokeMethod(check, "toggled")
+    assert Settings().get("General/askBeforeMove") is True and check.property("checked") is True
