@@ -272,8 +272,9 @@ def test_the_tutorial_is_its_own_root_and_its_folders_can_become_projects(machin
     monkeypatch.delenv(env_name("ACL_MODE"), raising=False)
     monkeypatch.delenv(env_name("ROLES"), raising=False)
     monkeypatch.delenv(env_name("TEMPLATES_DIR"), raising=False)
-    shutil.copytree(testrun.REPO_ROOT / "core" / "tests" / "unit" / "test_lab" / "Templates",
-                    machine.tutorial.parent / META_DIR / "Templates")
+    # The repository's templates, as the installer puts them (core/tests/unit/test_lab is not in
+    # git: a fresh clone does not have it).
+    shutil.copytree(testrun.REPO_ROOT / "templates", machine.tutorial.parent / META_DIR / "Templates")
     testrun.prepare(machine)
     root = machine.tutorial / META_DIR
     assert (root / "Project.md").is_file() and not (root / "ACLs.md").exists()
@@ -282,7 +283,7 @@ def test_the_tutorial_is_its_own_root_and_its_folders_can_become_projects(machin
     vacation = machine.tutorial / "DE" / "Lektion05" / "Urlaub Sommer 2026"
     assert ScopeApi(str(vacation.parent)).create_project(str(vacation))
     names = [e["name"] for e in ScopeApi(str(vacation)).list_children(str(vacation), True, False)]
-    assert {"admin", "info", "kommunikation"} <= set(names)
+    assert {"0_Admin", "1_Info", "3_Kommunikation"} <= set(names)
 
 
 def test_the_installers_widget_registration_stays(machine):
