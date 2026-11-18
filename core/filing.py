@@ -230,8 +230,14 @@ def _file_level(folder: Path, rule: SortRule, level: int, report: FilingReport,
                 report.skipped.append((path, "conflict"))
                 continue
             destination = _free_name(destination)
-        target_dir.mkdir(exist_ok=True)
-        shutil.move(str(path), str(destination))
+        try:
+            target_dir.mkdir(exist_ok=True)
+            shutil.move(str(path), str(destination))
+        except OSError:
+            # One that cannot go (a level folder that takes nothing, a file another program
+            # holds, the same folder filed twice at once): it stays, the rest goes on.
+            report.skipped.append((path, "failed"))
+            continue
         report.moved.append((path, destination))
     for level_folder in _level_folders(folder, rule, level):
         _file_level(level_folder, rule, level + 1, report, may_write)

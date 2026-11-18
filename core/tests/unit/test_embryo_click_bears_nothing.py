@@ -86,3 +86,40 @@ def test_a_drop_does_bear_it(world, tmp_path):
     note.write_text("x")
     assert ScopeApi(str(world["studio"])).move_entry(str(note), str(world["embryo"]))
     assert (world["embryo"] / "Rechnung.md").exists()
+
+
+def test_without_suggestions_the_born_folders_stay(tmp_path, monkeypatch):
+    """"docs/Prüfung 2026-11-18.md", API7: switching off the pale suggestions hid the real ones too."""
+    from core.scope_api import ScopeApi
+
+    monkeypatch.delenv(env_name("TEMPLATES_DIR"), raising=False)
+    standard = tmp_path / META_DIR / "Templates" / "Standard"
+    for name in ("04_Finanz", "05_Recht"):
+        (standard / name).mkdir(parents=True)
+    root = _project(tmp_path / "Projekte")
+    (root / META_DIR / "Templates.md").write_text("# Templates\nStandard\n")
+    (root / "04_Finanz").mkdir()
+    (root / "04_Finanz" / "Rechnung.pdf").write_text("x")
+    api = ScopeApi(str(root))
+    with_them = {e["name"]: e["isEmbryo"] for e in api.list_templates(str(root), True)}
+    without = {e["name"]: e["isEmbryo"] for e in api.list_templates(str(root), False)}
+    assert with_them == {"04_Finanz": False, "05_Recht": True}
+    assert without == {"04_Finanz": False}
+
+
+def test_the_listing_shows_the_suggestions_of_the_listed_folders_project(tmp_path, monkeypatch):
+    """"docs/Prüfung 2026-11-18.md", API8: they came from the project Scope stood in."""
+    from core.scope_api import ScopeApi
+
+    monkeypatch.delenv(env_name("TEMPLATES_DIR"), raising=False)
+    standard = tmp_path / META_DIR / "Templates" / "Standard"
+    (standard / "04_Finanz").mkdir(parents=True)
+    other = tmp_path / META_DIR / "Templates" / "Musik"
+    (other / "Aufnahmen").mkdir(parents=True)
+    root = _project(tmp_path / "Projekte")
+    (root / META_DIR / "Templates.md").write_text("# Templates\nStandard\n")
+    studio = _project(root / "Studio")
+    (studio / META_DIR / "Templates.md").write_text("# Templates\nMusik\n")
+    api = ScopeApi(str(root))  # Scope stands in the parent project
+    names = {e["name"] for e in api.list_entries(str(studio)) if e.get("isEmbryo")}
+    assert names == {"Aufnahmen"}

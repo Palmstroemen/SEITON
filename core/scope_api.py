@@ -1133,8 +1133,13 @@ class ScopeApi:
                         rel_child = child.name if rel == "" else f"{rel}/{child.name}"
                         # Include born folders (physical dirs that were embryos): do not skip by template path.
                         # They are marked via folder_type=FOLDER_TYPE_BORN from _classify_folder_type.
-                        is_project = self.is_project(str(child))
-                        project_color = self._resolve_effective_project_color(child) if is_project else None
+                        # A folder one may not look into is shown as a plain folder: else one such
+                        # (lost+found, another user's home) emptied the whole row.
+                        try:
+                            is_project = self.is_project(str(child))
+                            project_color = self._resolve_effective_project_color(child) if is_project else None
+                        except OSError:
+                            is_project, project_color = False, None
                         folder_type = self._classify_folder_type(
                             context_blueprint=context_blueprint,
                             rel_path=rel_child,
@@ -1189,18 +1194,12 @@ class ScopeApi:
         except Exception:
             return []
         context_root, context_blueprint = self._resolve_context_for_target(target)
-        can_list_virtual_embryos = bool(
-            include_embryos
-            and context_blueprint
-            and context_root
-            and is_within(target, context_root)
-        )
-        if not can_list_virtual_embryos:
+        # include_embryos False: the pale suggestions are left out, the born template folders
+        # (real folders of the user) stay in the row.
+        if not (context_blueprint and context_root and is_within(target, context_root)):
             return []
         if target.is_dir():
             self._acl_probe("read_templates", target)
-        if not include_embryos:
-            return []
         if not context_blueprint or not context_root or not is_within(target, context_root):
             return []
         rel = "" if target == context_root else str(target.relative_to(context_root))
@@ -1219,6 +1218,8 @@ class ScopeApi:
             result = []
             for name, is_embryo in template_folders:
                 if not show_hidden and name.startswith("."):
+                    continue
+                if is_embryo and not include_embryos:
                     continue
                 embryo_color = self._resolve_template_color_for_context(
                     context_blueprint, rel, name
@@ -1333,16 +1334,17 @@ class ScopeApi:
         except Exception:
             return []
 
-        if self.blueprint and self.project_root and is_within(target, self.project_root):
-            rel = "" if target == self.project_root else str(target.relative_to(self.project_root))
-            embryos = self.blueprint.get_embryos_at(rel)
+        # The suggestions of the listed folder's own project (not of the one Scope stands in).
+        context_root, context_blueprint = self._resolve_context_for_target(target)
+        if context_blueprint and context_root and is_within(target, context_root):
+            rel = "" if target == context_root else str(target.relative_to(context_root))
+            embryos = context_blueprint.get_embryos_at(rel)
             for name in embryos:
                 if not any(item["name"] == name for item in entries):
                     embryo_path = target / name
                     acl_embryo = self._acl_probe("read_dir", embryo_path)
                     if acl_embryo and acl_embryo.enforced and not acl_embryo.allowed:
                         continue
-                    embryo_path = target / name
                     entry = self._build_file_entry(
                         name=name,
                         is_dir=True,
@@ -1351,15 +1353,14 @@ class ScopeApi:
                         is_embryo=True,
                     )
                     batch_info = self._get_folder_batch(embryo_path)
-                    if (not batch_info["batch"] and not batch_info["batchText"]) and self.blueprint:
+                    if not batch_info["batch"] and not batch_info["batchText"]:
                         embryo_rel = f"{rel}/{name}" if rel else name
-                        batch_info = self._get_folder_batch_for_embryo(self.blueprint, embryo_rel)
+                        batch_info = self._get_folder_batch_for_embryo(context_blueprint, embryo_rel)
                     if batch_info["batch"]:
                         entry["batch"] = batch_info["batch"]
                     if batch_info["batchText"]:
                         entry["batchText"] = batch_info["batchText"]
                     entries.append(entry)
-        context_root, context_blueprint = self._resolve_context_for_target(target)
         if context_blueprint and context_root and is_within(target, context_root):
             rel = "" if target == context_root else str(target.relative_to(context_root))
             for entry in entries:
@@ -1875,7 +1876,14 @@ class ScopeApi:
             pass
 
     def _get_folder_batch(self, folder_path: Path) -> Dict[str, Optional[str]]:
-        """Return batch image URL or batchText from .MyOS/batch.* (batch1.svg etc. ignored)."""
+        """Return batch image URL or batchText from .MyOS/batch.* (batch1.svg etc. ignored).
+        A folder one may not look into has none (lost+found, another user's home)."""
+        try:
+            return self._read_folder_batch(folder_path)
+        except OSError:
+            return {"batch": None, "batchText": None}
+
+    def _read_folder_batch(self, folder_path: Path) -> Dict[str, Optional[str]]:
         settings_dir = folder_path / META_DIR
         if not settings_dir.is_dir():
             return {"batch": None, "batchText": None}

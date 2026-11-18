@@ -109,3 +109,18 @@ def test_folder_tags_need_write(tmp_path):
     assert api.set_folder_tags(str(root / "Arbeit"), ["wichtig"]) is False
     assert api.set_folder_tag_color(str(root / "Arbeit"), "wichtig", "#ff0000") is False
     assert not (root / "Arbeit" / META_DIR).exists() and not (root / "app.json").exists()
+
+
+def test_an_unreadable_subfolder_does_not_empty_the_folder_rows(tmp_path, monkeypatch):
+    """"docs/Prüfung 2026-11-18.md", API6 (/home, lost+found, other users' folders)."""
+    monkeypatch.setenv(env_name("ACL_MODE"), "off")
+    root = tmp_path / "Platte"
+    for name in ("Fotos", "Gesperrt", "Musik"):
+        (root / name).mkdir(parents=True)
+    (root / "Gesperrt").chmod(0)
+    try:
+        api = ScopeApi(str(root))
+        assert {c["name"] for c in api.list_children(str(root))} >= {"Fotos", "Musik"}
+        assert {e["name"] for e in api.list_entries_quick(str(root))} >= {"Fotos", "Musik"}
+    finally:
+        (root / "Gesperrt").chmod(0o755)

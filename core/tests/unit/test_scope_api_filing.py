@@ -155,3 +155,17 @@ def test_a_new_note_in_a_sorted_folder_opens_where_it_is_filed(project):
     assert not (folder / "Protokoll.md").exists()
     api.catch_up_filing(str(folder))
     assert created.exists()  # filed once, stays there
+
+
+def test_a_folder_that_cannot_take_the_file_skips_it_and_the_rest_goes_on(project):
+    """"docs/Prüfung 2026-11-18.md", API3: one failure emptied the listing and stopped filing."""
+    folder = project / "Rechnungen"
+    _put(folder, "a 2024-01-01.pdf", "b 2024-02-01.pdf", "c 2025-01-01.pdf")
+    (folder / "2024").mkdir()
+    (folder / "2024").chmod(0o555)  # the year folder takes nothing
+    try:
+        names = {e["name"] for e in ScopeApi(str(project)).list_entries(str(folder))}
+        assert "a 2024-01-01.pdf" in names and "b 2024-02-01.pdf" in names  # stayed, shown
+        assert (folder / "2025" / "c 2025-01-01.pdf").exists()  # the rest was filed
+    finally:
+        (folder / "2024").chmod(0o755)
