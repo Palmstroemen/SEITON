@@ -93,7 +93,8 @@ Built for the sections `ProjectConfig` resolves (today `Templates`). `ACLs.md`, 
   Removes `.seiton` when nothing of the project's own came since creating it (by
   `.created.json`); otherwise only after asking, and then `.seiton` goes into the parent
   project's trash as "SEITON settings"; restored, the folder is a project again (see
-  "Designdocument Trash.md"). Not for the top project; subprojects stay projects.
+  "Designdocument Trash.md"). A top project only without settings of its own (there is no
+  trash above it); subprojects stay projects.
   Separate from this, `myproject tidy` turns unused born template folders back into embryos
   (see "Designdocument BlueprintLayer.md", 3.2).
 

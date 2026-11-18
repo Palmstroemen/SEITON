@@ -2377,7 +2377,8 @@ class ScopeApi:
 
     def can_remove_project(self, path: str) -> bool:
         """Whether path is a project that can become an ordinary folder again (crossed-out
-        P-Button; core.project_unmake): not the top project, not in a template."""
+        P-Button; core.project_unmake): a top project only without settings of its own, not in
+        a template."""
         try:
             target = Path(path).expanduser().resolve()
         except (OSError, RuntimeError):

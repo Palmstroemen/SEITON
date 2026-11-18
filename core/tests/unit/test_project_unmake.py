@@ -2,8 +2,8 @@
 
 What creating the project wrote is remembered (.MyOS/.created.json); without anything of
 its own since, .MyOS is simply removed. Settings of its own (changed rights, tags, a
-trash, ...) are not lost: .MyOS goes into the parent project's trash as "MyOS settings".
-Not possible for the top project and outside the projects tree; subprojects stay."""
+trash, ...) are not lost: .MyOS goes into the parent project's trash as "SEITON settings".
+A top project only without settings of its own (no trash above it); subprojects stay."""
 
 from pathlib import Path
 
@@ -130,6 +130,23 @@ def test_what_cannot_be_turned_back(tree):
     with pytest.raises(ValueError):
         unmake_project(tree["projects"], "oliver")
     assert (tree["projects"] / META_DIR / "Project.md").exists()
+
+
+def test_a_top_project_with_nothing_of_its_own_can_be_taken_back(tree):
+    # E7: the first project (P on ~/Dokumente by mistake) had no way back. Beside the projects,
+    # below the templates as the installer puts them (~/.seiton/Templates).
+    dokumente = tree["tmp"] / "Dokumente"
+    (dokumente / "Brief.md").parent.mkdir(parents=True)
+    (dokumente / "Brief.md").write_text("Brief\n")
+    assert ProjectConfig.make_project(dokumente)
+
+    assert can_unmake(dokumente)
+    unmake_project(dokumente, "oliver")
+    assert not (dokumente / META_DIR).exists() and (dokumente / "Brief.md").exists()
+
+    assert ProjectConfig.make_project(dokumente)
+    (dokumente / META_DIR / "Tags.md").write_text("# Tags\nwichtig\n")  # its own: no trash above
+    assert not can_unmake(dokumente)
 
 
 def _folder_with_settings(projects: Path) -> Path:

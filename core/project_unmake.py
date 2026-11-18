@@ -3,8 +3,8 @@
 # Creating a project remembers what it wrote into .MyOS (CREATED, names and checksums).
 # Turning it back removes .MyOS when nothing of its own came since (changed rights, tags,
 # a trash with entries, ...); otherwise only with consent, and then .MyOS is not deleted
-# but goes into the parent project's trash as "SEITON settings". Not for the top project,
-# not outside the projects tree; subprojects stay projects.
+# but goes into the parent project's trash as "SEITON settings". A top project only without
+# settings of its own (no trash above it), not outside the projects tree; subprojects stay.
 
 from __future__ import annotations
 
@@ -57,7 +57,15 @@ def can_unmake(path: Path) -> bool:
     if not (target / META_DIR / "Project.md").is_file():
         return False
     if not any((parent / META_DIR / "Project.md").is_file() for parent in target.parents):
-        return False  # the top project of the projects tree
+        # A top project (the first one, made by a slip of the P on ~/Dokumente): only with nothing
+        # of its own - there is no trash above it for its settings - and never the one holding
+        # the templates (the root of the projects tree).
+        if (target / META_DIR / "Templates").exists():
+            return False
+        try:
+            return not own_settings(target)
+        except OSError:
+            return False
     templates_dir = find_templates_dir(target)
     return templates_dir is None or templates_dir.resolve() not in target.parents
 
