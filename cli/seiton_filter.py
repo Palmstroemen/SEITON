@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-myfilter - SEITON filters CLI
+seiton filter - SEITON filters CLI
 """
 
 import argparse
@@ -11,18 +11,18 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.perspective import find_filters_layers, resolve_effective_filter
-from core.brand import CONFIG_DIR, NAME  # noqa: E402
+from core.brand import COMMAND, CONFIG_DIR, NAME  # noqa: E402
 
 
 def _state_file() -> Path:
-    """The filter chosen by hand (myfilter activate): ~/.cache/seiton, or below XDG_CACHE_HOME."""
+    """The filter chosen by hand (seiton filter activate): ~/.cache/seiton, or below XDG_CACHE_HOME."""
     import os
 
-    return Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache") / CONFIG_DIR / "myfilter_state.json"
+    return Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache") / CONFIG_DIR / "filter_state.json"
 
 
 def parse_args(args=None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(prog=f"{COMMAND} filter", 
         description=f"{NAME} filters utility",
     )
     sub = parser.add_subparsers(dest="command", required=True)
@@ -49,8 +49,8 @@ def parse_args(args=None) -> argparse.Namespace:
     return parser.parse_args(args)
 
 
-def main() -> None:
-    args = parse_args()
+def main(argv=None) -> None:
+    args = parse_args(argv)
     try:
         if args.command == "list":
             _list_filters(args.path, verbose=bool(getattr(args, "verbose", False)))

@@ -1,4 +1,4 @@
-# cli/tests/test_cli_myacl.py
+# cli/tests/test_cli_acl.py
 
 import json
 import os
@@ -17,17 +17,17 @@ ACLS = (
 
 
 def _run(args, tmp_path, **env):
-    script = Path(__file__).parent.parent.parent / "cli" / "myacl.py"
+    script = Path(__file__).parent.parent.parent / "cli" / "seiton.py"
     environ = {k: v for k, v in os.environ.items() if not k.startswith((ENV_PREFIX, *LEGACY_ENV_PREFIXES))}
     environ.update({"XDG_CONFIG_HOME": str(tmp_path / "config"), **env})
     return subprocess.run(
-        [sys.executable, str(script)] + args, capture_output=True, text=True, cwd=tmp_path, env=environ
+        [sys.executable, str(script), "acl"] + args, capture_output=True, text=True, cwd=tmp_path, env=environ
     )
 
 
 def _project(path: Path) -> Path:
     (path / META_DIR).mkdir(parents=True)
-    (path / META_DIR / "Project.md").write_text("# MyOS Project\n")
+    (path / META_DIR / "Project.md").write_text("# SEITON Project\n")
     (path / META_DIR / "Templates.md").write_text("# Templates\nStandard\n")
     for folder in ("Finanz", "Info"):
         (path / folder).mkdir()
@@ -219,7 +219,7 @@ def test_the_plan_lets_read_an_embryo_who_may_read_where_it_is_born(tmp_path):
 
 
 def test_check_knows_everyone_and_self(tmp_path):
-    """"docs/Prüfung 2026-11-18.md", A4: myacl check said no where the checks say yes."""
+    """"docs/Prüfung 2026-11-18.md", A4: seiton acl check said no where the checks say yes."""
     root = _project(tmp_path / "Projekte")
     (root / "0_Admin" / "Zeitaufwand").mkdir(parents=True)
     (root / META_DIR / "ACLs.md").write_text(

@@ -1,4 +1,4 @@
-"""Against a real Nextcloud test instance with the app myos_acl: myacl sync, then entries
+"""Against a real Nextcloud test instance with the app myos_acl: seiton acl sync, then entries
 created, moved or copied on the way stay hidden from who may only pass there.
 
 Runs only when asked for (not part of the suite):
@@ -106,18 +106,18 @@ def _sync(tmp_path):
     (admin / "Liesmich.md").write_text("Nur für Admins")
     # And the department 04_Finanz, empty: for the lenses (/04_Finanz/Projekte).
     (root / META_DIR / "Templates" / "Standard" / "04_Finanz").mkdir()
-    # Familie a subproject: myacl sync puts its embryos into Familie/.MyOS.
+    # Familie a subproject: seiton acl sync puts its embryos into Familie/.MyOS.
     (root / "Familie" / META_DIR).mkdir(parents=True)
     (root / "Familie" / META_DIR / "Project.md").write_text(f"# {NAME} Project\n")
     # The .MyOS files come into the Team folder as with a sync client (the core reads them
     # there), before the sync, so it sets their rules as well.
     _upload_settings_dir(root, root)
     _upload_settings_dir(root, root / "Familie")
-    script = Path(__file__).resolve().parents[3] / "cli" / "myacl.py"
+    script = Path(__file__).resolve().parents[3] / "cli" / "seiton.py"
     env = {k: v for k, v in os.environ.items() if not k.startswith(tuple(p + "ACL" for p in (ENV_PREFIX, *LEGACY_ENV_PREFIXES)))}
     env.update({env_name("NEXTCLOUD_USER"): "oliver", env_name("NEXTCLOUD_PASSWORD"): _passwords()["oliver"],
                 "XDG_CONFIG_HOME": str(tmp_path / "config")})
-    result = subprocess.run([sys.executable, str(script), "sync", "--yes", str(root)],
+    result = subprocess.run([sys.executable, str(script), "acl", "sync", "--yes", str(root)],
                             capture_output=True, text=True, env=env)
     assert result.returncode == 0, result.stdout + result.stderr
     _settled(script, root, env)
@@ -129,7 +129,7 @@ def _settled(script, root, env, timeout=120):
     may still be bringing it in step - checked twice, a round of the core apart."""
     deadline, quiet = time.time() + timeout, 0
     while quiet < 2:
-        check = subprocess.run([sys.executable, str(script), "sync", "--dry-run", str(root)],
+        check = subprocess.run([sys.executable, str(script), "acl", "sync", "--dry-run", str(root)],
                                capture_output=True, text=True, env=env)
         quiet = quiet + 1 if " 0 change(s)" in check.stdout else 0
         assert time.time() < deadline, check.stdout + check.stderr
@@ -267,7 +267,7 @@ def _within(seconds, check, what):
 def test_a_folder_made_later_gets_its_rights_from_acls_md_without_a_sync(synced):
     # Anna (Buchhaltung) may work in /Familie/Steuer/, which is not there yet. Lisa makes it;
     # on the way through Familie it is locked for Anna at once (myos_acl), then the core gives
-    # her what ACLs.md says - no myacl sync.
+    # her what ACLs.md says - no seiton acl sync.
     assert _dav("lisa", "MKCOL", "Familie/Steuer")[0] == 201
     synced.append("Familie/Steuer")
 

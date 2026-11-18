@@ -185,7 +185,7 @@ Built (2026-10-22):
   project cannot be removed or renamed through the drive. Subprojects are reached through
   their project. Hidden files other than `.seiton` are allowed (LibreOffice lock files).
 - `core/perspective_fuse.py` - `PerspectiveDriveFuse`, the FUSE operations on the real
-  paths; `cli/myperspectivefs.py --projects-root ... --mount-point ...`.
+  paths; `cli/seiton_drive.py --projects-root ... --mount-point ...`.
 - `daemon/perspective_daemon.py` - the session plus the drive, one socket per projects
   root (`socket_path_for`). FUSE runs in the daemon's own process: a FUSE fork kept only
   one thread, and the socket server was gone (the reason the daemon never answered when

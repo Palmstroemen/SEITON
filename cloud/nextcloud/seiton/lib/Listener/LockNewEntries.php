@@ -46,7 +46,7 @@ class LockNewEntries implements IEventListener {
 		try {
 			$this->lock($node);
 		} catch (\Throwable $e) {
-			// Security: the entry stays readable on the way until the next myacl sync.
+			// Security: the entry stays readable on the way until the next seiton acl sync.
 			$this->logger->error('SEITON: could not lock ' . $node->getPath() . ': ' . $e->getMessage(), ['exception' => $e]);
 		}
 	}

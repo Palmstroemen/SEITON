@@ -470,7 +470,7 @@ ApplicationWindow {
         if (target.length === 0 || !hasBackend() || typeof backend.createProject !== "function") return
         var shownFolder = target === currentFilesPath()
         if (!backend.createProject(target)) {
-            // Said, not silent (E6): the same checks as myproject create.
+            // Said, not silent (E6): the same checks as seiton project create.
             showReport(qsTr("\"%1\" cannot become a project here (a template folder, outside the projects, or no write right).").arg(PathUtils.basename(target)))
             return
         }

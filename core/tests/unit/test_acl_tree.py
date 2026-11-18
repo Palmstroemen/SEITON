@@ -1,4 +1,4 @@
-"""ACLs of a whole project tree, for myacl and adapters that copy them elsewhere (a cloud):
+"""ACLs of a whole project tree, for seiton acl and adapters that copy them elsewhere (a cloud):
 where a role's rights at a path come from (ACLView.origin), and every rule with the
 "## Folder" rules resolved into the subprojects (ACLPolicy.for_tree)."""
 

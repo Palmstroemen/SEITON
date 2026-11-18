@@ -383,7 +383,7 @@ def test_the_nearest_filter_names_the_lens(tmp_path):
 
 
 # The collection in .MyOS/Filters is there to choose from: it acts only when chosen by hand
-# (myfilter), so a file lying there cannot change a whole project unasked. Filter.md acts by itself.
+# (seiton filter), so a file lying there cannot change a whole project unasked. Filter.md acts by itself.
 def _collection(tmp_path, body="# Filter\nName: Ausgaben\n\n## Perspective\n04_Finanz/Ausgaben\n"):
     root = tmp_path / "Job"
     (root / "Belege").mkdir(parents=True)

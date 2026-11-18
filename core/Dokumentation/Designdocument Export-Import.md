@@ -99,7 +99,7 @@ If reference path is absent or user chooses adoption, import creates or merges i
 - template handling: accept, ignore, or stage for review
 - ACL handling: accept, ignore, or stage for review
 
-Built today (`core/importer.py`, `cli/myimport.py`): source (folder or zip), `--target`, `--mode restore|adopt`, `--conflict merge|overwrite|skip`. Not built: per-file/per-folder decisions, template handling, ACL handling.
+Built today (`core/importer.py`, `cli/seiton_import.py`): source (folder or zip), `--target`, `--mode restore|adopt`, `--conflict merge|overwrite|skip`. Not built: per-file/per-folder decisions, template handling, ACL handling.
 
 ### **8.2 Steps**
 Built today: 1, 2, 3, 5 and 7 (for the subtree only). Not built: 4, 6, 8, 9. The import copies only the subtree; the package's `.seiton/` (config, ACLs, templates) is not taken over.
@@ -157,7 +157,7 @@ Built today: `user@hostname` (`Source:` in the export block).
 ---
 
 ## **13. Public API**
-Public API lives in `core/exporter.py` and `core/importer.py`; the CLI uses it (`cli/myexport.py`, `cli/myimport.py`), the GUI does not yet:
+Public API lives in `core/exporter.py` and `core/importer.py`; the CLI uses it (`cli/seiton_export.py`, `cli/seiton_import.py`), the GUI does not yet:
 - `export_subtree(source_path, output_dir, package_name=None, zip_output=False)`
 - `import_package(package_path, target_root=None, mode="adopt", conflict="merge")`
 

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-myedit - open a project's config file (Tags.md, Templates.md, ACLs.md, Config.md) in $EDITOR.
+seiton edit - open a project's config file (Tags.md, Templates.md, ACLs.md, Config.md) in $EDITOR.
 
-myedit writes nothing itself: a file that is not there yet is made by the editor when it is
+seiton edit writes nothing itself: a file that is not there yet is made by the editor when it is
 saved. A placeholder written here would end the inheritance (an empty ACLs.md in a subproject
-gives no one any right). Where the project still inherits, myedit says from where.
+gives no one any right). Where the project still inherits, seiton edit says from where.
 """
 
 import argparse
@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from core.brand import META_DIR, NAME
+from core.brand import COMMAND, META_DIR, NAME
 from core.project import find_config_in_parents, resolve_cwp
 
 
@@ -30,7 +30,7 @@ SECTION_MAP = {
 
 
 def parse_args(args=None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(prog=f"{COMMAND} edit", 
         description=f"Open the relevant {NAME} config file in your editor.",
     )
     parser.add_argument("section", help="Config section (tags, templates, acl, config)")
@@ -43,8 +43,8 @@ def parse_args(args=None) -> argparse.Namespace:
     return parser.parse_args(args)
 
 
-def main() -> None:
-    args = parse_args()
+def main(argv=None) -> None:
+    args = parse_args(argv)
     try:
         editor = os.environ.get("EDITOR")
         if not editor:

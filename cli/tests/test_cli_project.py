@@ -1,4 +1,4 @@
-# cli/tests/test_cli_myproject.py
+# cli/tests/test_cli_project.py
 
 import subprocess
 import sys
@@ -7,17 +7,17 @@ from pathlib import Path
 from core.brand import META_DIR, env_name
 
 
-def _run_myproject(args, cwd):
-    script = Path(__file__).parent.parent.parent / "cli" / "myproject.py"
+def _run_project(args, cwd):
+    script = Path(__file__).parent.parent.parent / "cli" / "seiton.py"
     return subprocess.run(
-        [sys.executable, str(script)] + args,
+        [sys.executable, str(script), "project"] + args,
         capture_output=True,
         text=True,
         cwd=cwd,
     )
 
 
-def test_myproject_create_success():
+def test_project_create_success():
     with tempfile.TemporaryDirectory() as tmpdir:
         root = Path(tmpdir) / "Root"
         child = root / "Child"
@@ -25,35 +25,35 @@ def test_myproject_create_success():
 
         settings_dir = root / META_DIR
         settings_dir.mkdir(parents=True)
-        (settings_dir / "Project.md").write_text("# MyOS Project\n")
+        (settings_dir / "Project.md").write_text("# SEITON Project\n")
 
-        result = _run_myproject(["create", str(child)], cwd=tmpdir)
+        result = _run_project(["create", str(child)], cwd=tmpdir)
 
         assert result.returncode == 0
         assert (child / META_DIR / "Project.md").exists()
 
 
-def test_myproject_create_without_parent_fails():
+def test_project_create_without_parent_fails():
     with tempfile.TemporaryDirectory() as tmpdir:
         target = Path(tmpdir) / "NoParent"
         target.mkdir()
 
-        result = _run_myproject(["create", str(target)], cwd=tmpdir)
+        result = _run_project(["create", str(target)], cwd=tmpdir)
 
         assert result.returncode != 0
         assert "Error:" in result.stderr
 
 
-def test_myproject_create_new_path_with_flag():
+def test_project_create_new_path_with_flag():
     with tempfile.TemporaryDirectory() as tmpdir:
         root = Path(tmpdir) / "Root"
         root.mkdir()
         settings_dir = root / META_DIR
         settings_dir.mkdir(parents=True)
-        (settings_dir / "Project.md").write_text("# MyOS Project\n")
+        (settings_dir / "Project.md").write_text("# SEITON Project\n")
 
         target = root / "NewChild"
-        result = _run_myproject(["create", "--new", str(target)], cwd=tmpdir)
+        result = _run_project(["create", "--new", str(target)], cwd=tmpdir)
 
         assert result.returncode == 0
         assert (target / META_DIR / "Project.md").exists()
@@ -63,7 +63,7 @@ def _tidy_project(tmpdir: str) -> Path:
     """Project with born 04_Finanz/Ausgaben (unused) and Einnahmen (holds a user file)."""
     root = Path(tmpdir) / "Project"
     (root / META_DIR).mkdir(parents=True)
-    (root / META_DIR / "Project.md").write_text("# MyOS Project\n")
+    (root / META_DIR / "Project.md").write_text("# SEITON Project\n")
     (root / META_DIR / "Templates.md").write_text("# Templates\nStandard\n")
     template = root / META_DIR / "Templates" / "Standard" / "04_Finanz"
     (template / "Ausgaben").mkdir(parents=True)
@@ -80,13 +80,13 @@ def _env_without_templates_override():
     return {k: v for k, v in os.environ.items() if k not in (env_name("TEMPLATES_DIR"), env_name("ROLES"))}
 
 
-def test_myproject_tidy_turns_unused_born_folders_back_into_embryos():
+def test_project_tidy_turns_unused_born_folders_back_into_embryos():
     with tempfile.TemporaryDirectory() as tmpdir:
         root = _tidy_project(tmpdir)
-        script = Path(__file__).parent.parent.parent / "cli" / "myproject.py"
+        script = Path(__file__).parent.parent.parent / "cli" / "seiton.py"
 
         result = subprocess.run(
-            [sys.executable, str(script), "tidy", str(root / "04_Finanz")],
+            [sys.executable, str(script), "project", "tidy", str(root / "04_Finanz")],
             capture_output=True, text=True, cwd=tmpdir, env=_env_without_templates_override(),
         )
 
@@ -97,23 +97,23 @@ def test_myproject_tidy_turns_unused_born_folders_back_into_embryos():
         assert str(root / "04_Finanz" / "Ausgaben") in result.stdout
 
 
-def test_myproject_tidy_outside_project_fails():
+def test_project_tidy_outside_project_fails():
     with tempfile.TemporaryDirectory() as tmpdir:
-        result = _run_myproject(["tidy", tmpdir], cwd=tmpdir)
+        result = _run_project(["tidy", tmpdir], cwd=tmpdir)
 
         assert result.returncode == 1
 
 
-def test_myproject_tidy_also_tidies_nested_sub_projects():
+def test_project_tidy_also_tidies_nested_sub_projects():
     with tempfile.TemporaryDirectory() as tmpdir:
         parent = Path(tmpdir) / "Parent"
         (parent / META_DIR).mkdir(parents=True)
-        (parent / META_DIR / "Project.md").write_text("# MyOS Project\n")
+        (parent / META_DIR / "Project.md").write_text("# SEITON Project\n")
         sub = _tidy_project(str(parent))
-        script = Path(__file__).parent.parent.parent / "cli" / "myproject.py"
+        script = Path(__file__).parent.parent.parent / "cli" / "seiton.py"
 
         result = subprocess.run(
-            [sys.executable, str(script), "tidy", str(parent)],
+            [sys.executable, str(script), "project", "tidy", str(parent)],
             capture_output=True, text=True, cwd=tmpdir, env=_env_without_templates_override(),
         )
 
@@ -126,7 +126,7 @@ def _trash_project(tmpdir):
     import os
     root = Path(tmpdir) / "Root"
     (root / META_DIR).mkdir(parents=True)
-    (root / META_DIR / "Project.md").write_text("# MyOS Project\n")
+    (root / META_DIR / "Project.md").write_text("# SEITON Project\n")
     for name in ("Alt", "Neu"):
         (root / name).mkdir()
         (root / name / "a.md").write_text(name)
@@ -141,11 +141,11 @@ def _env():
 
 
 def _run(args, cwd):
-    script = Path(__file__).parent.parent.parent / "cli" / "myproject.py"
-    return subprocess.run([sys.executable, str(script)] + args, capture_output=True, text=True, cwd=cwd, env=_env())
+    script = Path(__file__).parent.parent.parent / "cli" / "seiton.py"
+    return subprocess.run([sys.executable, str(script), "project"] + args, capture_output=True, text=True, cwd=cwd, env=_env())
 
 
-def test_myproject_trash_list_restore_delete_empty():
+def test_project_trash_list_restore_delete_empty():
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     from core import trash
 
@@ -175,11 +175,11 @@ def test_myproject_trash_list_restore_delete_empty():
         assert missing.returncode != 0
 
 
-def _myproject(args, cwd):
+def _project(args, cwd):
     import subprocess
     import sys
-    script = Path(__file__).parent.parent.parent / "cli" / "myproject.py"
-    return subprocess.run([sys.executable, str(script)] + args, capture_output=True, text=True, cwd=cwd)
+    script = Path(__file__).parent.parent.parent / "cli" / "seiton.py"
+    return subprocess.run([sys.executable, str(script), "project"] + args, capture_output=True, text=True, cwd=cwd)
 
 
 def _root(tmp_path):
@@ -198,12 +198,12 @@ def test_create_refuses_what_the_p_button_refuses(tmp_path):
 
     root = _root(tmp_path)
     template_folder = root / META_DIR / "Templates" / "Standard" / "4_Finanz"
-    refused = _myproject(["create", str(template_folder)], tmp_path)
+    refused = _project(["create", str(template_folder)], tmp_path)
     assert refused.returncode == 1 and not (template_folder / META_DIR).exists(), refused.stderr
-    again = _myproject(["create", str(root)], tmp_path)
+    again = _project(["create", str(root)], tmp_path)
     assert again.returncode == 1 and "already" in again.stderr.lower()
     (root / "Kunde").mkdir()
-    assert _myproject(["create", str(root / "Kunde")], tmp_path).returncode == 0
+    assert _project(["create", str(root / "Kunde")], tmp_path).returncode == 0
 
 
 def test_remove_makes_a_project_a_folder_again(tmp_path):
@@ -213,9 +213,9 @@ def test_remove_makes_a_project_a_folder_again(tmp_path):
     root = _root(tmp_path)
     kunde = root / "Kunde"
     kunde.mkdir()
-    assert _myproject(["create", str(kunde)], tmp_path).returncode == 0
+    assert _project(["create", str(kunde)], tmp_path).returncode == 0
     (kunde / META_DIR / "Tags.md").write_text("# Tags\n#wichtig\n")  # a setting of its own
-    asked = _myproject(["remove", str(kunde)], tmp_path)
+    asked = _project(["remove", str(kunde)], tmp_path)
     assert asked.returncode == 1 and "Tags.md" in asked.stderr and "--keep-own" in asked.stderr
-    assert _myproject(["remove", str(kunde), "--keep-own"], tmp_path).returncode == 0
+    assert _project(["remove", str(kunde), "--keep-own"], tmp_path).returncode == 0
     assert not (kunde / META_DIR).exists()

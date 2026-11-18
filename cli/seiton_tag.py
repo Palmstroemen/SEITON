@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-mytag - tags of files and folders.
+seiton tag - tags of files and folders.
 
 A file's tags are its extended attributes; a folder's are the ones Scope shows and filters by,
 in its .seiton/myTags.md (Designdocument Tags.md) - plain tags without a value.
@@ -13,11 +13,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.tags import read_tags, write_tags
-from core.brand import NAME  # noqa: E402
+from core.brand import COMMAND, NAME  # noqa: E402
 
 
 def parse_args(args=None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(prog=f"{COMMAND} tag", 
         description=f"{NAME} tags utility",
     )
     sub = parser.add_subparsers(dest="command", required=True)
@@ -43,8 +43,8 @@ def parse_args(args=None) -> argparse.Namespace:
     return parser.parse_args(args)
 
 
-def main() -> None:
-    args = parse_args()
+def main(argv=None) -> None:
+    args = parse_args(argv)
     try:
         if args.command == "list":
             _list_tags(args.path)

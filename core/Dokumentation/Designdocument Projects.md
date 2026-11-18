@@ -81,7 +81,7 @@ Built for the sections `ProjectConfig` resolves (today `Templates`). `ACLs.md`, 
   Reads the `inherit` rule for a section; default is `dynamic`.
 
 - **`create(path)`**  
-  Turns a folder into a project (Scope's P-Button via `make_project`, `myproject create`):  
+  Turns a folder into a project (Scope's P-Button via `make_project`, `seiton project create`):  
   1) Finds a parent with `.seiton/` (else refuses)  
   2) Writes `.seiton/Project.md` (`# SEITON Project`) in the new folder  
   3) Copies the files of the templates' root `.seiton` (`ACLs.md`, `Desk.md`, …) into it,
@@ -95,7 +95,7 @@ Built for the sections `ProjectConfig` resolves (today `Templates`). `ACLs.md`, 
   project's trash as "SEITON settings"; restored, the folder is a project again (see
   "Designdocument Trash.md"). A top project only without settings of its own (there is no
   trash above it); subprojects stay projects.
-  Separate from this, `myproject tidy` turns unused born template folders back into embryos
+  Separate from this, `seiton project tidy` turns unused born template folders back into embryos
   (see "Designdocument BlueprintLayer.md", 3.2).
 
 - **`find_config_in_parents(start_path, config_name)`**  
@@ -128,10 +128,10 @@ The FUSE blueprint layer:
   "Designdocument BlueprintLayer.md", 7).
 
 ## **8. CLI Commands**
-Built (`cli/myproject.py`):
-- `myproject create <path> [--new]`: create a project
-- `myproject tidy [path]`: turn unused born template folders back into embryos
-- `myproject trash …`: the project's trash (see "Designdocument Trash.md")
+Built (`cli/seiton_project.py`):
+- `seiton project create <path> [--new]`: create a project
+- `seiton project tidy [path]`: turn unused born template folders back into embryos
+- `seiton project trash …`: the project's trash (see "Designdocument Trash.md")
 
 Planned:
 - Add/remove templates

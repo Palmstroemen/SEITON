@@ -120,7 +120,7 @@ its rules `{Self}` is the **asking person**, written as in `# Users`:
 - Like `## Folder`, they apply again in every subproject the ACLs.md governs.
 - Someone not in `# Users` is not everyone. A name that is no plain file name (a slash,
   `..`, a wildcard) gets nothing from a `{Self}` rule, so it cannot widen it.
-- Everyone is no role: the GUI's role list and `myacl rules` do not show it yet (to come).
+- Everyone is no role: the GUI's role list and `seiton acl rules` do not show it yet (to come).
 - In Nextcloud (core/acl_nextcloud.py, also the core service) the rules become rules per
   person, `{Self}` filled in as for the checks: each one gets their own time file, with read
   on the way there. A rule on a file not there yet is a note ("not there yet") until it
@@ -284,15 +284,15 @@ SEITON ACLs are **logical rules** that can be:
 
 Today (with `SEITON_ACL_MODE=enforce`) they are enforced by Scope, SunTree and Headline
 (through `core/scope_api.py`), PostFix, the drives (`core/role_drive.py`, the embryo layer)
-and `myacl`. The other CLI tools (`myls`, `mytag`, `myimport`, `myexport`, `myedit`) work
+and `seiton acl`. The other CLI tools (`seiton ls`, `seiton tag`, `seiton import`, `seiton export`, `seiton edit`) work
 with the rights of the operating system, like `ls` and `cp`. See `ACL_ROLLOUT.md` §2.
-Mapped today: Nextcloud (`myacl sync`, app `seiton`); NTFS/APFS/POSIX are not built.
+Mapped today: Nextcloud (`seiton acl sync`, app `seiton`); NTFS/APFS/POSIX are not built.
 
 ### **6.2 USB / FAT32 / exFAT**
 These filesystems lack proper ACL support.  
 **Proposed MVP behavior:** provide **role‑based export** instead of native ACLs.  
 Example: a “Finance” export includes only `/4_Finanz/` (and any other paths granted to that role).
-Not built: `myexport` copies with the rights of the operating system, not by role.
+Not built: `seiton export` copies with the rights of the operating system, not by role.
 
 ### **6.3 Clouds & Sync**
 Cloud providers vary in ACL support.  
@@ -354,7 +354,7 @@ Built as listed (`core/acl.py`). Around it: `ACLAuthorizer` (`can_user_access`),
 ## **8. MVP Scope**
 The MVP should demonstrate that **access control is real and intentional**:
 - ACLs stored in `.seiton/ACLs.md` (built)
-- Role‑based checks in the SEITON layer (built for the GUI, the drives and `myacl`; the other
+- Role‑based checks in the SEITON layer (built for the GUI, the drives and `seiton acl`; the other
   CLI tools work with the rights of the operating system, see 6.1)
 - Export restricted by role (USB or share) (not built)
 - Clear API boundaries for future plugins
@@ -378,7 +378,7 @@ Define a small, stable interface for ACL backends:
 - **Templates with their own ACLs** (decided and built 2026-10-22): templates are ordinary
   folder structures; whatever lies in `.seiton/Templates/<name>/.seiton` (`ACLs.md`, `Desk.md`,
   `Color.md`, …) is copied into a new project's `.seiton` when it is created (P-Button,
-  `myproject create`; `core/template_seed.py`). Nothing already there is overwritten; with
+  `seiton project create`; `core/template_seed.py`). Nothing already there is overwritten; with
   several templates the first one with a file wins; only plain files (no symlinks, no
   `ACLs-history`, no drafts). Give the Buchhalter `/4_Finanz/` once in the template and
   every new project has it.

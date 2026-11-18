@@ -1,6 +1,6 @@
 """X-ray view: look through small folders at their files while the listing still fits.
 
-The budget is how many entries fit without scrolling (Scope: the window, myls: the
+The budget is how many entries fit without scrolling (Scope: the window, seiton ls: the
 terminal). Folders are seen through smallest first (by their number of files, then by
 name), each completely or not at all, as long as the listing stays within the budget.
 Projects, empty, hidden and unreadable folders stay folders."""

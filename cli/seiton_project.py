@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-myproject - MyOS project CLI
+seiton project - project CLI
 """
 
 import argparse
@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from core.brand import META_DIR, NAME
+from core.brand import COMMAND, META_DIR, NAME
 from core.project import ProjectConfig
 
 
@@ -133,7 +133,7 @@ def _trash(args) -> int:
 
 
 def parse_args(args=None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(prog=f"{COMMAND} project", 
         description=f"{NAME} project management",
     )
     sub = parser.add_subparsers(dest="command", required=True)
@@ -173,8 +173,8 @@ def parse_args(args=None) -> argparse.Namespace:
     return parser.parse_args(args)
 
 
-def main() -> None:
-    args = parse_args()
+def main(argv=None) -> None:
+    args = parse_args(argv)
     if args.command == "create":
         sys.exit(_create_project(args.path, create_missing=args.new))
     if args.command == "remove":

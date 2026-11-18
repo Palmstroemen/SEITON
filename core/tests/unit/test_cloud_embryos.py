@@ -121,7 +121,7 @@ def test_a_project_without_templates_has_an_empty_manifest(tmp_path):
     assert only.payload == {}
 
 
-# --- bringing them into the cloud (myacl sync) ---
+# --- bringing them into the cloud (seiton acl sync) ---
 
 
 class FakeCloud:

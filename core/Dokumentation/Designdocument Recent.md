@@ -4,7 +4,7 @@ Status (checked 2026-11-18): this file has been a fragment since its first commi
 (2026-02-21): sections 1-8 (the `Recent.md` format the notes below interpret) are missing.
 Nothing of the recents model is built: there is no `Recent.md` and no `.cache/recent.*`.
 What exists: the key `RecentPolicy` in `Desk.md`, which is read but does nothing yet (see
-"Designdocument Desk.md", 5), and the option `myls --recent=N`, whose method is still an
+"Designdocument Desk.md", 5), and the option `seiton ls --recent=N`, whose method is still an
 empty stub (prints nothing).
 
 Interpretation notes:

@@ -78,7 +78,7 @@ its own design document; this one only shows how they fit together.
 | Part | What it is | Design documents |
 |---|---|---|
 | `core/` | the logic: projects, templates and embryos, ACLs, tags, filters, perspectives, trash, export/import, time tracking, colours; no Qt | `core/Dokumentation/` (one `Designdocument X.md` per topic) |
-| `cli/` | the CLI tools (myls, myproject, mytag, myacl, myedit, myimport, myexport, myfilter) on the core | `cli/Dokumentationen/CLI.md` |
+| `cli/` | the command `seiton` (`cli/seiton.py`) with its tools: ls, project, tag, acl, edit, filter, export, import, drive | `cli/Dokumentationen/CLI.md` |
 | `daemon/` | the session daemon: the lens shared by the programs, the FUSE drive "Perspektiven", the clock | `core/Dokumentation/Designdocument Perspectives.md`, `… Perspective Resolver MVP.md`, `… Time.md` |
 | `apps/Scope/` | the file browser (QML) with its settings on the back | `apps/Scope/README.md`, `apps/Scope/Designdocument Setup.md`, `apps/Scope/Colour inventory.md` |
 | `apps/Headline/` | the line at the top edge of the screen; the minimal view M of Scope as a tool of its own | `apps/Scope/Designdocument Headline.md` |

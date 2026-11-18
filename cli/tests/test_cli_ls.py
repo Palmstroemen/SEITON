@@ -1,4 +1,4 @@
-# cli/tests/test_cli_myls.py (partial updates)
+# cli/tests/test_cli_ls.py (partial updates)
 
 import unittest
 from pathlib import Path
@@ -10,14 +10,14 @@ import subprocess
 import pytest  # For capsys fixture
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from cli.myls import Lister
+from cli.seiton_ls import Lister
 from core.brand import XATTR_PREFIX
 
 class TestListerBasic(unittest.TestCase):
     
     def setUp(self):
         """Create a temporary test directory structure."""
-        self.test_dir = tempfile.mkdtemp(prefix="myos_test_")
+        self.test_dir = tempfile.mkdtemp(prefix="seiton_test_")
         self.test_path = Path(self.test_dir)
         
         # Basic structure
@@ -141,16 +141,16 @@ class TestListerBasic(unittest.TestCase):
             self.fail(f"list_all() failed: {e}")
     
     def test_command_line_interface(self):
-        """Test that myls can be called from command line."""
+        """Test that seiton ls can be called from command line."""
         # Create a simple test file
         test_file = self.test_path / "cli_test.txt"
         test_file.write_text("test")
         
         # Run via subprocess
-        myls_path = Path(__file__).parent.parent.parent / "cli" / "myls.py"
+        ls_path = Path(__file__).parent.parent.parent / "cli" / "seiton.py"
         
         result = subprocess.run(
-            [sys.executable, str(myls_path), str(self.test_path)],
+            [sys.executable, str(ls_path), "ls", str(self.test_path)],
             capture_output=True,
             text=True
         )
@@ -207,7 +207,7 @@ def test_roentgen_without_a_number_fills_the_terminal(tmp_path, capsys, monkeypa
     (tmp_path / "Fotos").mkdir()
     for name in ("a.jpg", "b.jpg", "c.jpg"):
         (tmp_path / "Fotos" / name).write_text(name)
-    monkeypatch.setattr("cli.myls.shutil.get_terminal_size", lambda *a, **k: _os.terminal_size((80, 6)))
+    monkeypatch.setattr("cli.seiton_ls.shutil.get_terminal_size", lambda *a, **k: _os.terminal_size((80, 6)))
 
     Lister(str(tmp_path)).list_roentgen()
 

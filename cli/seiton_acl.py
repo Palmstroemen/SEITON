@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-myacl - MyOS ACLs CLI: who may do what, every rule of a project, and its rules in a Nextcloud
+seiton acl - ACLs CLI: who may do what, every rule of a project, and its rules in a Nextcloud
 """
 
 import argparse
@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from core.brand import META_DIR, NAME, env_name, getenv
+from core.brand import COMMAND, META_DIR, NAME, env_name, getenv
 from core.acl import ACLPolicy, rules_apart
 from core.acl_enforcement import configured_mode
 from core.acl_nextcloud import BITS, FULL_MASK, NEXTCLOUD_PERMISSIONS, local_tree, plan, read_nextcloud_md, rights_files
@@ -26,7 +26,7 @@ class _Refused(Exception):
 
 
 def parse_args(args=None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=f"{NAME} ACLs utility")
+    parser = argparse.ArgumentParser(prog=f"{COMMAND} acl", description=f"{NAME} ACLs utility")
     sub = parser.add_subparsers(dest="command", required=True)
 
     show_cmd = sub.add_parser("show", help="Who may do what at a path, and where it comes from")
@@ -53,8 +53,8 @@ def parse_args(args=None) -> argparse.Namespace:
     return parser.parse_args(args)
 
 
-def main() -> None:
-    args = parse_args()
+def main(argv=None) -> None:
+    args = parse_args(argv)
     try:
         if args.command == "show":
             code = _show(args.path)
@@ -65,7 +65,7 @@ def main() -> None:
         else:
             code = _sync(args.path, args.plan, args.dry_run, args.yes, args.json)
         sys.exit(code)
-    except BrokenPipeError:  # output cut short (myacl rules | head)
+    except BrokenPipeError:  # output cut short (seiton acl rules | head)
         sys.exit(0)
     except Exception as exc:
         print(f"Error: {exc}", file=sys.stderr)

@@ -32,8 +32,8 @@ The code currently supports ACL probing broadly and enforce-mode blocking for:
 
 These are `core/scope_api.py` functions; Scope, SunTree and Headline go through them.
 Also enforcing: PostFix, the drives (`core/role_drive.py`, the embryo layer
-`core/localBlueprintLayer.py`, write on embryos only in enforce mode) and `myacl`. The other
-CLI tools (`myls`, `mytag`, `myimport`, `myexport`, `myedit`) do not know the mode: they
+`core/localBlueprintLayer.py`, write on embryos only in enforce mode) and `seiton acl`. The other
+CLI tools (`seiton ls`, `seiton tag`, `seiton import`, `seiton export`, `seiton edit`) do not know the mode: they
 work with the rights of the operating system, like `ls` and `cp`.
 
 `monitor` mode keeps behavior non-blocking but produces audit evidence.
@@ -90,7 +90,7 @@ Exit criteria:
 
 Before each rollout step:
 
-- Confirm ACL policy validity (it loads, `myacl show`/`myacl rules` give the expected rights;
+- Confirm ACL policy validity (it loads, `seiton acl show`/`seiton acl rules` give the expected rights;
   unknown rights are not reported).
 - Confirm mode configuration and fallback behavior.
 - Confirm audit sink availability (memory/file).

@@ -1,4 +1,4 @@
-# cli/tests/test_cli_myfilter.py
+# cli/tests/test_cli_filter.py
 
 import os
 import subprocess
@@ -9,9 +9,9 @@ from core.brand import META_DIR
 
 
 def _run_cmd(args, cwd):
-    script = Path(__file__).parent.parent.parent / "cli" / "myfilter.py"
+    script = Path(__file__).parent.parent.parent / "cli" / "seiton.py"
     return subprocess.run(
-        [sys.executable, str(script)] + args,
+        [sys.executable, str(script), "filter"] + args,
         capture_output=True,
         text=True,
         cwd=cwd,
@@ -22,7 +22,7 @@ def _write_filter(path: Path, name: str) -> None:
     path.write_text(f"# Filter\nName: {name}\n")
 
 
-def test_myfilter_list_orders_by_specificity():
+def test_filter_list_orders_by_specificity():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
         root = tmp / "Root"
@@ -41,7 +41,7 @@ def test_myfilter_list_orders_by_specificity():
         assert lines[1].startswith("Root ")
 
 
-def test_myfilter_resolve_manual_wins():
+def test_filter_resolve_manual_wins():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
         root = tmp / "Root"
@@ -59,7 +59,7 @@ def test_myfilter_resolve_manual_wins():
         assert result.stdout.strip() == "Manual"
 
 
-def test_myfilter_resolve_fallback():
+def test_filter_resolve_fallback():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
         root = tmp / "Root"
@@ -76,7 +76,7 @@ def test_myfilter_resolve_fallback():
         assert result.stdout.strip() == "Root"
 
 
-def test_myfilter_activate_and_clear_manual_state():
+def test_filter_activate_and_clear_manual_state():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
         root = tmp / "Root"
@@ -88,8 +88,8 @@ def test_myfilter_activate_and_clear_manual_state():
         _write_filter(sub / "Filter.md", "Auto")
 
         activated = _run_cmd(["activate", str(manual / "Filter.md")], cwd=tmpdir)
-        # In SEITON's cache, below XDG_CACHE_HOME (the tests' own, see conftest), not ~/.cache/myos.
-        assert (Path(os.environ["XDG_CACHE_HOME"]) / "seiton" / "myfilter_state.json").exists()
+        # In SEITON's cache, below XDG_CACHE_HOME (the tests' own, see conftest), not ~/.cache/seiton.
+        assert (Path(os.environ["XDG_CACHE_HOME"]) / "seiton" / "filter_state.json").exists()
         resolved = _run_cmd(["resolve", str(sub)], cwd=tmpdir)
         cleared = _run_cmd(["clear"], cwd=tmpdir)
         resolved_auto = _run_cmd(["resolve", str(sub)], cwd=tmpdir)
@@ -104,7 +104,7 @@ def test_myfilter_activate_and_clear_manual_state():
         assert resolved_auto.stdout.strip() == "Auto"
 
 
-def test_myfilter_show_verbose_outputs_chain():
+def test_filter_show_verbose_outputs_chain():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
         root = tmp / "Root"

@@ -145,7 +145,7 @@ def plan(
 
 
 # In a .MyOS folder: what manages the rights and the sync (ACLs.md as in MyOS, where change
-# grants writing it; its history, the cloud settings, the embryos myacl sync uploads).
+# grants writing it; its history, the cloud settings, the embryos seiton acl sync uploads).
 
 
 def rights_files(paths: Iterable[str]) -> List[str]:

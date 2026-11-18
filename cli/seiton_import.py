@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-myimport - import an export package: back to its place when that is still a project, else
+seiton import - import an export package: back to its place when that is still a project, else
 into --target as a project of its own (its rights travel with it).
 """
 
@@ -11,11 +11,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.importer import import_package
-from core.brand import NAME  # noqa: E402
+from core.brand import COMMAND, NAME  # noqa: E402
 
 
 def parse_args(args=None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(prog=f"{COMMAND} import", 
         description=f"{NAME} import utility",
     )
     parser.add_argument("package", help="Path to export package (folder or zip)")
@@ -38,8 +38,8 @@ def parse_args(args=None) -> argparse.Namespace:
     return parser.parse_args(args)
 
 
-def main() -> None:
-    args = parse_args()
+def main(argv=None) -> None:
+    args = parse_args(argv)
     try:
         result = import_package(
             args.package,

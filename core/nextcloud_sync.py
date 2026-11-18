@@ -1,11 +1,11 @@
 # nextcloud_sync.py - bring a project's ACLs.md and embryos into its Nextcloud Team folder
 #
-# What `myacl sync` does, as one piece the CLI and the MyOS core service share
+# What `seiton acl sync` does, as one piece the CLI and the MyOS core service share
 # ("cloud/nextcloud/Designdocument SEITON Core Service.md", 8, step 2): compare the Team folder
 # with what MyOS says - the rules of ACLs.md (core/acl_nextcloud.py), the embryos of the
 # templates (core/cloud_embryos.py) and the tags of Tags.md (as the instance's collaborative
 # tags; never removed: others on the instance may use them) - and send what differs. The project may be a local copy
-# (myacl sync) or the shadow tree of the Team folder itself (the core service).
+# (seiton acl sync) or the shadow tree of the Team folder itself (the core service).
 
 from __future__ import annotations
 

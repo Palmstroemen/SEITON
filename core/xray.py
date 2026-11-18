@@ -1,6 +1,6 @@
 # xray.py - X-ray view: look through small folders at their files
 #
-# While a listing still fits on screen (Scope: no scrollbar in the window, myls: the
+# While a listing still fits on screen (Scope: no scrollbar in the window, seiton ls: the
 # terminal's height), small folders are seen through: their files take the folder's place,
 # each marked with the folder they lie in. Folders open smallest first (by their number of
 # files, then by name), each completely or not at all, as long as the listing stays within

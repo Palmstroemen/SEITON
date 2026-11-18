@@ -15,11 +15,11 @@ SEITON has moved beyond early prototyping. Core components are implemented and i
 - **Scope** — QML file browser: Templates + Projects rows, path bar, CWD/CTD navigation, tag filtering, DnD, multi-selection, context menu; settings on its back (General, Scope, SunTree; `apps/Scope/Designdocument Setup.md`)
 - **Headline** — the line at the top edge of the screen: where one is, the project's standard folders, the perspectives, the clock; docked, as a panel like a start menu, or as a Cinnamon applet (`apps/Scope/Designdocument Headline.md`)
 - **Time tracking** — a clock counts the time per project, writes it into the project, and parent projects collect their children's time; the clock has a role of its own in the sandbox (`core/Dokumentation/Designdocument Time.md`)
-- **CLI tools** — myls, myproject, mytag, myacl, myedit, myimport, myexport, myfilter
+- **CLI** — one command, `seiton`: alone it starts Scope, with a command the tools (`seiton ls`, `project`, `tag`, `acl`, `edit`, `filter`, `export`, `import`, `drive`; `seiton help`)
 - **Blueprint layer** — Embryo materialization one level at a time (including nested embryos); unused born folders turn back into embryos
 - **ACLs** — rules per folder in `.seiton/ACLs.md`, roles, `## Everyone` and `{Self}`, a sandbox for programs with a role of their own
-- **Filters & Perspectives** — Filter runtime (include/exclude/flatten; `Filter.md` acts by itself, `.seiton/Filters/` only when chosen with `myfilter`); the lens as one session in the perspective daemon, shared by Scope, SunTree and the Headline, with the FUSE drive "Perspektiven"
-- **Nextcloud** — `myacl sync` turns `ACLs.md` into Team folder rules; the app `seiton` locks new entries at once and shows the SEITON folders and the perspectives in Files; the core runs beside Nextcloud as a service (`cloud/nextcloud/Designdocument SEITON Core Service.md`)
+- **Filters & Perspectives** — Filter runtime (include/exclude/flatten; `Filter.md` acts by itself, `.seiton/Filters/` only when chosen with `seiton filter`); the lens as one session in the perspective daemon, shared by Scope, SunTree and the Headline, with the FUSE drive "Perspektiven"
+- **Nextcloud** — `seiton acl sync` turns `ACLs.md` into Team folder rules; the app `seiton` locks new entries at once and shows the SEITON folders and the perspectives in Files; the core runs beside Nextcloud as a service (`cloud/nextcloud/Designdocument SEITON Core Service.md`)
 - **Desk** — The desktop follows the projects: per-project themes (apps, taskbar) and wallpaper (KDE, Cinnamon, GNOME), changes saved automatically; project icon. Taskbar programs not yet
 - **Sort** — `Sort.md` runtime for automatic project sorting
 - **Tagging** — Project-scoped tags, color registry, security-tested
@@ -40,19 +40,20 @@ Besides: fixing what the review of 2026-11-18 found (`docs/Prüfung 2026-11-18.m
 
 ## Recent Milestones (Nov 2026)
 
+- One command, `seiton`: `seiton ls`, `seiton acl sync` & co. instead of `myls`, `myacl` (2026-11-18)
 - MyOS is now SEITON, with `cli/migrate_name.py` for old projects and settings (2026-11-14)
 - Installer for one user; SEITON runs without the workshop pieces (2026-11-16)
 - Time tracking, steps 1–4, and the Headline, steps 1–4 with its widgets (2026-11-16/17)
 - ACLs: `## Everyone` and `{Self}` (2026-11-16)
-- Nextcloud: `myacl sync`, the app (then `myos_acl`, now `seiton`), the core as a service with a shadow tree, rights kept live, the perspectives in Files, SEITON tags as Nextcloud tags (2026-11-07 to 11-12)
+- Nextcloud: `seiton acl sync`, the app (then `myos_acl`, now `seiton`), the core as a service with a shadow tree, rights kept live, the perspectives in Files, SEITON tags as Nextcloud tags (2026-11-07 to 11-12)
 - PostFix: the Obsidian-like editor is the default (2026-11-07)
 - Scope: colour schemes on its back, chosen and edited (2026-11-06)
 
 ## Earlier Milestones (Oct 2026)
 
 - Embryo birth materializes only the folder itself; visible subfolders stay embryos until first use
-- Born template folders that hold nothing of the user turn back into embryos after delete/move (cascading upwards); `myproject tidy` does the same for folders emptied outside SEITON
-- Deleting is undoable: entries go to the trash of their project (`.seiton/Trash/`, freedesktop layout, `trash_days` in Project.md, default 30), outside projects to the system trash; CLI `myproject trash list|restore|delete|empty`
+- Born template folders that hold nothing of the user turn back into embryos after delete/move (cascading upwards); `seiton project tidy` does the same for folders emptied outside SEITON
+- Deleting is undoable: entries go to the trash of their project (`.seiton/Trash/`, freedesktop layout, `trash_days` in Project.md, default 30), outside projects to the system trash; CLI `seiton project trash list|restore|delete|empty`
 - UI strings are English in the code; German (default UI language) comes from `*_de.ts` translations, kept complete by tests (`scripts/update_translations.py`)
 - ACLs: rules in ACLs.md are project-relative; per role the nearest rule wins, `none` locks a role out; subprojects without own ACLs.md inherit the parent's; right `delete` (not implied by `write`)
 

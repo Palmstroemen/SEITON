@@ -49,7 +49,7 @@ When a path contains embryos, `BirthClinic.give_birth()`:
 
 `BirthClinic.reabsorb()` is the reverse: it removes a born folder only when it holds nothing
 but unchanged copies of its template. Scope calls it after an operation emptied a folder
-(`reabsorb_upwards`); `myproject tidy` does it for the whole project (`reabsorb_all`).
+(`reabsorb_upwards`); `seiton project tidy` does it for the whole project (`reabsorb_all`).
 
 ## **4. Embryo Tree Structure**
 The embryo tree is a nested dictionary of folder names:

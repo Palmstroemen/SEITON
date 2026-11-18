@@ -58,7 +58,7 @@ folder remains. Only a folder emptied completely disappears, as born folders alr
 SEITON does not depend on catching every file event (a watcher misses files while Scope is
 elsewhere, and a debounce can swallow a second file). Instead it **catches up**: whenever
 the folder is looked at in Scope, when Scope starts, and once a day, SEITON checks
-what is due and files it. (`myls` does not file; this section once named it too.) This is idempotent: what was left last time is filed next time;
+what is due and files it. (`seiton ls` does not file; this section once named it too.) This is idempotent: what was left last time is filed next time;
 nothing gets lost.
 
 Only files lying directly in the sorted folder (or in a real level's folder, for the next
@@ -106,7 +106,7 @@ decided, the rule goes into the template; from then on new projects file by them
 - Whether the young files in a folder should keep a grace period before filing (an earlier
   idea: "invoices arrive within three months"); with the threshold, new files stay visible
   at the top while there are few, so it is left out for now.
-- `myls`: show virtual levels (e.g. `2024/ (virtual)`).
+- `seiton ls`: show virtual levels (e.g. `2024/ (virtual)`).
 
 ## 10. Implementation
 

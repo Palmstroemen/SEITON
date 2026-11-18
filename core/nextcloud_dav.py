@@ -1,5 +1,5 @@
 # nextcloud_dav.py - a Nextcloud Team folder over WebDAV: its tree and its "advanced
-# permissions" rules (for myacl sync)
+# permissions" rules (for seiton acl sync)
 #
 # The Team folders app (groupfolders) hands its rules out as the property nc:acl-list of
 # every entry; reading them needs "manage advanced permissions" for the folder, not a
@@ -155,7 +155,7 @@ class NextcloudDAV:
         status, _answer = self._transport("POST", self.url + _TAGS, body, {"Content-Type": "application/json"}, self._auth)
         self._check(status, (201, 409), "POST", _TAGS + name)
 
-    # Files (paths relative to the Team folder), for the embryos myacl sync uploads.
+    # Files (paths relative to the Team folder), for the embryos seiton acl sync uploads.
 
     def get(self, path: str) -> Optional[bytes]:
         """A file's content, or None when it is not there."""

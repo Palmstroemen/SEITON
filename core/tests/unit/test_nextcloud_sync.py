@@ -1,4 +1,4 @@
-"""Bringing a project's ACLs.md and embryos into its Team folder (myacl sync, and the MyOS
+"""Bringing a project's ACLs.md and embryos into its Team folder (seiton acl sync, and the MyOS
 core service after each change). No network: a fake Team folder holds entries, their rules
 and files as Nextcloud does."""
 

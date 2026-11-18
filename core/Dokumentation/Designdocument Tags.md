@@ -52,7 +52,7 @@ Primary storage uses filesystem metadata:
 
 File tags live in the xattr `user.seiton.tags` (until November 2026 `user.myos.tags`; old
 ones are moved over by `cli/migrate_name.py`), as a comma-separated list, a value written as
-`tag=value` (`mytag set`). On filesystems without xattr there are no file tags; there is no
+`tag=value` (`seiton tag set`). On filesystems without xattr there are no file tags; there is no
 fallback. `.seiton/Tags.md` holds only the suggested tags (see 3), not the tags of files.
 
 Folder tags live in a sidecar file on the tagged folder itself:

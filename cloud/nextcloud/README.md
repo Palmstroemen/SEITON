@@ -1,6 +1,6 @@
 # SEITON for Nextcloud
 
-`myacl sync` (cli/myacl.py, core/acl_nextcloud.py) copies a project's `.seiton/ACLs.md` into a
+`seiton acl sync` (cli/seiton_acl.py, core/acl_nextcloud.py) copies a project's `.seiton/ACLs.md` into a
 Team folder with "advanced permissions". The app `seiton` closes the one gap Nextcloud
 leaves: who may only work deep down gets read on the way there, and an entry created later
 on that way would inherit that read. The app locks such entries the moment they are created,
@@ -21,7 +21,7 @@ app. Coming from `myos_acl`: `occ app:disable myos_acl`, install `seiton` as abo
 are not read. Projects still under `.MyOS` need `.seiton`: `python3 cli/migrate_name.py --apply
 <folder>` on a desktop, then let the sync client carry it up.
 
-## What `myacl sync` needs on the server
+## What `seiton acl sync` needs on the server
 
 - a Team folder with advanced permissions switched on, given to a group of everyone involved
 - for the account that syncs: "manage advanced permissions" on that folder, and read on all of it
@@ -52,11 +52,11 @@ account (lib/Controller/CoreController.php); the browser never talks to the cont
 `seiton` tells the core of every change in a Team folder (POST /changed; the core decides
 what matters), so it starts at once; it also looks at the folder's ETag every
 `SEITON_SHADOW_POLL` seconds (default 60) for what no one told.
-After each change of the Team folder the core does what `myacl sync` does
+After each change of the Team folder the core does what `seiton acl sync` does
 (core/nextcloud_sync.py) with the service account: a folder made later gets its rights from
 `ACLs.md` within seconds, and an `ACLs.md` edited in the cloud changes the rules - unless it
 leaves no one who may change the rights (then most likely broken: nothing is sent).
-`myacl sync` from a desktop stays possible and does the same.
+`seiton acl sync` from a desktop stays possible and does the same.
 
 The tags of each project's `Tags.md` the core makes as Nextcloud's collaborative tags (one
 list for the instance; never removed). The row of SEITON folders shows the tags a folder's
@@ -102,7 +102,7 @@ colour, embryos pale; clicking an embryo gives birth to it as Scope does (the fo
 files and hidden folders of that template level). Born SEITON folders leave the list below
 (Nextcloud counts them as "hidden" there). Embryos show only where one may create.
 
-`myacl sync` - or the core after each change - uploads per project a folder per embryo, `.seiton/Embryos/<embryo>/`, holding what
+`seiton acl sync` - or the core after each change - uploads per project a folder per embryo, `.seiton/Embryos/<embryo>/`, holding what
 its birth copies (the files and hidden folders of that template level; its visible
 subfolders are the deeper embryos), and `.seiton/Embryos.json` (the template tree and a hash
 per file, the sync's bookkeeping) (core/cloud_embryos.py). Everyone with rights in the

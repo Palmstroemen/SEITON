@@ -24,6 +24,7 @@ CONFIG_DIR = "seiton"  # the user's settings, below XDG_CONFIG_HOME
 ENV_PREFIX = "SEITON_"
 XATTR_PREFIX = "user.seiton."
 HTTP_HEADER_PREFIX = "X-Seiton-"  # between the platform's bridge and the core service
+COMMAND = "seiton"  # the one command: seiton, seiton ls, seiton acl sync (cli/seiton.py)
 URL_SCHEME = "seiton"  # links in notes: seiton:open?scope=... (examples/PostFix/exercise_links.py)
 TUTORIAL_DIR = f"Learning {NAME}"  # the tutorial in the repo (scripts/testrun.py copies it)
 

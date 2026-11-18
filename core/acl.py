@@ -65,7 +65,7 @@ class ACLPolicy:
     explicit_bases: Dict[str, Set[str]] = field(default_factory=dict)
     # "## Everyone": rules for every person in "# Users", {Self} still in them (it is the
     # asking person, expanded when asked: everyone_rights). Kept apart from the roles, so the
-    # tools that copy roles elsewhere (Nextcloud, myacl rules) do not see a literal {Self}.
+    # tools that copy roles elsewhere (Nextcloud, seiton acl rules) do not see a literal {Self}.
     everyone: List[PermissionRule] = field(default_factory=list)
 
     def display_name(self, key: str) -> str:
@@ -170,7 +170,7 @@ class ACLPolicy:
         Every rule of project_root's ACLs.md for the whole tree it governs: the policy
         with the "## Folder" rules applied again in each subproject (for_context), each
         rule once. Subprojects with an ACLs.md of their own are governed by it, not here.
-        For tools that copy the rules elsewhere (myacl rules, a cloud adapter).
+        For tools that copy the rules elsewhere (seiton acl rules, a cloud adapter).
         """
         root = Path(project_root).resolve()
         policy = cls.from_project(root)

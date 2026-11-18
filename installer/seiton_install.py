@@ -15,7 +15,7 @@ What it does:
    asking, with sudo.
 2. Python packages in a venv of SEITON's own (~/.local/share/seiton/venv): newer distributions
    refuse pip in the system (PEP 668), and SEITON keeps its own Qt version.
-3. Launchers in ~/.local/bin (seiton, the CLI tools, seiton-postfix), the icon, the menu entry,
+3. Launchers in ~/.local/bin (seiton with its commands, seiton-postfix), the icon, the menu entry,
    the emblems.
 4. The templates to ~/.seiton/Templates; a template one has already is kept.
 5. The Headline: its launcher, a menu entry that opens its panel (to pin to a taskbar), on
@@ -67,8 +67,6 @@ INSTALL = {
 # The Headline (apps/Scope/Designdocument Headline.md): its launcher, and its applet in Cinnamon.
 HEADLINE = file_name("headline")
 HEADLINE_APPLET = "seiton-headline@seiton"
-# The CLI tools that get a launcher of the same name (cli/<name>.py).
-CLI_TOOLS = ("myls", "myproject", "mytag", "myedit", "myfilter", "myacl", "myexport", "myimport")
 
 Run = Callable[..., int]
 Ask = Callable[[str], bool]
@@ -228,11 +226,8 @@ def python_packages(places: Places, run: Run) -> None:
 
 
 def launchers(places: Places, written: Written) -> None:
-    written.text(places.bin / APP_ID, _launcher(places, places.repo / "apps" / "Scope" / "Scope.py"), executable=True)
-    for tool in CLI_TOOLS:
-        script = places.repo / "cli" / f"{tool}.py"
-        if script.is_file():
-            written.text(places.bin / tool, _launcher(places, script), executable=True)
+    # The one command (cli/seiton.py): alone it starts Scope, seiton ls & co. run the tools.
+    written.text(places.bin / APP_ID, _launcher(places, places.repo / "cli" / "seiton.py"), executable=True)
     written.text(places.bin / HEADLINE, _launcher(places, places.repo / "apps" / "Headline" / "Headline.py"),
                  executable=True)
     # The time tracking: its screen, and the clock (started in its sandbox, cli/seiton_clock.py).
@@ -406,7 +401,7 @@ def install(places: Places, options: Options, run: Run = run_command, ask: Ask =
     if which("cinnamon"):
         print("The SEITON button for Cinnamon's panel: right click on the panel, Applets, SEITON.")
     if str(places.bin) not in os.environ.get("PATH", "").split(os.pathsep):
-        print(f"(Add {places.bin} to PATH to start it and the CLI tools by name.)")
+        print(f"(Add {places.bin} to PATH to start it by name: seiton, seiton help.)")
 
 
 def wanted_at_login(flag: bool, question: str, entry: Path, ask: Ask) -> bool:

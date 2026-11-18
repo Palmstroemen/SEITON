@@ -33,7 +33,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
 
 [x] Jahresfilter: /Jahr/Monat/-Ablage automatisch (core/filing.py, Designdocument Sort.md):
     Regel im Ordner selbst, flach → virtuell → echt ab NewLevelFrom, Ablage durch Nachholen statt Beobachter, echtes EXIF
-    [ ] Regel bequem einrichten (der Knopf "Enable sorting" ist mit der oberen Leiste weg, 2026-10-26: vorerst von Hand); myls zeigt virtuelle Ebenen noch nicht
+    [ ] Regel bequem einrichten (der Knopf "Enable sorting" ist mit der oberen Leiste weg, 2026-10-26: vorerst von Hand); seiton ls zeigt virtuelle Ebenen noch nicht
 [ ] SunTree: nur zum Ablegen - zeigt Ordner, keine Dateien, keine Suche (entschieden 2026-10-25)
     [ ] Weiche Krone (examples/SunTree/Designdocument Krone.md, Skizze examples/SunTree/prototype/Krone.html): Feld wächst nach außen,
         ab der Linie T (0,7 R) in den Stamm gesaugt, Zeiger nach innen gezogen; Rückweg ebenso weich
@@ -139,7 +139,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
             Auto-Filter nie. Alte CPD-Schicht entfernt (perspective_resolver.py, ScopeApi perspective_*, Teil B)
             Zurückgenommen (2026-10-26): die Wahl von Hand samt Menü (öffnen, speichern) ist weg - die Brille kommt per
             Doppelklick auf den MyOS-Ordner; Auto-Filter bleiben
-        [x] Filter in .MyOS/Filters wirken nur noch von Hand (2026-11-06, myfilter), Filter.md weiter von selbst; Name mit Pfad im
+        [x] Filter in .MyOS/Filters wirken nur noch von Hand (2026-11-06, seiton filter), Filter.md weiter von selbst; Name mit Pfad im
             Dateibereich weg, nur beim Flachklopfen der Pfad von hier aus
         [ ] E7 Suche mit Brille über alle Projekte (nur die Abteilungsordner, Spalte "Projekt"; Designdoc A9) -
             zurückgestellt (2026-10-25), bis die Suche im Alltag fehlt; schlank wäre: nur Dateinamen, ein Feld in Scope
@@ -202,7 +202,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
         Harmlos, aber echt, auch beim normalen Start. Die Zeile soll die Breite selbst verteilen (fillWidth, Minimum/
         Maximum), dazu die Umbruchlogik (`flowOnSecondLine`) anfassen. Test: `apps/Scope/tests/test_scope_smoke.py`
         (`test_the_top_row_has_no_layout_loop`, xfail strict - meldet sich, sobald die Schleife weg ist)
-    [x] Röntgenblick (X-Ray): kleine Ordner durchsichtig, solange die Liste ohne Scrollbalken passt; Standard an; auch `myls --roentgen`
+    [x] Röntgenblick (X-Ray): kleine Ordner durchsichtig, solange die Liste ohne Scrollbalken passt; Standard an; auch `seiton ls --roentgen`
     [x] Röntgenblick: eigenes Icon (2026-10-26, Theme/icons/xray.svg: Film mit Brustkorb statt Ordner)
     [x] Dateibereich (2026-10-26): Embryos unter den Ordnern blass (0,4) wie in den Ordnerzeilen - fehlte bisher;
         neuer Ordnertag als blasser Tag ohne Namen am Ende der Tags, ein Klick benennt ihn ("#"-Knopf weg)
@@ -280,7 +280,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
         lösen oder auf die Freigaben der Cloud abbilden
     [ ] ACL-Adapter zu Nextcloud (2026-11-07; vorgezogen: der Server setzt die Rechte dann wirklich durch, auch im
         Sync-Client). Ziel: Team folders (App groupfolders) mit "Advanced Permissions"; `ACLs.md` bleibt die Quelle,
-        abgeglichen wird nur in eine Richtung. Grundlage: `myacl rules --json` (gebaut). Testinstanz: Nextcloud 32 auf dem
+        abgeglichen wird nur in eine Richtung. Grundlage: `seiton acl rules --json` (gebaut). Testinstanz: Nextcloud 32 auf dem
         GMXtec (Container `myos-nc`, nur 127.0.0.1:8081, per `ssh -L`); Ziel später: eine Nextcloud 32.0.1 eines Bekannten
         (ohne Admin-Zugang: braucht dort einen Team folder und "Manage advanced permissions")
         Versuch 2026-11-07 ergab:
@@ -297,15 +297,15 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
           ein Präfix, sonst wird die Rolle `Admin` womöglich Admin der ganzen Nextcloud
         - Personen in `# Users` sind freie Namen, die Cloud braucht Konten: Zuordnung Name → Konto nötig
         - Basisrechte eines Team folders kennen nur read, write (= Ändern + Anlegen), share, delete
-        [x] `myacl sync --plan`: die Nextcloud-Regeln berechnen, pro Person (Gruppen anlegen bräuchte einen Admin),
+        [x] `seiton acl sync --plan`: die Nextcloud-Regeln berechnen, pro Person (Gruppen anlegen bräuchte einen Admin),
             jede Regel legt alle Bits fest, Leserecht auf den Weg samt Sperren daneben, die Gruppe des Team folders an der
             Wurzel ohne Rechte (core/acl_nextcloud.py; Konten in `.MyOS/Nextcloud.md`). Nicht abbildbar und gemeldet:
             Muster wie `/Job/*.pdf`, Ordner, die es noch nicht gibt (Embryos), `change`
-        [x] `myacl sync --dry-run`: die vorhandenen Regeln lesen und nur den Unterschied zeigen (core/nextcloud_dav.py;
+        [x] `seiton acl sync --dry-run`: die vorhandenen Regeln lesen und nur den Unterschied zeigen (core/nextcloud_dav.py;
             gegen die Testinstanz geprüft, der Plan folgt dem Baum der Cloud). Über WebDAV
             (`PROPFIND`/`PROPPATCH` von `nc:acl-list`, ersetzt alle Regeln eines Pfads); braucht nur "Manage advanced
             permissions", kein `occ`. Bits: read 1, update 2, create 4, delete 8, share 16, dazu eine Maske
-        [x] `myacl sync`: den Unterschied anwenden (pro Pfad die ganze Liste, die tiefsten zuerst, danach Kontrolle),
+        [x] `seiton acl sync`: den Unterschied anwenden (pro Pfad die ganze Liste, die tiefsten zuerst, danach Kontrolle),
             fragt vorher oder braucht `--yes`. Auf der Testinstanz geprüft 2026-11-07: per WebDAV setzt Nextcloud danach
             genau die ACLs.md durch (Tom nur `Familie/Kind`, Lisa in `Finanz` nur lesen, Karl nur `Job`)
         [x] Neue Einträge auf dem Weg sofort sperren (Lücke oben): Nextcloud-App `cloud/nextcloud/myos_acl` (PHP,
@@ -324,7 +324,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
             Regelwerk in PHP. Offizielle Schnittstellen von `@nextcloud/files` 3.12 (Header, FileListFilter).
             Verworfen: blasse Zeilen mitten in der Liste (keine Schnittstelle, der Desktop-Client würde sie als echte
             Ordner synchronisieren), Embryos als leere echte Ordner
-        [x] Stufe 2 (2026-11-07): `myacl sync` schreibt pro Projekt `.MyOS/Embryos.json` (Baum, pro Embryo was die
+        [x] Stufe 2 (2026-11-07): `seiton acl sync` schreibt pro Projekt `.MyOS/Embryos.json` (Baum, pro Embryo was die
             Geburt kopiert, mit Hash) und lädt diese Dateien nach `.MyOS/Embryos/<Embryo>/` (core/cloud_embryos.py;
             nur Geändertes, Entfallenes geht). Wer im Projekt etwas darf, darf beides lesen, sonst nichts in `.MyOS`
             (`plan(readable=...)`; jeder Eintrag unter einer Wegregel bekommt jetzt eine eigene Regel). Geburt im
@@ -361,7 +361,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
                 gebaut, wenn sich das ETag des Team-Ordners ändert; Container `myos-core` im Netz `myos-net`
                 neben `myos-nc`, ohne offenen Port; `myos_acl` reicht `GET .../api/v1/lens` mit dem
                 angemeldeten Konto durch (LensController.php). Integrationstest über die Brücke grün (7/7)
-            [x] Erkenntnis: `myacl sync` lädt nur die Embryos hoch - `ACLs.md`, `Nextcloud.md`, Vorlagen lagen
+            [x] Erkenntnis: `seiton acl sync` lädt nur die Embryos hoch - `ACLs.md`, `Nextcloud.md`, Vorlagen lagen
                 gar nicht im Team-Ordner. Der Kern liest sie dort (der Team-Ordner ist die Quelle); im Test lädt
                 sie der Test hoch wie ein Sync-Client, vor dem Sync, damit ihre Regeln mitgesetzt werden
             [x] Ansicht "Perspectives" in Files (2026-11-10, src/lens.js, App 0.2.0): Abteilungen, Regal, dann die
@@ -379,7 +379,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
             [ ] Offen: Abteilungen, in denen man nirgends etwas lesen darf (`00_Admin`), zeigen ein leeres Regal;
                 Unterprojekte erreicht man nur über ihr Projekt (wie im Laufwerk)
         [ ] Schritt 2: API für Ebene und Geburt, Ereignisse aus der App `seiton`, Rechte live
-            [x] Rechte live (2026-11-10): Nach jedem Neubau des Schattens tut der Kern, was `myacl sync` tut
+            [x] Rechte live (2026-11-10): Nach jedem Neubau des Schattens tut der Kern, was `seiton acl sync` tut
                 (core/nextcloud_sync.py, gemeinsam mit der CLI), mit dem Dienstkonto - Regeln und Embryos. Ein
                 später angelegter Ordner hat seine Rechte nach etwa 10-30 Sekunden, eine in der Cloud geänderte
                 `ACLs.md` ändert die Regeln. Lässt `ACLs.md` niemanden übrig, der die Rechte ändern darf, bleibt
@@ -399,7 +399,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
                 `Depth: infinity` (Rückfall auf Ordner für Ordner) und unveränderte `.MyOS`-Dateien per ETag aus dem
                 vorigen Schatten: neuer Ordner hat seine Rechte nach ~5 s
             [ ] Schatten und Regeln werden pro Runde ganz neu gerechnet - bei großen Team-Ordnern messen
-        [x] Vorlagen wie Formulare (2026-11-08): `myacl sync` legt pro Embryo einen Ordner in `.MyOS/Embryos/` an,
+        [x] Vorlagen wie Formulare (2026-11-08): `seiton acl sync` legt pro Embryo einen Ordner in `.MyOS/Embryos/` an,
             lesbar nur für wen, der den Ordner lesen darf, der daraus wird (wie Scope Embryos zeigt); wer in
             `/00_Admin` nichts darf, sieht weder Embryo noch Vorlage. `Embryos.json` ist nur noch Buchhaltung des
             Syncs; der Browser liest die Embryos aus den Ordnern, die er sehen darf. Integrationstest und Browser grün
@@ -414,7 +414,7 @@ Die strategische Richtung (Lehren aus früheren Versuchen, Jetzt / Als Nächstes
             die ganze Instanz; Desktop und Cloud vorerst getrennt - der Sync-Client trägt keine xattrs; Werte bleiben
             auf dem Desktop; Tags vor Filtern)
             [x] 4a Tags (App 0.6.0): Der Kern legt die Tags aller `Tags.md` als Nextcloud-Tags an (beim Abgleich,
-                auch `myacl sync`; nie gelöscht). Die Ordnerzeile zeigt die Tags des Projekts, ein Klick filtert die
+                auch `seiton acl sync`; nie gelöscht). Die Ordnerzeile zeigt die Tags des Projekts, ein Klick filtert die
                 Liste, der aktive Filter als Chip wie in Files. `project_tags` jetzt in core/tags.py (Scope nutzt es)
             [ ] Farben aus PostFix' `app.json` als Farbe der Nextcloud-Tags
             [ ] Brücke Desktop (xattr) <-> Cloud (Nextcloud-Tags)

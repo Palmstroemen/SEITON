@@ -1,8 +1,8 @@
-# cli/myls.py (update)
+# cli/seiton_ls.py
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-myls - MyOS Intelligent File Lister
+seiton ls - Intelligent File Lister
 """
 
 import os
@@ -14,17 +14,17 @@ from pathlib import Path
 from typing import List, Dict, Optional, Any
 import tempfile
 
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from core.brand import COMMAND, META_DIR, NAME  # noqa: E402  (no dependencies of its own)
+
 try:
     # Try to import the core
-    sys.path.insert(0, str(Path(__file__).parent.parent))
     from core.localBlueprintLayer import Blueprint
     from core.tags import read_tags, tag_list
     from core.xray import xray_listing
-    from core.brand import META_DIR, NAME
     HAS_CORE = True
 except ImportError:
     HAS_CORE = False
-    NAME = ""
 
 class Lister:
     def __init__(self, path: str) -> None:
@@ -33,7 +33,7 @@ class Lister:
             print(f"Error: Directory does not exist: {self.root}", file=sys.stderr)
             sys.exit(1)
         
-        # Initialize MyOS API if available
+        # Initialize SEITON API if available
         self.api = None
         self.in_project = False
         
@@ -42,7 +42,7 @@ class Lister:
                 self.api = Blueprint(self.root)
                 self.in_project = True
             except (ValueError, ImportError):
-                # Not a MyOS project or other error
+                # Not a SEITON project or other error
                 pass
     
     def is_embryo(self, name: str) -> bool:
@@ -221,11 +221,12 @@ def parse_arguments(args=None) -> argparse.Namespace:
         args = sys.argv[1:]  # Default: current command line
     
     parser = argparse.ArgumentParser(
+        prog=f'{COMMAND} ls',
         description=f'{NAME} Intelligent File Lister'.strip(),
         epilog='Examples:\n'
-               '  myls . --extended          # Show embryo status\n'
-               '  myls ~/projects --recent=5 # 5 newest files\n'
-               '  myls --all                 # Combined overview',
+               f'  {COMMAND} ls . --extended          # Show embryo status\n'
+               f'  {COMMAND} ls ~/projects --recent=5 # 5 newest files\n'
+               f'  {COMMAND} ls --all                 # Combined overview',
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     
@@ -289,16 +290,16 @@ def parse_arguments(args=None) -> argparse.Namespace:
     parser.add_argument(
         '--version',
         action='version',
-        version=f'myls 0.2.0 ({NAME} Prototype)'
+        version=f'{COMMAND} ls 0.2.0 ({NAME} Prototype)'
     )
     
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
-def main() -> None:
+def main(argv=None) -> None:
     """Main entry point."""
     try:
-        args = parse_arguments()
+        args = parse_arguments(argv)
         lister = Lister(args.path)
         
         # Dispatch to the selected view

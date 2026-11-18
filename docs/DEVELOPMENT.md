@@ -27,7 +27,7 @@ SEITON/
 │   ├── SunTree/          # the crown, for dropping into folders
 │   └── ClipboardTool/    # CopyQ commands: clips as Markdown files
 ├── assets/               # icons and brand images
-├── cli/                  # CLI tools (myls, myproject, mytag, etc.), see cli/Dokumentationen/CLI.md
+├── cli/                  # the command seiton and its tools (cli/seiton.py, cli/seiton_<command>.py), see cli/Dokumentationen/CLI.md
 ├── daemon/               # the lens drive's daemon, the clock
 ├── cloud/                # Nextcloud app and the core service
 ├── installer/            # seiton_install.py (./install.sh) and its requirements
@@ -84,11 +84,12 @@ python3 apps/Scope/Scope.py
 python3 examples/PostFix/cli.py path/to/file.md
 python3 apps/Headline/Headline.py
 python3 examples/SunTree/SunTree.py SEITON_Test/Projekte/
-python3 cli/myls.py SEITON_Test/Projekte/ --extended
+python3 cli/seiton.py ls SEITON_Test/Projekte/ --extended
 ```
 
-After `./install.sh` the same as launchers in `~/.local/bin`: `seiton`, `seiton-postfix`,
-`seiton-headline`, `seiton-time`, `seiton-clock`, the CLI tools.
+After `./install.sh` the same as launchers in `~/.local/bin`: `seiton` (alone Scope, with a
+command the tools: `seiton ls`, `seiton help`), `seiton-postfix`, `seiton-headline`, `seiton-time`,
+`seiton-clock`.
 
 ## UI Language (i18n)
 

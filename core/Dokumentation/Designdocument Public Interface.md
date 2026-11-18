@@ -23,7 +23,7 @@ outermost layer that suffices.
 | Layer | What | Who may use it |
 |---|---|---|
 | **1. Files** | `.seiton/` (Project.md, ACLs.md, Tags.md, Filters/, Trash/), the standard folders, `.TagsHere.json`, `seiton:` links | every program in every language, even without SEITON installed |
-| **2. CLI** | `myls`, `myproject`, `mytag`, `myacl`, `myfilter`, `myedit`, `myimport`, `myexport`, with `--json` where an app reads the output | every program that can start a process |
+| **2. CLI** | `seiton ls`, `seiton project`, `seiton tag`, `seiton acl`, `seiton filter`, `seiton edit`, `seiton import`, `seiton export`, with `--json` where an app reads the output | every program that can start a process |
 | **3. The daemon** | the perspective daemon's protocol (lens, shared place, clock) and the drive "Perspektiven" | programs that follow the lens or the place live |
 | **4. Python** | a package `seiton` (section 4) | Python apps that want more than files and CLI |
 
@@ -97,8 +97,8 @@ does this the same way Scope does.
    longer needs `core.name_migration`.
 5. **Theme/.** Done with step 1 (2026-11-18): the tag styles moved to `core/` (`core.tag_chips`,
    `core.tag_styles`), the icons to `assets/icons/`; `seiton.look` is to re-export the styles.
-6. **CLI with `--json`.** Which tools give machine-readable output first: probably `myls` and
-   `myproject`.
+6. **CLI with `--json`.** Which tools give machine-readable output first: probably `seiton ls` and
+   `seiton project`.
 7. **The daemon's protocol.** Today only `LensLink` knows it. To be documented with a version
    number before an app in another language may speak it.
 

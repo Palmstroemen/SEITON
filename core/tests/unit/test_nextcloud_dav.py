@@ -1,5 +1,5 @@
 """Reading a Nextcloud Team folder over WebDAV (tree and "advanced permissions" rules) and
-comparing its rules with the planned ones (myacl sync --dry-run). No network: a fake
+comparing its rules with the planned ones (seiton acl sync --dry-run). No network: a fake
 transport answers like Nextcloud 32 does."""
 
 import json
@@ -217,7 +217,7 @@ def test_a_rule_with_the_wrong_mask_is_a_change():
     assert ("/Familie/Kind", "user", "tom") in {(c.path, c.kind, c.account) for c in diff(planned, tree)}
 
 
-# --- files (the embryos of myacl sync) ---
+# --- files (the embryos of seiton acl sync) ---
 
 def _files_transport(answers, calls):
     def request(method, url, body, headers, auth):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-myexport - MyOS export CLI
+seiton export - export CLI
 """
 
 import argparse
@@ -10,11 +10,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.exporter import export_subtree
-from core.brand import NAME  # noqa: E402
+from core.brand import COMMAND, NAME  # noqa: E402
 
 
 def parse_args(args=None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(prog=f"{COMMAND} export", 
         description=f"{NAME} export utility",
     )
     parser.add_argument("path", help="Path inside a project to export")
@@ -31,8 +31,8 @@ def parse_args(args=None) -> argparse.Namespace:
     return parser.parse_args(args)
 
 
-def main() -> None:
-    args = parse_args()
+def main(argv=None) -> None:
+    args = parse_args(argv)
     try:
         result = export_subtree(args.path, args.out, zip_output=args.zip)
         print(f"Exported to {result.package_path}")

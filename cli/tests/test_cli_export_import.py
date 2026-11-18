@@ -1,4 +1,4 @@
-# cli/tests/test_cli_myexport_import.py
+# cli/tests/test_cli_export_import.py
 
 import subprocess
 import sys
@@ -9,10 +9,10 @@ from core.exporter import export_subtree
 from core.brand import META_DIR
 
 
-def _run_cmd(script_name, args, cwd):
-    script = Path(__file__).parent.parent.parent / "cli" / script_name
+def _run_cmd(command, args, cwd):
+    script = Path(__file__).parent.parent.parent / "cli" / "seiton.py"
     return subprocess.run(
-        [sys.executable, str(script)] + args,
+        [sys.executable, str(script), command] + args,
         capture_output=True,
         text=True,
         cwd=cwd,
@@ -22,14 +22,14 @@ def _run_cmd(script_name, args, cwd):
 def _create_project(project_root: Path) -> None:
     settings_dir = project_root / META_DIR
     settings_dir.mkdir(parents=True, exist_ok=True)
-    (settings_dir / "Project.md").write_text("# MyOS Project\n")
+    (settings_dir / "Project.md").write_text("# SEITON Project\n")
     (settings_dir / "Templates.md").write_text("# Templates\nStandard\n")
 
     templates_dir = project_root / META_DIR / "Templates" / "Standard"
     templates_dir.mkdir(parents=True, exist_ok=True)
 
 
-def test_myexport_creates_package():
+def test_export_creates_package():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
         project_root = tmp / "Project"
@@ -41,14 +41,14 @@ def test_myexport_creates_package():
         (subtree / "note.txt").write_text("x")
 
         out_dir = tmp / "out"
-        result = _run_cmd("myexport.py", [str(subtree), "--out", str(out_dir)], cwd=tmpdir)
+        result = _run_cmd("export", [str(subtree), "--out", str(out_dir)], cwd=tmpdir)
 
         assert result.returncode == 0
         assert "Exported to" in result.stdout
         assert any(out_dir.iterdir())
 
 
-def test_myimport_imports_package():
+def test_import_imports_package():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
         project_root = tmp / "Project"
@@ -67,7 +67,7 @@ def test_myimport_imports_package():
         target.mkdir()
 
         result = _run_cmd(
-            "myimport.py",
+            "import",
             [str(exported.package_path), "--target", str(target), "--mode", "adopt"],
             cwd=tmpdir,
         )

@@ -52,7 +52,7 @@ The building blocks exist but are fragmented. SEITON aims to unify them into one
 | **assets/** | SEITON's icons and brand images |
 | **templates/** | The templates SEITON ships (Standard, Person, Firma, Development) |
 | **installer/** | The installer (`install.sh` starts it) and its requirements |
-| **cli/** | CLI tools (myls, myproject, mytag, myedit, myfilter, etc.) |
+| **cli/** | The command `seiton` and its tools (seiton ls, seiton project, seiton tag, seiton acl, ...) |
 | **docs/** | Design entry point, roadmap, logbook, status, development guide, conventions, security |
 | **docs/Vision/** | Concept and GUI notes (e.g. CWD/CWP/CTD) |
 | **Learning SEITON/** | Tutorial and learning content (DE/EN) |
@@ -88,7 +88,7 @@ cd SEITON
 
 It installs the missing system packages (after asking, with sudo), puts SEITON's Python packages
 into a venv of its own (`~/.local/share/seiton/venv`), adds SEITON to the menu, the launchers
-`seiton`, `seiton-postfix` and the CLI tools to `~/.local/bin`, and the templates to
+`seiton` (with its commands: `seiton help`) and `seiton-postfix` to `~/.local/bin`, and the templates to
 `~/.seiton/Templates`. It asks whether SunTree, the Headline and the clock of the time tracking should start at
 login and whether the file browsers should show Markdown previews (`--suntree`, `--headline`,
 `--clock`, `--thumbnailer`; `--yes` asks nothing).
@@ -107,9 +107,9 @@ python3 apps/Scope/Scope.py
 python3 -m pytest
 ```
 
-**CLI examples:**
+**CLI examples** (installed: `seiton ls ...`; `seiton help` lists the commands):
 ```bash
-python3 cli/myls.py "Learning SEITON/DE/Lektion10" --extended
+python3 cli/seiton.py ls "Learning SEITON/DE/Lektion10" --extended
 python3 examples/PostFix/cli.py path/to/file.md
 ```
 

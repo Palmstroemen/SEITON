@@ -26,7 +26,7 @@ belongs in the core.
 
 ## 3. Where We Stand (commit 1e05deb)
 
-SEITON runs on the desktop as a compiler and the cloud gets the result: `myacl sync` reads a
+SEITON runs on the desktop as a compiler and the cloud gets the result: `seiton acl sync` reads a
 local copy, sets real Team folder rules and uploads `Embryos.json` with the template files.
 The rights are real, Nextcloud enforces them. But the logic only runs at sync time:
 
@@ -75,7 +75,7 @@ answer; the copies in `.seiton/Embryos/` are then no longer needed.
   by the forwarded events; a periodic ETag check catches what an event missed.
 - The shadow is a cache, never a source: on doubt it is rebuilt.
 - The source of truth is the Team folder itself. A desktop SEITON with the sync client sees the
-  same `ACLs.md`; `myacl sync` from the desktop becomes optional.
+  same `ACLs.md`; `seiton acl sync` from the desktop becomes optional.
 
 ## 6. Who Acts with Which Rights
 
@@ -84,7 +84,7 @@ answer; the copies in `.seiton/Embryos/` are then no longer needed.
   browser does it with the user's session, so Nextcloud checks the user's rights as for any
   other action. The core never writes documents on a user's behalf.
 - **The service account sets rules.** One account with "Manage advanced permissions" on the
-  Team folder (a person of the role Admin, as `myacl sync` needs today) applies the rules the
+  Team folder (a person of the role Admin, as `seiton acl sync` needs today) applies the rules the
   core computes, right after the event that needs them. A newborn folder gets its rights in
   seconds, not at the next sync.
 - **A template is like a form at an office**: whoever may file the application may see the
@@ -93,7 +93,7 @@ answer; the copies in `.seiton/Embryos/` are then no longer needed.
   rules of the embryo's path). Whoever may do nothing there sees neither the embryo nor its
   template (e.g. `/00_Admin` for someone outside the role Admin). The birth then copies with
   the user's own rights; there are no files a user owns afterwards but was not allowed to
-  read before. Built into `myacl sync` already (2026-11-08): each embryo's folder in
+  read before. Built into `seiton acl sync` already (2026-11-08): each embryo's folder in
   `.seiton/Embryos/` is readable for who may read the folder it becomes, as Scope shows an
   embryo (read there); births need create on top, which Nextcloud checks.
 - `seiton` passes the user's id; the core trusts only that header and only with the shared
@@ -187,7 +187,7 @@ the most and risk the least - the core sets no rules and writes nothing.
    a sync; editing `ACLs.md` in the cloud changes the rules.
    State 2026-11-10: rights live are done, differently than first thought - no events yet.
    After each rebuild of the shadow (the Team folder's ETag changed) the core does what
-   `myacl sync` does (core/nextcloud_sync.py, shared with the CLI) with the service account:
+   `seiton acl sync` does (core/nextcloud_sync.py, shared with the CLI) with the service account:
    rules and `.seiton/Embryos/`. A folder made later has its rights in about 10-30 seconds;
    until then `LockNewEntries` keeps it locked on the way. An `ACLs.md` that leaves no one
    who may change the rights is not sent (most likely broken: its parser is lenient, garbage
@@ -230,7 +230,7 @@ the most and risk the least - the core sets no rules and writes nothing.
    its own. Values (`Wichtig=80`) stay on the desktop; Nextcloud has no place for them. Tags
    before filters, so filters can later filter by tag.
    4a, tags (2026-11-11): the core makes the tags of every project's `Tags.md` as
-   collaborative tags when it reconciles (core/nextcloud_sync.py, also `myacl sync`; never
+   collaborative tags when it reconciles (core/nextcloud_sync.py, also `seiton acl sync`; never
    removed - others on the instance may use them). `GET tags?path=` gives the row the tags a
    folder's project suggests (`core/tags.py: project_tags`, Scope's own); a click shows only
    what carries the tag, its chip under the filters as Files shows its own. Colours (PostFix'
@@ -305,7 +305,7 @@ other). Checked 2026-11-10: `core/perspective_drive.py` maps the turned paths wi
   (rights add up, nothing can be taken away deeper), so there the adapter must refuse or
   approximate, never pretend.
 - Today the Nextcloud parts still live in `core/` (`acl_nextcloud.py`, `nextcloud_dav.py`,
-  `nextcloud_sync.py`, the last shared by `myacl sync` and the core service since step 2), and
+  `nextcloud_sync.py`, the last shared by `seiton acl sync` and the core service since step 2), and
   `cloud/service/` imports them from there. So `core/` is not free of platform code yet. They
   move into a Nextcloud adapter with the second adapter (e.g. Synology), not before (state
   2026-11-18).

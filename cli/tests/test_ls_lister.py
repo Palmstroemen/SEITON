@@ -1,4 +1,4 @@
-# cli/tests/test_myls.py
+# cli/tests/test_ls_lister.py
 import pytest
 from pathlib import Path
 import sys
@@ -7,26 +7,26 @@ import tempfile
 import subprocess
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from cli.myls import Lister, parse_arguments, main
+from cli.seiton_ls import Lister, parse_arguments, main
 
 def test_extended_flag_parsing(monkeypatch):
     """Test that the --extended flag is parsed correctly."""
-    monkeypatch.setattr(sys, 'argv', ['myls.py', '--extended'])
+    monkeypatch.setattr(sys, 'argv', ['seiton_ls.py', '--extended'])
     args = parse_arguments()
     assert args.extended == True
     assert args.path == "."
     
-    monkeypatch.setattr(sys, 'argv', ['myls.py', '/some/path', '--extended'])
+    monkeypatch.setattr(sys, 'argv', ['seiton_ls.py', '/some/path', '--extended'])
     args = parse_arguments()
     assert args.extended == True
     assert args.path == "/some/path"
     
-    monkeypatch.setattr(sys, 'argv', ['myls.py'])
+    monkeypatch.setattr(sys, 'argv', ['seiton_ls.py'])
     args = parse_arguments()
     assert args.extended == False
 
 def test_extended_view_without_api(capsys):
-    """Test extended view without MyOS API."""
+    """Test extended view without SEITON API."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
         (tmp / "file1.txt").touch()
@@ -120,12 +120,12 @@ def test_extended_color_output(capsys, monkeypatch):
         assert "embryo_dir" in captured.out
 
 def test_command_line_integration(monkeypatch):
-    """Test myls.py with --extended."""
+    """Test seiton ls with --extended."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
         (tmp / "testfile.txt").touch()
         
-        monkeypatch.setattr(sys, 'argv', ['myls.py', '--extended', str(tmp)])
+        monkeypatch.setattr(sys, 'argv', ['seiton_ls.py', '--extended', str(tmp)])
         
         import io
         from contextlib import redirect_stdout, redirect_stderr
@@ -170,8 +170,8 @@ def test_recent_lists_the_newest_files_below(tmp_path):
     for name, when in made:
         (tmp_path / name).write_text("x")
         os.utime(tmp_path / name, (when, when))
-    script = Path(__file__).parent.parent.parent / "cli" / "myls.py"
-    shown = subprocess.run([sys.executable, str(script), str(tmp_path), "--recent=2"],
+    script = Path(__file__).parent.parent.parent / "cli" / "seiton.py"
+    shown = subprocess.run([sys.executable, str(script), "ls", str(tmp_path), "--recent=2"],
                            capture_output=True, text=True).stdout
     lines = [line for line in shown.splitlines() if line.strip()]
     assert len(lines) == 2, shown

@@ -1,4 +1,4 @@
-# cli/tests/test_cli_mytag.py
+# cli/tests/test_cli_tag.py
 
 import subprocess
 import sys
@@ -10,9 +10,9 @@ import pytest
 
 
 def _run_cmd(args, cwd):
-    script = Path(__file__).parent.parent.parent / "cli" / "mytag.py"
+    script = Path(__file__).parent.parent.parent / "cli" / "seiton.py"
     return subprocess.run(
-        [sys.executable, str(script)] + args,
+        [sys.executable, str(script), "tag"] + args,
         capture_output=True,
         text=True,
         cwd=cwd,
@@ -24,7 +24,7 @@ def _skip_if_no_xattr():
         pytest.skip("xattr not available on this platform")
 
 
-def test_mytag_set_and_list():
+def test_tag_set_and_list():
     _skip_if_no_xattr()
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
@@ -38,7 +38,7 @@ def test_mytag_set_and_list():
         assert "wichtig=60" in result.stdout
 
 
-def test_mytag_add_remove_clear():
+def test_tag_add_remove_clear():
     _skip_if_no_xattr()
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
@@ -88,12 +88,12 @@ def test_folder_tags_are_the_ones_scope_shows(tmp_path):
     assert not (folder / META_DIR).exists()
 
 
-def test_myls_shows_the_folder_tags_scope_shows(tmp_path):
+def test_ls_shows_the_folder_tags_scope_shows(tmp_path):
     from core.scope_api import ScopeApi
 
     folder = tmp_path / "Rechnungen"
     folder.mkdir()
     ScopeApi(str(tmp_path)).set_folder_tags(str(folder), ["wichtig"])
-    script = Path(__file__).parent.parent.parent / "cli" / "myls.py"
-    shown = subprocess.run([sys.executable, str(script), str(tmp_path), "--tags"], capture_output=True, text=True)
+    script = Path(__file__).parent.parent.parent / "cli" / "seiton.py"
+    shown = subprocess.run([sys.executable, str(script), "ls", str(tmp_path), "--tags"], capture_output=True, text=True)
     assert "Rechnungen: wichtig" in shown.stdout, (shown.stdout, shown.stderr)

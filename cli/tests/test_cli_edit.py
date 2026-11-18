@@ -1,4 +1,4 @@
-# cli/tests/test_cli_myedit.py
+# cli/tests/test_cli_edit.py
 
 import os
 import subprocess
@@ -9,9 +9,9 @@ from core.brand import META_DIR
 
 
 def _run_cmd(args, cwd, env):
-    script = Path(__file__).parent.parent.parent / "cli" / "myedit.py"
+    script = Path(__file__).parent.parent.parent / "cli" / "seiton.py"
     return subprocess.run(
-        [sys.executable, str(script)] + args,
+        [sys.executable, str(script), "edit"] + args,
         capture_output=True,
         text=True,
         cwd=cwd,
@@ -22,7 +22,7 @@ def _run_cmd(args, cwd, env):
 def _create_project(path: Path) -> None:
     settings_dir = path / META_DIR
     settings_dir.mkdir(parents=True, exist_ok=True)
-    (settings_dir / "Project.md").write_text("# MyOS Project\n")
+    (settings_dir / "Project.md").write_text("# SEITON Project\n")
 
 
 def _recording_editor(tmp: Path) -> Path:
@@ -33,8 +33,8 @@ def _recording_editor(tmp: Path) -> Path:
     return editor
 
 
-def test_myedit_opens_the_project_file_and_writes_nothing_itself():
-    """Only the editor writes: a placeholder written by myedit would end the inheritance
+def test_edit_opens_the_project_file_and_writes_nothing_itself():
+    """Only the editor writes: a placeholder written by seiton edit would end the inheritance
     (an empty ACLs.md of a subproject gives no one any right)."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
@@ -51,7 +51,7 @@ def test_myedit_opens_the_project_file_and_writes_nothing_itself():
         assert not (root / META_DIR / "Tags.md").exists()
 
 
-def test_myedit_in_an_inheriting_subproject_says_where_the_rules_come_from():
+def test_edit_in_an_inheriting_subproject_says_where_the_rules_come_from():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
         root = tmp / "Project"
@@ -72,7 +72,7 @@ def test_myedit_in_an_inheriting_subproject_says_where_the_rules_come_from():
         assert str(root / META_DIR / "ACLs.md") in result.stdout
 
 
-def test_myedit_without_editor_changes_nothing():
+def test_edit_without_editor_changes_nothing():
     with tempfile.TemporaryDirectory() as tmpdir:
         root = Path(tmpdir) / "Project"
         root.mkdir()
@@ -87,7 +87,7 @@ def test_myedit_without_editor_changes_nothing():
         assert sorted(p.name for p in (root / META_DIR).iterdir()) == ["Project.md"]
 
 
-def test_myedit_errors_when_no_project():
+def test_edit_errors_when_no_project():
     with tempfile.TemporaryDirectory() as tmpdir:
         env = os.environ.copy()
         env["EDITOR"] = "true"

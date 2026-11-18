@@ -3,7 +3,7 @@
 ## **1. Purpose**
 Deleting in SEITON should be **undoable for a while**, without surprising other programs.
 Before the trash Scope deleted permanently (`shutil.rmtree`). This document describes the
-trash that replaced that; it is built (`core/trash.py`, Scope, `myproject trash`).
+trash that replaced that; it is built (`core/trash.py`, Scope, `seiton project trash`).
 
 ---
 
@@ -69,7 +69,7 @@ So tools that know the freedesktop trash can read it; the path is the ACL path w
 
 ## **5. Open Points**
 - Built: the restore UI (Scope's trash dialog behind the side panel button: name, original
-  place, date, who; restore / delete finally / empty) and the CLI `myproject trash` (list,
+  place, date, who; restore / delete finally / empty) and the CLI `seiton project trash` (list,
   restore, delete, empty `--yes`), both through `ScopeApi`, so the same rights apply.
 - Sync/clouds: the trash travels with the project; whether synced deletions should land
   in every member's view is a question for the sharing model.

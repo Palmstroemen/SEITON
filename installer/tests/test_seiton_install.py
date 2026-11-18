@@ -150,18 +150,20 @@ def test_qt_is_pinned_to_one_minor_version():
 
 # --- launchers, icon, menu ------------------------------------------------------------------
 
-def test_the_launcher_starts_scope_with_the_venv(places):
+def test_the_launcher_is_the_one_command_with_the_venv(places):
+    """seiton alone starts Scope, seiton ls & co. the tools (cli/seiton.py)."""
     _install(places)
     launcher = places.bin / "seiton"
     text = launcher.read_text(encoding="utf-8")
-    assert str(places.venv / "bin" / "python") in text and str(REPO / "apps" / "Scope" / "Scope.py") in text
+    assert str(places.venv / "bin" / "python") in text and str(REPO / "cli" / "seiton.py") in text
     assert launcher.stat().st_mode & stat.S_IXUSR
 
 
-def test_the_cli_tools_and_postfix_get_launchers(places):
+def test_no_launcher_per_tool_but_postfix_gets_one(places):
     _install(places)
-    for name in ("myls", "myproject", "mytag", "myacl"):
-        assert str(REPO / "cli" / f"{name}.py") in (places.bin / name).read_text(encoding="utf-8")
+    # the tools are commands of seiton: one name in PATH, none called my... or seiton-ls
+    assert not list(places.bin.glob("my*"))
+    assert not (places.bin / "seiton-ls").exists()
     # "postfix" is a mail server's command: ours carries the name
     assert str(REPO / "examples" / "PostFix" / "cli.py") in (places.bin / "seiton-postfix").read_text(encoding="utf-8")
     assert not (places.bin / "postfix").exists()

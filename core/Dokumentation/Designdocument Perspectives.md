@@ -36,8 +36,8 @@ Explicitly selected by the user. Manual filters override auto filters.
 
 Rule: The most specific explicit manual filter wins. If none is set, auto filter applies.
 
-Built only in the CLI: `myfilter activate <file>` (or `--manual`) chooses one, and it acts on
-what `myfilter resolve` and `myfilter show` report. Scope has no choice by hand: it was
+Built only in the CLI: `seiton filter activate <file>` (or `--manual`) chooses one, and it acts on
+what `seiton filter resolve` and `seiton filter show` report. Scope has no choice by hand: it was
 taken back on 2026-10-26 ("Designdocument Perspective Resolver MVP.md", A6); in Scope only
 auto filters act.
 
@@ -50,7 +50,7 @@ Filters are stored as Markdown files (`Filter.md`, `.seiton/Filter.md`, `.seiton
 - normal folders in the tree or in templates (e.g., `/4_Finanz/` in the template for auto perspective)
 
 A `Filter.md` (in the folder or its `.seiton/`) acts by itself. The collection in `.seiton/Filters/` is there to
-choose from: it acts only when chosen by hand (`myfilter activate`, `--manual`; so only in `myfilter`, see 4.2),
+choose from: it acts only when chosen by hand (`seiton filter activate`, `--manual`; so only in `seiton filter`, see 4.2),
 so a file lying there cannot change a whole project unasked (2026-11-06).
 
 Inheritance follows standard rules with `dynamic` as default. A future global mode `sparse` may store only deltas instead of full copies.
@@ -100,7 +100,7 @@ Desk.md
 
 `## Perspective` names a lens: a department and deeper levels, without a project (`..`
 and `.` are refused). It was built (2026-10-25) to put the lens on when the filter was chosen
-by hand. Since the choice by hand left Scope (2026-10-26) it is read and reported (`myfilter`,
+by hand. Since the choice by hand left Scope (2026-10-26) it is read and reported (`seiton filter`,
 ScopeApi's filter state, `lens`), but it puts on nothing. An auto filter never puts on a
 lens ("Designdocument Perspective Resolver MVP.md", A6).
 
@@ -115,10 +115,10 @@ Flattening shows items in a single view while preserving origin:
 
 Flattening is a core USP for SEITON.
 A limited form is the x-ray view (`core/xray.py`, Scope's X-ray button, on by default, and
-`myls --roentgen`): small folders are seen through, smallest first and each completely or
+`seiton ls --roentgen`): small folders are seen through, smallest first and each completely or
 not at all, while the listing fits without scrolling. Projects, empty, hidden and unreadable
 folders stay folders. Files seen through carry the folder they lie in (Scope: a large, faint
-folder behind the icon and a tooltip; myls: `(in Rechnungen/2024)`).
+folder behind the icon and a tooltip; seiton ls: `(in Rechnungen/2024)`).
 
 ---
 
