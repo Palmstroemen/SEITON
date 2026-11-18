@@ -41,8 +41,7 @@ Dialog {
         }
         var createdPath = backend.createFolder(targetPath, folderName)
         if (!createdPath || createdPath.length === 0) {
-            window.moveReportMessage = qsTr("Could not create folder \"%1\".").arg(folderName)
-            window.moveReportDialog.open()
+            window.showReport(qsTr("Could not create folder \"%1\".").arg(folderName))
             window.pendingCreateFolderName = qsTr("New Folder")
             window.pendingCreateFolderTargetPath = ""
             return

@@ -53,7 +53,7 @@ ApplicationWindow {
     // Started with a task (Scope.py --setup | --search | --clipboard; the Headline's buttons).
     function startAction(action) {
         if (action === "setup") flipSetup(true)
-        else if (action === "search") templatesBrowser.searchActive = true
+        else if (action === "search") level2SearchActive = true  // the binding stays (the magnifier toggles it)
         else if (action === "clipboard") openClipboard()
     }
     function flipSetup(toBack) {
@@ -353,6 +353,12 @@ ApplicationWindow {
     property string pendingMoveTargetDir: ""
     property string pendingMoveMessage: ""
     property string moveReportMessage: ""
+    /// A message in the report dialog - for the dialogs too: an id of this file is no property of
+    /// the window (window.moveReportDialog was undefined there, the messages went nowhere).
+    function showReport(text) {
+        moveReportMessage = text
+        moveReportDialog.open()
+    }
     property var pendingFolderBatchSources: []
     property string pendingFolderBatchName: qsTr("New Folder")
     property string pendingCreateFolderTargetPath: ""
@@ -529,6 +535,8 @@ ApplicationWindow {
         if (!browser) {
             return
         }
+        // A hover still waiting in the preview row must not open more after this (F5).
+        if (typeof browser.cancelPendingPreviewHover === "function") browser.cancelPendingPreviewHover()
         // No highlight means the browser reset its preview: nothing to show.
         var target = browser.highlightedPreviewPath()
         if (target.length === 0) {

@@ -58,6 +58,7 @@ class HeadlineBackend(QObject):
     dockChanged = Signal()
     widgetsChanged = Signal()
     themeChanged = Signal()
+    setupRequested = Signal()  # its own settings window (SettingsWindow.qml)
     # "Open the panel": at an anchor {x, y, width, height} (the applet's button), or None: at
     # the pointer (the launcher, the shortcut). From a later start (Headline/instance.py).
     panelRequested = Signal("QVariant")
@@ -203,6 +204,28 @@ class HeadlineBackend(QObject):
     def pointerRect(self) -> dict:
         pos = QCursor.pos()
         return {"x": pos.x(), "y": pos.y(), "width": 1, "height": 1}
+
+    # --- its own settings (2026-11-18: a program of its own, SEITON's master) -------------------
+
+    # What its settings window may set: where and how it sits, and SEITON's look.
+    OWN_SETTINGS = ("Headline/place", "Headline/dock", "General/darkTheme")
+
+    @Slot()
+    def openSetup(self) -> None:
+        self.setupRequested.emit()
+
+    @Slot(str, result="QVariant")
+    def setting(self, key: str):
+        return Settings().get(key) if key in self.OWN_SETTINGS else None
+
+    @Slot(str, "QVariant", result=bool)
+    def setSetting(self, key: str, value) -> bool:
+        """Set one of its own settings; it takes effect at once (the line, the dock, the look)."""
+        if key not in self.OWN_SETTINGS or not Settings().set(key, value):
+            return False
+        self.checkDock()
+        self.checkTheme()
+        return True
 
     @Slot(str, result=bool)
     def openScope(self, action: str) -> bool:

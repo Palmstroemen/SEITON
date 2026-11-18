@@ -333,9 +333,8 @@ def test_the_panel_has_them_too(started):
     assert [i.objectName() for i in _items(panel.contentItem()) if i.objectName().startswith("tool")] == TOOLS
 
 
-@pytest.mark.parametrize("tool, command_ends", [
-    ("toolSetup", "--setup"), ("toolSearch", "--search"), ("toolClipboard", "--clipboard")])
-def test_setup_search_and_clipboard_open_scope_here(started, world, tool, command_ends):
+@pytest.mark.parametrize("tool, command_ends", [("toolSearch", "--search"), ("toolClipboard", "--clipboard")])
+def test_search_and_clipboard_open_scope_here(started, world, tool, command_ends):
     backend = started["engine"]._backend
     ran = []
     backend._start = ran.append
@@ -546,3 +545,64 @@ def test_a_drop_into_the_panel_moves_too(world, started):
     _drop(planung, str(note))
     _settle(started["app"])
     assert (world["studio"] / "02_Planung" / "Plan.pdf").is_file()
+
+
+
+# --- its own settings (2026-11-18: the Headline is a program of its own, SEITON's master) -----
+
+def _settings_window(started):
+    panel = _open_panel(started, None)
+    _activate(_all(started, "toolSetup", panel)[0])
+    _settle(started["app"])
+    return _find(started, "headlineSettings")
+
+
+def test_setup_opens_its_own_settings_not_scope(started):
+    backend = started["engine"]._backend
+    ran = []
+    backend._start = ran.append
+    window = _settings_window(started)
+    assert isinstance(window, QWindow) and window.isVisible()
+    assert ran == []  # no Scope started
+
+
+def test_where_and_how_it_sits_take_effect_at_once(started):
+    from core.settings import Settings
+    window = _settings_window(started)
+    line = _find(started, "headlineLine")
+    assert _all(started, "settingsDock_keep", window)[0].property("on")
+    _activate(_all(started, "settingsDock_hide", window)[0])
+    _settle(started["app"])
+    assert Settings().get("Headline/dock") == "hide" and line.property("dockMode") == "hide"
+    _activate(_all(started, "settingsPlace_taskbar", window)[0])
+    _settle(started["app"])
+    assert Settings().get("Headline/place") == "taskbar" and not line.isVisible()
+    assert not _all(started, "settingsDock_keep", window)[0].property("visible")  # only for the top edge
+
+
+def test_light_or_dark_is_set_here(started):
+    from core.settings import Settings
+    window = _settings_window(started)
+    line = _find(started, "headlineLine")
+    colour = line.property("theme")["bg"]
+    dark = Settings().get("General/darkTheme")
+    _activate(_all(started, "settingsLook_light" if dark else "settingsLook_dark", window)[0])
+    _settle(started["app"])
+    assert Settings().get("General/darkTheme") is (not dark)
+    assert line.property("theme")["bg"] != colour
+
+
+def test_more_settings_are_in_scope(started, world):
+    backend = started["engine"]._backend
+    ran = []
+    backend._start = ran.append
+    window = _settings_window(started)
+    _activate(_all(started, "settingsMoreInScope", window)[0])
+    _settle(started["app"])
+    assert ran and ran[-1][-1] == "--setup" and ran[-1][-3].endswith("Scope.py")
+
+
+def test_only_its_own_settings_can_be_set_from_its_window(started):
+    backend = started["engine"]._backend
+    assert backend.setSetting("General/postFix", False) is False  # not its own
+    assert backend.setSetting("Headline/dock", "nonsense") is False

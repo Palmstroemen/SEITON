@@ -38,10 +38,11 @@ Dialog {
             window.pendingFolderBatchName = qsTr("New Folder")
             return
         }
-        var targetPath = backend.createFolder(window.cwp, folderName)
+        // In the folder the FilesPanel shows (where the entries are), as a new folder is.
+        var place = window.filesCreateTarget(window.currentFilesPath())
+        var targetPath = place ? backend.createFolder(place, folderName) : ""
         if (!targetPath || targetPath.length === 0) {
-            window.moveReportMessage = qsTr("Could not create target folder \"%1\".").arg(folderName)
-            window.moveReportDialog.open()
+            window.showReport(qsTr("Could not create target folder \"%1\".").arg(folderName))
             window.pendingFolderBatchSources = []
             window.pendingFolderBatchName = qsTr("New Folder")
             return

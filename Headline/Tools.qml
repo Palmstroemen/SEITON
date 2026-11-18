@@ -2,8 +2,9 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 
 // The Headline's tools (Scope/Designdocument Headline.md, 2): small buttons on top of the way
-// up and in the panel, as M's tools in Scope (Scope/CwdTools.qml). Setup, search and the
-// clipboard open Scope where one is; time opens the time screen; light / dark switches at once.
+// up and in the panel, as M's tools in Scope (Scope/CwdTools.qml). Setup opens the Headline's
+// own settings; search and the clipboard open Scope where one is; time opens the time screen;
+// light / dark switches at once.
 Row {
     id: tools
     property var theme: ({})
@@ -50,7 +51,7 @@ Row {
         objectName: "toolSetup"
         iconName: "preferences-system"
         tip: qsTr("Setup")
-        onActivate: { headline.openScope("setup"); tools.used() }
+        onActivate: { headline.openSetup(); tools.used() }
     }
     Tool {
         objectName: "toolSearch"

@@ -77,3 +77,21 @@ def test_without_a_task_neither(place):
         assert window.property("setupShown") is False
     finally:
         _gone(engine, window, app)
+
+
+def test_after_a_start_with_search_the_magnifier_still_toggles(place):
+    """"docs/Prüfung 2026-11-18.md", S5: the start broke the binding of the search field."""
+    from PySide6.QtCore import QMetaObject
+
+    engine, window, app = _start(place, "search")
+    try:
+        browser = window.findChild(QObject, "templatesBrowserRoot")
+        assert browser.property("searchActive") is True
+        QMetaObject.invokeMethod(browser, "toggleSearch")
+        app.processEvents()
+        assert browser.property("searchActive") is False
+        QMetaObject.invokeMethod(browser, "toggleSearch")
+        app.processEvents()
+        assert browser.property("searchActive") is True
+    finally:
+        _gone(engine, window, app)

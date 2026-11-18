@@ -303,13 +303,24 @@ Rectangle {
         z: 2
     }
 
+    // Without a target the DragHandler moves this button itself: it goes back to its place
+    // when the drag ends (dropped, refused or canceled) - else it stayed lying there (F3).
+    property real _dragHomeX: 0
+    property real _dragHomeY: 0
     DragHandler {
         id: dragHandler
         enabled: dragEnabled
         onActiveChanged: {
-            if (!active && dragEnabled) {
+            if (active) {
+                root._dragHomeX = root.x
+                root._dragHomeY = root.y
+                return
+            }
+            if (dragEnabled) {
                 root.Drag.drop()
             }
+            root.x = root._dragHomeX
+            root.y = root._dragHomeY
         }
     }
 

@@ -77,7 +77,8 @@ the small fan, then the three that are no line; a line under each says what it d
 1. `core/settings.py`, the flip with the tabs **General** (light/dark, language) and
    **SunTree** (its values); SunTree reads them on appearing; Scope keeps light/dark and the
    language. **Built** (2026-10-26): `Scope/SetupPage.qml` is the back
-   (the Scope and Headline tabs say what will come there); ⚙ in M's tools and, until the top
+   (the Scope tab says what will come there; the Headline's tab left on 2026-11-18 - it keeps its
+   own settings, `Headline/SettingsWindow.qml`); ⚙ in M's tools and, until the top
    bar goes, in the top bar flips it (a `Rotation` of the window's content about the vertical
    axis, the back taking over at the quarter turn); Scope's backend offers `setting`,
    `setSetting`, `settingDefault`, `settingLimits`, `resetSetting`; SunTree reads its group

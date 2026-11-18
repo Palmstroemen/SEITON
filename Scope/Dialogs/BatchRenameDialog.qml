@@ -28,16 +28,14 @@ Dialog {
         var fromText = String(window.pendingBatchReplaceFrom || "")
         var toText = String(batchRenameToInput.text || "")
         if (fromText.length === 0) {
-            window.moveReportMessage = qsTr("No shared search text found.")
-            window.moveReportDialog.open()
+            window.showReport(qsTr("No shared search text found."))
             window.pendingBatchRenamePaths = []
             window.pendingBatchReplaceFrom = ""
             window.pendingBatchReplaceTo = ""
             return
         }
         if (!window.hasBackend() || typeof backend.renameEntriesBatch !== "function") {
-            window.moveReportMessage = qsTr("Batch rename is not available in this mode.")
-            window.moveReportDialog.open()
+            window.showReport(qsTr("Batch rename is not available in this mode."))
             window.pendingBatchRenamePaths = []
             window.pendingBatchReplaceFrom = ""
             window.pendingBatchReplaceTo = ""
@@ -52,11 +50,10 @@ Dialog {
         window.pendingBatchReplaceTo = ""
         window.selectedEntryPaths = renamedPaths
         window.updateFiles()
-        window.moveReportMessage = qsTr("Renamed: %1\nUnchanged: %2\nFailed: %3")
+        window.showReport(qsTr("Renamed: %1\nUnchanged: %2\nFailed: %3")
             .arg(renamedPaths.length)
             .arg(unchangedCount)
-            .arg(failedCount)
-        window.moveReportDialog.open()
+            .arg(failedCount))
     }
     onRejected: {
         window.pendingBatchRenamePaths = []

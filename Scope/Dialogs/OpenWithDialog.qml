@@ -30,8 +30,7 @@ Dialog {
     onAccepted: {
         var ok = window.performOpenWith(window.pendingOpenWithPath, openWithCommandInput.text)
         if (!ok) {
-            window.moveReportMessage = qsTr("Could not open the file with the chosen program.")
-            window.moveReportDialog.open()
+            window.showReport(qsTr("Could not open the file with the chosen program."))
         }
         window.pendingOpenWithPath = ""
     }

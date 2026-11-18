@@ -129,9 +129,11 @@ def _heard(view):
     return heard.toVariant() if hasattr(heard, "toVariant") else heard
 
 
-def test_four_tabs(page):
+def test_three_tabs(page):
+    # The Headline keeps its own settings (2026-11-18: a program of its own, SEITON's master).
     view, _ = page
-    assert [_named(view, f"tab{name}") is not None for name in ("General", "Scope", "Headline", "SunTree")] == [True] * 4
+    assert [_named(view, f"tab{name}") is not None for name in ("General", "Scope", "Headline", "SunTree")] == [
+        True, True, False, True]
 
 
 def test_general_switches_and_flipping_back(page):
@@ -626,7 +628,7 @@ def test_without_suntree_there_is_no_suntree_tab(page_without_suntree):
     view, _ = page_without_suntree
     assert _named(view, "tabSunTree") is None
     assert _named(view, "crownPreview") is None
-    assert _named(view, "tabGeneral") is not None and _named(view, "tabHeadline") is not None
+    assert _named(view, "tabGeneral") is not None and _named(view, "tabScope") is not None
 
 
 def test_the_small_crown_comes_from_suntree_only_when_it_is_there():
@@ -635,32 +637,6 @@ def test_the_small_crown_comes_from_suntree_only_when_it_is_there():
     source = (SCOPE_DIR / "SetupPage.qml").read_text(encoding="utf-8")
     assert "CrownPreview {" not in source
     assert 'if (root.sunTreePresent) setSource("CrownPreview.qml"' in source
-
-
-def test_the_headline_keeps_its_room_or_hides_itself(page):
-    # Scope/Designdocument Headline.md, 1: as a taskbar can; the Headline reads it within a second.
-    from core.settings import Settings
-
-    view, _ = page
-    _click(view, _named(view, "tabHeadline"))
-    assert _named(view, "headlineDock_keep").property("on")
-    _click(view, _named(view, "headlineDock_hide"))
-    assert Settings().get("Headline/dock") == "hide" and _named(view, "headlineDock_hide").property("on")
-    _click(view, _named(view, "headlineDock_keep"))
-    assert Settings().get("Headline/dock") == "keep"
-
-
-def test_the_headline_at_the_top_edge_or_from_the_taskbar(page):
-    from core.settings import Settings
-
-    view, _ = page
-    _click(view, _named(view, "tabHeadline"))
-    assert _named(view, "headlinePlace_top").property("on")
-    _click(view, _named(view, "headlinePlace_taskbar"))
-    assert Settings().get("Headline/place") == "taskbar"
-    assert not _named(view, "headlineDock_keep").property("visible")  # only for the top edge
-    _click(view, _named(view, "headlinePlace_top"))
-    assert Settings().get("Headline/place") == "top" and _named(view, "headlineDock_keep").property("visible")
 
 
 def test_asking_before_moving_folders_is_off_unless_switched_on(page):

@@ -33,7 +33,7 @@ Window {
     readonly property var folders: view.folders || []
     // How many folders fit beside the CWD and the » (worked out from their widths).
     property int shownCount: folders.length
-    // Always there ("keep") or hiding itself ("hide"), as set in Setup (tab Headline).
+    // Always there ("keep") or hiding itself ("hide"), as set in its own settings (SettingsWindow.qml).
     property string dockMode: headline.dockMode()
     readonly property int edgeHeight: 2
     property bool pointerInside: false
@@ -84,11 +84,13 @@ Window {
             line.embryoOpacity = headline.embryoOpacity()
             panelWindow.theme = line.theme
             panelWindow.embryoOpacity = line.embryoOpacity
+            settingsWindow.read()
         }
         function onWidgetsChanged() {
             line.widgets = headline.widgets()
             Qt.callLater(line.fit)
         }
+        function onSetupRequested() { settingsWindow.openCentered() }
         function onDockChanged() {
             line.dockMode = headline.dockMode()
             line.placeMode = headline.placeMode()
@@ -154,6 +156,11 @@ Window {
         var result = headline.dropMove(plan.sources, plan.target)
         if (result.failed && result.failed.length > 0)
             dropAsk.tell(qsTr("Could not move: %1").arg(result.failed.join(", ")))
+    }
+    SettingsWindow {
+        id: settingsWindow
+        theme: line.theme
+        baseFont: line.baseFont
     }
     DropAsk {
         id: dropAsk

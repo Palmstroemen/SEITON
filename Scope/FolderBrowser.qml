@@ -1945,6 +1945,15 @@ Item { // ROOT
         Qt.callLater(function() { _applyQueuedPreviewHover(generation) })
     }
 
+    /// A hover still waiting for its delay is dropped: the FilesPanel took the folder (the
+    /// pointer crossed the preview row on its way down), nothing opens after that (F5).
+    function cancelPendingPreviewHover() {
+        previewHoverGen += 1
+        previewHoverApplyScheduled = false
+        previewHoverPendingGeneration = 0
+        previewHoverDelayTimer.stop()
+    }
+
     function updatePreviewFromHover(sourceLevel, sourcePath, sourceItem, sourceFillColor, sourceCenterX, sourceCenterY, fromCascadePanel) {
         if (!previewEnabled) {
             return
@@ -2580,7 +2589,9 @@ Item { // ROOT
                                 }
                                 Keys.onEscapePressed: {
                                     root.searchText = ""
-                                    root.searchActive = false
+                                    // Asked of the owner, as the magnifier does: setting searchActive
+                                    // here would break its binding (the magnifier could not reopen it).
+                                    if (root.searchActive) root.toggleSearch()
                                 }
                             }
                         }
@@ -3141,7 +3152,9 @@ Item { // ROOT
                                 }
                                 Keys.onEscapePressed: {
                                     root.searchText = ""
-                                    root.searchActive = false
+                                    // Asked of the owner, as the magnifier does: setting searchActive
+                                    // here would break its binding (the magnifier could not reopen it).
+                                    if (root.searchActive) root.toggleSearch()
                                 }
                             }
                         }
@@ -3217,6 +3230,13 @@ Item { // ROOT
                                 renaming: root.allowRename && root.renameTargetPath === fullPathForSegment
                                 renameEnabled: root.allowRename
                                 renameText: root.renameDraft
+                                // A folder of the path takes the file in hand, as in H (F6).
+                                allowDrops: root.allowDrops
+                                onDrop: function(payload) {
+                                    var targetPath = fullPathForSegment  // the delegate may go mid-handler
+                                    if (!payload) return
+                                    root.emitMoveEntryIntent(payload, targetPath)
+                                }
                                 onActivate: {
                                     pathSelected(modelData)
                                     root.emitNavigationIntent(modelData, "single", "verticalParent", null)
@@ -3324,7 +3344,8 @@ Item { // ROOT
                         onRenameCanceled: root.renameCanceled()
                         onDrop: function(payload) {
                             if (!payload) return
-                            clipboardDropRequested(payload)
+                            // Into the current folder, as on the CWD button in H (F6).
+                            root.emitMoveEntryIntent(payload, currentFullPath)
                         }
                         MouseArea {
                             visible: root.verticalView && !root.usePathBar

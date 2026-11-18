@@ -89,3 +89,26 @@ def test_the_tag_filter_filters_the_shown_folder(scope):
     app.processEvents()
     names = sorted(e["name"] for e in _list(window.property("fileItemsRaw")))
     assert names == ["Brief.md"], names
+
+
+def _dialog(window, kind):
+    from PySide6.QtCore import QObject
+
+    return next(o for o in window.findChildren(QObject) if o.metaObject().className().startswith(kind))
+
+
+def test_moving_into_a_new_folder_makes_it_in_the_shown_folder(scope):
+    """"docs/Prüfung 2026-11-18.md", S4: the new folder came into the CWD."""
+    from PySide6.QtCore import QMetaObject
+
+    app, window, root, sub = scope
+    _show(window, sub)
+    _wait(app, lambda: "Notiz.md" in _by_name(window))
+    window.setProperty("pendingFolderBatchSources", [str(sub / "Notiz.md")])
+    window.setProperty("pendingFolderBatchName", "Sammlung")
+    dialog = _dialog(window, "MoveSelectedFoldersDialog")
+    QMetaObject.invokeMethod(dialog, "open")
+    app.processEvents()
+    QMetaObject.invokeMethod(dialog, "accept")
+    assert _wait(app, lambda: (sub / "Sammlung" / "Notiz.md").exists())
+    assert not (root / "Sammlung").exists()

@@ -4,8 +4,8 @@ import QtQuick.Dialogs
 import QtQuick.Layouts 1.15
 import "js/Brand.js" as Brand
 
-// The back of Scope (Scope/Designdocument Setup.md): the settings of Scope, the Headline and
-// SunTree in tabs. Values go to the one settings file through `settings` (Scope's backend:
+// The back of Scope (Scope/Designdocument Setup.md): the settings of Scope and SunTree in tabs
+// (the Headline keeps its own since 2026-11-18: Headline/SettingsWindow.qml). Values go to the one settings file through `settings` (Scope's backend:
 // setting, setSetting, settingDefault, settingLimits, resetSetting); SunTree reads it when it
 // appears. Light/dark and the language are switched by the host (signals), which keeps them;
 // colours one sets go to the scheme worn (setSchemeColor, core/color_schemes.py).
@@ -41,8 +41,6 @@ Rectangle {
     property bool showSuggestionsOn: settings ? settings.setting("Scope/showSuggestions") === true : true
     property bool showHiddenOn: settings ? settings.setting("Scope/showHidden") === true : false
     property string templatesStyle: settings ? String(settings.setting("Scope/templatesStyle")) : "smallIcon"
-    property string headlineDock: settings ? String(settings.setting("Headline/dock")) : "keep"
-    property string headlinePlace: settings ? String(settings.setting("Headline/place")) : "top"
     property string projectsStyle: settings ? String(settings.setting("Scope/projectsStyle")) : "text"
     property bool instantReopenOn: settings ? settings.setting("Scope/instantReopen") === true : true
     property string previewTuning: settings ? String(settings.setting("Scope/previewTuning")) : "balanced"
@@ -603,7 +601,6 @@ Rectangle {
             Layout.fillWidth: true
             TabButton { objectName: "tabGeneral"; text: qsTr("General") }
             TabButton { objectName: "tabScope"; text: qsTr("Scope") }
-            TabButton { objectName: "tabHeadline"; text: qsTr("Headline") }
             TabButton { id: sunTreeTab; objectName: "tabSunTree"; text: qsTr("SunTree") }
             Component.onCompleted: if (!root.sunTreePresent) tabs.removeItem(sunTreeTab)
         }
@@ -914,40 +911,6 @@ Rectangle {
                         }
                     }
                 }
-            }
-
-            ColumnLayout {  // Headline (Scope/Designdocument Headline.md)
-                spacing: 8
-                Heading { text: qsTr("Where") }
-                Choices {
-                    // A line at the top edge, or a panel from the taskbar (as the start menu).
-                    prefix: "headlinePlace"
-                    options: [{ value: "top", label: qsTr("Top edge") }, { value: "taskbar", label: qsTr("From the taskbar") }]
-                    current: root.headlinePlace
-                    onChosen: function(value) { root.headlinePlace = value; root.keep("Headline/place", value) }
-                }
-                Heading { text: qsTr("At the top edge"); visible: root.headlinePlace === "top" }
-                Choices {
-                    visible: root.headlinePlace === "top"
-                    // As a taskbar can: always there, keeping its room, or hiding itself until
-                    // the pointer touches the edge.
-                    prefix: "headlineDock"
-                    options: [{ value: "keep", label: qsTr("Always there") }, { value: "hide", label: qsTr("Hides itself") }]
-                    current: root.headlineDock
-                    onChosen: function(value) { root.headlineDock = value; root.keep("Headline/dock", value) }
-                }
-                Text {
-                    visible: root.headlinePlace === "top"
-                    text: root.headlineDock === "keep"
-                        ? qsTr("Windows stop below the line.")
-                        : qsTr("The line comes when the pointer touches the top edge.")
-                    color: root.mutedColor
-                    font.pixelSize: root.baseFont - 1
-                    wrapMode: Text.WordWrap
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 1  // its words do not widen the page
-                }
-                Item { Layout.fillHeight: true }
             }
 
             RowLayout {  // SunTree: the crown (SunTree/Designdocument Krone.md, 5)

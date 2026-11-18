@@ -13,7 +13,8 @@ The Headline is SEITON at the screen's edge: where one is (the project, the curr
 project's standard folders, the perspectives, a few buttons. One click there, and one is in the
 right folder, or has the lens on at the right place.
 
-It lives in one of two places, chosen in Setup (tab Headline), as a taskbar can be:
+It lives in one of two places, chosen in its own settings (the Setup button of its tools), as a
+taskbar can be:
 
 | Place | Looks like | Folders shown |
 |---|---|---|
@@ -152,7 +153,8 @@ the time screen can start the clock (`Time/TimeScreen.py`, `startClock`). Not bu
 1. **The Headline as a program with its model and its own popup windows:** a window of its own,
    the top line drawn from the model (CWD, standard folders, buttons), the CWD dropdown and the
    cascade as windows that open towards the room. Tested offscreen, as Scope (TDD, harnesses).
-2. **The top edge:** always there (dock, strut) or hiding itself; the Headline tab in Setup.
+2. **The top edge:** always there (dock, strut) or hiding itself; set in its own settings
+   (since 2026-11-18; before, a tab in Scope's Setup).
    Built 2026-11-17: `Headline/x11_dock.py` (dock type, strut), the setting `Headline/dock`
    (keep, hide), read anew every second; hiding, the line is a 2 px edge that opens at once and
    goes 0.5 s after the pointer left, not while a dropdown is open.
@@ -189,6 +191,17 @@ the time screen can start the clock (`Time/TimeScreen.py`, `startClock`). Not bu
    do nothing on a click; a drop onto them bears them (section 3). Not yet tried on the real
    desktop: a drag from Nemo onto the dock line, and onto the panel (a popup).
 5. Later: KDE's plasmoid; Wayland.
+
+### Its own settings (decided 2026-11-18)
+
+The Headline is a program of its own and SEITON's visual component, always there: the master for
+everything else. Scope is only a first file browser for SEITON; others may follow. So the
+Headline keeps its own settings, not a tab in Scope's Setup: `Headline/SettingsWindow.qml`, opened
+by the Setup button of its tools. It holds where it sits, how it sits at the top edge, and
+SEITON's look (light, dark), which Scope and SunTree follow. What is SEITON-wide beyond that (the
+language, the paleness of suggested folders, asking before moving folders) is still in Scope's
+Setup for now ("More settings in Scope") and should move here in time. Its window may set only
+its own keys (`HeadlineBackend.OWN_SETTINGS`); a change takes effect at once.
 
 ## 5. Open
 

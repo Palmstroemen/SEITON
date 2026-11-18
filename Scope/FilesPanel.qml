@@ -1719,6 +1719,7 @@ Rectangle { // Files panel
             delegate: FolderItem {
                 readonly property string itemPath: (model.path && model.path.length > 0) ? model.path : ""
                 readonly property bool isFolder: !!(model.isDir)
+                readonly property bool isVirtual: !!(model.isVirtual)
                 readonly property bool selected: root.selectedPaths && itemPath.length > 0 && root.selectedPaths.indexOf(itemPath) !== -1
                 width: filesGrid.cellWidth - root.gridSpacing
                 height: filesGrid.cellHeight - (root.itemStyle === "largeIcon" ? root.gridSpacing : 4)
@@ -1801,18 +1802,6 @@ Rectangle { // Files panel
                         } else {
                             root.fileActivated(model.name)
                         }
-                    }
-                }
-                DropArea {
-                    anchors.fill: parent
-                    // Embryos accept drops too; the backend births them on move. Virtual
-                    // folders do not: putting something there must not create them.
-                    enabled: model.isDir && !model.isVirtual
-                    onDropped: function(drop) {
-                        var payload = DropUtils.payloadText(drop)
-                        if (payload.length === 0 || itemPath.length === 0) return
-                        root.moveEntriesRequested(payload, itemPath)
-                        drop.acceptProposedAction()
                     }
                 }
             }
@@ -1937,7 +1926,10 @@ Rectangle { // Files panel
                     var contentY = filesGrid.contentY || 0
                     var idx = filesGrid.indexAt(drop.x + contentX, drop.y + contentY)
                     var item = idx >= 0 ? filesGrid.itemAtIndex(idx) : null
-                    var targetDir = (item && item.isFolder && item.itemPath && item.itemPath.length > 0)
+                    // Into a folder dropped on (embryos too: the backend births them on move);
+                    // a virtual folder (a year group of a sorted folder) is none yet - the drop
+                    // goes into the sorted folder, which files it.
+                    var targetDir = (item && item.isFolder && !item.isVirtual && item.itemPath && item.itemPath.length > 0)
                         ? item.itemPath
                         : root.currentPath
                     if (!targetDir || targetDir.length === 0) return
