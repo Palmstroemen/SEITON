@@ -465,48 +465,6 @@ class ScopeApi:
     def get_last_desk_result(self) -> Dict[str, Any]:
         return self._desk_service.get_last_result()
 
-    def list_config_targets(self, path: str, config_name: str) -> List[Dict[str, str]]:
-        # Security: reject traversal/path-injection in config filenames.
-        if not self._desk_service.is_safe_config_name(config_name):
-            return [
-                {
-                    "id": "discard",
-                    "label": "Nicht speichern",
-                    "targetPath": "",
-                    "configPath": "",
-                    "exists": "0",
-                }
-            ]
-        if not self._desk_service.supports_config(config_name):
-            return [
-                {
-                    "id": "discard",
-                    "label": "Nicht speichern",
-                    "targetPath": "",
-                    "configPath": "",
-                    "exists": "0",
-                }
-            ]
-        target = self._resolve_path(path)
-        template_root: Optional[Path] = None
-        root, blueprint = self._resolve_context_for_target(target)
-        if root and blueprint is not None:
-            templates_dir = getattr(blueprint, "templates_dir", None)
-            if templates_dir:
-                templates_base = Path(templates_dir).expanduser().resolve()
-                for template_name in getattr(blueprint, "template_names", []):
-                    candidate = (templates_base / str(template_name)).resolve()
-                    if is_within(target, candidate):
-                        template_root = candidate
-                        break
-        return self._desk_service.list_config_targets(
-            target,
-            config_name=config_name,
-            global_root=self.top_root,
-            include_template_target=template_root is not None,
-            template_root=template_root,
-        )
-
     def ensure_project_config(self, path: str, config_name: str) -> Dict[str, Any]:
         # Security: reject traversal/path-injection in config filenames.
         if not self._desk_service.is_safe_config_name(config_name):
@@ -516,50 +474,6 @@ class ScopeApi:
         if not root:
             return {"ok": False, "reason": "no_project_root", "path": ""}
         return self._desk_service.ensure_config_file(root, config_name=config_name)
-
-    def capture_config_state(self, config_name: str) -> Dict[str, Any]:
-        # Security: reject traversal/path-injection in config filenames.
-        if not self._desk_service.is_safe_config_name(config_name):
-            return {"ok": False, "reason": "invalid_config_name", "path": ""}
-        return self._desk_service.capture_config_state(config_name=config_name)
-
-    def apply_config_state_to_target(self, path: str, config_name: str, target_id: str) -> Dict[str, Any]:
-        # Security: reject traversal/path-injection in config filenames.
-        if not self._desk_service.is_safe_config_name(config_name):
-            return {"ok": False, "reason": "invalid_config_name", "path": ""}
-        target = self._resolve_path(path)
-        options = self.list_config_targets(str(target), config_name)
-        chosen = None
-        for item in options:
-            if str(item.get("id")) == str(target_id):
-                chosen = item
-                break
-        if chosen is None:
-            return {"ok": False, "reason": "target_not_found", "path": ""}
-        if str(chosen.get("id")) == "discard":
-            return {"ok": True, "reason": "discarded", "path": ""}
-        target_path = str(chosen.get("targetPath") or "").strip()
-        if not target_path:
-            return {"ok": False, "reason": "missing_target_path", "path": ""}
-        state_result = self._desk_service.capture_config_state(config_name=config_name)
-        if not state_result.get("ok"):
-            return {"ok": False, "reason": "capture_failed", "path": ""}
-        return self._desk_service.write_config_from_state(
-            Path(target_path),
-            config_name=config_name,
-            state=dict(state_result.get("state") or {}),
-        )
-
-    def has_local_config(self, path: str, config_name: str) -> bool:
-        # Security: reject traversal/path-injection in config filenames.
-        if not self._desk_service.is_safe_config_name(config_name):
-            return False
-        target = self._resolve_path(path)
-        root = find_project_root(target)
-        if not root:
-            return False
-        candidate = root / META_DIR / config_name
-        return candidate.exists() and candidate.is_file()
 
     def find_config(self, path: str, config_name: str) -> Optional[str]:
         if not self._desk_service.is_safe_config_name(config_name):

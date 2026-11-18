@@ -460,14 +460,6 @@ class Backend(QObject):
         # the core (DeskService).
         self._lens_link.update_context(path)
 
-    @Slot(str, str, result="QVariantMap")
-    def ensureProjectConfig(self, path: str, configName: str):
-        return self._api.ensure_project_config(path, configName)
-
-    @Slot(str, str, result="QString")
-    def findConfig(self, path: str, configName: str) -> str:
-        return self._api.find_config(path, configName) or ""
-
     # The lens (Designdocument Perspective Resolver MVP.md, Part A): Scope only asks the
     # session (daemon/lens_link.py); it builds no lens paths itself.
 

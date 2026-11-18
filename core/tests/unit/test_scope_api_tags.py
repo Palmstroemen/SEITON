@@ -427,13 +427,8 @@ def test_scope_api_rejects_unsafe_config_name_for_security(tmp_path):
 
     api = ScopeApi(str(project_root))
 
-    assert api.has_local_config(str(project_root), "../outside.md") is False
-    targets = api.list_config_targets(str(project_root), "../outside.md")
-    assert len(targets) == 1
-    assert targets[0]["id"] == "discard"
     assert api.ensure_project_config(str(project_root), "../outside.md")["ok"] is False
-    assert api.capture_config_state("../outside.md")["ok"] is False
-    assert api.apply_config_state_to_target(str(project_root), "../outside.md", "discard")["ok"] is False
+    assert api.find_config(str(project_root), "../outside.md") is None
 
 
 def test_scope_api_rejects_overlong_config_name_for_security(tmp_path):
@@ -446,12 +441,7 @@ def test_scope_api_rejects_overlong_config_name_for_security(tmp_path):
     api = ScopeApi(str(project_root))
     long_name = "A" * 200 + ".md"
 
-    assert api.has_local_config(str(project_root), long_name) is False
     assert api.ensure_project_config(str(project_root), long_name)["ok"] is False
-    assert api.capture_config_state(long_name)["ok"] is False
-    targets = api.list_config_targets(str(project_root), long_name)
-    assert len(targets) == 1
-    assert targets[0]["id"] == "discard"
 
 
 def test_scope_api_rejects_non_ascii_spoofed_config_name_for_security(tmp_path):
@@ -464,53 +454,7 @@ def test_scope_api_rejects_non_ascii_spoofed_config_name_for_security(tmp_path):
     api = ScopeApi(str(project_root))
     spoofed = "Dеsk.md"  # Cyrillic e
 
-    assert api.has_local_config(str(project_root), spoofed) is False
     assert api.ensure_project_config(str(project_root), spoofed)["ok"] is False
-    assert api.capture_config_state(spoofed)["ok"] is False
-    targets = api.list_config_targets(str(project_root), spoofed)
-    assert len(targets) == 1
-    assert targets[0]["id"] == "discard"
-
-
-def test_scope_api_list_config_targets_shows_nearest_parent_when_inherited(tmp_path):
-    root = tmp_path / "Workspace"
-    project_root = root / "Project"
-    child = project_root / "Child"
-    child.mkdir(parents=True)
-
-    (project_root / META_DIR).mkdir(parents=True)
-    (project_root / META_DIR / "Project.md").write_text("# MyOS Project\n", encoding="utf-8")
-    (project_root / META_DIR / "Desk.md").write_text("# Desk\nThemePreset: Root\n", encoding="utf-8")
-    (child / META_DIR).mkdir(parents=True)
-    (child / META_DIR / "Project.md").write_text("# MyOS Project\n", encoding="utf-8")
-
-    api = ScopeApi(str(child))
-    targets = api.list_config_targets(str(child), "Desk.md")
-
-    ids = [item["id"] for item in targets]
-    assert "current_project" in ids
-    assert "nearest_parent_with_config" in ids
-
-
-def test_scope_api_list_config_targets_hides_parent_when_inherit_not(tmp_path):
-    root = tmp_path / "Workspace"
-    project_root = root / "Project"
-    child = project_root / "Child"
-    child.mkdir(parents=True)
-
-    (project_root / META_DIR).mkdir(parents=True)
-    (project_root / META_DIR / "Project.md").write_text("# MyOS Project\n", encoding="utf-8")
-    (project_root / META_DIR / "Desk.md").write_text("# Desk\nThemePreset: Root\n", encoding="utf-8")
-    (child / META_DIR).mkdir(parents=True)
-    (child / META_DIR / "Project.md").write_text("# MyOS Project\n", encoding="utf-8")
-    (child / META_DIR / "Desk.md").write_text("# Desk\n#### inherit: not\n", encoding="utf-8")
-
-    api = ScopeApi(str(child))
-    targets = api.list_config_targets(str(child), "Desk.md")
-
-    ids = [item["id"] for item in targets]
-    assert "current_project" in ids
-    assert "nearest_parent_with_config" not in ids
 
 
 def test_list_project_tags_inherits_from_the_parent_project(tmp_path):
