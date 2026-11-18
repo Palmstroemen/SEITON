@@ -1285,6 +1285,8 @@ def main() -> int:
     root = engine.rootObjects()[0]
     drop_filter = DropDebugFilter()
     root.installEventFilter(drop_filter)
+    from core.quit_on_signal import quit_on_sigterm
+    quit_on_sigterm(app)  # kill/logout: aboutToQuit still unmounts the lens drive (O2)
     return app.exec()
 
 

@@ -520,6 +520,8 @@ def main() -> int:
 
     # Ensure early backend refresh once QML is alive.
     QTimer.singleShot(0, backend.refreshAll)
+    from core.quit_on_signal import quit_on_sigterm
+    quit_on_sigterm(app)  # kill/logout: the cleanup below still runs (O2)
     exit_code = app.exec()
     hotkey_service.stop()
     backend.close()
