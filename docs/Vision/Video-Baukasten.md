@@ -51,6 +51,31 @@ Nur was gebaut ist, kommt als Lösung vor; was geplant ist, höchstens als Ausbl
 
 M12 und M13 sind Vision: im Video nur als Ausblick am Ende, als solcher benannt („Wohin es geht“).
 
+## Wo wir sie erwischen
+
+Erste Einschätzung vom 19.11., noch nicht an echten Menschen geprüft (Gerhard, eine IT-Leitung,
+eine Lehrerin, ein Kassier). Vorbild: Beim ersten iPhone überzeugte ein einziger Moment, das
+Scrollen. Wir suchen je Zielgruppe den größten Leidensdruck und den einen Moment, der ihn sichtbar
+löst.
+
+**Der Moment für alle:** Ein blasser Ordner wird geboren. Datei drauf, er wird kräftig, und Nemo
+zeigt ihn sofort. Das kann kein anderer Dateimanager; jeder versteht es ohne Erklärung. Danach
+„LibreOffice weiß nichts von SEITON“: über die Brille gespeichert, und im Projekt ist der Ordner da.
+
+| Für wen | Größter Leidensdruck | Der Moment, der sie erwischt | Module |
+|---|---|---|---|
+| Behörden, IT | Rechte-Wildwuchs auf Fileservern; jede Migration zieht ihn mit; Audits | Eine Zeile in `ACLs.md` ändern, Sekunden später sieht Anna den Ordner in der Nextcloud | M4, M5 |
+| EU-Entscheider | Abhängigkeit von wenigen Anbietern | SEITON wegnehmen, und alles bleibt da: Ordner und Textdateien | M6 |
+| Firmen | Suchzeit, „wo ist das?“; neue Leute; der Mechaniker, der Ablage hasst | Die Buchhaltung setzt die Brille auf und sieht alle Rechnungen aller Aufträge, ohne dass jemand doppelt ablegt | M2, M1 |
+| Schulen | Überlastete Lehrkräfte ohne Admin; jedes Jahr neue Klassen | Neues Schuljahr: Klassen aus der Vorlage; die Mathe-Lehrerin sieht mit der Brille nur Mathe, über alle Klassen | M7, M2 |
+| Militär | Ständige Wechsel der Besetzung; abgeschottete Netze | Die Stabsgliederung S1 bis S6 ist schon die Ordnung: SEITON spricht ihre Sprache; S4 sieht die Logistik aller Einheiten | M8, M2 |
+| Vereine | Ehrenamt wechselt; das Wissen liegt in privaten Dropboxen und Postfächern | Übergabe: Der neue Kassier bekommt das Projekt und findet sofort alles | M8, M14 |
+| Privat | „Wo ist die Rechnung für die Steuer?“; zwanzig Clouds | Steuer-Brille: alle Rechnungen des Jahres aus allen Lebensbereichen auf einen Blick | M2, M1 |
+
+Die Knaller über alle hinweg, nach Leidensdruck: **Rechte in einer Zeile** (wer je Berechtigungen
+auf einem Fileserver gepflegt hat), **die Brille** (jeder, der quer über Projekte arbeitet),
+**Übergabe und Einstieg** (jede Organisation mit Wechseln), **kein Lock-in** (Behörden und EU).
+
 ## Offen
 
 - Szenen für M7, M8 und M9; vorher prüfen, was davon heute so vorführbar ist.
