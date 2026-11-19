@@ -86,7 +86,11 @@ auf einem Fileserver gepflegt hat), **die Brille** (jeder, der quer über Projek
 ## Szene: Ein Ordner wird geboren (nach Michelangelo)
 
 Der Moment für alle, als Teaser (README, GitHub Pages) und als Auftakt von M1. Etwa 14 Sekunden,
-Collage, Legetrick-Bewegung: ruckelig, wenige Bilder je Sekunde.
+Collage, Legetrick-Bewegung: ruckelig, wenige Bilder je Sekunde. Ton und Machart wie die
+Zwischenspiele von Monty Python (Terry Gilliams Scherenschnitt-Animation): Figuren aus alten
+Kupferstichen und Gemälden ausgeschnitten, steif an Gelenken bewegt, absurd und ernst zugleich.
+Wir übernehmen die Machart, nicht ihre Figuren oder Motive (nicht den großen Fuß); als Vorlagen
+nur gemeinfreie Stiche oder eigene Zeichnungen im Stichstil.
 
 | Zeit | Bild | Ton |
 |---|---|---|
