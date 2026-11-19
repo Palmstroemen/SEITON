@@ -1,8 +1,8 @@
 # nextcloud_sync.py - bring a project's ACLs.md and embryos into its Nextcloud Team folder
 #
-# What `seiton acl sync` does, as one piece the CLI and the MyOS core service share
+# What `seiton acl sync` does, as one piece the CLI and the SEITON core service share
 # ("cloud/nextcloud/Designdocument SEITON Core Service.md", 8, step 2): compare the Team folder
-# with what MyOS says - the rules of ACLs.md (core/acl_nextcloud.py), the embryos of the
+# with what SEITON says - the rules of ACLs.md (core/acl_nextcloud.py), the embryos of the
 # templates (core/cloud_embryos.py) and the tags of Tags.md (as the instance's collaborative
 # tags; never removed: others on the instance may use them) - and send what differs. The project may be a local copy
 # (seiton acl sync) or the shadow tree of the Team folder itself (the core service).
@@ -46,7 +46,7 @@ class Comparison:
 
 class NextcloudSync:
     """The Team folder dav (core.nextcloud_dav.NextcloudDAV) against the project at
-    project_root, whose .MyOS/Nextcloud.md names the accounts and the Team folder's groups."""
+    project_root, whose .seiton/Nextcloud.md names the accounts and the Team folder's groups."""
 
     def __init__(self, project_root: Path, dav) -> None:
         self.project_root = Path(project_root)
@@ -66,7 +66,7 @@ class NextcloudSync:
     def someone_may_change(self) -> bool:
         """Whether one of the people of ACLs.md may still change the rights. Not so, the file
         is most likely broken (its parser is lenient: garbage names no one) - sending it would
-        take every rule away. MyOS refuses such an edit too (core/acl_edit.py, no lock-out)."""
+        take every rule away. SEITON refuses such an edit too (core/acl_edit.py, no lock-out)."""
         return any(may_change_acls(self.policy, user) for user in self.policy.users)
 
     @property

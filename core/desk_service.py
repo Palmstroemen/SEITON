@@ -18,7 +18,7 @@ _MAX_CONFIG_NAME_LEN = 120
 
 
 def desk_home() -> Path:
-    """Where MyOS keeps the user's own desktop (Desk.md) and what it set last."""
+    """Where SEITON keeps the user's own desktop (Desk.md) and what it set last."""
     return config_dir()
 
 
@@ -96,7 +96,7 @@ def _project_roots(path: Path) -> tuple[Optional[Path], Optional[Path]]:
 
 
 def _never_set_by_us(current: DesktopState, applied: Optional[DesktopState]) -> Dict[str, Any]:
-    """Settings of current that MyOS has not set yet (nothing applied, or it could not read them)."""
+    """Settings of current that SEITON has not set yet (nothing applied, or it could not read them)."""
     unknown = (None, "")
     return {
         field: getattr(current, field)
@@ -131,7 +131,7 @@ class DeskService:
     The desktop follows the projects ("Designdocument Desk.md", 12): inside the
     projects tree the nearest Desk.md applies, elsewhere the user's own desktop (the
     system default in desk_home()). What the user changes is saved, without asking,
-    where it was changed. Scope and PostFix share what MyOS set last (desk-state.json),
+    where it was changed. Scope and PostFix share what SEITON set last (desk-state.json),
     so neither takes the other's switch for a change by the user.
     """
 
@@ -194,15 +194,15 @@ class DeskService:
         own = _never_set_by_us(current, applied)
         missing = DesktopState(**{f: v for f, v in own.items() if not _desk_has(system_desk, f)})
         if missing != DesktopState():
-            # Before MyOS changes anything: the user's own desktop, restored outside projects.
-            # Also for settings MyOS learned to read later (an older system default).
+            # Before SEITON changes anything: the user's own desktop, restored outside projects.
+            # Also for settings SEITON learned to read later (an older system default).
             write_desk_values(system_desk, missing)
         changed = applied is not None and any(
             getattr(applied, f) is not None and getattr(current, f) != getattr(applied, f) for f in _STATE_FIELDS
         )
         owner_file = Path(shared["owner"]) if shared.get("owner") else None
         if changed and owner_file is not None and owner_file.parent.parent.is_dir():
-            # The user changed the desktop since MyOS set it: keep it where it was changed -
+            # The user changed the desktop since SEITON set it: keep it where it was changed -
             # unless that project is gone (renamed, in the trash): its old place is not built
             # anew for it (X5).
             try:
@@ -211,7 +211,7 @@ class DeskService:
                 pass  # not writable there (a template, say): not kept, the desktop still follows
 
         # "Same profile as last time" only means "nothing to do" while the desktop is
-        # still as MyOS set it; after a change the profile is applied again.
+        # still as SEITON set it; after a change the profile is applied again.
         last_applied = (None, None) if changed else (shared.get("source"), shared.get("hash"))
         runtime.active_source, runtime.active_hash = last_applied
         if top is None:  # outside the projects tree: the user's own desktop, no search

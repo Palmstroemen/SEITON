@@ -4,7 +4,7 @@
 # network. Findings behind it (ProjectLogbook, test of 2026-11-07):
 # - Nextcloud's rules are per path and per user or group, inherited, and every permission
 #   bit inherits on its own (mask). A rule here fixes every bit, so the nearest rule wins as
-#   in MyOS.
+#   in SEITON.
 # - Rules are per person (account), not per group: creating groups needs a Nextcloud admin.
 #   A person's rights are the union of their roles, computed by ACLPolicy as everywhere.
 # - Nextcloud needs read on every parent folder. Who has rights only deep down gets read on
@@ -27,7 +27,7 @@ from typing import Callable, Dict, FrozenSet, Iterable, List, Optional, Set, Tup
 from core.acl import RIGHTS_FILES, ACLPolicy, _nearest_rules, _normalize_path, _rule_base
 from core.brand import META_DIR
 
-# MyOS right -> Nextcloud permissions. execute and change have none; share is never given
+# SEITON right -> Nextcloud permissions. execute and change have none; share is never given
 # (it would pass files on beyond ACLs.md).
 NEXTCLOUD_PERMISSIONS = ("read", "write", "create", "delete", "share")
 _MAP = {"read": {"read"}, "write": {"write", "create"}, "delete": {"delete"}}
@@ -70,7 +70,7 @@ def local_tree(root: Path) -> Tuple[Callable[[str], bool], Callable[[str], List[
 
 def read_nextcloud_md(path: Path) -> Tuple[Dict[str, str], Dict[str, str]]:
     """
-    A project's .MyOS/Nextcloud.md: (settings of "# Nextcloud", lower-case keys, e.g. url,
+    A project's .seiton/Nextcloud.md: (settings of "# Nextcloud", lower-case keys, e.g. url,
     folder, group; people of "# Accounts", lower-case person -> account, "Anna Huber: anna.h").
     """
     sections: Dict[str, Dict[str, str]] = {"nextcloud": {}, "accounts": {}}
@@ -109,8 +109,8 @@ def plan(
     everyone with rights in the project when reader is None: the embryos the Files app shows,
     each for who may read where it is born (core/cloud_embryos.readable_paths); those not
     there yet are skipped. protected: the rights and sync
-    files of .MyOS folders (rights_files): only who may change the rights there (change on that
-    .MyOS/ACLs.md) may write them, everyone else keeps at most read. apart: the subprojects
+    files of .seiton folders (rights_files): only who may change the rights there (change on that
+    .seiton/ACLs.md) may write them, everyone else keeps at most read. apart: the subprojects
     with an ACLs.md of their own (core.acl.rules_apart): there their rules decide, not policy's.
     """
     result = Plan()
@@ -144,12 +144,12 @@ def plan(
     return result
 
 
-# In a .MyOS folder: what manages the rights and the sync (ACLs.md as in MyOS, where change
+# In a .seiton folder: what manages the rights and the sync (ACLs.md as in SEITON, where change
 # grants writing it; its history, the cloud settings, the embryos seiton acl sync uploads).
 
 
 def rights_files(paths: Iterable[str]) -> List[str]:
-    """The RIGHTS_FILES among paths (project-relative): entries right inside a .MyOS folder."""
+    """The RIGHTS_FILES among paths (project-relative): entries right inside a .seiton folder."""
     found = []
     for path in paths:
         parent, _, name = path.rpartition("/")

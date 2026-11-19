@@ -49,7 +49,7 @@ from core.brand import META_DIR, getenv
 try:
     from core.localBlueprintLayer import Blueprint
     from core.project import ProjectConfig
-except Exception:  # pragma: no cover - optional for non-MyOS paths
+except Exception:  # pragma: no cover - optional for non-SEITON paths
     Blueprint = None
 
 
@@ -74,7 +74,7 @@ SORT_RULE_SEED = (
 
 
 def find_project_root(start_path: Path) -> Optional[Path]:
-    """Project root = directory that has .MyOS/Project.md. .MyOS/ alone is not enough."""
+    """Project root = directory that has .seiton/Project.md. .seiton/ alone is not enough."""
     start_path = start_path.resolve()
     for candidate in [start_path] + list(start_path.parents):
         if (candidate / META_DIR / "Project.md").exists():
@@ -566,7 +566,7 @@ class ScopeApi:
         return self._file_due(sorted_folders(root) if root is not None else [])
 
     def enable_sorting(self, path: str) -> Dict[str, Any]:
-        """Give the folder path a sort rule (.MyOS/Sort.md, years and months by date);
+        """Give the folder path a sort rule (.seiton/Sort.md, years and months by date);
         {ok, reason, path}: "exists", "no_project" (rules only inside projects), "permission",
         "failed" (could not be written)."""
         try:
@@ -1301,7 +1301,7 @@ class ScopeApi:
                 if entry.get("isDir") and not entry.get("isEmbryo") and self._is_template_path(
                     context_blueprint, f"{rel}/{entry['name']}" if rel else entry["name"]
                 ):
-                    entry["isStandard"] = True  # a MyOS folder already born
+                    entry["isStandard"] = True  # a SEITON folder already born
         # File-browser style order: folders first, then files, both alphabetic.
         entries.sort(key=lambda item: (not bool(item.get("isDir")), str(item.get("name", "")).lower()))
         groups = virtual_groups(target)
@@ -1810,7 +1810,7 @@ class ScopeApi:
             pass
 
     def _get_folder_batch(self, folder_path: Path) -> Dict[str, Optional[str]]:
-        """Return batch image URL or batchText from .MyOS/batch.* (batch1.svg etc. ignored).
+        """Return batch image URL or batchText from .seiton/batch.* (batch1.svg etc. ignored).
         A folder one may not look into has none (lost+found, another user's home)."""
         try:
             return self._read_folder_batch(folder_path)
@@ -2139,7 +2139,7 @@ class ScopeApi:
             target = self._resolve_path(path)
         except Exception:
             return {"bytes": 0, "complete": True}
-        # Read-only and works anywhere, not only inside MyOS projects.
+        # Read-only and works anywhere, not only inside SEITON projects.
         if not target.is_dir():
             return {"bytes": 0, "complete": True}
         root_device = self._device_id(target)
@@ -2356,8 +2356,8 @@ class ScopeApi:
 
     def can_create_project(self, path: str) -> bool:
         """
-        Whether path may become a project (P-Button): an existing folder below a .MyOS
-        (inside the projects tree), no project yet, no template folder and no .MyOS folder.
+        Whether path may become a project (P-Button): an existing folder below a .seiton
+        (inside the projects tree), no project yet, no template folder and no .seiton folder.
         """
         try:
             target = Path(path).expanduser().resolve()
@@ -2366,7 +2366,7 @@ class ScopeApi:
         if not target.is_dir() or (target / META_DIR / "Project.md").exists() or META_DIR in target.parts:
             return False
         if ProjectConfig._find_parent_settings_dir(target) is None:
-            return False  # creating needs a .MyOS above (ProjectConfig.create)
+            return False  # creating needs a .seiton above (ProjectConfig.create)
         templates_dir = find_templates_dir(target)
         if templates_dir is not None:
             templates_dir = templates_dir.resolve()
@@ -2672,7 +2672,7 @@ class ScopeApi:
             if not self._entry_exists(source):
                 result["errors"].append({"source": key, "reason": "missing"})
                 continue
-            # Deleting is undoable: into the project's trash (.MyOS/Trash), outside
+            # Deleting is undoable: into the project's trash (.seiton/Trash), outside
             # projects into the system trash. Nothing is removed for good here.
             try:
                 if trash.project_trash_root(source) is not None:

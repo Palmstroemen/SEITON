@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-importer.py - MyOS import utilities.
+importer.py - SEITON import utilities.
 Imports a subtree from an export package with security checks.
 """
 
@@ -46,7 +46,7 @@ def import_package(
         target_root: Where to adopt it; without one it is restored.
         mode: "auto" (restore without a target, else adopt), "restore" or "adopt".
         conflict: "skip" (files already there stay) or "overwrite". Settings already at the
-            place (a .MyOS there) are never written over.
+            place (a .seiton there) are never written over.
 
     Returns:
         ImportResult describing the import.
@@ -163,7 +163,7 @@ def _validate_subtree_path(subtree: str) -> Path:
 
 def _copy_tree_secure(src: Path, dst: Path, conflict: str) -> None:
     """Copy src to dst without symlinks; a file there already stays (skip) or is replaced
-    (overwrite) - but never one in a .MyOS: the settings and rights of a project at the place."""
+    (overwrite) - but never one in a .seiton: the settings and rights of a project at the place."""
     if conflict not in CONFLICTS:
         raise ValueError(f"Invalid conflict mode: {conflict}")
     if src.is_file():  # a package of a single file (D6)

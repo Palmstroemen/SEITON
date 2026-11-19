@@ -1,4 +1,4 @@
-"""The settings of MyOS's programs in one file (apps/Scope/Designdocument Setup.md).
+"""The settings of SEITON's programs in one file (apps/Scope/Designdocument Setup.md).
 
 Scope writes them on its back; SunTree reads them each time it appears. Every setting has a
 kind, a default and its allowed values in one place; anything else - a value out of range, of
@@ -17,7 +17,7 @@ SETTINGS: Dict[str, Tuple[type, Any, Any]] = {
     "General/language": (str, "de", {"de", "en"}),
     # How pale embryos (template folders not born yet) are, in Scope and SunTree alike.
     "General/embryoOpacity": (float, 0.4, (0.1, 0.9)),
-    # The badges (€, §, ...) on suggested MyOS folders: their own paleness, half way by default.
+    # The badges (€, §, ...) on suggested SEITON folders: their own paleness, half way by default.
     "General/embryoBadgeOpacity": (float, 0.7, (0.1, 1.0)),
     # Notes (.md) open in PostFix, the editor of the workshop; off: Obsidian or the system's editor.
     "General/postFix": (bool, True, None),
@@ -35,7 +35,7 @@ SETTINGS: Dict[str, Tuple[type, Any, Any]] = {
     "Time/roundPer": (str, "stretch", {"stretch", "day"}),
     # Beside the projects worked on last (the Headline's panel): the time in all, this week, today.
     "Time/recentShows": (str, "total", {"total", "week", "today"}),
-    # Scope's two rows (the projects, the MyOS folders); views of their own are to come.
+    # Scope's two rows (the projects, the SEITON folders); views of their own are to come.
     "Scope/projectsRow": (bool, False, None),  # off by default: suggestions show only on the left
     "Scope/templatesRow": (bool, True, None),
     # How both rows show themselves: the path bar, the preview of a folder's contents, its
@@ -43,7 +43,7 @@ SETTINGS: Dict[str, Tuple[type, Any, Any]] = {
     "Scope/pathBar": (bool, True, None),
     "Scope/preview": (bool, True, None),
     "Scope/previewBackground": (bool, False, None),
-    # The rest of the display menus: suggested MyOS folders and hidden folders shown, the folder
+    # The rest of the display menus: suggested SEITON folders and hidden folders shown, the folder
     # style of each row, the preview's behaviour (reopening at once, its timing).
     "Scope/showSuggestions": (bool, True, None),
     "Scope/showHidden": (bool, False, None),

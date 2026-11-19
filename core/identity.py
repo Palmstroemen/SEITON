@@ -3,7 +3,7 @@
 # See "Designdocument ACLs.md", 5.3. People in "# Users" are people of the project, not
 # login names: projects travel (cloud, USB stick) to computers where not every person has
 # an account. So each computer keeps the user's names locally, in
-# ~/.config/MyOS/Identity.md ("Names: Oliver, Oliver Rafelsberger"); in a project the user
+# ~/.config/seiton/Identity.md ("Names: Oliver, Oliver Rafelsberger"); in a project the user
 # is the first of them that the project lists, else (as before) the login name.
 # MYOS_ACL_USER overrides everything (development and tests).
 #

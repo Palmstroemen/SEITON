@@ -1,11 +1,11 @@
 # filing.py - filing by date: flat, virtual, real (see "Designdocument Sort.md")
 #
-# A folder carries its rule in its own .MyOS/Sort.md (prepared in templates, copied along
+# A folder carries its rule in its own .seiton/Sort.md (prepared in templates, copied along
 # when the folder is born). A level of the pattern (year, month, ...) only becomes real
 # when the level above holds more than NewLevelFrom files; before that it is only
 # virtual - a grouping shown, nothing moves. Once a level folder exists, the level stays
 # real, and new level folders are born when a file goes in (never empty, never ahead).
-# Filing is idempotent: MyOS catches up whenever it looks (no watcher that can miss).
+# Filing is idempotent: SEITON catches up whenever it looks (no watcher that can miss).
 
 from __future__ import annotations
 
@@ -56,7 +56,7 @@ class FilingReport:
 
 
 def read_rule(folder: Union[str, Path]) -> Optional[SortRule]:
-    """The rule folder carries (.MyOS/Sort.md), or None: none there, not inside a project,
+    """The rule folder carries (.seiton/Sort.md), or None: none there, not inside a project,
     or not usable (unknown token, '..', an absolute path, a date token twice)."""
     folder = Path(folder).expanduser().resolve()
     sort_file = folder / META_DIR / SORT_FILE

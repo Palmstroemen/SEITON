@@ -1,8 +1,8 @@
 # project_unmake.py - a project becomes an ordinary folder again (crossed-out P-Button)
 #
-# Creating a project remembers what it wrote into .MyOS (CREATED, names and checksums).
-# Turning it back removes .MyOS when nothing of its own came since (changed rights, tags,
-# a trash with entries, ...); otherwise only with consent, and then .MyOS is not deleted
+# Creating a project remembers what it wrote into .seiton (CREATED, names and checksums).
+# Turning it back removes .seiton when nothing of its own came since (changed rights, tags,
+# a trash with entries, ...); otherwise only with consent, and then .seiton is not deleted
 # but goes into the parent project's trash as "SEITON settings". A top project only without
 # settings of its own (no trash above it), not outside the projects tree; subprojects stay.
 
@@ -18,7 +18,7 @@ from core import trash
 from core.template_place import find_templates_dir
 from core.brand import META_DIR, legacy_project_headings, project_heading
 
-CREATED = ".created.json"  # in .MyOS: what creating the project wrote
+CREATED = ".created.json"  # in .seiton: what creating the project wrote
 SETTINGS_NAME = trash.SETTINGS_NAME  # .seiton with settings of its own, in the parent's trash
 
 
@@ -31,7 +31,7 @@ class ProjectHasOwnSettings(Exception):
 
 
 def settings_before(folder: Path) -> List[str]:
-    """What the folder's .MyOS holds before it becomes a project (its tags, a sort rule, ...):
+    """What the folder's .seiton holds before it becomes a project (its tags, a sort rule, ...):
     the folder's, not the project's - turning the project back leaves it."""
     settings_dir = Path(folder) / META_DIR
     try:
@@ -41,7 +41,7 @@ def settings_before(folder: Path) -> List[str]:
 
 
 def record_created(project_root: Path, before: List[str] = ()) -> None:
-    """Remember the files creating the project wrote into its .MyOS, and what was there
+    """Remember the files creating the project wrote into its .seiton, and what was there
     before (settings_before), which is not the project's."""
     settings_dir = Path(project_root) / META_DIR
     kept = set(before)
@@ -71,7 +71,7 @@ def can_unmake(path: Path) -> bool:
 
 
 def own_settings(project_root: Path) -> List[str]:
-    """Names in the project's .MyOS that creating it did not write (or that changed since)."""
+    """Names in the project's .seiton that creating it did not write (or that changed since)."""
     settings_dir = Path(project_root) / META_DIR
     created, kept = _created(settings_dir), _kept(settings_dir)
     own = []
@@ -96,7 +96,7 @@ def own_settings(project_root: Path) -> List[str]:
 def unmake_project(project_root: Path, user: str, keep_own: bool = False) -> None:
     """
     Make project_root an ordinary folder again. With settings of its own this needs
-    keep_own (else ProjectHasOwnSettings): its .MyOS then goes into the parent project's
+    keep_own (else ProjectHasOwnSettings): its .seiton then goes into the parent project's
     trash as SETTINGS_NAME (restorable), instead of being deleted.
     """
     root = Path(project_root).expanduser().resolve()

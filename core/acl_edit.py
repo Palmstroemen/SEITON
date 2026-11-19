@@ -4,7 +4,7 @@
 # See "Designdocument ACLs.md", 5.3. Because the nearest rule wins (per role), an edit is
 # always the rule of one role at exactly one path. Only the affected lines change; the
 # draft is checked as a whole policy before it replaces ACLs.md, and the previous version
-# is kept in .MyOS/ACLs-history/ (undo, "who changed what, when").
+# is kept in .seiton/ACLs-history/ (undo, "who changed what, when").
 
 from __future__ import annotations
 
@@ -73,7 +73,7 @@ def set_role_rights(path, role: str, rights: Optional[Set[str]], editor: str) ->
 
     rights: the complete set at this path; an empty set writes "none" (locked out here),
     None removes the role's rule at this path (back to inherited).
-    editor: the user making the change; needs "change" on /.MyOS/ACLs.md.
+    editor: the user making the change; needs "change" on /.seiton/ACLs.md.
     Returns the kept previous version (None when nothing had to change).
     """
     target = Path(path).expanduser().resolve()
@@ -111,7 +111,7 @@ def set_user_roles(path, user: str, roles: Set[str], editor: str) -> Optional[Pa
     Memberships hold in the whole project, not only at path; path selects the ACLs.md
     and the (sub)project whose template folder roles may be given. An empty set removes
     the user's line (no groups, no rights). Only users already listed can be edited.
-    editor: the user making the change; needs "change" on /.MyOS/ACLs.md.
+    editor: the user making the change; needs "change" on /.seiton/ACLs.md.
     Returns the kept previous version (None when nothing had to change).
     """
     target = Path(path).expanduser().resolve()
@@ -146,7 +146,7 @@ def add_user(path, name: str, roles: Set[str], editor: str) -> Optional[Path]:
     Add a person with their groups (roles) to "# Users" of the ACLs.md governing path, as
     a new line after the people listed. name is free (a person of the project, see
     "Designdocument ACLs.md", 5.3); at least one known group is needed.
-    editor: the user making the change; needs "change" on /.MyOS/ACLs.md.
+    editor: the user making the change; needs "change" on /.seiton/ACLs.md.
     Returns the kept previous version.
     """
     target = Path(path).expanduser().resolve()
@@ -325,7 +325,7 @@ def _require_change_right(policy: ACLPolicy, root: Path, editor: str) -> None:
 
 
 def _may_write_template(template: Path, editor: str) -> bool:
-    """Whether the project holding template (in its .MyOS/Templates) lets editor write it;
+    """Whether the project holding template (in its .seiton/Templates) lets editor write it;
     a template outside any project with ACLs.md (MYOS_TEMPLATES_DIR) has no such rules."""
     holder = find_acl_project_root(template.parent)
     if holder is None:

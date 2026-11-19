@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-exporter.py - MyOS export utilities.
+exporter.py - SEITON export utilities.
 Exports a subtree with project metadata, ACLs, and templates.
 """
 
@@ -83,7 +83,7 @@ def export_subtree(
     else:
         _copy_tree_no_symlinks(source, package_path / subtree_rel, may_read=_may_read)
 
-    # Copy project .MyOS from export root (its templates: only the used ones, below)
+    # Copy project .seiton from export root (its templates: only the used ones, below)
     _copy_tree_no_symlinks(export_root / META_DIR, package_path / META_DIR, skip={TEMPLATES_REL.name})
 
     # Add export metadata

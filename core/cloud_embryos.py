@@ -1,8 +1,8 @@
-# cloud_embryos.py - a project's embryos for a cloud (the MyOS row in Nextcloud's Files app)
+# cloud_embryos.py - a project's embryos for a cloud (the SEITON row in Nextcloud's Files app)
 #
-# MyOS stays the one place that resolves templates (Templates.md, inherited, .MyOS/Templates
+# SEITON stays the one place that resolves templates (Templates.md, inherited, .seiton/Templates
 # found upwards, several templates merged). Per project this computes a folder per embryo,
-# .MyOS/Embryos/<embryo>/, holding what its birth copies, and .MyOS/Embryos.json - the
+# .seiton/Embryos/<embryo>/, holding what its birth copies, and .seiton/Embryos.json - the
 # template tree and the hash of each uploaded file, the sync's bookkeeping. The browser takes
 # the embryos of a level from the folders it may read there (each is readable for who may
 # read where it is born, as Scope shows an embryo) and copies on birth what one holds besides
@@ -74,7 +74,7 @@ def _paths(tree: dict, prefix: str = "") -> List[str]:
 def birth_contents(source: Path) -> Tuple[List[str], List[str]]:
     """
     What a birth from the template folder source copies (BirthClinic._copy_template_safely):
-    the files of its level and its hidden folders (e.g. .MyOS) with all they hold; visible
+    the files of its level and its hidden folders (e.g. .seiton) with all they hold; visible
     subfolders stay embryos. Returns (folders, files), relative and sorted.
     Security: symlinks are left out - a template must not hand out what they point to.
     """

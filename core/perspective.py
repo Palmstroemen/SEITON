@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-perspective.py - MyOS filter configuration handling.
+perspective.py - SEITON filter configuration handling.
 """
 
 from __future__ import annotations
@@ -158,7 +158,7 @@ def find_filters(start_path: Union[str, Path]) -> List[Tuple[Path, FilterConfig]
 
 
 def _acting_by_themselves(layers: List[FilterLayer]) -> List[FilterLayer]:
-    """The collection in .MyOS/Filters is there to choose from; it acts only when chosen by hand."""
+    """The collection in .seiton/Filters is there to choose from; it acts only when chosen by hand."""
     return [layer for layer in layers if layer.source_kind != "collection"]
 
 

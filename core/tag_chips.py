@@ -1,4 +1,4 @@
-"""Shared tag chip style helpers for MyOS applications."""
+"""Shared tag chip style helpers for SEITON applications."""
 
 from __future__ import annotations
 

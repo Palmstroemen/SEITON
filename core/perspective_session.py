@@ -85,7 +85,7 @@ class PerspectiveSession:
 
     def look_at(self, path: Union[str, Path]) -> None:
         """Put on (or move) the lens to a folder of a project - born or embryo - given as a
-        real path (Scope's MyOS-folder row shows such folders)."""
+        real path (Scope's SEITON-folder row shows such folders)."""
         if self.cwd is None:
             raise ValueError("no CWD")
         folder = Path(path).expanduser().resolve()
@@ -184,7 +184,7 @@ class PerspectiveSession:
 
     def desk_file(self) -> Optional[Path]:
         """The department's Desk.md while the lens is on (A5): the nearest one up the lens
-        path in the template - never the project's own. Birth copies .MyOS, so a project
+        path in the template - never the project's own. Birth copies .seiton, so a project
         holds old copies of the template's Desk; one there counts only where the template
         has none for the department."""
         if self.project is None:

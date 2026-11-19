@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-tags.py - MyOS tag storage utilities.
+tags.py - SEITON tag storage utilities.
 """
 
 from __future__ import annotations
@@ -92,7 +92,7 @@ def tag_list(path: Union[str, Path]) -> List[str]:
 
 
 def project_tags(folder: Union[str, Path]) -> List[str]:
-    """The tags suggested in folder: those of the .MyOS/Tags.md of the nearest project up the
+    """The tags suggested in folder: those of the .seiton/Tags.md of the nearest project up the
     path that has one - like other configs it inherits, a subproject without one takes its
     parent's."""
     tags_file = find_config_in_parents(Path(folder), "Tags.md", honor_inherit_not=False)
@@ -100,7 +100,7 @@ def project_tags(folder: Union[str, Path]) -> List[str]:
 
 
 def all_project_tags(root: Union[str, Path]) -> List[str]:
-    """The tags of every project's Tags.md from root down (hidden folders such as .MyOS with
+    """The tags of every project's Tags.md from root down (hidden folders such as .seiton with
     its templates skipped), sorted, each once."""
     found = set()
     for folder, dirs, _files in os.walk(Path(root)):

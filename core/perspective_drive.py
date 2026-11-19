@@ -189,7 +189,7 @@ def _ways(project_dir: Path) -> List[str]:
 def _parts(path: str) -> Optional[Parts]:
     """The parts of a drive path; None when a part is not allowed."""
     parts = tuple(p for p in str(path or "/").split("/") if p)
-    # Security: no way out of the projects root, never into MyOS' own .MyOS. Other hidden
+    # Security: no way out of the projects root, never into SEITON's own .seiton. Other hidden
     # files are allowed (LibreOffice keeps its lock file next to the document).
     if any(p in (".", "..", META_DIR) or "\\" in p for p in parts):
         return None

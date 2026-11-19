@@ -1,9 +1,9 @@
-# trash.py - one trash per project: .MyOS/Trash/ (see "Designdocument Trash.md")
+# trash.py - one trash per project: .seiton/Trash/ (see "Designdocument Trash.md")
 #
 # Deleting moves an entry into the trash of the project it belongs to (the nearest project
 # of its parent folder, so a subproject has its own trash, and deleting a whole subproject
 # puts it into its parent's). The layout follows the freedesktop trash: files/<name> and
-# info/<name>.trashinfo with the project-relative Path, DeletionDate and, for MyOS,
+# info/<name>.trashinfo with the project-relative Path, DeletionDate and, for SEITON,
 # DeletedBy. Rights (delete at the original place) are checked by the caller.
 
 from __future__ import annotations

@@ -1,8 +1,8 @@
-# template_seed.py - a new project gets what its templates' root .MyOS holds
+# template_seed.py - a new project gets what its templates' root .seiton holds
 #
-# Templates are ordinary folder structures. Whatever lies in .MyOS/Templates/<name>/.MyOS
-# (ACLs.md, Desk.md, Color.md, ...) is copied into the .MyOS of a project when it is
-# created, like the .MyOS of a template folder when an embryo is born. Nothing already in
+# Templates are ordinary folder structures. Whatever lies in .seiton/Templates/<name>/.seiton
+# (ACLs.md, Desk.md, Color.md, ...) is copied into the .seiton of a project when it is
+# created, like the .seiton of a template folder when an embryo is born. Nothing already in
 # the project is overwritten; with several templates the first one that has a file wins.
 # See "Designdocument ACLs.md", 10.
 
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def seed_from_templates(project_root: Path) -> List[Path]:
-    """Copy the files of the templates' root .MyOS into project_root/.MyOS; the copies."""
+    """Copy the files of the templates' root .seiton into project_root/.seiton; the copies."""
     project_root = Path(project_root).resolve()
     # Before ACLs.md is copied: who the creator is and which ACLs governed the place so far.
     previous_root = find_acl_project_root(project_root)

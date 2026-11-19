@@ -73,7 +73,7 @@ class ACLPolicy:
 
     @classmethod
     def from_project(cls, project_root: Path, acl_file: Optional[Path] = None) -> "ACLPolicy":
-        """Policy of project_root; acl_file replaces its .MyOS/ACLs.md (to check a draft)."""
+        """Policy of project_root; acl_file replaces its .seiton/ACLs.md (to check a draft)."""
         project_root = Path(project_root)
         config = ProjectConfig(project_root)
         if config.is_valid():
@@ -474,12 +474,12 @@ def _roles_from_templates(project_root: Path, template_names: Iterable[str]) -> 
 
 
 def _template_folder_names(template_dir: Path) -> Set[str]:
-    # .MyOS (the template's own settings) and other hidden folders are no roles.
+    # .seiton (the template's own settings) and other hidden folders are no roles.
     return {child.name for child in template_dir.iterdir() if child.is_dir() and not child.name.startswith(".")}
 
 
 def is_template_root(path) -> bool:
-    """Whether path is a template (.MyOS/Templates/<name>): no project, its rights take effect
+    """Whether path is a template (.seiton/Templates/<name>): no project, its rights take effect
     in the projects made from it."""
     path = Path(path).expanduser().resolve()
     if (path / META_DIR / "Project.md").exists():

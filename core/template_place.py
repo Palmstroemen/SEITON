@@ -1,9 +1,9 @@
 # template_place.py - where a project's templates live
 #
-# Templates are system settings like ACLs.md: they live in <project>/.MyOS/Templates/<name>/.
-# The nearest .MyOS/Templates above a path wins as a whole (a subproject with templates of
+# Templates are system settings like ACLs.md: they live in <project>/.seiton/Templates/<name>/.
+# The nearest .seiton/Templates above a path wins as a whole (a subproject with templates of
 # its own does not mix them with its parent's). A plain Templates/ folder is never taken:
-# ~/Templates (XDG), a cloud's own Templates folder and the like are not MyOS'.
+# ~/Templates (XDG), a cloud's own Templates folder and the like are not SEITON's.
 # MYOS_TEMPLATES_DIR overrides the search (one set for all projects).
 
 from __future__ import annotations

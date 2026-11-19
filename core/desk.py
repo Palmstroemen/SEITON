@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-desk.py - MyOS desk profile discovery and parsing.
+desk.py - SEITON desk profile discovery and parsing.
 """
 
 from __future__ import annotations

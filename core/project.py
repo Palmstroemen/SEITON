@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-project.py - MyOS project detection and configuration handling.
-Handles .MyOS/Project.md and project hierarchy detection.
+project.py - SEITON project detection and configuration handling.
+Handles .seiton/Project.md and project hierarchy detection.
 """
 
 from typing import Dict, List, Any, Optional, Union, Tuple
@@ -60,7 +60,7 @@ def find_config_in_parents(
     honor_inherit_not: bool = True,
 ) -> Optional[Path]:
     """
-    Find nearest `.MyOS/<config_name>` by walking up from start_path.
+    Find nearest `.seiton/<config_name>` by walking up from start_path.
     """
     search_dir = _coerce_search_dir(start_path)
     for candidate in [search_dir, *search_dir.parents]:
@@ -102,7 +102,7 @@ def find_next_parent_config(
 
 
 class ProjectConfig:
-    """Load, write, and manage project configuration stored in .MyOS/."""
+    """Load, write, and manage project configuration stored in .seiton/."""
 
     def __init__(self, path: Path):
         """Initialize a ProjectConfig for the given path."""
@@ -127,12 +127,12 @@ class ProjectConfig:
         return self.project_md.exists()
     
     def load(self):
-        """Load configuration from local .MyOS/ files."""
+        """Load configuration from local .seiton/ files."""
         if self.settings_dir.exists():
             self._load_from_settings_dir()
     
     def _load_from_settings_dir(self):
-        """Load Templates.md, Manifest.md, and Config.md from .MyOS/."""
+        """Load Templates.md, Manifest.md, and Config.md from .seiton/."""
         # Templates.md -> self.templates
         templates_md = self.settings_dir / "Templates.md"
         if templates_md.exists():
@@ -407,7 +407,7 @@ class ProjectConfig:
         return children
 
     def is_valid(self) -> bool:
-        """Return True when this path is a valid MyOS project."""
+        """Return True when this path is a valid SEITON project."""
         return self._is_project()
 
     
@@ -415,15 +415,15 @@ class ProjectConfig:
     def create(cls, dir_path: Union[str, Path]) -> 'ProjectConfig':
         """
         Create a new project marker. The parent's config files are not copied (they are
-        inherited); the templates' root .MyOS files are (core.template_seed).
+        inherited); the templates' root .seiton files are (core.template_seed).
         """
         dir_path = Path(dir_path)
         
-        # Find nearest parent with .MyOS
+        # Find nearest parent with .seiton
         parent_settings = cls._find_parent_settings_dir(dir_path)
         if not parent_settings:
             raise ValueError(f"No parent {META_DIR} directory found for {dir_path}")
-        # Ensure target directory exists and initialize minimal .MyOS marker.
+        # Ensure target directory exists and initialize minimal .seiton marker.
         dir_path.mkdir(parents=True, exist_ok=True)
         target_settings = dir_path / META_DIR
         from core.project_unmake import record_created, settings_before  # late: imports this module
@@ -433,7 +433,7 @@ class ProjectConfig:
         if not project_marker.exists():
             project_marker.write_text(project_heading() + "\n")
             cls._first_gets_standard(dir_path)
-            # A new project gets what its templates' root .MyOS holds (ACLs.md, Desk.md, ...).
+            # A new project gets what its templates' root .seiton holds (ACLs.md, Desk.md, ...).
             from core.template_seed import seed_from_templates  # late: template_seed imports this module
             try:
                 seed_from_templates(dir_path)
@@ -466,7 +466,7 @@ class ProjectConfig:
 
     @staticmethod
     def _find_parent_settings_dir(dir_path: Path) -> Optional[Path]:
-        """Find parent .MyOS directory by walking up the directory tree."""
+        """Find parent .seiton directory by walking up the directory tree."""
         current = dir_path.parent
         while current and current != current.parent:  # Stop at filesystem root
             settings_dir = current / META_DIR
@@ -498,7 +498,7 @@ class ProjectConfig:
             # Create directory if it doesn't exist
             path.mkdir(parents=True, exist_ok=True)
             
-            # Create project config (with the templates' .MyOS files)
+            # Create project config (with the templates' .seiton files)
             config = ProjectConfig.create(path)
             return config.is_valid()
             
@@ -514,7 +514,7 @@ class ProjectConfig:
 
 class ProjectFinder:
     """
-    Finds MyOS projects in the directory hierarchy.
+    Finds SEITON projects in the directory hierarchy.
     
     Walks up from a starting directory to find the nearest project.
     """
@@ -533,7 +533,7 @@ class ProjectFinder:
         current = Path(start_path).expanduser().absolute()
         
         while current != current.parent:  # Stop at filesystem root
-            # Check for .MyOS/Project.md marker
+            # Check for .seiton/Project.md marker
             if (current / META_DIR / "Project.md").exists():
                 return current
             
@@ -543,10 +543,10 @@ class ProjectFinder:
 
     @staticmethod
     def is_project(path: Union[str, Path]) -> bool:
-        """Check if directory contains a MyOS project."""
+        """Check if directory contains a SEITON project."""
         path = Path(path)
         
-        # Check for .MyOS/Project.md marker
+        # Check for .seiton/Project.md marker
         if (path / META_DIR / "Project.md").exists():
             return True
         

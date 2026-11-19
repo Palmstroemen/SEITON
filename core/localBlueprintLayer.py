@@ -10,7 +10,7 @@ from core.brand import META_DIR, NAME, getenv
 
 try:
     from fuse import FUSE, FuseOSError, Operations
-except ImportError:  # the MyOS core service (Docker) has no FUSE: Blueprint without mounting
+except ImportError:  # the SEITON core service (Docker) has no FUSE: Blueprint without mounting
     FUSE = None  # type: ignore
 
     class FuseOSError(OSError):  # type: ignore
@@ -86,7 +86,7 @@ class BirthClinic:
     def _copy_template_safely(self, source: Path, target: Path):
         """
         Copy one template level without symlinks.
-        Files and hidden config dirs (e.g. .MyOS) are copied; visible subfolders
+        Files and hidden config dirs (e.g. .seiton) are copied; visible subfolders
         stay embryos and are only born on first use.
         """
         if source.is_dir():
@@ -111,7 +111,7 @@ class BirthClinic:
             # Security: copy2 does not follow symlinks for files
             shutil.copy2(source, target)
     
-    # Caches MyOS writes on its own; they never count as user content.
+    # Caches SEITON writes on its own; they never count as user content.
     DISPOSABLE_FILES = frozenset({".TagsHere.json"})
 
     def reabsorb(self, embryo_path: str) -> bool:
@@ -140,10 +140,10 @@ class BirthClinic:
     ) -> Optional[Tuple[List[Path], List[Path]]]:
         """
         Return (files, dirs) to delete if `folder` contains only unchanged copies of
-        `template` (what birth copied) and MyOS caches, else None. `dirs` is deepest
+        `template` (what birth copied) and SEITON caches, else None. `dirs` is deepest
         first and ends with `folder`. Visible subfolders of the born folder always
         count as content (born sub-embryos are reabsorbed on their own, bottom-up);
-        inside hidden config dirs (e.g. .MyOS) only files are judged.
+        inside hidden config dirs (e.g. .seiton) only files are judged.
         """
         files: List[Path] = []
         dirs: List[Path] = []
@@ -312,7 +312,7 @@ class Blueprint(Operations):
         return find_templates_dir(self.project_root) or self.project_root / TEMPLATES_REL
 
     def _find_project_root(self, start_path: Path) -> Path:
-        """Find the nearest project root by searching for .MyOS/Project.md upwards."""
+        """Find the nearest project root by searching for .seiton/Project.md upwards."""
         current = start_path
         while current != current.parent:
             if (current / META_DIR / "Project.md").exists():
@@ -375,7 +375,7 @@ class Blueprint(Operations):
         """Load recursive tree from a single template directory."""
         tree = {}
         for item in template_dir.iterdir():
-            # .MyOS holds settings (copied at birth), hidden folders are no embryos.
+            # .seiton holds settings (copied at birth), hidden folders are no embryos.
             if item.is_dir() and not item.name.startswith("."):
                 # Kein %-Suffix mehr - nur der reine Name
                 name = item.name
