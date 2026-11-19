@@ -121,6 +121,25 @@ eigentlich nur eine Datei übergeben.
 - **Ordnerfarbe und Name** je Fassung: Rot und `4_Finanz` für Firmen und privat; in der
   Behörden-Fassung `5_Recht` in seiner eigenen Logo-Farbe.
 
+## Szene: Die Geburt der Venus (nach Botticelli)
+
+Eine zweite Szene in derselben Machart, für M1 („Wo soll ich DAS ablegen?“). Etwa 15 Sekunden.
+
+| Zeit | Bild | Ton |
+|---|---|---|
+| 0–3 s | Meer aus Papier. Viele geschlossene Muscheln liegen im Wasser, nichts ist los. Auf jeder steht klein ihr Name: `1_Info`, `4_Finanz`, `5_Recht`, … | Wellen, Möwe |
+| 3–6 s | Ein Finger mit einer Datei erscheint. Die Muscheln drehen sich ihm nach, interessiert, ein wenig hoffnungsvoll. | ein neugieriges Klappern |
+| 6–9 s | Der Finger sucht ein wenig, liest die Namen, entscheidet sich und legt die Datei auf eine Muschel. | Zögern, dann ein Plopp |
+| 9–11 s | BANG: Die Muschel geht auf, die Venus entsteigt ihr, gemalt in der bekannten Haltung, am Arm eine Einkaufstasche mit der Datei darin. | Schlag, Harfe, Chor |
+| 11–15 s | Die Venus prüft zufrieden ihre Tasche. Die anderen Muscheln klappen enttäuscht wieder zu und warten weiter. | Chor bricht ab, Wellen |
+
+- **Was es erklärt:** Die Muscheln sind die Standardordner. Sie warten, jede mit ihrem Namen, darum
+  ist die Wahl leicht. Geboren wird nur die eine, die gebraucht wird; die anderen bleiben zu.
+- **Keine Reproduktion des Gemäldes:** eigene Zeichnung in der Haltung; das Original hängt in den
+  Uffizien, und Italien schützt Abbildungen seiner Kulturgüter auch gegen kommerzielle Nutzung.
+- **Für Schulen und Behörden:** Die Venus bleibt so bedeckt wie bei Botticelli (Haar, Hand), die
+  Einkaufstasche hilft mit.
+
 ## Offen
 
 - Szenen für M7, M8 und M9; vorher prüfen, was davon heute so vorführbar ist.
