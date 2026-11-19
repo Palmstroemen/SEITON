@@ -83,6 +83,27 @@ Die Knaller über alle hinweg, nach Leidensdruck: **Rechte in einer Zeile** (wer
 auf einem Fileserver gepflegt hat), **die Brille** (jeder, der quer über Projekte arbeitet),
 **Übergabe und Einstieg** (jede Organisation mit Wechseln), **kein Lock-in** (Behörden und EU).
 
+## Szene: Ein Ordner wird geboren (nach Michelangelo)
+
+Der Moment für alle, als Teaser (README, GitHub Pages) und als Auftakt von M1. Etwa 14 Sekunden,
+Collage, Legetrick-Bewegung: ruckelig, wenige Bilder je Sekunde.
+
+| Zeit | Bild | Ton |
+|---|---|---|
+| 0–2 s | Papiergrund. Von links ein Zeigefinger aus Papier, mit einem Stück Ärmel, wie Gottes Hand bei Michelangelo. Er klickt auf eine Datei. | ein kleines Klicken |
+| 2–5 s | Die Datei klebt an der Fingerspitze; der Finger trägt sie unbeholfen ruckelnd hinüber. | leise, erwartungsvoll |
+| 5–6 s | Von rechts Adams Finger, lässig. Daran hängt wie ein kleines Täschchen ein ungeborener Ordner: blass, durchsichtig, nur Umriss. | |
+| 6–7 s | Der erste Finger lässt die Datei fallen, sie fällt in den Ordner, und BANG: Der Ordner wird kräftig, in Logo-Farbe, Sterne funkeln. | Schlag, Funkeln |
+| 7–11 s | Beide Finger verharren, fast berührend, genau wie bei Michelangelo. | pathetische Musik schwillt an, Chor |
+| 11–13 s | Gottes Finger klopft Adam zweimal auf den Finger: „Na los, mach weiter.“ | |
+| 13–14 s | Filmriss; Adams Finger zieht sich mit seinem Ordner zurück. | Plattenkratzer, Stille |
+
+- **Keine Reproduktion des Freskos:** eigene Papierfinger in der Pose, kein Foto der Sixtinischen
+  Kapelle (für Abbildungen italienischer und vatikanischer Kulturgüter gelten eigene Regeln).
+- **Musik:** eigene, nur im Gestus pathetisch.
+- **Ordnerfarbe und Name** je Fassung: Rot und `4_Finanz` für Firmen und privat; in der
+  Behörden-Fassung `5_Recht` in seiner eigenen Logo-Farbe.
+
 ## Offen
 
 - Szenen für M7, M8 und M9; vorher prüfen, was davon heute so vorführbar ist.
