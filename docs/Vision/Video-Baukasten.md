@@ -153,6 +153,15 @@ Running Gag mit Michelangelo: Jedes Mal nimmt am Ende der Maler den Ordner mit, 
   schon.“ Die Botschaft: Zu Hause tischlerst du kein Regal, du holst dir eins. Die Ablage auch.
   Regale mit lustigen, schwedisch klingenden Namen gehen; ein echtes Möbelhaus mit Namen, Logo
   oder Farben nicht.
+- **Alchemist und Apotheker.** Der mittelalterliche Alchemist: Säckchen, Gläser, Phiolen überall
+  verteilt, nichts findet er, ständig sucht er. Daneben der spätere Apotheker vor seinem
+  Apothekerschrank: jede Lade beschriftet, in jeder Apotheke an derselben Stelle. „Oh, wie
+  schlau!“ Der Apothekerschrank ist das Bild für Standardordner; gemeinfreie Stiche von Alchemisten
+  und Apotheken gibt es viele, ideal für die Collage.
+- **Das Altersheim der Betriebssysteme.** Zwei alt gewordene Computer, ein Laptop und ein
+  Bürorechner, sitzen im Altersheim und rätseln, was sie auf dem Bürorechner eigentlich mit dem
+  Ordner `Musik` sollten. Erinnert an die bekannten Werbespots der 2000er Jahre; ohne Marken,
+  Logos, Schauspieler oder deren Sätze.
 - **Schrödingers Ordner,** als eigener Kurzfilm im Monty-Python-Stil: Der Ordner existiert erst,
   wenn man etwas hineinlegt. [Ausarbeiten.]
 - **Leuchtende Bodenplatten:** Wo jemand hintritt, leuchtet die Platte auf; so erscheinen die
