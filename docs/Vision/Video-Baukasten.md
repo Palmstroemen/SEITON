@@ -21,26 +21,34 @@ Nur was gebaut ist, kommt als Lösung vor; was geplant ist, höchstens als Ausbl
 
 | | Problem | Lösung mit SEITON | Szene | Stand |
 |---|---|---|---|---|
-| M1 Ablage | Jeder legt anders ab; leere Ordnerhüllen, die keiner braucht. | Jedes Projekt hat dieselben Standardordner; sie entstehen erst, wenn etwas hineinkommt. | K1, K2 | gebaut |
+| M1 Ablage | „Wo soll ich DAS jetzt wieder ablegen?“ Jeder legt anders ab; leere Ordnerhüllen, die keiner braucht. | Standardordner: in jedem Projekt dieselben, sie entstehen erst, wenn etwas hineinkommt. | K1, K2 | gebaut |
+| M10 Laufwerke | Chaos auf den gemeinsamen Laufwerken: endlos lange Listen von Dateien und Ordnern. | Projektbasiert: oben nur Projekte, darin immer dieselbe Ordnung. | [Szene: alte Freigabe in Nemo gegen Scope] | gebaut |
 | M2 Überblick | Wer etwas über alle Projekte braucht, klickt sich durch jedes einzeln. | Die Brille: ein Standardordner über alle Projekte, ohne Kopie. | K3 | gebaut |
 | M3 Programme | Neue Ordnung heißt sonst: jede Software umbauen. | Jedes Programm kann es, über das Laufwerk. | K4 | gebaut |
 | M4 Rechte | Rechte hängen an Ordnern, die keiner mehr versteht. | Rechte in einer lesbaren Zeile, gültig in jedem Projekt. | B1 | gebaut |
 | M5 Cloud | Desktop und Cloud haben zwei Ordnungen und zwei Rechteverwaltungen. | Dieselbe Datei; Nextcloud setzt die Rechte auf dem Server durch. | B2 | gebaut |
 | M6 Ausstieg | Wer ein System einführt, kommt schwer wieder heraus. | Gewöhnliche Ordner und Textdateien; offen, MIT-Lizenz. | B3 | gebaut |
-| M7 Vorlage | Jeder neue Kunde, jede neue Klasse fängt von vorn an. | Ein neues Projekt kommt aus der Vorlage, mit derselben Ordnung. | [Szene fehlt] | gebaut, prüfen |
-| M8 Übergabe | Wer geht, nimmt die Ordnung im Kopf mit. | Das Projekt bringt Ordnung und Rechte mit; die Nächste findet sich zurecht, weil alles gleich heißt. | [Szene fehlt] | prüfen |
+| M7 Vorlage | „Wie strukturiere ich das?“ Jedes Mal ein neuer Versuch, jeder macht es ein wenig anders: einmal `Finanzen`, dann `Rechnungen`, dann `Ausgangsrechnungen`. | Vorlagen: ein neues Projekt kommt mit derselben Ordnung, die Namen stehen fest. | [Szene fehlt] | gebaut, prüfen |
+| M8 Übergabe und Einstieg | Wer geht, nimmt die Ordnung im Kopf mit. Wer neu kommt, fragt: Wo gehört was hin, wo finde ich was? | Das Projekt bringt Ordnung und Rechte mit; neue Leute finden sich zurecht, weil überall alles gleich heißt. | [Szene fehlt] | prüfen |
 | M9 Ohne Netz | Abgeschottete Netze, keine Cloud erlaubt. | SEITON läuft lokal, die Ordnung steckt in den Dateien. | [Szene fehlt] | prüfen, was gebaut ist |
+| M11 Hin und her | Verschiedene Container: ständig exportieren und importieren, PDF als Transportformat. | Die Dateien bleiben, wo sie sind; jedes Programm arbeitet am selben Ort (das Laufwerk, K4). | [Szene fehlt] | teils gebaut, prüfen |
+| M12 Zwanzig Clouds | Fotos bei Google, Dokumente in der Dropbox, Notizen in Notion, Mails im Mailprogramm, Rechnungen in der Buchhaltung. | Projekte: alles, was zusammengehört, liegt beisammen. | [Szene fehlt] | Vision, als Ausblick |
+| M13 Alle Geräte | Handy, Tablet, Bürorechner, Privatlaptop, Hausautomation, Fernseher, Sprachassistent: überall andere Strukturen und Denkweisen. | Eine Ordnung für alle; auch wer nur ein Prozent davon braucht, findet sich zurecht. | [Szene fehlt] | Vision, als Ausblick |
 
 ## Zielgruppen
 
 | Für wen | Kernbotschaft | Module | Eigenes Beispiel |
 |---|---|---|---|
-| Behörden, IT und Migration | Die Ordnung für den neuen Arbeitsplatz: offen, lesbar, ohne Bindung an einen Anbieter. | M1, M2, M3, M4, M5, M6 | Vorhaben wie `Schulbau Nord`; die Finanzabteilung über alle Vorhaben |
+| Behörden, IT und Migration | Die Ordnung für den neuen Arbeitsplatz: offen, lesbar, ohne Bindung an einen Anbieter. | M10, M1, M2, M3, M4, M5, M6 | Vorhaben wie `Schulbau Nord`; die Finanzabteilung über alle Vorhaben |
 | Entscheider bei der EU und in Ministerien | Europas Verwaltungen ziehen um. SEITON gibt der Ablage eine Ordnung, die ihnen selbst gehört. | M1, M4 oder M5, M6, je kurz | wie Behörden |
 | Schulen | Jedes Jahr neue Klassen, jedes Jahr dieselbe Ordnung. | M7, M1, M2, M8, M6 | Klassen `1a`, `1b`; die Mathe-Lehrerin über alle Klassen |
 | Militär | Ordnung, die jede Übergabe übersteht, auch ohne Cloud. | M8, M1, M2, M4, M9 | Einheiten; S4 (Logistik) über alle Einheiten |
-| Firmen | Eine Ablage, die mitwächst, vom ersten Auftrag bis zur Firma. | M1, M7, M2, M3, M4 | die Werkstatt-Rechnung; die Buchhaltung über alle Betriebe |
+| Firmen | Eine Ablage, die mitwächst, vom ersten Auftrag bis zur Firma. | M1, M7, M8, M2, M11, M4 | die Werkstatt-Rechnung; die Buchhaltung über alle Betriebe |
 | Vereine | Wenn der Kassier wechselt, bleibt die Ordnung. | M8, M1, M2, M6 | Veranstaltungen; der Kassier über alle Kassen |
+
+| Alle, privat | Alles, was zusammengehört, liegt beisammen, und überall gleich geordnet. | M1, M7, M2, M3, Ausblick M12 und M13 | Steuererklärung, Urlaub |
+
+M12 und M13 sind Vision: im Video nur als Ausblick am Ende, als solcher benannt („Wohin es geht“).
 
 ## Offen
 
