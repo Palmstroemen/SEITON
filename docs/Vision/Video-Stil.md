@@ -4,7 +4,7 @@ Stand 19. November 2026. Damit jedes SEITON-Video gleich aussieht, egal für wen
 Sprache: welcher Stil, was echt gezeigt wird, welche Farben, Schrift, Bewegung und welcher Ton.
 Gilt für die Drehbücher in „Demo – Kern“ und den Fassungen je Zielgruppe.
 
-## Grundstil: Comic und Collage, offen für anderes
+## Grundstil: Comic, Collage und bewegte Schrift, offen für anderes
 
 Verworfen nach Tests: Blender-Modellräume mit Strichmännchen (zu sauber, „künstlich“) und
 KI-Video aus Text allein (zeigt nicht, was gemeint ist). Isometrie passt nicht. Auch die Brille als
@@ -15,17 +15,20 @@ Raumfahrt durch Durchreichen ist nicht gesetzt: Kill your darlings.
 2. **Collage** trägt die Wirklichkeit: ausgeschnittene Fotos mit weißem Scherenrand und hartem
    Schatten, gerissenes Papier, Haftnotizen, ausgeschnittene Schrift. Werkstatt, Büro, Studio,
    Kanzlei als echte Orte.
-3. **Mixed Media:** Wo es der Sache dient, darf anderes hinein, eingeklebt wie ein weiterer
+3. **Bewegte Schrift (Kinetic Typography)** trägt die Begriffe. Bei SEITON ist der Inhalt Schrift:
+   Ordnernamen, Pfade, `.seiton`. Ein `4_Finanz`, das sich zu `Autowerkstatt` verwandelt, zeigt
+   die Brille ohne Raum; Standardordner fallen als Wörter ins Regal; Kernsätze des Sprechers stehen
+   groß im Bild. Schrift als ausgeschnittener Aufkleber oder Comic-Lettering, nie als glatte
+   Folienschrift.
+4. **Mixed Media:** Wo es der Sache dient, darf anderes hinein, eingeklebt wie ein weiterer
    Schnipsel:
    - **Screencast:** SEITON selbst immer als echte Bildschirmaufnahme, nie nachgebaut oder
      KI-erzeugt; als Bildschirm-Schnipsel in Panel oder Collage, mit Zoom dorthin, wo geklickt wird.
-   - **Bewegte Schrift:** Ordnernamen sind der Inhalt; ein `4_Finanz`, das zu `Autowerkstatt`
-     wird, zeigt die Brille ohne Raum.
    - **2,5D:** Ebenen der Collage gegeneinander verschoben, für Tiefe ohne 3D.
    - **Legetrick:** Hände legen hin, wo etwas Konkretes geschieht.
    - **Renderings, Realfilm, KI-Übergänge:** nur als Schnipsel, KI nur zwischen zwei festgelegten
      Bildern (Anfangs- und Endbild), nie frei erfunden.
-4. **Übergänge:** Zoom in ein Detail (ein Etikett, ein Panel, ein Blatt), dahinter die nächste
+5. **Übergänge:** Zoom in ein Detail (ein Etikett, ein Panel, ein Blatt), dahinter die nächste
    Szene. Harter Schnitt zwischen Collage und Screencast ist erlaubt.
 
 ## Farben
