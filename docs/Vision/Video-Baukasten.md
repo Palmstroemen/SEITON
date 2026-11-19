@@ -107,6 +107,10 @@ eigentlich nur eine Datei übergeben.
 | 11–13 s | Die beiden merken, wie sie dastehen. Verlegen. Gott klopft Adam zweimal auf den Finger: „Na los, mach weiter.“ | Musik hält einen Ton zu lang |
 | 13–15 s | Filmriss; Adams Arm zieht sich in den Ordner zurück. | Plattenkratzer, Stille |
 
+- **Anderer Schluss (statt 11–15 s):** Michelangelo kommt als Zeichnung herein, betrachtet das
+  Bild, radiert Datei und Ordner weg, malt Adam fertig und sagt sich: „Ja, jetzt passt das so.“
+  Damit wäre das berühmteste Bild der Welt beim Ablegen entstanden. Damit SEITON nicht mit
+  wegradiert wird: Beim Hinausgehen klemmt er sich den Ordner unter den Arm; auch er legt ab.
 - **Rötel zu Fresko:** Der Übergang von der Skizze zum gemalten Bild ist derselbe wie von blass zu
   kräftig in SEITON; er erklärt die blassen Ordner ohne ein Wort.
 - **Aufkleber:** „Es werde Ordner.“ (englisch „Let there be folder.“). „Es werde Licht“ kennt fast
