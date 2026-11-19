@@ -143,6 +143,22 @@ Running Gag mit Michelangelo: Jedes Mal nimmt am Ende der Maler den Ordner mit, 
 - **Für Schulen und Behörden:** Die Venus bleibt so bedeckt wie bei Botticelli (Haar, Hand), die
   Einkaufstasche hilft mit.
 
+## Weitere Ideen für Szenen
+
+- **Der Zeitreisende (Regal von der Stange).** Ein Zeitreisender landet im Mittelalter. Die Leute
+  zimmern sich mühsam ein Regal aus einem Baumstamm. „Ihr braucht ein Regal? Dann holt euch doch
+  eines! Wo ist das Problem? … Ach so, das Möbelhaus gibt's ja noch nicht.“ Zurück in der Gegenwart:
+  Kollegen basteln an obskuren Ordnerstrukturen, mehr Kunstwerke als Ablage. „Oh mein Gott, was
+  tut ihr da? Nehmt doch einfach SEITON. … Ach so, das gibt's ja noch gar nicht.“ Logo: „Jetzt
+  schon.“ Die Botschaft: Zu Hause tischlerst du kein Regal, du holst dir eins. Die Ablage auch.
+  Regale mit lustigen, schwedisch klingenden Namen gehen; ein echtes Möbelhaus mit Namen, Logo
+  oder Farben nicht.
+- **Schrödingers Ordner,** als eigener Kurzfilm im Monty-Python-Stil: Der Ordner existiert erst,
+  wenn man etwas hineinlegt. [Ausarbeiten.]
+- **Leuchtende Bodenplatten:** Wo jemand hintritt, leuchtet die Platte auf; so erscheinen die
+  Ordner, wo man sie braucht. Erinnert an ein bekanntes Musikvideo; nur die allgemeine Idee nehmen,
+  keine Person, keine Musik, keine Tanzschritte daraus.
+
 ## Offen
 
 - Szenen für M7, M8 und M9; vorher prüfen, was davon heute so vorführbar ist.
