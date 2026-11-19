@@ -1,36 +1,58 @@
 # SEITON
 
-A new OS paradigm for Linux: project-centric desktop and filesystem.
+**A structure for your files that belongs to you.** Every project gets the same standard folders,
+and they only appear when you need them.
 
-Seiton (整頓) is Japanese for order: a place for everything, and everything in its place. That is exactly the idea of SEITON: an order that is easy to understand, one that anyone can grasp and use right away.
+<!-- Teaser video, about 60 seconds: goes here once it is made. -->
 
-**SEITON** is an experimental Linux desktop concept that puts the user and their projects at the center. The goal is an intuitive, context-sensitive environment where everything revolves around your current project and its structure.
+Seiton (整頓) is Japanese for order: a place for everything, and everything in its place.
 
-Until November 2026 the project was called MyOS; in some places that name still appears.
+## Three moments
+
+**A folder is born.** Every computer has `Documents`, `Pictures` and `Music`; nobody asks where a
+photo goes. SEITON does that for every project: `0_Admin`, `1_Info`, `4_Finanz`, `5_Recht`,
+`9_Dokumentation` and the rest. They wait inside the project as pale folders. Drop a file on one,
+and it becomes real, in Scope and in every other file manager.
+
+**The lens.** Put on the lens of a standard folder, say `4_Finanz`, and you see that one folder
+across all your projects. No copy, no second folder tree: the same files, seen the other way round.
+Through the `Perspektiven` drive every program can do this; LibreOffice knows nothing of SEITON
+and saves into the right project anyway.
+
+**Rights in one line.** In a project's `.seiton/ACLs.md`:
+
+```
+## Buchhaltung
+- /4_Finanz/: read, write
+```
+
+The accounting role works on the finances of every project and subproject, and on nothing else.
+Anyone can read it, no admin console needed. A Nextcloud with the SEITON app enforces it on the
+server.
+
+## What stays when you leave
+
+Ordinary folders and a few Markdown files in a hidden `.seiton` folder. Remove SEITON, and a tidy
+directory tree remains, readable on any system. MIT licence.
+
+## Who it is for
+
+Administrations moving to Linux and Nextcloud, schools, companies, clubs, and anyone whose files are
+spread over too many places. One structure for all of them, even when each uses its own template.
 
 ## Project Status
 
-**Current phase:** MVP implementation. The core API, Scope, the Headline, the time tracking, the CLI tools, the perspectives drive and a first Nextcloud integration are in place and being hardened. Not a complete operating system.
+**A prototype, being hardened.** Built: the core with its API, Scope (the file browser), the
+Headline (the line at the top of the screen: project, standard folders, lenses), time tracking, the
+CLI, the perspectives drive and the Nextcloud app (Nextcloud 32 to 35). About 2000 automated tests.
+Not a complete operating system.
 
-For a concise status snapshot and priorities, see [docs/STATUS.md](docs/STATUS.md). For the operational roadmap and open questions, see [docs/ProjectLogbook.md](docs/ProjectLogbook.md).
+Honest limits: on the desktop, rights are enforced by SEITON's own tools (Scope, CLI, the drive),
+not yet by the file system itself; in Nextcloud the server enforces them. Until November 2026 the
+project was called MyOS; in some places that name still appears.
 
----
-
-## What is SEITON?
-
-- **Project-based desktop:** Multi-project environment for a single user. Each project can have its own desktop, launcher, and app configuration; open windows stay tied to their respective projects.
-
-- **Standardized project structures:** Projects offer predefined but initially hidden folders (templates/embryos) that only materialize when used (e.g. first file moved in).
-
-- **Deep Obsidian integration (vision):** Obsidian as the default note editor in a distraction-free mode; every project as an Obsidian Vault.
-
-- **Permissions and localization:** Folder names and access rights can be customized per project and language.
-
----
-
-## Vision
-
-The building blocks exist but are fragmented. SEITON aims to unify them into one clean, intuitive environment with sensible defaults and a gentle learning curve.
+For a status snapshot and priorities, see [docs/STATUS.md](docs/STATUS.md); for the roadmap and
+open questions, [docs/ProjectLogbook.md](docs/ProjectLogbook.md).
 
 ---
 
