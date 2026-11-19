@@ -33,8 +33,8 @@ Raumfahrt durch Durchreichen ist nicht gesetzt: Kill your darlings.
 3. **Bewegte Schrift (Kinetic Typography)** trägt die Begriffe. Bei SEITON ist der Inhalt Schrift:
    Ordnernamen, Pfade, `.seiton`. Ein `4_Finanz`, das sich zu `Autowerkstatt` verwandelt, zeigt
    die Brille ohne Raum; Standardordner fallen als Wörter ins Regal; Kernsätze des Sprechers stehen
-   groß im Bild. Schrift als ausgeschnittener Aufkleber oder Comic-Lettering, nie als glatte
-   Folienschrift.
+   groß im Bild. Ordnernamen stehen auf Ordnerrücken (Farbe, helles Rückenschild, Griffloch),
+   Sätze auf ausgeschnittenen Aufklebern; nie glatte Folienschrift.
 4. **Mixed Media:** Wo es der Sache dient, darf anderes hinein, eingeklebt wie ein weiterer
    Schnipsel:
    - **Screencast:** SEITON selbst immer als echte Bildschirmaufnahme, nie nachgebaut oder
@@ -100,9 +100,10 @@ Finanzbüro fällt der Fleck am meisten auf: dieselbe Rechnung.
 
 ## Titel und Logo
 
-- **Anfang:** Papier-Karte, das Logo baut sich auf: fünf Ordnerrücken gleiten nacheinander ins
-  Regal, dann erscheint der Schriftzug. Etwa 3 Sekunden.
-- **Ende:** Tinte-Karte mit Logo, dem einen Satz der Fassung und der Adresse.
+- **Problem, Lösung, Logo:** kein Titel am Anfang. Das Video beginnt mit dem Problem; das Logo
+  kommt erst ganz am Ende.
+- **Ende:** Tinte-Karte mit dem Logo (`assets/brand/seiton-wordmark.svg`), dem einen Satz der
+  Fassung und der Adresse.
 - Das Logo nie verfremden und nie von einer KI erzeugen lassen.
 
 ## Ton
