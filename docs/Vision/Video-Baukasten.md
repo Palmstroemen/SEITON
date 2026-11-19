@@ -83,25 +83,34 @@ Die Knaller über alle hinweg, nach Leidensdruck: **Rechte in einer Zeile** (wer
 auf einem Fileserver gepflegt hat), **die Brille** (jeder, der quer über Projekte arbeitet),
 **Übergabe und Einstieg** (jede Organisation mit Wechseln), **kein Lock-in** (Behörden und EU).
 
-## Szene: Ein Ordner wird geboren (nach Michelangelo)
+## Szene: Es werde Ordner (nach Michelangelo)
 
-Der Moment für alle, als Teaser (README, GitHub Pages) und als Auftakt von M1. Etwa 14 Sekunden,
+Der Moment für alle, als Teaser (README, GitHub Pages) und als Auftakt von M1. Etwa 15 Sekunden,
 Collage, Legetrick-Bewegung: ruckelig, wenige Bilder je Sekunde. Ton und Machart wie die
 Zwischenspiele von Monty Python (Terry Gilliams Scherenschnitt-Animation): Figuren aus alten
 Kupferstichen und Gemälden ausgeschnitten, steif an Gelenken bewegt, absurd und ernst zugleich.
 Wir übernehmen die Machart, nicht ihre Figuren oder Motive (nicht den großen Fuß); als Vorlagen
 nur gemeinfreie Stiche oder eigene Zeichnungen im Stichstil.
 
+**Die Idee:** Bei Michelangelo wird Adam nicht geboren, sondern zum Leben erweckt: fertig
+geformt, aber noch leblos. Genau das ist ein blasser Ordner. Gottes Finger ist der Nutzer mit der
+Datei, **Adam ist der Ordner**. Und die berühmte Pose ist gar nicht gewollt: Die beiden wollen sich
+eigentlich nur eine Datei übergeben.
+
 | Zeit | Bild | Ton |
 |---|---|---|
-| 0–2 s | Papiergrund. Von links ein Zeigefinger aus Papier, mit einem Stück Ärmel, wie Gottes Hand bei Michelangelo. Er klickt auf eine Datei. | ein kleines Klicken |
-| 2–5 s | Die Datei klebt an der Fingerspitze; der Finger trägt sie unbeholfen ruckelnd hinüber. | leise, erwartungsvoll |
-| 5–6 s | Von rechts Adams Finger, lässig. Daran hängt wie ein kleines Täschchen ein ungeborener Ordner: blass, durchsichtig, nur Umriss. | |
-| 6–7 s | Der erste Finger lässt die Datei fallen, sie fällt in den Ordner, und BANG: Der Ordner wird kräftig, in Logo-Farbe, Sterne funkeln. | Schlag, Funkeln |
-| 7–11 s | Beide Finger verharren, fast berührend, genau wie bei Michelangelo. | pathetische Musik schwillt an, Chor |
-| 11–13 s | Gottes Finger klopft Adam zweimal auf den Finger: „Na los, mach weiter.“ | |
-| 13–14 s | Filmriss; Adams Finger zieht sich mit seinem Ordner zurück. | Plattenkratzer, Stille |
+| 0–2 s | Papiergrund. Rechts liegt lässig ein blasser Ordner, an ihm klebt Adams Arm mit schlaffem Finger. Ordner und Arm sind noch nicht fertig gemalt, nur eine Rötel-Skizze. | Stille, Papierrascheln |
+| 2–5 s | Von links Gottes Arm, prächtig gemalt, mit Ärmel. Der Finger klickt auf eine Datei; sie klebt an der Fingerspitze, und er trägt sie unbeholfen ruckelnd hinüber. | ein kleines Klicken, Schritte wie Papier |
+| 5–7 s | Eine ganz gewöhnliche Übergabe: Gott will die Datei abgeben, Adams Finger hebt sich träge, sie zu nehmen. Die Datei rutscht ab und fällt in den Ordner. | ein Plopp |
+| 7–8 s | BANG: Die Rötel-Skizze wird gemalt, Ordner und Arm bekommen Farbe, der Ordner seine Logo-Farbe und seinen Namen. Sterne funkeln. | Schlag, Funkeln |
+| 8–11 s | Ohne es zu wollen, stehen beide Finger genau in Michelangelos Pose, fast berührend, und verharren. Aufkleber: „Es werde Ordner.“ | pathetische Musik schwillt an, Chor |
+| 11–13 s | Die beiden merken, wie sie dastehen. Verlegen. Gott klopft Adam zweimal auf den Finger: „Na los, mach weiter.“ | Musik hält einen Ton zu lang |
+| 13–15 s | Filmriss; Adams Arm zieht sich in den Ordner zurück. | Plattenkratzer, Stille |
 
+- **Rötel zu Fresko:** Der Übergang von der Skizze zum gemalten Bild ist derselbe wie von blass zu
+  kräftig in SEITON; er erklärt die blassen Ordner ohne ein Wort.
+- **Aufkleber:** „Es werde Ordner.“ (englisch „Let there be folder.“). „Es werde Licht“ kennt fast
+  jeder; damit ist die Schöpfung benannt, auch für alle, die das Fresko nicht deuten können.
 - **Keine Reproduktion des Freskos:** eigene Papierfinger in der Pose, kein Foto der Sixtinischen
   Kapelle (für Abbildungen italienischer und vatikanischer Kulturgüter gelten eigene Regeln).
 - **Musik:** eigene, nur im Gestus pathetisch.
