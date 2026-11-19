@@ -123,7 +123,8 @@ eigentlich nur eine Datei übergeben.
 
 ## Szene: Die Geburt der Venus (nach Botticelli)
 
-Eine zweite Szene in derselben Machart, für M1 („Wo soll ich DAS ablegen?“). Etwa 15 Sekunden.
+Eine zweite Szene in derselben Machart, für M1 („Wo soll ich DAS ablegen?“). Etwa 19 Sekunden.
+Running Gag mit Michelangelo: Jedes Mal nimmt am Ende der Maler den Ordner mit, und zurück bleibt das berühmte Bild.
 
 | Zeit | Bild | Ton |
 |---|---|---|
@@ -131,7 +132,9 @@ Eine zweite Szene in derselben Machart, für M1 („Wo soll ich DAS ablegen?“)
 | 3–6 s | Ein Finger mit einer Datei erscheint. Die Muscheln drehen sich ihm nach, interessiert, ein wenig hoffnungsvoll. | ein neugieriges Klappern |
 | 6–9 s | Der Finger sucht ein wenig, liest die Namen, entscheidet sich und legt die Datei auf eine Muschel. | Zögern, dann ein Plopp |
 | 9–11 s | BANG: Die Muschel geht auf, die Venus entsteigt ihr, gemalt in der bekannten Haltung, am Arm eine Einkaufstasche mit der Datei darin. | Schlag, Harfe, Chor |
-| 11–15 s | Die Venus prüft zufrieden ihre Tasche. Die anderen Muscheln klappen enttäuscht wieder zu und warten weiter. | Chor bricht ab, Wellen |
+| 11–13 s | Die Venus prüft zufrieden ihre Tasche. Die anderen Muscheln klappen enttäuscht wieder zu und warten weiter. | Chor bricht ab, Wellen |
+| 13–17 s | Der Maler (Botticelli, als Zeichnung) kommt herein, nimmt der Venus die Einkaufstasche weg, also den Ordner, und geht damit ab. Die Venus regt sich fürchterlich auf. | Gezeter |
+| 17–19 s | Mitten im Aufregen gefriert sie, und es ist das Bild, wie man es kennt. | Stille, ein einzelner Harfenton |
 
 - **Was es erklärt:** Die Muscheln sind die Standardordner. Sie warten, jede mit ihrem Namen, darum
   ist die Wahl leicht. Geboren wird nur die eine, die gebraucht wird; die anderen bleiben zu.
