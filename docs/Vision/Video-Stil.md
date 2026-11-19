@@ -4,7 +4,20 @@ Stand 19. November 2026. Damit jedes SEITON-Video gleich aussieht, egal für wen
 Sprache: welcher Stil, was echt gezeigt wird, welche Farben, Schrift, Bewegung und welcher Ton.
 Gilt für die Drehbücher in „Demo – Kern“ und den Fassungen je Zielgruppe.
 
-## Grundstil: Comic, Collage und bewegte Schrift, offen für anderes
+## Grundstil: Collage mit Einbettungen
+
+Stand der Ideen (19.11.): Die **Collage** ist die eine Grundlage, alles andere wird eingebettet. Das
+Ganze darf an einen Comic erinnern, ohne einer zu sein.
+
+- **Eine Hand** legt Schnipsel auf und wischt sie wieder weg; das Wegwischen ist der Übergang
+  zur nächsten Szene.
+- **Bewegtes im Stillen:** In einem Foto läuft ein Video, oder auf einem dazugelegten Handy oder
+  Bildschirm. So kommt auch der echte SEITON-Screencast ins Bild.
+- **Schrift, Comic-Panels, Icons, Renderings** liegen als weitere Schnipsel dazwischen.
+
+Die Gliederung darunter ist der ältere Stand und gilt, soweit sie dem nicht widerspricht.
+
+### Bausteine
 
 Verworfen nach Tests: Blender-Modellräume mit Strichmännchen (zu sauber, „künstlich“) und
 KI-Video aus Text allein (zeigt nicht, was gemeint ist). Isometrie passt nicht. Auch die Brille als
