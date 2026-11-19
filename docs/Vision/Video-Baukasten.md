@@ -1,0 +1,50 @@
+# Video-Baukasten
+
+Ideensammlung vom 19. November 2026. Jedes Video zeigt ein Problem und wie SEITON es löst. Die
+Module dafür bauen wir einmal; jede Zielgruppe bekommt ihre Kernbotschaft, ihre Auswahl und
+Reihenfolge der Module und ihre eigenen Beispiele. Der Stil steht in „Video-Stil“, die
+Bildschirm-Szenen (K1 bis K4, B1 bis B3) in „Demo – Kern“ und „Demo für Behörden“.
+
+## Ein Modul
+
+Jedes Modul hat dieselben vier Teile, etwa 20 bis 40 Sekunden:
+
+1. **Problem:** in der Collage, in Problemfarben, ein Satz, den jeder aus dem Alltag kennt.
+2. **Lösung:** wie SEITON es löst, echt im Bildschirm-Schnipsel.
+3. **Beweis:** was man sieht, nicht was behauptet wird (eine Zeile in einer Datei, ein Ordner, der
+   entsteht, eine Stoppuhr).
+4. **Kernsatz:** ein Satz, als Aufkleber im Bild.
+
+Nur was gebaut ist, kommt als Lösung vor; was geplant ist, höchstens als Ausblick und so benannt.
+
+## Die Module
+
+| | Problem | Lösung mit SEITON | Szene | Stand |
+|---|---|---|---|---|
+| M1 Ablage | Jeder legt anders ab; leere Ordnerhüllen, die keiner braucht. | Jedes Projekt hat dieselben Standardordner; sie entstehen erst, wenn etwas hineinkommt. | K1, K2 | gebaut |
+| M2 Überblick | Wer etwas über alle Projekte braucht, klickt sich durch jedes einzeln. | Die Brille: ein Standardordner über alle Projekte, ohne Kopie. | K3 | gebaut |
+| M3 Programme | Neue Ordnung heißt sonst: jede Software umbauen. | Jedes Programm kann es, über das Laufwerk. | K4 | gebaut |
+| M4 Rechte | Rechte hängen an Ordnern, die keiner mehr versteht. | Rechte in einer lesbaren Zeile, gültig in jedem Projekt. | B1 | gebaut |
+| M5 Cloud | Desktop und Cloud haben zwei Ordnungen und zwei Rechteverwaltungen. | Dieselbe Datei; Nextcloud setzt die Rechte auf dem Server durch. | B2 | gebaut |
+| M6 Ausstieg | Wer ein System einführt, kommt schwer wieder heraus. | Gewöhnliche Ordner und Textdateien; offen, MIT-Lizenz. | B3 | gebaut |
+| M7 Vorlage | Jeder neue Kunde, jede neue Klasse fängt von vorn an. | Ein neues Projekt kommt aus der Vorlage, mit derselben Ordnung. | [Szene fehlt] | gebaut, prüfen |
+| M8 Übergabe | Wer geht, nimmt die Ordnung im Kopf mit. | Das Projekt bringt Ordnung und Rechte mit; die Nächste findet sich zurecht, weil alles gleich heißt. | [Szene fehlt] | prüfen |
+| M9 Ohne Netz | Abgeschottete Netze, keine Cloud erlaubt. | SEITON läuft lokal, die Ordnung steckt in den Dateien. | [Szene fehlt] | prüfen, was gebaut ist |
+
+## Zielgruppen
+
+| Für wen | Kernbotschaft | Module | Eigenes Beispiel |
+|---|---|---|---|
+| Behörden, IT und Migration | Die Ordnung für den neuen Arbeitsplatz: offen, lesbar, ohne Bindung an einen Anbieter. | M1, M2, M3, M4, M5, M6 | Vorhaben wie `Schulbau Nord`; die Finanzabteilung über alle Vorhaben |
+| Entscheider bei der EU und in Ministerien | Europas Verwaltungen ziehen um. SEITON gibt der Ablage eine Ordnung, die ihnen selbst gehört. | M1, M4 oder M5, M6, je kurz | wie Behörden |
+| Schulen | Jedes Jahr neue Klassen, jedes Jahr dieselbe Ordnung. | M7, M1, M2, M8, M6 | Klassen `1a`, `1b`; die Mathe-Lehrerin über alle Klassen |
+| Militär | Ordnung, die jede Übergabe übersteht, auch ohne Cloud. | M8, M1, M2, M4, M9 | Einheiten; S4 (Logistik) über alle Einheiten |
+| Firmen | Eine Ablage, die mitwächst, vom ersten Auftrag bis zur Firma. | M1, M7, M2, M3, M4 | die Werkstatt-Rechnung; die Buchhaltung über alle Betriebe |
+| Vereine | Wenn der Kassier wechselt, bleibt die Ordnung. | M8, M1, M2, M6 | Veranstaltungen; der Kassier über alle Kassen |
+
+## Offen
+
+- Szenen für M7, M8 und M9; vorher prüfen, was davon heute so vorführbar ist.
+- Ob die Entscheider-Fassung eine eigene Problem-Szene braucht (Souveränität, Abhängigkeit),
+  ohne dass sie werblich wird.
+- Welche Fassung zuerst gedreht wird: die Behörden.
