@@ -71,7 +71,8 @@ Die Farben des Logos (`assets/brand/seiton-icon.svg`), das selbst ein Regal ist:
 ## Räume (Ideen)
 
 - **Werkstatt:** dunkel, schmutzig, eine Bastlerwerkstatt; Glühbirne, ölverschmierte Hände, leicht
-  angerostetes Werkzeug. Keine Hochglanzwerkstatt.
+  angerostetes Werkzeug. Keine Hochglanzwerkstatt. Neben dem Regal eine Tür „Büro“: hält uns
+  offen, später einmal hindurch zur Brille zu gehen.
 - **Finanzbüro:** hell und clean.
 - **Musikstudio:** dunkel, neonfarbene Hinterleuchtung (das Neon gehört dem Raum, nicht SEITON).
 - **Kanzlei:** getäfelte Wände, schwere englische Möbel, grüne Lederauflage, Messinglampe; darf
