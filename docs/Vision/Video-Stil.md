@@ -45,9 +45,28 @@ Die Farben des Logos (`assets/brand/seiton-icon.svg`), das selbst ein Regal ist:
 | Tinte | `#16130f` | Tuschestrich, Schrift, Raster, dunkle Titelkarten |
 | Papier | `#fbfaf6` | Grund, Sprechblasen, Scherenrand, helle Titelkarten |
 
-- Fotos in der Collage schwarzweiß oder im Raster; Farbe kommt nur aus der Logo-Palette.
-- Dieselbe Abteilung hat in jedem Bild dieselbe Farbe, dasselbe Projekt auch.
-- Keine weiteren Farben, kein Glanz.
+- **Zwei Welten:** Die Logo-Farben stehen für die Ordnung und kommen nur dort ins Bild, wo SEITON
+  wirkt (Etiketten, Aufkleber, das echte Programm). Alltag, Problem und alles andere leben in
+  gedämpften Farben: Braun, Grau, dunkles Pastell (Altöl `#2b241d`, Rost `#8a4b2a`, Schiefer
+  `#55595c`, Staub `#a59d8e`, Altrosa `#8f7276`, Moos `#69735a`, Taube `#66778a`). Faustregel: In
+  jedem Raum ist das Etikett im Regal der einzige Fleck in Logo-Farbe.
+- Fotos in der Collage schwarzweiß oder im Raster.
+- Dieselbe Abteilung hat in jedem Bild dieselbe Farbe, dasselbe Projekt auch. Kein Glanz.
+
+## Räume (Ideen)
+
+- **Werkstatt:** dunkel, schmutzig, eine Bastlerwerkstatt; Glühbirne, ölverschmierte Hände, leicht
+  angerostetes Werkzeug. Keine Hochglanzwerkstatt.
+- **Finanzbüro:** hell und clean.
+- **Musikstudio:** dunkel, neonfarbene Hinterleuchtung (das Neon gehört dem Raum, nicht SEITON).
+- **Kanzlei:** getäfelte Wände, schwere englische Möbel, grüne Lederauflage, Messinglampe; darf
+  auch moderner sein.
+
+## Die Rechnung aus der Werkstatt
+
+Wiedererkennungszeichen über alle Räume: oben ein leuchtend rotes Firmenlogo (erfunden, Zahnrad
+mit Schraubenschlüssel), unten ein kräftiger Ölfleck vom Daumen des Mechanikers. Im hellen
+Finanzbüro fällt der Fleck am meisten auf: dieselbe Rechnung.
 
 ## Schrift
 
