@@ -60,6 +60,18 @@ Jede Fassung erzählt sie mit ihren eigenen Daten und Sätzen; hier steht, was g
   von Scope und der Headline neu festlegen.]
 - **Was passiert:** Über alle Projekte nur dieser eine Standardordner, in Scope wie im Laufwerk.
 - **Kernsatz:** „Kein zweiter Ordnerbaum, keine Kopie. Derselbe Bestand, umgedreht.“
+- **Für das Video (Ideen, 19.11.):** Die Brille ist eine kurze Szene, kein Thema für sich. Jede
+  Fassung erzählt sie mit ihrem eigenen Beispiel; dazwischen dürfen ein, zwei Bilder kurz als
+  Collage-Schnipsel stehen, damit es wirklich jeder versteht.
+  - Beispiele je Fassung: Behörden die Finanzabteilung über alle Vorhaben; Schulen die
+    Mathe-Lehrerin über alle Klassen; Militär S4 (Logistik) über alle Einheiten, denn die
+    Stabsgliederung S1 bis S6 ist schon eine Reihe von Standardordnern; Firmen die Buchhaltung
+    (die Werkstatt-Rechnung); Vereine der Kassier über alle Veranstaltungen.
+  - Bilder: die Tabelle (Projekte Zeilen, Standardordner Spalten, die Brille liest eine Spalte);
+    das Regal von zwei Seiten (Werkstatt und Finanzbüro, „Brillen und die runde Halle“); die
+    Schubladen (in jedem Schrank dieselbe Schublade, alle gehen zugleich auf); die Folien
+    („Transparentpapier“); der Schlüssel (sperrt in jedem Projekt dieselbe Tür, passt zu den
+    Rechten).
 
 ### K4. Jedes Programm kann es
 

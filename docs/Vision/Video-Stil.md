@@ -15,6 +15,8 @@ Ganze darf an einen Comic erinnern, ohne einer zu sein.
   Bildschirm. So kommt auch der echte SEITON-Screencast ins Bild.
 - **Schrift, Comic-Panels, Icons, Renderings** liegen als weitere Schnipsel dazwischen.
 
+Die Brille ist in jedem Video nur eine kurze Szene; die Bilder dafür stehen in „Demo – Kern“ bei K3.
+
 Die Gliederung darunter ist der ältere Stand und gilt, soweit sie dem nicht widerspricht.
 
 ### Bausteine
