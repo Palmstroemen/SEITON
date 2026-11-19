@@ -33,6 +33,7 @@ Nur was gebaut ist, kommt als Lösung vor; was geplant ist, höchstens als Ausbl
 | M9 Ohne Netz | Abgeschottete Netze, keine Cloud erlaubt. | SEITON läuft lokal, die Ordnung steckt in den Dateien. | [Szene fehlt] | prüfen, was gebaut ist |
 | M11 Hin und her | Verschiedene Container: ständig exportieren und importieren, PDF als Transportformat. | Die Dateien bleiben, wo sie sind; jedes Programm arbeitet am selben Ort (das Laufwerk, K4). | [Szene fehlt] | teils gebaut, prüfen |
 | M14 Viele Gruppen | Ich bin in der Firma, im Fußballverein, im Chor und bei der Feuerwehr, und jede Gruppe teilt anders: der Chor Noten und Videos in der Dropbox, die Verwaltung aber in Outlook und Mails; die Feuerwehr in einer Nextcloud, deren Admin überfordert ist; die Firma streng geheim, Sicherheitsschlüssel hier, Audit dort. | Wenn alle nach einem halbwegs einheitlichen Schema arbeiten, auch mit verschiedenen Vorlagen, findet man sich überall rasch zurecht: Der Chor hat andere Ordner als die Feuerwehr, aber beide sind Projekte mit Standardordnern an vertrauten Stellen. Jedes Projekt bringt seine Rechte in einer lesbaren Zeile mit (M4), die Cloud dahinter setzt sie durch (M5). Wo es liegt, ist zweitrangig. Ehrlich: gebaut ist das für Nextcloud; andere Clouds kommen über Adapter, bis dahin Ausblick. | [Szene fehlt] | teils gebaut (Nextcloud) |
+| M15 Scrollen statt Finden | Wer nichts ablegt, scrollt: 20 Bildschirme zurück im Chat, „warte, der hat mir das doch geschickt … ah, da ist es, ich schick's dir gleich weiter“. Geht jemand, ist der Verlauf weg. | Ablegen ohne Entscheidung: eine Geste, die blassen Ordner zeigen, wohin. Finden ohne Suchen: Die Brille ist ein Filter wie in der App, „alle Rechnungen“, „alle Arbeitsblätter“. | [Szene fehlt] | gebaut; automatisches Ablegen ist Vision |
 | M12 Zwanzig Clouds | Fotos bei Google, Dokumente in der Dropbox, Notizen in Notion, Mails im Mailprogramm, Rechnungen in der Buchhaltung. | Projekte: alles, was zusammengehört, liegt beisammen. | [Szene fehlt] | Vision, als Ausblick |
 | M13 Alle Geräte | Handy, Tablet, Bürorechner, Privatlaptop, Hausautomation, Fernseher, Sprachassistent: überall andere Strukturen und Denkweisen. | Eine Ordnung für alle; auch wer nur ein Prozent davon braucht, findet sich zurecht. | [Szene fehlt] | Vision, als Ausblick |
 
@@ -71,6 +72,11 @@ zeigt ihn sofort. Das kann kein anderer Dateimanager; jeder versteht es ohne Erk
 | Militär | Ständige Wechsel der Besetzung; abgeschottete Netze | Die Stabsgliederung S1 bis S6 ist schon die Ordnung: SEITON spricht ihre Sprache; S4 sieht die Logistik aller Einheiten | M8, M2 |
 | Vereine | Ehrenamt wechselt; das Wissen liegt in privaten Dropboxen und Postfächern | Übergabe: Der neue Kassier bekommt das Projekt und findet sofort alles | M8, M14 |
 | Privat | „Wo ist die Rechnung für die Steuer?“; zwanzig Clouds | Steuer-Brille: alle Rechnungen des Jahres aus allen Lebensbereichen auf einen Blick | M2, M1 |
+
+**Woran wir anknüpfen:** Jeder Rechner hat seit Windows XP und Vista `Dokumente`, `Bilder`,
+`Musik`; niemand fragt, wohin ein Foto gehört. SEITON macht das für jedes Projekt, und die
+Ordner erscheinen erst, wenn man sie braucht. Trägt bei allen, die diese Ordner kennen; für die
+Generation, die nur scrollt, ist der Anknüpfungspunkt der Filter in der App (M15).
 
 Die Knaller über alle hinweg, nach Leidensdruck: **Rechte in einer Zeile** (wer je Berechtigungen
 auf einem Fileserver gepflegt hat), **die Brille** (jeder, der quer über Projekte arbeitet),
