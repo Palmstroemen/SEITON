@@ -1,6 +1,7 @@
 """CLI entrypoint for PostFix."""
 
 import argparse
+import os
 import signal
 import sys
 from pathlib import Path
@@ -83,6 +84,10 @@ def main() -> int:
     except ImportError:
         from main import PostFixWindow
 
+    # Every window drawn through the GPU from the start: else the editor (QtWebEngine) makes Qt
+    # build the note's window anew on its first click, and on X11 (Linux Mint) the new window
+    # opens behind the others, unfocused - the note seems to close (measured on the Acer).
+    os.environ.setdefault("QT_WIDGETS_RHI", "1")
     app = QApplication(sys.argv)
     app.setApplicationName("PostFix")
     app.setOrganizationName("PostFixDev")
