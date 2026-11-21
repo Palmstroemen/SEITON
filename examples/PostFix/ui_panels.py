@@ -175,12 +175,19 @@ class TagSidebar(SidebarWidget):
         self._tag_colors = dict(tag_colors or {})
         self._rebuild()
 
-    def _rebuild(self):
+    def _rebuild(self, force: bool = False):
+        # Set again on every key typed, mostly unchanged: built anew each time, the sidebar
+        # changed its width for a moment and the whole note jumped sideways.
+        shown = (repr(self.color_entries), tuple(self.tags), tuple(sorted(self._tag_colors.items())))
+        if not force and shown == getattr(self, "_shown", None):
+            return
+        self._shown = shown
         layout = self.layout()
         layout.setContentsMargins(0, 8, 0, 8)
         while layout.count():
             item = layout.takeAt(0)
             if item.widget():
+                item.widget().hide()
                 item.widget().deleteLater()
 
         for item in self.color_entries:
@@ -231,7 +238,7 @@ class TagSidebar(SidebarWidget):
 
     def retranslate_ui(self):
         self.set_title_text(self.tr("Tags"))
-        self._rebuild()
+        self._rebuild(force=True)
 
 
 class ACLSidebar(SidebarWidget):
