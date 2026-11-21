@@ -228,10 +228,12 @@ class SmartEditor(QWidget):
 
     def suspend_preview(self):
         self._preview_suspended = True
+        self.preview.frozen = True
 
     def resume_preview(self, top=None):
         """The editor moved on: the rendering again, at top = (line, offset) where it was."""
         self._preview_suspended = False
+        self.preview.frozen = False
         self.render_preview()
         if top is not None and self.light_look:
             self.preview.scroll_to_line(*top)

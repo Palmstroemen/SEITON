@@ -418,12 +418,16 @@ class LightBrowser(QTextBrowser):
         finally:
             self._laying_out = False
         if self.viewport().width() != self._laid_out_width:
-            QTimer.singleShot(0, lambda: self.show_note(*self._note))
+            QTimer.singleShot(0, lambda: self.frozen or self.show_note(*self._note))
+
+    # Under the editor nobody sees the rendering: laying it out again on every width it passes
+    # (a scroll bar coming and going while one types) cost a slow machine up to a second a key.
+    frozen = False
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
         note = getattr(self, "_note", None)
-        if note is not None and self.viewport().width() != self._laid_out_width:
+        if note is not None and not self.frozen and self.viewport().width() != self._laid_out_width:
             self.show_note(*note)
 
     # --- lines and scrolling, in the editor's terms ---------------------------------------------
