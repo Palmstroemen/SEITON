@@ -12,7 +12,9 @@ import json
 from pathlib import Path
 from typing import Callable, Optional
 
-from PySide6.QtCore import QEvent, QObject, QUrl, Signal, Slot
+from PySide6.QtCore import QEvent, QEventLoop, QObject, Qt, QTimer, QUrl, Signal, Slot
+from PySide6.QtGui import QColor, QPainter
+from PySide6.QtWidgets import QApplication, QWidget
 from PySide6.QtWebChannel import QWebChannel
 from PySide6.QtWebEngineWidgets import QWebEngineView
 import shiboken6
@@ -44,6 +46,8 @@ new QWebChannel(qt.webChannelTransport, (channel) => {
     onLink: (note, href) => bridge.link(note, href),
     onScroll: (note, line, offset) => bridge.scrolled(note, line, offset),
   });
+  // Two frames after a note came in, it is on screen: PostFix shows the editor only then.
+  window.painted = (n) => requestAnimationFrame(() => requestAnimationFrame(() => bridge.painted(n)));
   bridge.ready();
 });
 </script></body></html>"""
@@ -70,6 +74,49 @@ class _Bridge(QObject):
     def ready(self):
         self._host._on_ready()
 
+    @Slot(int)
+    def painted(self, n: int):
+        self._host._on_painted(n)
+
+
+class _Dim(QWidget):
+    """A shade over the note while the editor loads: still, so it needs no smooth frames."""
+
+    def __init__(self, parent, area):
+        super().__init__(parent)
+        self.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.setGeometry(area)
+        self.show()
+        self.raise_()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), QColor(30, 30, 40, 70))
+        painter.end()
+
+
+_dim: Optional[_Dim] = None
+
+
+def dim(widget, area):
+    """Shade area of widget until undim(), on screen at once (the first editor stalls the
+    program for a moment after this)."""
+    global _dim
+    if _dim is not None and _dim.parent() is widget:
+        return
+    undim()
+    _dim = _Dim(widget, area)
+    _dim.repaint()
+    QApplication.processEvents(QEventLoop.ExcludeUserInputEvents)
+
+
+def undim():
+    global _dim
+    if _dim is not None:
+        _dim.hide()
+        _dim.deleteLater()
+        _dim = None
+
 
 class EditorHost(QObject):
     """One editor page for all notes; attach() moves it into the note being edited."""
@@ -85,6 +132,8 @@ class EditorHost(QObject):
         self._watched = set()
         self._tops: dict = {}  # note -> (first line in view, its offset), as the page reports
         self._on_leave: Optional[Callable[[], None]] = None
+        self._shows = 0        # attach() count: which note the page reports painted
+        self._waiting = False  # the busy cursor is up until the editor is on screen
         self.view = QWebEngineView()
         self.view.hide()
         self._bridge = _Bridge(self)
@@ -138,14 +187,40 @@ class EditorHost(QObject):
         self._on_leave = on_leave
         self.view.setParent(widget)
         self.view.setGeometry(self._area(widget))
+        # Shown, but below the note's rendering until the page has painted the note: a page
+        # still loading (the first click, a slow machine) would show white for a second or two.
         self.view.show()
-        self.view.raise_()
+        self.view.lower()
+        self._shows += 1
+        shows = self._shows
+        if not self._waiting:
+            self._waiting = True
+            QApplication.setOverrideCursor(Qt.BusyCursor)
+        if not self.ready:  # the page still loads: a while on a slow machine, shown as a shade
+            dim(widget, self._area(widget))
         base = QUrl.fromLocalFile(str(Path(base_dir).resolve()) + "/").toString()
         if background:
             self._run(f"document.documentElement.style.setProperty('--bg', {json.dumps(background)})")
         self._run(f"window.host.show({json.dumps(note)}, {json.dumps(body)}, {json.dumps(base)}, "
-                  f"{json.dumps(place)}); window.host.focus()")
+                  f"{json.dumps(place)}); window.host.focus(); window.painted({shows})")
         self.view.setFocus()
+        QTimer.singleShot(10000, lambda: self._on_painted(shows))  # a page that never says so
+
+    def _on_painted(self, shows: int):
+        """The note of attach() number shows is on screen: the editor comes up over the rendering."""
+        if shows != self._shows or shows == getattr(self, "_painted", 0):
+            return  # a later attach() waits for its own note; the fallback after the page said so
+        self._painted = shows
+        if self._owner is not None and self.view is not None:
+            self.view.raise_()
+            self.view.setFocus()
+        self._end_wait()
+
+    def _end_wait(self):
+        undim()
+        if self._waiting:
+            self._waiting = False
+            QApplication.restoreOverrideCursor()
 
     def owner(self):
         return self._owner
@@ -173,6 +248,7 @@ class EditorHost(QObject):
         if self._owner is not widget:
             return
         self._let_go(widget)
+        self._end_wait()
         self.view.hide()
         self.view.setParent(None)
         self._owner = None

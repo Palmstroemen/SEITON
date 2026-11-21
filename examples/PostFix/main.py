@@ -1017,6 +1017,8 @@ class PostFixWindow(WindowLayoutMixin, WindowTagsMixin, WindowAclsMixin, WindowT
         its rendering again."""
         if not editor_enabled():
             return
+        if editor_host._shared is None:  # the first editor: the note shaded while it comes
+            editor_host.dim(self.editor, editor_host.EditorHost._area(self.editor))
         host = _editor()
         if host.owner() is self.editor:
             return
