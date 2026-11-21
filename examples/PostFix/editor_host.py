@@ -94,7 +94,10 @@ class EditorHost(QObject):
         bundle = BUNDLE.read_text(encoding="utf-8").replace("</script", "<\\/script")
         self.view.setHtml(PAGE.replace("__BUNDLE__", bundle), QUrl.fromLocalFile(str(BUNDLE.parent) + "/"))
         # The fonts the light rendering uses too (light_view.fonts), so both look the same.
-        from . import light_view
+        try:
+            from . import light_view
+        except ImportError:  # run as a script from PostFix/ (cli.py, the desktop entries)
+            import light_view
         body, mono = light_view.fonts()
         self._run(f"document.documentElement.style.setProperty('--body', {json.dumps(json.dumps(body))});"
                   f"document.documentElement.style.setProperty('--mono', {json.dumps(json.dumps(mono))})")
